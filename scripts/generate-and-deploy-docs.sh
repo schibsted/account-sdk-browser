@@ -22,11 +22,8 @@ git commit -m "Docs from version '${VERSION}'"
 # Generate a commit SHA — only for the docs folder, using git subtree
 SUBTREE=$(git subtree split --prefix docs HEAD)
 
-# Find the repo path
-REPO_PATH=$(git config remote.origin.url | cut -d':' -f2)
-
 # Construct a repo path that we have write access to
-REPO=https://${GITHUB_USER}:${GITHUB_TOKEN}@github.schibsted.io/${REPO_PATH}
+REPO=https://${GITHUB_USER}:${GITHUB_TOKEN}@github.com/schibsted/account-sdk-browser
 
 # Push the commit for that subtree to the gh-pages branch
 git push ${REPO} ${SUBTREE}:gh-pages --force
