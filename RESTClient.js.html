@@ -1,0 +1,240 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <title>RESTClient.js - Documentation</title>
+
+    <script src="scripts/prettify/prettify.js"></script>
+    <script src="scripts/prettify/lang-css.js"></script>
+    <!--[if lt IE 9]>
+      <script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+    <link type="text/css" rel="stylesheet" href="styles/prettify.css">
+    <link type="text/css" rel="stylesheet" href="styles/jsdoc.css">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+</head>
+<body>
+
+<input type="checkbox" id="nav-trigger" class="nav-trigger" />
+<label for="nav-trigger" class="navicon-button x">
+  <div class="navicon"></div>
+</label>
+
+<label for="nav-trigger" class="overlay"></label>
+
+<nav>
+    <h2><a href="index.html">Home</a></h2><h3>Classes</h3><ul><li><a href="Identity.html">Identity</a><ul class='methods'><li data-type='method'><a href="Identity.html#enableVarnishCookie">enableVarnishCookie</a></li><li data-type='method'><a href="Identity.html#hasSession">hasSession</a></li><li data-type='method'><a href="Identity.html#isLoggedIn">isLoggedIn</a></li><li data-type='method'><a href="Identity.html#isConnected">isConnected</a></li><li data-type='method'><a href="Identity.html#getUser">getUser</a></li><li data-type='method'><a href="Identity.html#getUserId">getUserId</a></li><li data-type='method'><a href="Identity.html#getUserUuidId">getUserUuidId</a></li><li data-type='method'><a href="Identity.html#getVisitorId">getVisitorId</a></li><li data-type='method'><a href="Identity.html#getSpId">getSpId</a></li><li data-type='method'><a href="Identity.html#login">login</a></li><li data-type='method'><a href="Identity.html#logout">logout</a></li><li data-type='method'><a href="Identity.html#loginUrl">loginUrl</a></li><li data-type='method'><a href="Identity.html#logoutUrl">logoutUrl</a></li><li data-type='method'><a href="Identity.html#accountUrl">accountUrl</a></li><li data-type='method'><a href="Identity.html#phonesUrl">phonesUrl</a></li><li data-type='method'><a href="Identity.html#agreementUrl">agreementUrl</a></li><li data-type='method'><a href="Identity.html#authFlowUrl">authFlowUrl</a></li><li data-type='method'><a href="Identity.html#signupFlowUrl">signupFlowUrl</a></li><li data-type='method'><a href="Identity.html#signinFlowUrl">signinFlowUrl</a></li></ul></li><li><a href="Monetization.html">Monetization</a><ul class='methods'><li data-type='method'><a href="Monetization.html#hasProduct">hasProduct</a></li><li data-type='method'><a href="Monetization.html#hasSubscription">hasSubscription</a></li><li data-type='method'><a href="Monetization.html#subscriptionsUrl">subscriptionsUrl</a></li><li data-type='method'><a href="Monetization.html#productsUrl">productsUrl</a></li></ul></li><li><a href="Payment.html">Payment</a><ul class='methods'><li data-type='method'><a href="Payment.html#payWithPaylink">payWithPaylink</a></li><li data-type='method'><a href="Payment.html#purchaseHistoryUrl">purchaseHistoryUrl</a></li><li data-type='method'><a href="Payment.html#redeemUrl">redeemUrl</a></li><li data-type='method'><a href="Payment.html#purchasePaylinkUrl">purchasePaylinkUrl</a></li><li data-type='method'><a href="Payment.html#purchaseProductFlowUrl">purchaseProductFlowUrl</a></li><li data-type='method'><a href="Payment.html#purchaseCampaignFlowUrl">purchaseCampaignFlowUrl</a></li></ul></li></ul><h3>Events</h3><ul><li><a href="Identity.html#event:error">error</a></li><li><a href="Identity.html#event:login">login</a></li><li><a href="Identity.html#event:logout">logout</a></li><li><a href="Identity.html#event:notLoggedin">notLoggedin</a></li><li><a href="Identity.html#event:sessionChange">sessionChange</a></li><li><a href="Identity.html#event:sessionInit">sessionInit</a></li><li><a href="Identity.html#event:statusChange">statusChange</a></li><li><a href="Identity.html#event:userChange">userChange</a></li><li><a href="Identity.html#event:visitor">visitor</a></li></ul>
+</nav>
+
+<div id="main">
+    
+    <h1 class="page-title">RESTClient.js</h1>
+    
+
+    
+
+
+
+    
+    <section>
+        <article>
+            <pre class="prettyprint source linenums"><code>/* Copyright 2018 Schibsted Products &amp; Technology AS. Licensed under the terms of the MIT license.
+ * See LICENSE.md in the project root.
+ */
+
+'use strict';
+
+const SDKError = require('./SDKError');
+const { cloneDefined } = require('./object');
+const { urlMapper } = require('./url');
+const { assert, isObject, isFunction, isStr, isNonEmptyString } = require('./validate');
+
+/**
+ * Converts a series of parameters of various types to a string that's suitable for logging.
+ * @private
+ * @param {Array.&lt;*>} msg - a number of parameters from any type (including objects)
+ * @return {string}
+ */
+const logString = (msg) => msg.map(m => isObject(m) ? JSON.stringify(m, null, 2) : m).join(' ');
+
+/**
+ * Calls a log function passing a string
+ * @private
+ * @param {function} fn - the log function
+ * @param {...*} msg - a series of message objects
+ * @return {*} - The result of calling fn
+ */
+const logFn = (fn, ...msg) => (typeof fn === 'function') &amp;&amp; fn(logString(msg));
+
+/**
+ * Construct query string for WHATWG urls
+ * @private
+ * @param {object} query - Object to generate query string from
+ * @param {boolean} useDefaultParams - Use defaultParams or not
+ * @param {object} defaultParams - Default params
+ * @returns {string} Query string
+ */
+function search(query, useDefaultParams, defaultParams) {
+    const searchParams = new URLSearchParams(
+        useDefaultParams ? cloneDefined(defaultParams, query) : cloneDefined(query));
+    return searchParams.toString();
+}
+
+const globalFetch = window.fetch;
+
+/**
+ * This class can be used for creating a wrapper around a server and all its endpoints.
+ * Its functionality is extended by {@link JSONPClient}
+ * Creates a client to a REST server. While useful stand-alone, it's also used for some other
+ * types of client that change some functionalities.
+ * @throws {SDKError} if any of options are invalid
+ * @summary the simplest way to communicate to a REST endpoint without any
+ *          special authentication
+ * @memberof core
+ * @private
+ */
+class RESTClient {
+
+    /**
+     * @param {object} options
+     * @param {string} [options.serverUrl=PRE] - The URL to the server eg.
+     * https://login.schibsted.com or a URL key like 'DEV' in combination with {@link envDic}.
+     * @param {object} [options.envDic] - A dictionary that will be used for looking up
+     * {@link serverUrl} keys. If serverUrl is always a URL, you don't need this.
+     * @param {function} [options.fetch=window.fetch] - The fetch function to use. It can be native
+     * or a polyfill
+     * @param {function} [options.log] - A function that will be called with log messages about
+     * request and response
+     * @param {object} [options.defaultParams={}] - a set of parameters to add to every call custom.
+     *        As long as it supports the standard fetch API we're good.
+     */
+    constructor({ serverUrl = 'PRE', envDic, fetch = globalFetch, log, defaultParams = {}}) {
+        assert(isObject(defaultParams), `defaultParams should be a non-null object`);
+
+        this.url = new URL(urlMapper(serverUrl, envDic));
+
+        this.defaultParams = defaultParams;
+
+        if (log !== undefined) {
+            assert(isFunction(log), `log must be a function but it is ${log}`);
+            this.log = log;
+        }
+
+        if (fetch !== undefined) {
+            assert(isFunction(fetch), 'Fetch should be a function');
+            this.fetch = fetch;
+        }
+    }
+
+    /**
+     * Makes the actual call to the server and deals with headers, data objects and the edge cases.
+     * Please note that this method expects the response to be in JSON format. However, it'll not
+     * parse the response if its code is not in the 200 range.
+     * @param {object} options - an obligatory options object
+     * @param {string} options.method - can be 'GET', 'POST', 'DELETE', etc. case sensitive.  To be
+     *        more specific, this can be one of the values that are passed to the `methods`
+     *        property of the constructor's `options` parameter.
+     * @param {string} pathname - the path to the endpoint like 'api/2/endpoint-name'
+     * @param {Object} [data={}] - data payload (depending on GET/DELETE or POST it may be a query
+     *        string or form body)
+     * @param {boolean} [useDefaultParams] - should we add the defaultParams to the query?
+     * @throws {SDKError} - if the call can't be made for whatever reason.
+     * @return {Promise&lt;object>} - A promise that will resolve to the call's response or reject if there
+     *         is an error before making the call or if the server returns a non-2xx error or
+     *         something that's not parsable as JSON.
+     */
+    async go({
+        method,
+        headers,
+        pathname,
+        data = {},
+        useDefaultParams = true,
+        fetchOptions = { method, credentials: 'include' }
+    }) {
+        assert(isFunction(this.fetch),
+            `Can't make a call. The reference to fetch is missing or not a function.`);
+        assert(isNonEmptyString(method), `Method must be a non empty string but it is "${method}"`);
+        assert(isNonEmptyString(pathname), `Pathname must be string but it is "${pathname}"`);
+        assert(isObject(data), `data must be a non-null object`);
+
+        fetchOptions.headers = isObject(headers) ? cloneDefined(headers) : {};
+
+        let fullUrl;
+        // If anything remaining in the payload object, pass it
+        // Assign payload based on what type of call it is
+        if (method.toUpperCase() === 'POST') {
+            fetchOptions.headers['Content-Type'] = 'application/x-www-form-urlencoded';
+            const body = cloneDefined(useDefaultParams ? this.defaultParams : {}, data);
+            fetchOptions.body = new URLSearchParams(body);
+            fullUrl = (new URL(pathname, this.url)).href;
+        } else {
+            // GET and DELETE use query strings
+            fullUrl = this.makeUrl(pathname, data, useDefaultParams);
+        }
+
+        logFn(this.log, 'Request:', fetchOptions.method.toUpperCase(), fullUrl);
+        logFn(this.log, 'Request Headers:', fetchOptions.headers);
+        logFn(this.log, 'Request Body:', fetchOptions.body);
+        try {
+            const response = await this.fetch(fullUrl, fetchOptions);
+            logFn(this.log, 'Response Code:', response.status, response.statusText);
+            if (!response.ok) {
+                // status code not in range 200-299
+                throw new SDKError(response.statusText, { code: response.status });
+            }
+            const responseObject = await response.json();
+            logFn(this.log, 'Response Parsed:', responseObject);
+            return responseObject;
+        } catch (err) {
+            let msg = isStr(err) ? err : 'Unknown RESTClient error';
+            if (isObject(err) &amp;&amp; isStr(err.message)) {
+                msg = err.message;
+            }
+            throw new SDKError(`Failed to '${method}' '${fullUrl}': '${msg}'`, err);
+        }
+    }
+
+    /**
+     * Creates a url that points to an endpoint in the server
+     * @param {string} [pathname=] - WHATWG pathname ie. 'api/2/endpoint-name'
+     * @param {object} [query={}] - WHATWG query. It's the data payload.
+     * @param {boolean} [useDefaultParams=true] - should we add the defaultParams to the query?
+     * @return {string} - the resulting url string ready to pass to fetch
+     */
+    makeUrl(pathname = '', query = {}, useDefaultParams = true) {
+        const url = new URL(pathname, this.url);
+        url.search = search(query, useDefaultParams, this.defaultParams);
+        return url.href;
+    }
+
+    /**
+     * Make a GET request
+     * @param {string} pathname - WHATWG pathname ie. 'api/2/endpoint-name'
+     * @param {object} [data={}] - the data payload.
+     * @return {Promise}
+     */
+    get(pathname, data) {
+        return this.go({ method: 'get', pathname, data });
+    }
+}
+
+module.exports = RESTClient;
+</code></pre>
+        </article>
+    </section>
+
+
+
+
+</div>
+
+<br class="clear">
+
+<footer>
+    Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.5.5</a> on Mon Mar 05 2018 21:04:40 GMT+0000 (UTC) using the <a href="https://github.com/clenemt/docdash">docdash</a> theme.
+</footer>
+
+<script>prettyPrint();</script>
+<script src="scripts/linenumber.js"></script>
+</body>
+</html>

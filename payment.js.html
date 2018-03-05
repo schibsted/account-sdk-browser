@@ -1,0 +1,239 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <title>payment.js - Documentation</title>
+
+    <script src="scripts/prettify/prettify.js"></script>
+    <script src="scripts/prettify/lang-css.js"></script>
+    <!--[if lt IE 9]>
+      <script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+    <link type="text/css" rel="stylesheet" href="styles/prettify.css">
+    <link type="text/css" rel="stylesheet" href="styles/jsdoc.css">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+</head>
+<body>
+
+<input type="checkbox" id="nav-trigger" class="nav-trigger" />
+<label for="nav-trigger" class="navicon-button x">
+  <div class="navicon"></div>
+</label>
+
+<label for="nav-trigger" class="overlay"></label>
+
+<nav>
+    <h2><a href="index.html">Home</a></h2><h3>Classes</h3><ul><li><a href="Identity.html">Identity</a><ul class='methods'><li data-type='method'><a href="Identity.html#enableVarnishCookie">enableVarnishCookie</a></li><li data-type='method'><a href="Identity.html#hasSession">hasSession</a></li><li data-type='method'><a href="Identity.html#isLoggedIn">isLoggedIn</a></li><li data-type='method'><a href="Identity.html#isConnected">isConnected</a></li><li data-type='method'><a href="Identity.html#getUser">getUser</a></li><li data-type='method'><a href="Identity.html#getUserId">getUserId</a></li><li data-type='method'><a href="Identity.html#getUserUuidId">getUserUuidId</a></li><li data-type='method'><a href="Identity.html#getVisitorId">getVisitorId</a></li><li data-type='method'><a href="Identity.html#getSpId">getSpId</a></li><li data-type='method'><a href="Identity.html#login">login</a></li><li data-type='method'><a href="Identity.html#logout">logout</a></li><li data-type='method'><a href="Identity.html#loginUrl">loginUrl</a></li><li data-type='method'><a href="Identity.html#logoutUrl">logoutUrl</a></li><li data-type='method'><a href="Identity.html#accountUrl">accountUrl</a></li><li data-type='method'><a href="Identity.html#phonesUrl">phonesUrl</a></li><li data-type='method'><a href="Identity.html#agreementUrl">agreementUrl</a></li><li data-type='method'><a href="Identity.html#authFlowUrl">authFlowUrl</a></li><li data-type='method'><a href="Identity.html#signupFlowUrl">signupFlowUrl</a></li><li data-type='method'><a href="Identity.html#signinFlowUrl">signinFlowUrl</a></li></ul></li><li><a href="Monetization.html">Monetization</a><ul class='methods'><li data-type='method'><a href="Monetization.html#hasProduct">hasProduct</a></li><li data-type='method'><a href="Monetization.html#hasSubscription">hasSubscription</a></li><li data-type='method'><a href="Monetization.html#subscriptionsUrl">subscriptionsUrl</a></li><li data-type='method'><a href="Monetization.html#productsUrl">productsUrl</a></li></ul></li><li><a href="Payment.html">Payment</a><ul class='methods'><li data-type='method'><a href="Payment.html#payWithPaylink">payWithPaylink</a></li><li data-type='method'><a href="Payment.html#purchaseHistoryUrl">purchaseHistoryUrl</a></li><li data-type='method'><a href="Payment.html#redeemUrl">redeemUrl</a></li><li data-type='method'><a href="Payment.html#purchasePaylinkUrl">purchasePaylinkUrl</a></li><li data-type='method'><a href="Payment.html#purchaseProductFlowUrl">purchaseProductFlowUrl</a></li><li data-type='method'><a href="Payment.html#purchaseCampaignFlowUrl">purchaseCampaignFlowUrl</a></li></ul></li></ul><h3>Events</h3><ul><li><a href="Identity.html#event:error">error</a></li><li><a href="Identity.html#event:login">login</a></li><li><a href="Identity.html#event:logout">logout</a></li><li><a href="Identity.html#event:notLoggedin">notLoggedin</a></li><li><a href="Identity.html#event:sessionChange">sessionChange</a></li><li><a href="Identity.html#event:sessionInit">sessionInit</a></li><li><a href="Identity.html#event:statusChange">statusChange</a></li><li><a href="Identity.html#event:userChange">userChange</a></li><li><a href="Identity.html#event:visitor">visitor</a></li></ul>
+</nav>
+
+<div id="main">
+    
+    <h1 class="page-title">payment.js</h1>
+    
+
+    
+
+
+
+    
+    <section>
+        <article>
+            <pre class="prettyprint source linenums"><code>/* Copyright 2018 Schibsted Products &amp; Technology AS. Licensed under the terms of the MIT license.
+ * See LICENSE.md in the project root.
+ */
+
+'use strict';
+
+const { assert, isNonEmptyString, isUrl, isStr } = require('./validate');
+const { urlMapper } = require('./url');
+const { ENDPOINTS } = require('./config');
+const JSONPClient = require('./JSONPClient');
+const popup = require('./popup');
+const RESTClient = require('./RESTClient');
+const spidTalk = require('./spidTalk');
+
+const globalWindow = window;
+
+/**
+ * Provides features related to payment
+ */
+class Payment {
+    /**
+     * @param {object} options
+     * @param {string} options.clientId - Mandatory client id
+     * @param {string} [options.redirectUri] - Redirect uri
+     * @param {string} [options.env=PRE] - Schibsted Account environment: `PRE`, `PRO` or `PRO_NO`
+     * @throws {SDKError} - If any of options are invalid
+     */
+    constructor({ clientId, redirectUri, env = 'PRE', window = globalWindow }) {
+        spidTalk.emulate(window);
+        assert(isNonEmptyString(clientId), 'clientId parameter is required');
+
+        this.clientId = clientId;
+        this.redirectUri = redirectUri;
+        this.window = window;
+        this._setSpidServerUrl(env);
+        this._setBffServerUrl(env);
+    }
+
+    /**
+     * Set SPiD server URL
+     * @private
+     * @param {string} url - real URL or 'PRE' style key
+     * @returns {void}
+     */
+    _setSpidServerUrl(url) {
+        assert(isStr(url), `url parameter is invalid: ${url}`);
+        this._spid = new JSONPClient({
+            serverUrl: urlMapper(url, ENDPOINTS.SPiD),
+            defaultParams: { client_id: this.clientId, redirect_uri: this.redirectUri },
+        });
+    }
+
+    /**
+     * Set BFF server URL - real URL or 'PRE' style key
+     * @private
+     * @param {string} url
+     * @returns {void}
+     */
+    _setBffServerUrl(url) {
+        assert(isStr(url), `url parameter is invalid: ${url}`);
+        this._bff = new RESTClient({
+            serverUrl: urlMapper(url, ENDPOINTS.BFF),
+            defaultParams: { client_id: this.clientId, redirect_uri: this.redirectUri },
+        });
+    }
+
+    /**
+     * Close this.popup if it exists and is open
+     * @private
+     * @returns {void}
+     */
+    _closePopup() {
+        if (this.popup) {
+            if (!this.popup.closed) {
+                this.popup.close();
+            }
+            this.popup = null;
+        }
+    }
+
+    /**
+     * Starts the flow for the paylink in a popup or current window
+     * @param {object} options
+     * @param {string} options.paylink - The paylink
+     * @param {boolean} [options.preferPopup=false] - Should we try to open a popup?
+     * @param {string} [options.redirectUri=this.redirectUri]
+     * @returns {Window|null} - Returns a reference to the popup window, or `null` if no popup was
+     * used
+     */
+    payWithPaylink({ paylink, preferPopup, redirectUri = this.redirectUri }) {
+        assert(isUrl(redirectUri), `payWithPaylink(): redirectUri is invalid`);
+        this._closePopup();
+        const url = this.purchasePaylinkUrl(paylink, redirectUri);
+        if (preferPopup) {
+            this.popup =
+                popup.open(this.window, url, 'Schibsted Account', { width: 360, height: 570 });
+            if (this.popup) {
+                return this.popup;
+            }
+        }
+        this.window.location.href = url;
+        return null;
+    }
+
+    /**
+     * Get the url for the end user to review the purchase history
+     * @param {string} [redirectUri=this.redirectUri]
+     * @return {string} - The url to the purchase history review page
+     */
+    purchaseHistoryUrl(redirectUri = this.redirectUri) {
+        assert(isUrl(redirectUri), `purchaseHistoryUrl(): redirectUri is invalid`);
+        return this._spid.makeUrl('account/purchasehistory', { redirect_uri: redirectUri });
+    }
+
+    /**
+     * Get the url for the end user to redeem a voucher code
+     * @param {string} voucherCode
+     * @param {string} [redirectUri=this.redirectUri]
+     * @return {string} - The url
+     */
+    redeemUrl(voucherCode, redirectUri = this.redirectUri) {
+        assert(isUrl(redirectUri), `redeemUrl(): redirectUri is invalid`);
+        return this._spid.makeUrl('account/redeem', { voucher_code: voucherCode });
+    }
+
+    /**
+     * Get the url for the paylink purchase
+     * @todo Check working-ness for BFF + SPiD
+     * @param {string} paylinkId
+     * @param {string} [redirectUri=this.redirectUri]
+     * @return {string} - The url to the API endpoint
+     */
+    purchasePaylinkUrl(paylinkId, redirectUri = this.redirectUri) {
+        assert(isUrl(redirectUri), `purchasePaylinkUrl(): redirectUri is invalid`);
+        return this._bff.makeUrl('payment/purchase', {
+            paylink: paylinkId,
+            redirect_uri: redirectUri
+        });
+    }
+
+    /**
+     * Get the url for flow to purchase a product
+     * @todo Check working-ness for BFF + SPiD
+     * @param {string} productId
+     * @param {string} [redirectUri=this.redirectUri]
+     * @return {string} - The url to the products review page
+     */
+    purchaseProductFlowUrl(productId, redirectUri = this.redirectUri) {
+        assert(isUrl(redirectUri), `purchaseProductUrl(): redirectUri is invalid`);
+        return this._bff.makeUrl('flow/checkout', {
+            response_type: 'code',
+            flow: 'payment',
+            product_id: productId,
+            redirect_uri: redirectUri
+        });
+    }
+
+    /**
+     * Get the url for flow to purchase a product through a campaign and voucher code
+     * @todo Check working-ness for BFF + SPiD
+     * @param {string} campaignId
+     * @param {string} productId
+     * @param {string} voucherCode
+     * @param {string} [redirectUri=this.redirectUri]
+     * @return {string} - The url to the products review page
+     */
+    purchaseCampaignFlowUrl(campaignId = null, productId = null, voucherCode = null, redirectUri = this.redirectUri) {
+        assert(isUrl(redirectUri), `purchaseProductUrl(): redirectUri is invalid`);
+        return this._bff.makeUrl('flow/checkout', {
+            response_type: 'code',
+            flow: 'payment',
+            campaign_id: campaignId,
+            product_id: productId,
+            voucher_code: voucherCode,
+            redirect_uri: redirectUri
+        });
+    }
+}
+
+module.exports = Payment;
+</code></pre>
+        </article>
+    </section>
+
+
+
+
+</div>
+
+<br class="clear">
+
+<footer>
+    Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.5.5</a> on Mon Mar 05 2018 21:04:40 GMT+0000 (UTC) using the <a href="https://github.com/clenemt/docdash">docdash</a> theme.
+</footer>
+
+<script>prettyPrint();</script>
+<script src="scripts/linenumber.js"></script>
+</body>
+</html>

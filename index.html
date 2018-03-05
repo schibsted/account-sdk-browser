@@ -1,0 +1,277 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <title>Home - Documentation</title>
+
+    <script src="scripts/prettify/prettify.js"></script>
+    <script src="scripts/prettify/lang-css.js"></script>
+    <!--[if lt IE 9]>
+      <script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+    <link type="text/css" rel="stylesheet" href="styles/prettify.css">
+    <link type="text/css" rel="stylesheet" href="styles/jsdoc.css">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+</head>
+<body>
+
+<input type="checkbox" id="nav-trigger" class="nav-trigger" />
+<label for="nav-trigger" class="navicon-button x">
+  <div class="navicon"></div>
+</label>
+
+<label for="nav-trigger" class="overlay"></label>
+
+<nav>
+    <h2><a href="index.html">Home</a></h2><h3>Classes</h3><ul><li><a href="Identity.html">Identity</a><ul class='methods'><li data-type='method'><a href="Identity.html#enableVarnishCookie">enableVarnishCookie</a></li><li data-type='method'><a href="Identity.html#hasSession">hasSession</a></li><li data-type='method'><a href="Identity.html#isLoggedIn">isLoggedIn</a></li><li data-type='method'><a href="Identity.html#isConnected">isConnected</a></li><li data-type='method'><a href="Identity.html#getUser">getUser</a></li><li data-type='method'><a href="Identity.html#getUserId">getUserId</a></li><li data-type='method'><a href="Identity.html#getUserUuidId">getUserUuidId</a></li><li data-type='method'><a href="Identity.html#getVisitorId">getVisitorId</a></li><li data-type='method'><a href="Identity.html#getSpId">getSpId</a></li><li data-type='method'><a href="Identity.html#login">login</a></li><li data-type='method'><a href="Identity.html#logout">logout</a></li><li data-type='method'><a href="Identity.html#loginUrl">loginUrl</a></li><li data-type='method'><a href="Identity.html#logoutUrl">logoutUrl</a></li><li data-type='method'><a href="Identity.html#accountUrl">accountUrl</a></li><li data-type='method'><a href="Identity.html#phonesUrl">phonesUrl</a></li><li data-type='method'><a href="Identity.html#agreementUrl">agreementUrl</a></li><li data-type='method'><a href="Identity.html#authFlowUrl">authFlowUrl</a></li><li data-type='method'><a href="Identity.html#signupFlowUrl">signupFlowUrl</a></li><li data-type='method'><a href="Identity.html#signinFlowUrl">signinFlowUrl</a></li></ul></li><li><a href="Monetization.html">Monetization</a><ul class='methods'><li data-type='method'><a href="Monetization.html#hasProduct">hasProduct</a></li><li data-type='method'><a href="Monetization.html#hasSubscription">hasSubscription</a></li><li data-type='method'><a href="Monetization.html#subscriptionsUrl">subscriptionsUrl</a></li><li data-type='method'><a href="Monetization.html#productsUrl">productsUrl</a></li></ul></li><li><a href="Payment.html">Payment</a><ul class='methods'><li data-type='method'><a href="Payment.html#payWithPaylink">payWithPaylink</a></li><li data-type='method'><a href="Payment.html#purchaseHistoryUrl">purchaseHistoryUrl</a></li><li data-type='method'><a href="Payment.html#redeemUrl">redeemUrl</a></li><li data-type='method'><a href="Payment.html#purchasePaylinkUrl">purchasePaylinkUrl</a></li><li data-type='method'><a href="Payment.html#purchaseProductFlowUrl">purchaseProductFlowUrl</a></li><li data-type='method'><a href="Payment.html#purchaseCampaignFlowUrl">purchaseCampaignFlowUrl</a></li></ul></li></ul><h3>Events</h3><ul><li><a href="Identity.html#event:error">error</a></li><li><a href="Identity.html#event:login">login</a></li><li><a href="Identity.html#event:logout">logout</a></li><li><a href="Identity.html#event:notLoggedin">notLoggedin</a></li><li><a href="Identity.html#event:sessionChange">sessionChange</a></li><li><a href="Identity.html#event:sessionInit">sessionInit</a></li><li><a href="Identity.html#event:statusChange">statusChange</a></li><li><a href="Identity.html#event:userChange">userChange</a></li><li><a href="Identity.html#event:visitor">visitor</a></li></ul>
+</nav>
+
+<div id="main">
+    
+
+    
+
+
+
+    
+
+
+
+
+
+
+
+
+
+    
+
+
+    <section class="readme">
+        <article><p><a href="https://github.com/schibsted/account-sdk-browser"><img src="https://www.schibsted.com/Global/LogoTypes/Logos%202014/SMG_Small_2014_RGB.png" alt="logo"></a></p>
+<p><a href="https://travis-ci.org/schibsted/account-sdk-browser"><img src="https://travis-ci.org/schibsted/account-sdk-browser.svg?branch=master" alt="Build Status"></a></p>
+<h1>Schibsted Account SDK for browsers</h1><p>Welcome! This is the home of the Schibsted Account JavaScript SDK for use by any website that wishes
+to use Schibsted Account to sign up and log in users. Use it to generate URLs for your site's &quot;Log
+in&quot; button, query the logged-in status of your users, and to check whether they have access to
+products and subscriptions, etc.</p>
+<h2>Getting started</h2><ol>
+<li>Do <code>npm install --save @schibsted/account-sdk-browser</code></li>
+<li>Use this library as you would any other npm module (<code>const schAccount =
+require('@schibsted/account-sdk-browser')</code> for instance)<ol>
+<li>It's possible to <code>require('@schibsted/account-sdk-browser/identity')</code> or <code>/monetization'</code> or
+<code>/payment'</code> if you don't need all of it, and you wish to reduce the size of included code on
+your site.</li>
+</ol>
+</li>
+<li>Build your site as you prefer. This library uses modern JavaScript syntax (including async/await
+and other ES2017 features). Use babel or something similar if you need to cater to older browsers</li>
+</ol>
+<h2>Upgrading from 2.x</h2><p>If you already use the 2.x branch of the SPiD JS SDK, certain changes will be required to use this
+version of the SDK. We have chosen what we believe to be a middle ground between &quot;remembering the
+work done in the old SDK&quot; and &quot;starting fresh&quot;. Therefore it is recommended that you read this
+document in full. But ok, let's present some highlighted differences:</p>
+<h4>Differences from 2.x</h4><ul>
+<li>Instead of using <code>SPiD.init()</code> for initialization, the new SDK exports three classes; <code>Identity</code>,
+ <code>Monetization</code> and <code>Payment</code></li>
+<li>The <code>'SPiD.'</code> string is removed from the name of all SDK events. So the event that used to be
+ <code>'SPiD.login'</code> is not just <code>'login'</code></li>
+<li>You don't log in by setting <code>window.location</code>. Instead, you use the <code>login()</code> method on an
+ instance of <code>Identity</code></li>
+<li>The JavaScript code in this browser SDK does <strong>NOT</strong> set any <code>document.cookie = ...</code> by default.
+ There is a function <code>enableVarnishCookie</code> that you can call on an <code>Identity</code> instance. This will
+ enable setting the <code>SP_ID</code> cookie whenever <code>hasSession()</code> is called. Any other cookie that you
+ need set, you will have to set yourself</li>
+<li>You no longer <code>subscribe</code> to events but <code>listen</code> (using a function <code>.on</code> that's compatible with
+ Node's <code>EventEmitter</code>). For example <code>SPiD.event.subscribe('SPiD.login', handler)</code> becomes
+ <code>Identity.on('login', handler)</code></li>
+<li>SPiD URI is gone. There are a handful of <code>***Url()</code> functions in each SDK for the relevant flows</li>
+<li>The new SDK uses promises where it makes sense (often written as <code>async</code> functions). For example
+ <code>Identity.logout()</code> returns a promise</li>
+<li>The new SDK has inline jsdoc documentation that's available
+ <a href="https://pages.github.com/schibsted/account-sdk-browser/">here</a> instead of tech docs.
+ These documents will always be up to date with the latest release so make sure to run <code>npm
+ outdated</code> in your project to be notified about any new releases</li>
+<li>The new UI flows are different than the old ones in that they use the Schibsted Account API
+endpoints just like any other client. For most clients this means absolutely nothing at all, but
+for some, it's quite important; If you have ever asked our support staff to disable certain API
+endpoint accesses, there is a chance that you'll encounter problems. For instance, if you've set
+<code>NO ACCESS</code> on the <code>POST /signup</code> endpoint, <strong>users will not be able to sign up to your site</strong>
+using the new flows.</li>
+</ul>
+<h4>Polyfills required for older browsers</h4><p>This SDK uses modern JavaScript features. If you support older browsers, you should use a tool like
+babel to transform the JavaScript as needed. We consider this to be out of scope of this SDK.
+Though, if popular demand becomes high enough, we are open to reconsider this policy. If you have
+questions, contact us on <a href="mailto:support@spid.no">support@spid.no</a>, and we'll try to assist you as best we can.</p>
+<h2>Events</h2><p>The SDK fires events when something we deem interesting is happening. For example the
+<a href="https://pages.github.com/schibsted/account-sdk-browser/Identity.html">Identity</a> class
+emits some events when the user is logged in or logged out. This SDK uses a familar interface that's
+very similar to Node's <a href="https://nodejs.org/api/events.html">EventEmitter</a>. The most important
+methods are <code>.on(eventName, listener)</code> (to subscribe to an event) and <code>.off(eventName, listener)</code>
+(to unsubscribe to an event).</p>
+<h2>Identity</h2><p>Let's start with a bit of example code:</p>
+<h4>Example</h4><pre class="prettyprint source lang-javascript"><code>const Identity = require('@schibsted/account-sdk-browser/identity')
+
+const identity = new Identity({
+    clientId: '56e9a5d1eee0000000000000',
+    redirectUri: 'https://awesomenews.site', // ensure it's listed in selfservice
+    env: 'PRE', // Schibsted Account env. A url or a special key: 'PRE', 'PRO' or 'PRO_NO'
+})
+
+async function whenSiteLoaded() {
+    const loginContainer = document.getElementById('login-container');
+    if (await identity.isLoggedIn()) {
+        const user = await identity.getUser()
+        loginContainer.innerHTML = `&lt;span>Hello ${user.givenName}&lt;/span>`
+    } else {
+        loginContainer.innerHTML = '&lt;button class=&quot;login-button&quot;>Log in&lt;/button>'
+    }
+}
+
+function userClicksLogIn() {
+    identity.login({ state: 'some-random-string-1234-foobar-wonky-pig' })
+}</code></pre><h4>Authentication methods</h4><p>Although Schibsted Account abstracts away the details of how the users sign up or log in, it's worth
+mentioning that your end users have a few ways to log in:</p>
+<ul>
+<li>Username &amp; password: pretty self-explanatory; users register using an email address and a
+self-chosen password</li>
+<li>Passwordless - email: here, the users enter their email address and receive a one-time code that
+they can use to log in</li>
+<li>Passwordless - SMS: similar to the previous method but instead of an email address, they receive
+the code on their phone as an SMS</li>
+</ul>
+<p>The default is username &amp; password. If you wish to use one of the passwordless login methods, the
+<code>login()</code> function takes an optional parameter called <code>acrValues</code> (yeah, it's an OAuth specific
+name). Please set this parameter to either <code>otp-email</code> or <code>otp-sms</code>.</p>
+<p>The classic way to authenticate a user, is to send them from your site to the Schibsted Account
+domain, let the user authenticate there, and then have us redirect them back to your site. If you
+prefer, we also provide a popup that you can use. In this method, the authentication happens on a
+separate popup window and at the end of the auth flow. We recommend that you make the popup send a
+signal to your main page — using
+<a href="https://developer.mozilla.org/en-US/docs/Web/API/Window/postMessage">postMessage</a> or something
+similar — to indicate that the user is logged in. If the popup window fails to open, it'll
+automatically fall back to the redirect flow.</p>
+<h4>Is the user logged in?</h4><p>Schibsted Account relies on browser cookies to determine whether a user is recognized as logged in.
+The SDK provides functions that can be used to check if the user that's visiting your site is
+already a Schibsted user or not.</p>
+<ul>
+<li><a href="https://pages.github.com/schibsted/account-sdk-browser/Identity.html#isLoggedIn">Identity#isLoggedIn</a>
+tells you if the user that is visiting your site is already logged in to Schibsted Account or not.</li>
+<li><a href="https://pages.github.com/schibsted/account-sdk-browser/Identity.html#isConnected">Identity#isConnected</a>
+tells you if the user is connected to your client. A user might have <code>isLoggedIn=true</code> and at the
+same time <code>isConnected=false</code> if they have logged in to Schibsted Account, but not accepted terms
+and privacy policy for your site.</li>
+</ul>
+<p>If you've lately changed your terms &amp; conditions, maybe the user still hasn't accepted them. In that
+case they are considered <em>not connected</em>. In that case, if they click &quot;Log in&quot; from your site, we
+will just ask them to accept those terms and redirect them right back to your site.</p>
+<h4>Logging out</h4><p>If you want to log the user out of Schibsted Account, you can call
+<a href="https://pages.github.com/schibsted/account-sdk-browser/Identity.html#logout">Identity#logout</a>. This
+will remove the Schibsted Account browser session, and so log the user out of all Schibsted sites in
+that browser.</p>
+<p>On your site backend, it may or may not make sense to remove the access/refresh tokens that you got
+from Schibsted Account. This can simply be achieved by removing it from your session or just
+deleting the session. At this time, there are no ways to invalidate the tokens so they will not be
+usable. <em>In the future you might be able to invalidate tokens. This comes in handy if you know that
+a token is compromised and you don't want them to be usable in the future.</em></p>
+<h2>Monetization</h2><p>This class has two important endpoints:</p>
+<ul>
+<li><a href="https://pages.github.com/schibsted/account-sdk-browser/Monetization.html#hasProduct">Monetization#hasProduct</a>
+for checking if the user has access to a particular product</li>
+<li><a href="https://pages.github.com/schibsted/account-sdk-browser/Monetization.html#hasSubscription">Monetization#hasSubscription</a>
+for checking if the user has access to a particular subscription</li>
+</ul>
+<p>These two functions require a parameter <code>sp_id</code> that is obtained from
+<a href="https://pages.github.com/schibsted/account-sdk-browser/Identity.html#getSpId">Identity#getSpId</a>
+asynchronously.</p>
+<h4>Example</h4><pre class="prettyprint source lang-javascript"><code>const Monetization = require('@schibsted/account-sdk-browser/monetization');
+
+const monetization = new Monetization({
+    clientId: '56e9a5d1eee0000000000000',
+    redirectUri: 'https://awesomenews.site', // ensure it's listed in selfservice
+    env: 'PRE', // Schibsted Account env. A url or a special key: 'PRE', 'PRO' or 'PRO_NO'
+});
+
+try {
+    // Check if the user has access to a a particular product
+    // You need the sp_id parameter that is obtained from an Identity instance
+    const sp_id = await identity.getSpId();
+    const data = await monetization.hasProduct(productId, sp_id);
+    alert(`User has access to ${productId}? ${data.result}`);
+} catch (err) {
+    alert(`Could not query if the user has access to ${productId} because ${err}`);
+}</code></pre><h2>Payment</h2><p>This class provides methods for paying with a so-called paylink, buying a product, getting links to
+pages for redeeming voucher codes, reviewing payment history, and more.</p>
+<h4>Example</h4><pre class="prettyprint source lang-javascript"><code>const Payment = require('@schibsted/account-sdk-browser/payment');
+
+const paymentSDK = new Payment({
+    clientId: '56e9a5d1eee0000000000000',
+    redirectUri: 'https://awesomenews.site', // ensure it's listed in selfservice
+    env: 'PRE', // Schibsted Account env. A url or a special key: 'PRE', 'PRO' or 'PRO_NO'
+});
+
+// Get the url to paymentSDK with paylink
+const paylink = '...';
+const paylinkUrl = paymentSDK.purchasePaylinkUrl(paylink);
+
+// Or another example --- pay with paylink in a popup
+paymentSDK.payWithPaylink(paylink);</code></pre><h2>Appendix</h2><h4>Cookies</h4><p>There are some cookies used by Schibsted Account. They should all be considered opaque on the
+browser side. Nevertheless, here is a short description of them.</p>
+<ol>
+<li>The <strong>autologin</strong> cookie (often called 'the remember-me-cookie'): The cookie name in the
+production environments is <code>vgs_email</code>, because reasons (on PRE, it is called <code>spid-pre-data</code>).
+It's a JSON string that's encoded using the standard <code>encodeURIComponent()</code> function and is an
+object that contains two pieces of information that's important:<ul>
+<li><code>remember</code>: if set to <code>true</code>, the user chose to be remembered and this means we usually support
+auto-login (that is, if you call the Schibsted Account hassession service, and no session can
+be found in the session database, it will automatically create a new one for the user so that
+they don't have to authenticate again. If it is <code>false</code>, it should be interpreted as the user
+does not want to be automatically logged in to any site when their session expires</li>
+<li><code>v</code>: the version number</li>
+</ul>
+</li>
+<li>The <strong>visitor</strong> cookie: Cookie name in production environments is <code>spiduid</code>.</li>
+<li>The <strong>session</strong> cookies: Cookie names in production environments are <code>identity</code>, and <code>SPID_SE</code> or
+<code>SPID_NO</code>. It contains:<ul>
+<li><code>user</code>: an object (if it's missing, a call to hassession will return a <code>401</code> with a
+<code>UserException</code> that says <code>No session found</code>)<ul>
+<li><code>userId</code> identifies the user. We use this property to compare &quot;old&quot; user with &quot;new&quot; user and
+fire events that indicate that the user has changed</li>
+<li><code>is_logged_in</code> indicates if the user is logged in</li>
+</ul>
+</li>
+<li><code>user_tags</code>: a map that contains some flags about the user; namely:<ul>
+<li><code>is_logged_in</code> indicates if the user is logged in (this seems to be a duplicate of a
+property with a similar name in the parent <code>user</code> object)</li>
+<li><code>terms</code>: a map of term ids that indicate if they've been accepted by the user.</li>
+</ul>
+</li>
+<li><code>referer</code> (yep, missing the double &quot;rr&quot;..): If this is missing, a call to hassession will
+return a <code>401</code> with a <code>UserException</code> that says <code>No session found</code>.</li>
+</ul>
+</li>
+</ol>
+<h2>LICENSE</h2><p>Copyright (c) 2018 Schibsted Products &amp; Technology AS</p>
+<p>Licensed under the <a href="https://github.com/schibsted/account-sdk-browser/blob/master/LICENSE.md">MIT
+License</a></p>
+<p>Unless required by applicable law or agreed to in writing, software distributed under the License is
+distributed on an &quot;AS IS&quot; BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or
+implied. See the License for the specific language governing permissions and limitations under the
+License.</p></article>
+    </section>
+
+
+
+
+
+
+</div>
+
+<br class="clear">
+
+<footer>
+    Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.5.5</a> on Mon Mar 05 2018 21:04:40 GMT+0000 (UTC) using the <a href="https://github.com/clenemt/docdash">docdash</a> theme.
+</footer>
+
+<script>prettyPrint();</script>
+<script src="scripts/linenumber.js"></script>
+</body>
+</html>

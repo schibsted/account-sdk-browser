@@ -1,0 +1,199 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <title>cache.js - Documentation</title>
+
+    <script src="scripts/prettify/prettify.js"></script>
+    <script src="scripts/prettify/lang-css.js"></script>
+    <!--[if lt IE 9]>
+      <script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+    <link type="text/css" rel="stylesheet" href="styles/prettify.css">
+    <link type="text/css" rel="stylesheet" href="styles/jsdoc.css">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+</head>
+<body>
+
+<input type="checkbox" id="nav-trigger" class="nav-trigger" />
+<label for="nav-trigger" class="navicon-button x">
+  <div class="navicon"></div>
+</label>
+
+<label for="nav-trigger" class="overlay"></label>
+
+<nav>
+    <h2><a href="index.html">Home</a></h2><h3>Classes</h3><ul><li><a href="Identity.html">Identity</a><ul class='methods'><li data-type='method'><a href="Identity.html#enableVarnishCookie">enableVarnishCookie</a></li><li data-type='method'><a href="Identity.html#hasSession">hasSession</a></li><li data-type='method'><a href="Identity.html#isLoggedIn">isLoggedIn</a></li><li data-type='method'><a href="Identity.html#isConnected">isConnected</a></li><li data-type='method'><a href="Identity.html#getUser">getUser</a></li><li data-type='method'><a href="Identity.html#getUserId">getUserId</a></li><li data-type='method'><a href="Identity.html#getUserUuidId">getUserUuidId</a></li><li data-type='method'><a href="Identity.html#getVisitorId">getVisitorId</a></li><li data-type='method'><a href="Identity.html#getSpId">getSpId</a></li><li data-type='method'><a href="Identity.html#login">login</a></li><li data-type='method'><a href="Identity.html#logout">logout</a></li><li data-type='method'><a href="Identity.html#loginUrl">loginUrl</a></li><li data-type='method'><a href="Identity.html#logoutUrl">logoutUrl</a></li><li data-type='method'><a href="Identity.html#accountUrl">accountUrl</a></li><li data-type='method'><a href="Identity.html#phonesUrl">phonesUrl</a></li><li data-type='method'><a href="Identity.html#agreementUrl">agreementUrl</a></li><li data-type='method'><a href="Identity.html#authFlowUrl">authFlowUrl</a></li><li data-type='method'><a href="Identity.html#signupFlowUrl">signupFlowUrl</a></li><li data-type='method'><a href="Identity.html#signinFlowUrl">signinFlowUrl</a></li></ul></li><li><a href="Monetization.html">Monetization</a><ul class='methods'><li data-type='method'><a href="Monetization.html#hasProduct">hasProduct</a></li><li data-type='method'><a href="Monetization.html#hasSubscription">hasSubscription</a></li><li data-type='method'><a href="Monetization.html#subscriptionsUrl">subscriptionsUrl</a></li><li data-type='method'><a href="Monetization.html#productsUrl">productsUrl</a></li></ul></li><li><a href="Payment.html">Payment</a><ul class='methods'><li data-type='method'><a href="Payment.html#payWithPaylink">payWithPaylink</a></li><li data-type='method'><a href="Payment.html#purchaseHistoryUrl">purchaseHistoryUrl</a></li><li data-type='method'><a href="Payment.html#redeemUrl">redeemUrl</a></li><li data-type='method'><a href="Payment.html#purchasePaylinkUrl">purchasePaylinkUrl</a></li><li data-type='method'><a href="Payment.html#purchaseProductFlowUrl">purchaseProductFlowUrl</a></li><li data-type='method'><a href="Payment.html#purchaseCampaignFlowUrl">purchaseCampaignFlowUrl</a></li></ul></li></ul><h3>Events</h3><ul><li><a href="Identity.html#event:error">error</a></li><li><a href="Identity.html#event:login">login</a></li><li><a href="Identity.html#event:logout">logout</a></li><li><a href="Identity.html#event:notLoggedin">notLoggedin</a></li><li><a href="Identity.html#event:sessionChange">sessionChange</a></li><li><a href="Identity.html#event:sessionInit">sessionInit</a></li><li><a href="Identity.html#event:statusChange">statusChange</a></li><li><a href="Identity.html#event:userChange">userChange</a></li><li><a href="Identity.html#event:visitor">visitor</a></li></ul>
+</nav>
+
+<div id="main">
+    
+    <h1 class="page-title">cache.js</h1>
+    
+
+    
+
+
+
+    
+    <section>
+        <article>
+            <pre class="prettyprint source linenums"><code>/* Copyright 2018 Schibsted Products &amp; Technology AS. Licensed under the terms of the MIT license.
+ * See LICENSE.md in the project root.
+ */
+
+'use strict';
+
+const SDKError = require('./SDKError');
+
+/**
+ * Check whether we are able to use web storage
+ * @param {Storage} store - A reference to either `sessionStorage` or `localStorage` from a `Window`
+ * object
+ * @private
+ * @returns {boolean}
+ */
+function webStorageWorks(store) {
+    if (!store) {
+        return false;
+    }
+    try {
+        const randomKey = 'x-x-x-x'.replace(/x/g, () => Math.random());
+        const testValue = 'TEST-VALUE';
+        store.setItem(randomKey, testValue);
+        const val = store.getItem(randomKey);
+        store.removeItem(randomKey);
+        return (val === testValue);
+    } catch (e) {
+        return false;
+    }
+}
+
+/**
+ * Will be used if web storage is available
+ * @private
+ */
+class WebStorageCache {
+    /**
+     * Create web storage cache object
+     * @param {Storage} store - A reference to either `sessionStorage` or `localStorage` from a
+     * `Window` object
+     */
+    constructor(store) {
+        this.store = store;
+        this.get = (key) => this.store.getItem(key);
+        this.set = (key, value) => this.store.setItem(key, value);
+        this.delete = (key) => this.store.removeItem(key);
+    }
+}
+
+/**
+ * Will be used if session storage is not available
+ * @private
+ */
+class LiteralCache {
+    /**
+     * Create JS object literal cache object
+     */
+    constructor() {
+        this.store = {};
+        this.get = (key) => this.store[key];
+        this.set = (key, value) => this.store[key] = value;
+        this.delete = (key) => delete this.store[key];
+    }
+}
+
+/**
+ * Cache class that attempts WebStorage (session/local storage), and falls back to JS object literal
+ * @private
+ */
+class Cache {
+    /**
+     * @param {Storage} [store] - A reference to either `sessionStorage` or `localStorage` from a
+     * `Window` object
+     * @throws {SDKError} - If sessionStorage or localStorage are not accessible
+     */
+    constructor(store) {
+        if (webStorageWorks(store)) {
+            this.cache = new WebStorageCache(store);
+            this.type = 'WebStorage';
+        } else {
+            this.cache = new LiteralCache();
+            this.type = 'ObjectLiteralStorage';
+        }
+    }
+
+    /**
+     * Get a value from cache (checks that the object has not expired)
+     * @param {string} key
+     * @returns {*} - The value if it exists, otherwise null
+     */
+    get(key) {
+        try {
+            const raw = this.cache.get(key);
+            const obj = raw ? JSON.parse(raw) : null;
+            if (obj &amp;&amp; Number.isInteger(obj.expiresOn) &amp;&amp; obj.expiresOn > Date.now()) {
+                return obj.value;
+            }
+            this.delete(key);
+            return null;
+        } catch (e) {
+            throw new SDKError(e);
+        }
+    }
+
+    /**
+     * Set a cache entry
+     * @param {string} key
+     * @param {*} value
+     * @param {Number} expiresIn - Value in milliseconds until the entry expires
+     * @returns {void}
+     */
+    set(key, value, expiresIn = 0) {
+        if (expiresIn &lt;= 0) {
+            return;
+        }
+
+        try {
+            const expiresOn = Math.floor(Date.now() + expiresIn);
+            this.cache.set(key, JSON.stringify({ expiresOn, value }));
+            setTimeout(() => this.delete(key), expiresIn);
+        } catch (e) {
+            throw new SDKError(e);
+        }
+    }
+
+    /**
+     * Delete a cache entry
+     * @param {string} key
+     * @returns {void}
+     */
+    delete(key) {
+        try {
+            this.cache.delete(key);
+        } catch (e) {
+            throw new SDKError(e);
+        }
+    }
+}
+
+module.exports = Cache;
+</code></pre>
+        </article>
+    </section>
+
+
+
+
+</div>
+
+<br class="clear">
+
+<footer>
+    Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.5.5</a> on Mon Mar 05 2018 21:04:40 GMT+0000 (UTC) using the <a href="https://github.com/clenemt/docdash">docdash</a> theme.
+</footer>
+
+<script>prettyPrint();</script>
+<script src="scripts/linenumber.js"></script>
+</body>
+</html>
