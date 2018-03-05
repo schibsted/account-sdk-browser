@@ -1,0 +1,19 @@
+#############################################################
+#                                                           #
+# Schibsted Account SDK for browsers                        #
+# Copyright (c) 2018 Schibsted Products & Technology AS AS  #
+#                                                           #
+#############################################################
+
+This SDK depends on the following projects (each of which have zero dependencies of their own):
+
+# SCHIBSTED ACCOUNT SDK DEPENDENCIES
+
+fetch-jsonp
+  LICENSE: MIT,
+           https://github.com/camsong/fetch-jsonp/blob/master/README.md#license
+
+tiny-emitter
+  LICENSE: MIT,
+           https://github.com/scottcorgan/tiny-emitter/blob/master/LICENSE
+

@@ -1,0 +1,36 @@
+extends: eslint:recommended
+parserOptions:
+  ecmaVersion: 2017
+plugins:
+  - import
+env:
+    commonjs: true
+    browser: true
+    mocha: true
+    es6: true
+rules:
+    no-undefined: off
+    no-var: off
+    indent:
+      - warn
+      - 4
+    no-unused-vars:
+      - error
+      - argsIgnorePattern: next
+    require-jsdoc:
+      - warn
+      - require:
+          FunctionDeclaration: true
+          ClassDeclaration: true
+          MethodDefinition: true
+          ArrowFunctionExpression: true
+          FunctionExpression: true
+    valid-jsdoc:
+      - warn
+      - requireParamDescription: false
+        requireReturnDescription: false
+    max-nested-callbacks:
+      - error
+      - 5
+    camelcase: off
+    padded-blocks: off

@@ -1,0 +1,26 @@
+language: node_js
+sudo: false
+node_js:
+- '8'
+cache:
+  directories:
+  - node_modules
+install: npm install
+script:
+  - npm run test
+before_deploy:
+  - npm config set @schibsted:registry=https://registry.npmjs.org/
+  - npm config set //registry.npmjs.org/:_authToken=${NPMJS_AUTHTOKEN}
+deploy:
+  - provider: script
+    skip_cleanup: true
+    script: npm publish
+    on:
+      branch: master
+      tags: true
+  - provider: script
+    skip_cleanup: true
+    script: ./scripts/generate-and-deploy-docs.sh
+    name: Travis JSDoc to Github Pages Deployment
+    on:
+      branch: master
