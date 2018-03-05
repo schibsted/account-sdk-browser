@@ -23,4 +23,4 @@ deploy:
     script: ./scripts/generate-and-deploy-docs.sh
     name: Travis JSDoc to Github Pages Deployment
     on:
-      branch: master
+      branch: test2
