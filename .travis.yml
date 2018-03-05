@@ -15,7 +15,7 @@ before_deploy:
 deploy:
   - provider: script
     skip_cleanup: true
-    script: npm publish
+    script: npm publish --access=public --tag=beta
     on:
       branch: master
       tags: true
