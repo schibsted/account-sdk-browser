@@ -2,6 +2,4 @@
  * See LICENSE.md in the project root.
  */
 
-// Test 1
-
 module.exports = require('./src/identity');
