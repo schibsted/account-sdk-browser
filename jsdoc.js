@@ -23,17 +23,7 @@ module.exports = {
         recurse: true,
         template: 'node_modules/docdash',
     },
-    templates: {
-        cleverLinks: true,
-        default: {
-            staticFiles: {
-                include: [
-                    'jsdoc',
-                ],
-                includePattern: /.+\.png$/,
-            }
-        }
-    },
+    templates: { cleverLinks: true },
     docdash: {
         static: true,
         sort: false,
