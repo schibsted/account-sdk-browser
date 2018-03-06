@@ -48,7 +48,7 @@ document in full. But ok, let's present some highlighted differences:
 * The new SDK uses promises where it makes sense (often written as `async` functions). For example
    `Identity.logout()` returns a promise
 * The new SDK has inline jsdoc documentation that's available
-   [here](https://pages.github.com/schibsted/account-sdk-browser/) instead of tech docs.
+   [here](https://schibsted.github.io/account-sdk-browser/) instead of tech docs.
    These documents will always be up to date with the latest release so make sure to run `npm
    outdated` in your project to be notified about any new releases
 * The new UI flows are different than the old ones in that they use the Schibsted Account API
@@ -68,7 +68,7 @@ questions, contact us on support@spid.no, and we'll try to assist you as best we
 ## Events
 
 The SDK fires events when something we deem interesting is happening. For example the
-[Identity](https://pages.github.com/schibsted/account-sdk-browser/Identity.html) class
+[Identity](https://schibsted.github.io/account-sdk-browser/Identity.html) class
 emits some events when the user is logged in or logged out. This SDK uses a familar interface that's
 very similar to Node's [EventEmitter](https://nodejs.org/api/events.html). The most important
 methods are `.on(eventName, listener)` (to subscribe to an event) and `.off(eventName, listener)`
@@ -137,9 +137,9 @@ Schibsted Account relies on browser cookies to determine whether a user is recog
 The SDK provides functions that can be used to check if the user that's visiting your site is
 already a Schibsted user or not.
 
-* [Identity#isLoggedIn](https://pages.github.com/schibsted/account-sdk-browser/Identity.html#isLoggedIn)
+* [Identity#isLoggedIn](https://schibsted.github.io/account-sdk-browser/Identity.html#isLoggedIn)
   tells you if the user that is visiting your site is already logged in to Schibsted Account or not.
-* [Identity#isConnected](https://pages.github.com/schibsted/account-sdk-browser/Identity.html#isConnected)
+* [Identity#isConnected](https://schibsted.github.io/account-sdk-browser/Identity.html#isConnected)
   tells you if the user is connected to your client. A user might have `isLoggedIn=true` and at the
   same time `isConnected=false` if they have logged in to Schibsted Account, but not accepted terms
   and privacy policy for your site.
@@ -151,7 +151,7 @@ will just ask them to accept those terms and redirect them right back to your si
 #### Logging out
 
 If you want to log the user out of Schibsted Account, you can call
-[Identity#logout](https://pages.github.com/schibsted/account-sdk-browser/Identity.html#logout). This
+[Identity#logout](https://schibsted.github.io/account-sdk-browser/Identity.html#logout). This
 will remove the Schibsted Account browser session, and so log the user out of all Schibsted sites in
 that browser.
 
@@ -165,13 +165,13 @@ a token is compromised and you don't want them to be usable in the future.*
 
 This class has two important endpoints:
 
-* [Monetization#hasProduct](https://pages.github.com/schibsted/account-sdk-browser/Monetization.html#hasProduct)
+* [Monetization#hasProduct](https://schibsted.github.io/account-sdk-browser/Monetization.html#hasProduct)
   for checking if the user has access to a particular product
-* [Monetization#hasSubscription](https://pages.github.com/schibsted/account-sdk-browser/Monetization.html#hasSubscription)
+* [Monetization#hasSubscription](https://schibsted.github.io/account-sdk-browser/Monetization.html#hasSubscription)
   for checking if the user has access to a particular subscription
 
 These two functions require a parameter `sp_id` that is obtained from
-[Identity#getSpId](https://pages.github.com/schibsted/account-sdk-browser/Identity.html#getSpId)
+[Identity#getSpId](https://schibsted.github.io/account-sdk-browser/Identity.html#getSpId)
 asynchronously.
 
 #### Example
