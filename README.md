@@ -91,7 +91,9 @@ async function whenSiteLoaded() {
     const loginContainer = document.getElementById('login-container');
     if (await identity.isLoggedIn()) {
         const user = await identity.getUser()
-        loginContainer.innerHTML = `<span>Hello ${user.givenName}</span>`
+        const span = document.createElement('span')
+        span.textContent = `Hello ${user.givenName}`
+        loginContainer.appendChild(span)
     } else {
         loginContainer.innerHTML = '<button class="login-button">Log in</button>'
     }
