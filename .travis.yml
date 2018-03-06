@@ -1,0 +1,27 @@
+language: node_js
+sudo: false
+node_js:
+- '8'
+cache:
+  directories:
+  - node_modules
+install: npm install
+script: npm run cover
+before_deploy:
+  - npm config set @schibsted:registry=https://registry.npmjs.org/
+  - npm config set //registry.npmjs.org/:_authToken=${NPMJS_AUTHTOKEN}
+  - npm run docs
+deploy:
+  - provider: script
+    skip_cleanup: true
+    script: npm publish --access=public --tag=beta
+    on:
+      branch: master
+      tags: true
+  - provider: pages
+    skip-cleanup: true
+    github-token: $GITHUB_TOKEN
+    keep-history: true
+    local-dir: docs
+    on:
+      branch: master

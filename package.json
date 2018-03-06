@@ -1,0 +1,53 @@
+{
+  "name": "@schibsted/account-sdk-browser",
+  "version": "3.0.0-beta.1",
+  "description": "Schibsted Account SDK for browsers",
+  "main": "index.js",
+  "scripts": {
+    "build-es5": "parcel build old.js",
+    "build": "parcel build index.js",
+    "clean": "rimraf .cache coverage dist docs",
+    "docs": "rimraf docs && jsdoc -c ./utils/jsdoc.js --verbose",
+    "lint": "eslint .",
+    "pretest": "npm run lint",
+    "test": "jest",
+    "cover": "jest --coverage",
+    "postcover": "codecov"
+  },
+  "author": "",
+  "license": "MIT",
+  "dependencies": {
+    "fetch-jsonp": "^1.1.3",
+    "tiny-emitter": "^2.0.2"
+  },
+  "devDependencies": {
+    "babel-core": "^6.26.0",
+    "babel-preset-env": "^1.6.1",
+    "codecov": "^3.0.0",
+    "docdash": "git+https://github.com/torarvid/docdash.git#v0.5.0",
+    "eslint": "^4.16.0",
+    "eslint-plugin-import": "^2.8.0",
+    "jest": "^22.1.4",
+    "jest-junit": "^3.4.1",
+    "jsdoc": "^3.5.5",
+    "node-fetch": "^1.7.3",
+    "parcel-bundler": "^1.5.0",
+    "regenerator-runtime": "^0.11.1",
+    "whatwg-url": "^6.4.0"
+  },
+  "babel": {
+    "presets": [
+      [
+        "env",
+        {
+          "targets": {
+            "browsers": [
+              "last 2 major versions",
+              "ie 9"
+            ]
+          }
+        }
+      ]
+    ]
+  }
+}

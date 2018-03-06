@@ -1,0 +1,4 @@
+rules:
+    require-jsdoc: 0
+globals:
+    expect: true
