@@ -89,7 +89,7 @@ document in full. But ok, let's present some highlighted differences:</p>
 <li>The new SDK uses promises where it makes sense (often written as <code>async</code> functions). For example
  <code>Identity.logout()</code> returns a promise</li>
 <li>The new SDK has inline jsdoc documentation that's available
- <a href="https://pages.github.com/schibsted/account-sdk-browser/">here</a> instead of tech docs.
+ <a href="https://schibsted.github.io/account-sdk-browser/">here</a> instead of tech docs.
  These documents will always be up to date with the latest release so make sure to run <code>npm
  outdated</code> in your project to be notified about any new releases</li>
 <li>The new UI flows are different than the old ones in that they use the Schibsted Account API
@@ -104,7 +104,7 @@ babel to transform the JavaScript as needed. We consider this to be out of scope
 Though, if popular demand becomes high enough, we are open to reconsider this policy. If you have
 questions, contact us on <a href="mailto:support@spid.no">support@spid.no</a>, and we'll try to assist you as best we can.</p>
 <h2>Events</h2><p>The SDK fires events when something we deem interesting is happening. For example the
-<a href="https://pages.github.com/schibsted/account-sdk-browser/Identity.html">Identity</a> class
+<a href="https://schibsted.github.io/account-sdk-browser/Identity.html">Identity</a> class
 emits some events when the user is logged in or logged out. This SDK uses a familar interface that's
 very similar to Node's <a href="https://nodejs.org/api/events.html">EventEmitter</a>. The most important
 methods are <code>.on(eventName, listener)</code> (to subscribe to an event) and <code>.off(eventName, listener)</code>
@@ -157,9 +157,9 @@ automatically fall back to the redirect flow.</p>
 The SDK provides functions that can be used to check if the user that's visiting your site is
 already a Schibsted user or not.</p>
 <ul>
-<li><a href="https://pages.github.com/schibsted/account-sdk-browser/Identity.html#isLoggedIn">Identity#isLoggedIn</a>
+<li><a href="https://schibsted.github.io/account-sdk-browser/Identity.html#isLoggedIn">Identity#isLoggedIn</a>
 tells you if the user that is visiting your site is already logged in to Schibsted Account or not.</li>
-<li><a href="https://pages.github.com/schibsted/account-sdk-browser/Identity.html#isConnected">Identity#isConnected</a>
+<li><a href="https://schibsted.github.io/account-sdk-browser/Identity.html#isConnected">Identity#isConnected</a>
 tells you if the user is connected to your client. A user might have <code>isLoggedIn=true</code> and at the
 same time <code>isConnected=false</code> if they have logged in to Schibsted Account, but not accepted terms
 and privacy policy for your site.</li>
@@ -168,7 +168,7 @@ and privacy policy for your site.</li>
 case they are considered <em>not connected</em>. In that case, if they click &quot;Log in&quot; from your site, we
 will just ask them to accept those terms and redirect them right back to your site.</p>
 <h4>Logging out</h4><p>If you want to log the user out of Schibsted Account, you can call
-<a href="https://pages.github.com/schibsted/account-sdk-browser/Identity.html#logout">Identity#logout</a>. This
+<a href="https://schibsted.github.io/account-sdk-browser/Identity.html#logout">Identity#logout</a>. This
 will remove the Schibsted Account browser session, and so log the user out of all Schibsted sites in
 that browser.</p>
 <p>On your site backend, it may or may not make sense to remove the access/refresh tokens that you got
@@ -178,13 +178,13 @@ usable. <em>In the future you might be able to invalidate tokens. This comes in 
 a token is compromised and you don't want them to be usable in the future.</em></p>
 <h2>Monetization</h2><p>This class has two important endpoints:</p>
 <ul>
-<li><a href="https://pages.github.com/schibsted/account-sdk-browser/Monetization.html#hasProduct">Monetization#hasProduct</a>
+<li><a href="https://schibsted.github.io/account-sdk-browser/Monetization.html#hasProduct">Monetization#hasProduct</a>
 for checking if the user has access to a particular product</li>
-<li><a href="https://pages.github.com/schibsted/account-sdk-browser/Monetization.html#hasSubscription">Monetization#hasSubscription</a>
+<li><a href="https://schibsted.github.io/account-sdk-browser/Monetization.html#hasSubscription">Monetization#hasSubscription</a>
 for checking if the user has access to a particular subscription</li>
 </ul>
 <p>These two functions require a parameter <code>sp_id</code> that is obtained from
-<a href="https://pages.github.com/schibsted/account-sdk-browser/Identity.html#getSpId">Identity#getSpId</a>
+<a href="https://schibsted.github.io/account-sdk-browser/Identity.html#getSpId">Identity#getSpId</a>
 asynchronously.</p>
 <h4>Example</h4><pre class="prettyprint source lang-javascript"><code>const Monetization = require('@schibsted/account-sdk-browser/monetization');
 
@@ -272,7 +272,7 @@ License.</p></article>
 <br class="clear">
 
 <footer>
-    Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.5.5</a> on Tue Mar 06 2018 13:20:43 GMT+0000 (UTC) using the <a href="https://github.com/clenemt/docdash">docdash</a> theme.
+    Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.5.5</a> on Tue Mar 06 2018 13:25:59 GMT+0000 (UTC) using the <a href="https://github.com/clenemt/docdash">docdash</a> theme.
 </footer>
 
 <script>prettyPrint();</script>
