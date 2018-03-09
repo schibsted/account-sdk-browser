@@ -4,9 +4,6 @@
 
 'use strict';
 
-const Identity = require('../identity');
-const testutils = require('../utils/testutils');
-
 describe('Identity', () => {
 
     beforeAll(() => {
@@ -14,6 +11,8 @@ describe('Identity', () => {
     });
 
     describe('constructor()', () => {
+        const Identity = require('../identity');
+
         test('throws if the options object is not passed to the constructor', () => {
             expect(() => new Identity()).toThrowError(/Cannot read property 'clientId' of undefined/);
         });
@@ -45,6 +44,8 @@ describe('Identity', () => {
     });
 
     describe('loginUrl()', () => {
+        const Identity = require('../identity');
+        const testutils = require('../utils/testutils');
 
         test('returns the expected endpoint for old flows', () => {
             const identity = new Identity({
@@ -80,4 +81,78 @@ describe('Identity', () => {
 
     });
 
+    describe('hasSession', () => {
+        let Identity;
+        let mockSpy = {};
+
+        const mockHasSessionLoginRequired = {
+            error: {
+                code: 401,
+                type: 'LoginException',
+                description: 'Autologin required'
+            },
+            response: {
+                result: false,
+                serverTime: 1520599943,
+                expiresIn: null,
+                baseDomain: 'localhost',
+                visitor: {
+                    uid: 'Xytpn4Xoi8rb9Xso27ks',
+                    user_id: '36424'
+                }
+            }
+        };
+        const mockSPiDOk = {
+            result: true,
+            serverTime: 1520610964,
+            expiresIn: 2592000,
+            visitor: {
+                uid: '1234',
+                user_id: '12345'
+            },
+            id: '59e9eaaaacb3ad0aaaedaaaa',
+            userId: 12345,
+            uuid: 'aaaaaaaa-de42-5c4b-80ee-eeeeeeeeeeee',
+            displayName: 'bruce_wayne',
+            givenName: 'Bruce',
+            familyName: 'Wayne',
+            gender: 'withheld',
+            photo: 'https://secure.gravatar.com/avatar/1234?s=200',
+            tracking: true,
+            userStatus: 'connected',
+            clientAgreementAccepted: true,
+            defaultAgreementAccepted: true,
+            sp_id: 'some-jwt-token',
+            sig: 'some-encrypted-value'
+        };
+
+        beforeAll(() => {
+            jest.resetModules();
+            jest.mock('fetch-jsonp', () => {
+                return async (url) => {
+                    if (url.includes('rpc/hasSession.js')) { // hasSession
+                        mockSpy.hasSessionCalled = true;
+                        return { ok: true, json: async () => mockHasSessionLoginRequired };
+                    }
+                    if (url.includes('ajax/hasSession.js')) { // SPiD
+                        mockSpy.spidCalled = true;
+                        return { ok: true, json: async () => mockSPiDOk };
+                    }
+                    return;
+                };
+            });
+            Identity = require('../src/identity');
+        });
+
+        test('Calls SPiD on failure', async () => {
+            const identity = new Identity({
+                clientId: 'foo',
+                redirectUri: 'http://example.com',
+            });
+            const foo = await identity.hasSession();
+            expect(foo).toMatchObject({ result: true });
+            expect(mockSpy.hasSessionCalled).toBe(true);
+            expect(mockSpy.spidCalled).toBe(true);
+        });
+    });
 });
