@@ -27,17 +27,22 @@ const logString = (msg) => msg.map(m => isObject(m) ? JSON.stringify(m, null, 2)
 const logFn = (fn, ...msg) => (typeof fn === 'function') && fn(logString(msg));
 
 /**
- * Construct query string for WHATWG urls
+ * Encode a string like URLSearchParams would do
  * @private
- * @param {object} query - Object to generate query string from
- * @param {boolean} useDefaultParams - Use defaultParams or not
- * @param {object} defaultParams - Default params
- * @returns {string} Query string
+ * @param {string} str - The input
+ * @returns {string} The encoded string
  */
-function search(query, useDefaultParams, defaultParams) {
-    const searchParams = new URLSearchParams(
-        useDefaultParams ? cloneDefined(defaultParams, query) : cloneDefined(query));
-    return searchParams.toString();
+function encode(str) {
+    const replace = {
+        '!': '%21',
+        "'": '%27',
+        '(': '%28',
+        ')': '%29',
+        '~': '%7E',
+        '%20': '+',
+        '%00': '\x00'
+    };
+    return encodeURIComponent(str).replace(/[!'()~]|%20|%00/g, match => replace[match]);
 }
 
 const globalFetch = window.fetch;
@@ -163,7 +168,7 @@ class RESTClient {
      */
     makeUrl(pathname = '', query = {}, useDefaultParams = true) {
         const url = new URL(pathname, this.url);
-        url.search = search(query, useDefaultParams, this.defaultParams);
+        url.search = RESTClient.search(query, useDefaultParams, this.defaultParams);
         return url.href;
     }
 
@@ -175,6 +180,19 @@ class RESTClient {
      */
     get(pathname, data) {
         return this.go({ method: 'get', pathname, data });
+    }
+
+    /**
+     * Construct query string for WHATWG urls
+     * @private
+     * @param {object} query - Object to generate query string from
+     * @param {boolean} useDefaultParams - Use defaultParams or not
+     * @param {object} defaultParams - Default params
+     * @returns {string} Query string
+     */
+    static search(query, useDefaultParams, defaultParams) {
+        const params = useDefaultParams ? cloneDefined(defaultParams, query) : cloneDefined(query);
+        return Object.keys(params).map(p => `${encode(p)}=${encode(params[p])}`).join('&');
     }
 }
 
