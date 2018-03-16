@@ -6,13 +6,7 @@
 
 const { URL } = require('whatwg-url');
 const { urlMapper } = require('../src/url');
-const { cloneDefined } = require('../src/object');
-
-function search(query, useDefaultParams, defaultParams) {
-    const searchParams = new URLSearchParams(
-        useDefaultParams ? cloneDefined(defaultParams, query) : cloneDefined(query));
-    return searchParams.toString();
-}
+const RESTClient = require('../src/RESTClient');
 
 describe('url', () => {
 
@@ -45,7 +39,7 @@ describe('url', () => {
 
         test('constructs URL with params', () => {
             const url = new URL('/server', 'http://example.com');
-            url.search = search({ a: 1, foo: 'bar' });
+            url.search = RESTClient.search({ a: 1, foo: 'bar' });
             expect(url.href).toBe('http://example.com/server?a=1&foo=bar');
         });
 
