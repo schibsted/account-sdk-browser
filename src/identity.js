@@ -319,22 +319,12 @@ class Identity extends EventEmitter {
                 return cachedData;
             }
         }
-        // eslint-disable-next-line require-jsdoc
-        const getSessionData = async (autologin) => {
-            try {
-                return await this._hasSession.get('rpc/hasSession.js', { autologin });
-            } catch (err) {
-                // The first call was made to session cluster, try SPiD as well
-                if (isObject(err) && err.type === 'LoginException') {
-                    return await this._spid.get('ajax/hasSession.js', { autologin });
-                }
-                // Rethrow
-                throw err;
-            }
-        }
 
         try {
-            const data = await getSessionData(autologin ? 1 : 0);
+            let data = await this._hasSession.get('rpc/hasSession.js', { autologin });
+            if (isObject(data.error) && data.error.type === 'LoginException') {
+                data = await this._spid.get('ajax/hasSession.js', { autologin });
+            }
             if (data.result) {
                 this.cache.set(HAS_SESSION_CACHE_KEY, data, data.expiresIn * 1000);
             }
