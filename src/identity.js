@@ -480,6 +480,7 @@ class Identity extends EventEmitter {
      * @param {boolean} [options.preferPopup=false] - Should we try to open a popup window?
      * @param {boolean} [options.newFlow=true] - Should we try the new GDPR-safe flow or the
      * legacy/stable SPiD flow?
+     * @param {string} [loginHint=''] - user email hint
      * @return {Window|null} - Reference to popup window if created (or `null` otherwise)
      */
     login({
@@ -489,9 +490,10 @@ class Identity extends EventEmitter {
         redirectUri = this.redirectUri,
         preferPopup = false,
         newFlow = true,
+        loginHint = ''
     }) {
         this._closePopup();
-        const url = this.loginUrl(state, acrValues, scope, redirectUri, newFlow);
+        const url = this.loginUrl(state, acrValues, scope, redirectUri, newFlow, loginHint);
         if (preferPopup) {
             this.popup =
                 popup.open(this.window, url, 'Schibsted Account', { width: 360, height: 570 });
@@ -551,6 +553,7 @@ class Identity extends EventEmitter {
      * @param {string} [redirectUri=this.redirectUri]
      * @param {boolean} [newFlow=true] - Should we try the new flow or the old Schibsted Account
      * login? If this parameter is set to false, the `acrValues` parameter doesn't have any effect
+     * @param {string} [loginHint=''] - user email hint
      * @return {string} - The url
      */
     loginUrl(
@@ -558,7 +561,8 @@ class Identity extends EventEmitter {
         acrValues,
         scope = 'openid',
         redirectUri = this.redirectUri,
-        newFlow = true
+        newFlow = true,
+        loginHint = ''
     ) {
         assert(!acrValues || isStrIn(acrValues, ['', 'otp-email', 'otp-sms'], true),
             `The acrValues parameter is not acceptable: ${acrValues}`);
@@ -575,7 +579,8 @@ class Identity extends EventEmitter {
                 redirect_uri: redirectUri,
                 scope,
                 state,
-                acr_values: acrValues
+                acr_values: acrValues,
+                login_hint: loginHint
             });
         } else {
             // acrValues do not work with the old flows
@@ -583,7 +588,8 @@ class Identity extends EventEmitter {
                 response_type: 'code',
                 redirect_uri: redirectUri,
                 scope,
-                state
+                state,
+                email: loginHint
             });
         }
     }

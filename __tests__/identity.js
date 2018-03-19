@@ -59,8 +59,9 @@ describe('Identity', () => {
                 'otp-email',
                 undefined,
                 undefined,
-                false
-            ), 'https://payment.schibsted.no/flow/login?client_id=foo&state=dummy-state&scope=openid&response_type=code&redirect_uri=http%3A%2F%2Fexample.com');
+                false,
+                'dev@spid.no'
+            ), 'https://payment.schibsted.no/flow/login?client_id=foo&state=dummy-state&scope=openid&response_type=code&redirect_uri=http%3A%2F%2Fexample.com&email=dev@spid.no');
         });
 
         test('returns the expected endpoint for new flows', () => {
@@ -75,8 +76,9 @@ describe('Identity', () => {
                 undefined,
                 undefined,
                 undefined,
-                true
-            ), 'https://login.schibsted.com/oauth/authorize?new-flow=true&redirect_uri=http%3A%2F%2Fexample.com&client_id=foo&state=dummy-state&response_type=code&scope=openid');
+                true,
+                'dev@spid.no'
+            ), 'https://login.schibsted.com/oauth/authorize?new-flow=true&redirect_uri=http%3A%2F%2Fexample.com&client_id=foo&state=dummy-state&response_type=code&scope=openid&login_hint=dev@spid.no');
         });
 
     });
