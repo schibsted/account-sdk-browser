@@ -1,5 +1,13 @@
 # Changelog
 
+## v3.0.0-beta.4 (2018-03-19)
+
+### New features
+
+* There is only one change in this release, and that is the addition of a `loginHint` parameter on
+  the `Indentity.login()` and `Identity.loginUrl()` functions. This enables the caller to pre-fill
+  the user identifier (email or phone number)
+
 ## v3.0.0-beta.3 (2018-03-16)
 
 ### Fixes
