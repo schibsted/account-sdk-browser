@@ -21,3 +21,15 @@ testing.
 npm install
 npm test
 ```
+
+#### Releasing
+Releases are triggered by Travis. The correct way to do this, is:
+
+1. Update `package.json` with a new version
+1. Run `npm install` so that `package-lock.json` is also up-to-date
+1. Update `CHANGELOG.md` with relevant changes, in sections **New features**, **Fixes**, not to
+   mention the most important one; **Breaking changes**
+1. Commit those changes, push a PR and land it
+1. Create a [new release](https://github.com/schibsted/account-sdk-browser/releases/new) and name it
+   according to the version number you just placed in `package.json`
+1. Pray to the Travis gods
