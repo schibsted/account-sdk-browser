@@ -1,6 +1,6 @@
 {
   "name": "@schibsted/account-sdk-browser",
-  "version": "3.0.0-beta.3",
+  "version": "3.0.0-beta.4",
   "description": "Schibsted Account SDK for browsers",
   "main": "index.js",
   "scripts": {
