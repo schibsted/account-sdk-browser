@@ -1581,7 +1581,7 @@ The unique visitor id can be used to track the user for analytics (Mixpanel).</p
 
     
 
-    <h4 class="name" id="login"><span class="type-signature"></span>login<span class="signature">(options)</span><span class="type-signature"> &rarr; {Window|null}</span></h4>
+    <h4 class="name" id="login"><span class="type-signature"></span>login<span class="signature">(options, loginHint<span class="signature-attributes">opt</span>)</span><span class="type-signature"> &rarr; {Window|null}</span></h4>
 
     
     <p class="summary"><p>Perform a login, either using a full-page redirect or a popup</p></p>
@@ -1595,7 +1595,7 @@ The unique visitor id can be used to track the user for analytics (Mixpanel).</p
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="identity.js.html">identity.js</a>, <a href="identity.js.html#line485">line 485</a>
+        <a href="identity.js.html">identity.js</a>, <a href="identity.js.html#line486">line 486</a>
     </li></ul></dd>
     
 
@@ -1674,7 +1674,11 @@ browser's popup blockers and has to be explicitly authorized to be shown.</p>
         <th>Type</th>
 
         
+        <th>Attributes</th>
+        
 
+        
+        <th>Default</th>
         
 
         <th class="last">Description</th>
@@ -1699,7 +1703,19 @@ browser's popup blockers and has to be explicitly authorized to be shown.</p>
             </td>
 
             
+                <td class="attributes">
+                
 
+                
+
+                
+                </td>
+            
+
+            
+                <td class="default">
+                
+                </td>
             
 
             <td class="description last">
@@ -1971,6 +1987,45 @@ legacy/stable SPiD flow?</p></td>
         </tr>
 
     
+
+        <tr>
+            
+                <td class="name"><code>loginHint</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">string</span>
+
+
+            
+            </td>
+
+            
+                <td class="attributes">
+                
+                    &lt;optional><br>
+                
+
+                
+
+                
+                </td>
+            
+
+            
+                <td class="default">
+                
+                    <code>''</code>
+                
+                </td>
+            
+
+            <td class="description last"><p>user email hint</p></td>
+        </tr>
+
+    
     </tbody>
 </table>
 
@@ -2033,7 +2088,7 @@ legacy/stable SPiD flow?</p></td>
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="identity.js.html">identity.js</a>, <a href="identity.js.html#line512">line 512</a>
+        <a href="identity.js.html">identity.js</a>, <a href="identity.js.html#line514">line 514</a>
     </li></ul></dd>
     
 
@@ -2193,7 +2248,7 @@ legacy/stable SPiD flow?</p></td>
 
     
 
-    <h4 class="name" id="loginUrl"><span class="type-signature"></span>loginUrl<span class="signature">(state, acrValues<span class="signature-attributes">opt</span>, scope<span class="signature-attributes">opt</span>, redirectUri<span class="signature-attributes">opt</span>, newFlow<span class="signature-attributes">opt</span>)</span><span class="type-signature"> &rarr; {string}</span></h4>
+    <h4 class="name" id="loginUrl"><span class="type-signature"></span>loginUrl<span class="signature">(state, acrValues<span class="signature-attributes">opt</span>, scope<span class="signature-attributes">opt</span>, redirectUri<span class="signature-attributes">opt</span>, newFlow<span class="signature-attributes">opt</span>, loginHint<span class="signature-attributes">opt</span>)</span><span class="type-signature"> &rarr; {string}</span></h4>
 
     
 
@@ -2205,7 +2260,7 @@ legacy/stable SPiD flow?</p></td>
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="identity.js.html">identity.js</a>, <a href="identity.js.html#line556">line 556</a>
+        <a href="identity.js.html">identity.js</a>, <a href="identity.js.html#line559">line 559</a>
     </li></ul></dd>
     
 
@@ -2493,6 +2548,45 @@ login? If this parameter is set to false, the <code>acrValues</code> parameter d
         </tr>
 
     
+
+        <tr>
+            
+                <td class="name"><code>loginHint</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">string</span>
+
+
+            
+            </td>
+
+            
+                <td class="attributes">
+                
+                    &lt;optional><br>
+                
+
+                
+
+                
+                </td>
+            
+
+            
+                <td class="default">
+                
+                    <code>''</code>
+                
+                </td>
+            
+
+            <td class="description last"><p>user email hint</p></td>
+        </tr>
+
+    
     </tbody>
 </table>
 
@@ -2552,7 +2646,7 @@ login? If this parameter is set to false, the <code>acrValues</code> parameter d
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="identity.js.html">identity.js</a>, <a href="identity.js.html#line596">line 596</a>
+        <a href="identity.js.html">identity.js</a>, <a href="identity.js.html#line602">line 602</a>
     </li></ul></dd>
     
 
@@ -2727,7 +2821,7 @@ login? If this parameter is set to false, the <code>acrValues</code> parameter d
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="identity.js.html">identity.js</a>, <a href="identity.js.html#line609">line 609</a>
+        <a href="identity.js.html">identity.js</a>, <a href="identity.js.html#line615">line 615</a>
     </li></ul></dd>
     
 
@@ -2829,7 +2923,7 @@ login? If this parameter is set to false, the <code>acrValues</code> parameter d
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="identity.js.html">identity.js</a>, <a href="identity.js.html#line617">line 617</a>
+        <a href="identity.js.html">identity.js</a>, <a href="identity.js.html#line623">line 623</a>
     </li></ul></dd>
     
 
@@ -2931,7 +3025,7 @@ login? If this parameter is set to false, the <code>acrValues</code> parameter d
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="identity.js.html">identity.js</a>, <a href="identity.js.html#line626">line 626</a>
+        <a href="identity.js.html">identity.js</a>, <a href="identity.js.html#line632">line 632</a>
     </li></ul></dd>
     
 
@@ -3040,7 +3134,7 @@ login? If this parameter is set to false, the <code>acrValues</code> parameter d
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="identity.js.html">identity.js</a>, <a href="identity.js.html#line636">line 636</a>
+        <a href="identity.js.html">identity.js</a>, <a href="identity.js.html#line642">line 642</a>
     </li></ul></dd>
     
 
@@ -3224,7 +3318,7 @@ login? If this parameter is set to false, the <code>acrValues</code> parameter d
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="identity.js.html">identity.js</a>, <a href="identity.js.html#line650">line 650</a>
+        <a href="identity.js.html">identity.js</a>, <a href="identity.js.html#line656">line 656</a>
     </li></ul></dd>
     
 
@@ -3408,7 +3502,7 @@ login? If this parameter is set to false, the <code>acrValues</code> parameter d
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="identity.js.html">identity.js</a>, <a href="identity.js.html#line664">line 664</a>
+        <a href="identity.js.html">identity.js</a>, <a href="identity.js.html#line670">line 670</a>
     </li></ul></dd>
     
 
@@ -5423,7 +5517,7 @@ no logged-in user neither before nor after <a href="Identity.html#hasSession"><c
 <br class="clear">
 
 <footer>
-    Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.5.5</a> on Fri Mar 16 2018 08:13:38 GMT+0000 (UTC) using the <a href="https://github.com/clenemt/docdash">docdash</a> theme.
+    Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.5.5</a> on Mon Mar 19 2018 08:45:13 GMT+0000 (UTC) using the <a href="https://github.com/clenemt/docdash">docdash</a> theme.
 </footer>
 
 <script>prettyPrint();</script>
