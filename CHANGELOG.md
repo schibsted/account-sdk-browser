@@ -1,5 +1,13 @@
 # Changelog
 
+## v3.0.0-beta.5 (2018-03-21)
+
+### Fixes
+
+* An issue where `Identity.hasSession` would call the backend server(s) with a wrong autologin
+  parameter has been fixed. This could potentially cause the user to not be auto-logged-in when they
+  were supposed to be
+
 ## v3.0.0-beta.4 (2018-03-19)
 
 ### New features
