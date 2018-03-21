@@ -321,9 +321,9 @@ class Identity extends EventEmitter {
         }
 
         try {
-            let data = await this._hasSession.get('rpc/hasSession.js', { autologin });
+            let data = await this._hasSession.get('rpc/hasSession.js', { autologin: autologin ? 1 : 0 });
             if (isObject(data.error) && data.error.type === 'LoginException') {
-                data = await this._spid.get('ajax/hasSession.js', { autologin });
+                data = await this._spid.get('ajax/hasSession.js', { autologin: autologin ? 1 : 0 });
             }
             if (data.result) {
                 this.cache.set(HAS_SESSION_CACHE_KEY, data, data.expiresIn * 1000);
