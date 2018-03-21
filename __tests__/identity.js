@@ -4,6 +4,8 @@
 
 'use strict';
 
+const { URL } = require('url');
+
 describe('Identity', () => {
 
     beforeAll(() => {
@@ -84,77 +86,37 @@ describe('Identity', () => {
     });
 
     describe('hasSession', () => {
-        let Identity;
-        let mockSpy = {};
+        const fetch = require('fetch-jsonp');
+        const Identity = require('../src/identity');
+        let identity;
 
-        const mockHasSessionLoginRequired = {
-            error: {
-                code: 401,
-                type: 'LoginException',
-                description: 'Autologin required'
-            },
-            response: {
-                result: false,
-                serverTime: 1520599943,
-                expiresIn: null,
-                baseDomain: 'localhost',
-                visitor: {
-                    uid: 'Xytpn4Xoi8rb9Xso27ks',
-                    user_id: '36424'
-                }
-            }
-        };
-        const mockSPiDOk = {
-            result: true,
-            serverTime: 1520610964,
-            expiresIn: 2592000,
-            visitor: {
-                uid: '1234',
-                user_id: '12345'
-            },
-            id: '59e9eaaaacb3ad0aaaedaaaa',
-            userId: 12345,
-            uuid: 'aaaaaaaa-de42-5c4b-80ee-eeeeeeeeeeee',
-            displayName: 'bruce_wayne',
-            givenName: 'Bruce',
-            familyName: 'Wayne',
-            gender: 'withheld',
-            photo: 'https://secure.gravatar.com/avatar/1234?s=200',
-            tracking: true,
-            userStatus: 'connected',
-            clientAgreementAccepted: true,
-            defaultAgreementAccepted: true,
-            sp_id: 'some-jwt-token',
-            sig: 'some-encrypted-value'
-        };
-
-        beforeAll(() => {
-            jest.resetModules();
-            jest.mock('fetch-jsonp', () => {
-                return async (url) => {
-                    if (url.includes('rpc/hasSession.js')) { // hasSession
-                        mockSpy.hasSessionCalled = true;
-                        return { ok: true, json: async () => mockHasSessionLoginRequired };
-                    }
-                    if (url.includes('ajax/hasSession.js')) { // SPiD
-                        mockSpy.spidCalled = true;
-                        return { ok: true, json: async () => mockSPiDOk };
-                    }
-                    return;
-                };
-            });
-            Identity = require('../src/identity');
-        });
-
-        test('Calls SPiD on failure', async () => {
-            const identity = new Identity({
+        beforeEach(() => {
+            fetch.mockClear()
+            identity = new Identity({
                 clientId: 'foo',
                 redirectUri: 'http://example.com',
             });
-            const foo = await identity.hasSession();
-            expect(foo).toMatchObject({ result: true });
-            expect(mockSpy.hasSessionCalled).toBe(true);
-            expect(mockSpy.spidCalled).toBe(true);
+        });
+
+        test('Calls hasSession with autologin=1 (not "true")', async () => {
+            const session = await identity.hasSession();
+            expect(session).toMatchObject({ result: true });
+            expect(fetch).toHaveProperty('mock.calls.length', 2);
+            const { searchParams } = new URL(fetch.mock.calls[0][0]);
+            expect(searchParams.get('autologin')).toBe('1');
+        });
+
+        test('Calls SPiD on failure', async () => {
+            const session = await identity.hasSession();
+            expect(session).toMatchObject({ result: true });
+            expect(fetch).toHaveProperty('mock.calls.length', 2);
+            expect(fetch.mock.calls[0][0]).toContain('session.identity-pre.schibsted.com/rpc');
+            expect(fetch.mock.calls[1][0]).toContain('identity-pre.schibsted.com/ajax/');
+        });
+
+        test('Does not auto login if autologin=false', async () => {
+            await expect(identity.hasSession(false)).rejects.toMatchObject({ type: 'UserException' });
+            expect(fetch).toHaveProperty('mock.calls.length', 1);
         });
     });
 });
