@@ -123,19 +123,7 @@ class RESTClient {
         assert(isObject(data), `data must be a non-null object`);
 
         fetchOptions.headers = isObject(headers) ? cloneDefined(headers) : {};
-
-        let fullUrl;
-        // If anything remaining in the payload object, pass it
-        // Assign payload based on what type of call it is
-        if (method.toUpperCase() === 'POST') {
-            fetchOptions.headers['Content-Type'] = 'application/x-www-form-urlencoded';
-            const body = cloneDefined(useDefaultParams ? this.defaultParams : {}, data);
-            fetchOptions.body = new URLSearchParams(body);
-            fullUrl = (new URL(pathname, this.url)).href;
-        } else {
-            // GET and DELETE use query strings
-            fullUrl = this.makeUrl(pathname, data, useDefaultParams);
-        }
+        const fullUrl = this.makeUrl(pathname, data, useDefaultParams);
 
         logFn(this.log, 'Request:', fetchOptions.method.toUpperCase(), fullUrl);
         logFn(this.log, 'Request Headers:', fetchOptions.headers);
