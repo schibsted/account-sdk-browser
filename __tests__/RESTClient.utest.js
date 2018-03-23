@@ -35,4 +35,15 @@ describe('RESTClient', () => {
         const q = RESTClient.search({ foo: `b a!r'b(a)r~b${NUL}a` });
         expect(q).toBe('foo=b+a%21r%27b%28a%29r%7Eb\x00a');
     });
+
+    test('Check that headers are sent', async () => {
+        const spy = jest.fn();
+        spy.mockImplementation(async () => ({ ok: true, json: async () => ({}) }));
+        const restClient = new RESTClient({ envDic: ENDPOINTS.SPiD, fetch: spy });
+        await restClient.go({ method: 'get', pathname: '/' });
+        await restClient.go({ method: 'get', pathname: '/', headers: { foo: 'bar' } });
+        expect(spy).toHaveBeenCalledTimes(2);
+        expect(spy.mock.calls[0][1].headers).toEqual({});
+        expect(spy.mock.calls[1][1].headers).toEqual({ foo: 'bar' });
+    });
 });
