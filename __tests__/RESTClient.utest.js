@@ -18,4 +18,15 @@ describe('RESTClient', () => {
         expect(typeof restClient.get).toBe('function');
         expect(typeof restClient.go).toBe('function');
     });
+
+    test('Supplied log function is called', async () => {
+        const spy = jest.fn();
+        const restClient = new RESTClient({
+            envDic: ENDPOINTS.SPiD,
+            log: spy,
+            fetch: async () => ({ ok: true, json: async () => ({}) }),
+        });
+        await restClient.go({ method: 'get', pathname: '/' });
+        expect(spy).toHaveBeenCalled();
+    });
 });
