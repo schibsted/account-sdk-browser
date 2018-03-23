@@ -65,6 +65,22 @@ describe('Identity', () => {
             expect(window).toHaveProperty('location.href',
                 'https://identity-pre.schibsted.com/oauth/authorize?client_id=foo&redirect_uri=http%3A%2F%2Ffoo.com&response_type=code&new-flow=true&scope=openid&state=foo&login_hint=');
         });
+        test('Should close previous popup if it exists (and is open)', () => {
+            const window = { screen: {}, open: () => ({ fakePopup: 'yup' }) };
+            const identity = new Identity({ clientId: 'foo', redirectUri: 'http://foo.com', window });
+            const oldPopup = identity.popup = { close: jest.fn() };
+            const popup = identity.login({ state: 'foo', preferPopup: true });
+            expect(popup).toHaveProperty('fakePopup', 'yup');
+            expect(oldPopup.close).toHaveBeenCalledTimes(1);
+        });
+        test('Should not try to close existing popup if already close', () => {
+            const window = { screen: {}, open: () => ({ fakePopup: 'yup' }) };
+            const identity = new Identity({ clientId: 'foo', redirectUri: 'http://foo.com', window });
+            const oldPopup = identity.popup = { close: jest.fn(), closed: true };
+            const popup = identity.login({ state: 'foo', preferPopup: true });
+            expect(popup).toHaveProperty('fakePopup', 'yup');
+            expect(oldPopup.close).toHaveBeenCalledTimes(0);
+        });
     });
 
     describe('logout()', () => {
