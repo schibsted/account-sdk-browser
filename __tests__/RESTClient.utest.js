@@ -29,4 +29,10 @@ describe('RESTClient', () => {
         await restClient.go({ method: 'get', pathname: '/' });
         expect(spy).toHaveBeenCalled();
     });
+
+    test('Static `search` function is called and encoded correctly', () => {
+        const NUL = String.fromCodePoint(0);
+        const q = RESTClient.search({ foo: `b a!r'b(a)r~b${NUL}a` });
+        expect(q).toBe('foo=b+a%21r%27b%28a%29r%7Eb\x00a');
+    });
 });
