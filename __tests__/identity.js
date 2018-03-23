@@ -4,6 +4,7 @@
 
 'use strict';
 
+const Identity = require('../src/identity');
 const { URL } = require('url');
 
 describe('Identity', () => {
@@ -13,8 +14,6 @@ describe('Identity', () => {
     });
 
     describe('constructor()', () => {
-        const Identity = require('../identity');
-
         test('throws if the options object is not passed to the constructor', () => {
             expect(() => new Identity()).toThrowError(/Cannot read property 'clientId' of undefined/);
         });
@@ -45,8 +44,30 @@ describe('Identity', () => {
         });
     });
 
+    describe('login()', () => {
+        test('Should work with only "state" param', () => {
+            const window = { location: {} };
+            const identity = new Identity({ clientId: 'foo', redirectUri: 'http://foo.com', window });
+            identity.login({ state: 'foo' });
+            expect(window).toHaveProperty('location.href',
+                'https://identity-pre.schibsted.com/oauth/authorize?client_id=foo&redirect_uri=http%3A%2F%2Ffoo.com&response_type=code&new-flow=true&scope=openid&state=foo&login_hint=');
+        });
+        test('Should open popup if "preferPopup" is true', () => {
+            const window = { screen: {}, open: () => ({ fakePopup: 'yup' }) };
+            const identity = new Identity({ clientId: 'foo', redirectUri: 'http://foo.com', window });
+            const popup = identity.login({ state: 'foo', preferPopup: true });
+            expect(popup).toHaveProperty('fakePopup', 'yup');
+        });
+        test('Should fall back to redirecting if popup fails', () => {
+            const window = { location: {}, screen: {}, open: () => {} };
+            const identity = new Identity({ clientId: 'foo', redirectUri: 'http://foo.com', window });
+            identity.login({ state: 'foo', preferPopup: true });
+            expect(window).toHaveProperty('location.href',
+                'https://identity-pre.schibsted.com/oauth/authorize?client_id=foo&redirect_uri=http%3A%2F%2Ffoo.com&response_type=code&new-flow=true&scope=openid&state=foo&login_hint=');
+        });
+    });
+
     describe('loginUrl()', () => {
-        const Identity = require('../identity');
         const testutils = require('../utils/testutils');
 
         test('returns the expected endpoint for old flows', () => {
@@ -87,7 +108,6 @@ describe('Identity', () => {
 
     describe('hasSession', () => {
         const fetch = require('fetch-jsonp');
-        const Identity = require('../src/identity');
         let identity;
 
         beforeEach(() => {
