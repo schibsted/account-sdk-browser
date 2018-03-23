@@ -39,7 +39,7 @@ class JSONPClient extends RESTClient {
      * @throws {SDKError} - If the call can't be invoked
      * @return {Promise} - A promise that will represent the success or failure of the call
      */
-    go(options = {}) {
+    go(options = { method: 'get', pathname: '/' }) {
         const fetchOptions = {
             method: options.method,
             credentials: 'include',
