@@ -36,6 +36,10 @@
     "regenerator-runtime": "^0.11.1",
     "whatwg-url": "^6.4.0"
   },
+  "repository": {
+    "type": "git",
+    "url": "git://github.com/schibsted/account-sdk-browser.git"
+  },
   "babel": {
     "presets": [
       [
