@@ -67,6 +67,44 @@ describe('Identity', () => {
         });
     });
 
+    describe('logout()', () => {
+        test('Should be able to log out from SPiD', async () => {
+            const identity = new Identity({ clientId: 'foo', redirectUri: 'http://foo.com', window: {} });
+            const fakeFetch = jest.fn();
+            fakeFetch.mockImplementation(async () => ({ ok: true, json: async () => ({})}));
+            identity._spid.fetch = fakeFetch;
+            identity._bffService.fetch = fakeFetch;
+            await expect(identity.logout()).resolves.toBeUndefined();
+            expect(fakeFetch).toHaveBeenCalledTimes(2);
+            expect(fakeFetch.mock.calls[0][0]).toMatch(/ajax\/logout.js/);
+            expect(fakeFetch.mock.calls[1][0]).toMatch(/authn\/api\/identity\/logout/);
+        });
+        test('Should be able to log out from BFF', async () => {
+            const identity = new Identity({ clientId: 'foo', redirectUri: 'http://foo.com', window: {} });
+            const fakeFetch = jest.fn();
+            fakeFetch.mockImplementation(async () => ({ ok: true, json: async () => ({})}));
+            identity._spid.fetch = fakeFetch;
+            identity._bffService.fetch = fakeFetch;
+            await expect(identity.logout()).resolves.toBeUndefined();
+            expect(fakeFetch).toHaveBeenCalledTimes(2);
+            expect(fakeFetch.mock.calls[0][0]).toMatch(/ajax\/logout.js/);
+            expect(fakeFetch.mock.calls[1][0]).toMatch(/authn\/api\/identity\/logout/);
+        });
+        test('Should handle error', async () => {
+            const identity = new Identity({ clientId: 'foo', redirectUri: 'http://foo.com', window: {} });
+            const fakeFetch = jest.fn();
+            fakeFetch.mockImplementation(async () => ({ ok: false }));
+            identity._spid.fetch = fakeFetch;
+            identity._bffService.fetch = fakeFetch;
+            await expect(identity.logout()).rejects.toMatchObject({
+                message: 'Could not log out from any endpoint'
+            });
+            expect(fakeFetch).toHaveBeenCalledTimes(2);
+            expect(fakeFetch.mock.calls[0][0]).toMatch(/ajax\/logout.js/);
+            expect(fakeFetch.mock.calls[1][0]).toMatch(/authn\/api\/identity\/logout/);
+        });
+    });
+
     describe('loginUrl()', () => {
         const testutils = require('../utils/testutils');
 
