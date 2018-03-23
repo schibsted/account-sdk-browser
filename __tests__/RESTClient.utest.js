@@ -46,4 +46,35 @@ describe('RESTClient', () => {
         expect(spy.mock.calls[0][1].headers).toEqual({});
         expect(spy.mock.calls[1][1].headers).toEqual({ foo: 'bar' });
     });
+
+    test('Should return SDKError on failed requests', async () => {
+        const spy = jest.fn();
+        spy.mockImplementation(async () => ({ ok: false, status: 400, statusText: 'Errorz' }));
+        const restClient = new RESTClient({ envDic: ENDPOINTS.SPiD, fetch: spy });
+        await expect(restClient.go({ method: 'get', pathname: '/' })).rejects.toMatchObject({
+            name: 'SDKError',
+            message: `Failed to 'get' 'https://identity-pre.schibsted.com/': 'Errorz'`,
+            code: 400
+        });
+    });
+
+    test('Should return SDKError when fetch throws', async () => {
+        const spy = jest.fn();
+        spy.mockImplementation(async () => { throw 'Errorz'; });
+        const restClient = new RESTClient({ envDic: ENDPOINTS.SPiD, fetch: spy });
+        await expect(restClient.go({ method: 'get', pathname: '/' })).rejects.toMatchObject({
+            name: 'SDKError',
+            message: `Failed to 'get' 'https://identity-pre.schibsted.com/': 'Errorz'`,
+        });
+    });
+
+    test('makeUrl should work', async () => {
+        const spy = jest.fn();
+        spy.mockImplementation(async () => { throw 'Errorz'; });
+        const restClient = new RESTClient({ envDic: ENDPOINTS.SPiD, defaultParams: { foo: 'bar'} });
+        const u = restClient.makeUrl();
+        expect(u).toBe('https://identity-pre.schibsted.com/?foo=bar');
+        const u2 = restClient.makeUrl('', {}, false);
+        expect(u2).toBe('https://identity-pre.schibsted.com/');
+    });
 });
