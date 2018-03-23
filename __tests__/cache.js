@@ -16,6 +16,11 @@ const webStorageMock = () => {
     return mock;
 };
 
+const throwingStorageMock = {
+    spy: jest.fn().mockImplementation(() => { throw new Error() }),
+    setItem: (...args) => throwingStorageMock.spy(...args),
+};
+
 describe('cache', () => {
     describe('ctor', () => {
         test('can create one', () => {
@@ -28,6 +33,12 @@ describe('cache', () => {
         test('can force a cache with session storage', () => {
             const cache = new Cache(webStorageMock());
             expect(cache.type).toBe('WebStorage');
+        });
+        test('Falls back to object literal storage if supplied storage throws', () => {
+            const cache = new Cache(throwingStorageMock);
+            expect(cache.type).toBe('ObjectLiteralStorage');
+            expect(throwingStorageMock.spy).toHaveBeenCalledTimes(1);
+            expect(throwingStorageMock.spy.mock.calls[0][1]).toBe('TEST-VALUE');
         });
     });
     describe('web storage', () => {
