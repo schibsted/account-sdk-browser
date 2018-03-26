@@ -4,6 +4,7 @@
 
 'use strict';
 
+const Identity = require('../src/identity');
 const { URL } = require('url');
 
 describe('Identity', () => {
@@ -13,8 +14,6 @@ describe('Identity', () => {
     });
 
     describe('constructor()', () => {
-        const Identity = require('../identity');
-
         test('throws if the options object is not passed to the constructor', () => {
             expect(() => new Identity()).toThrowError(/Cannot read property 'clientId' of undefined/);
         });
@@ -45,8 +44,84 @@ describe('Identity', () => {
         });
     });
 
+    describe('login()', () => {
+        test('Should work with only "state" param', () => {
+            const window = { location: {} };
+            const identity = new Identity({ clientId: 'foo', redirectUri: 'http://foo.com', window });
+            identity.login({ state: 'foo' });
+            expect(window).toHaveProperty('location.href',
+                'https://identity-pre.schibsted.com/oauth/authorize?client_id=foo&redirect_uri=http%3A%2F%2Ffoo.com&response_type=code&new-flow=true&scope=openid&state=foo&login_hint=');
+        });
+        test('Should open popup if "preferPopup" is true', () => {
+            const window = { screen: {}, open: () => ({ fakePopup: 'yup' }) };
+            const identity = new Identity({ clientId: 'foo', redirectUri: 'http://foo.com', window });
+            const popup = identity.login({ state: 'foo', preferPopup: true });
+            expect(popup).toHaveProperty('fakePopup', 'yup');
+        });
+        test('Should fall back to redirecting if popup fails', () => {
+            const window = { location: {}, screen: {}, open: () => {} };
+            const identity = new Identity({ clientId: 'foo', redirectUri: 'http://foo.com', window });
+            identity.login({ state: 'foo', preferPopup: true });
+            expect(window).toHaveProperty('location.href',
+                'https://identity-pre.schibsted.com/oauth/authorize?client_id=foo&redirect_uri=http%3A%2F%2Ffoo.com&response_type=code&new-flow=true&scope=openid&state=foo&login_hint=');
+        });
+        test('Should close previous popup if it exists (and is open)', () => {
+            const window = { screen: {}, open: () => ({ fakePopup: 'yup' }) };
+            const identity = new Identity({ clientId: 'foo', redirectUri: 'http://foo.com', window });
+            const oldPopup = identity.popup = { close: jest.fn() };
+            const popup = identity.login({ state: 'foo', preferPopup: true });
+            expect(popup).toHaveProperty('fakePopup', 'yup');
+            expect(oldPopup.close).toHaveBeenCalledTimes(1);
+        });
+        test('Should not try to close existing popup if already close', () => {
+            const window = { screen: {}, open: () => ({ fakePopup: 'yup' }) };
+            const identity = new Identity({ clientId: 'foo', redirectUri: 'http://foo.com', window });
+            const oldPopup = identity.popup = { close: jest.fn(), closed: true };
+            const popup = identity.login({ state: 'foo', preferPopup: true });
+            expect(popup).toHaveProperty('fakePopup', 'yup');
+            expect(oldPopup.close).toHaveBeenCalledTimes(0);
+        });
+    });
+
+    describe('logout()', () => {
+        test('Should be able to log out from SPiD', async () => {
+            const identity = new Identity({ clientId: 'foo', redirectUri: 'http://foo.com', window: {} });
+            const fakeFetch = jest.fn();
+            fakeFetch.mockImplementation(async () => ({ ok: true, json: async () => ({})}));
+            identity._spid.fetch = fakeFetch;
+            identity._bffService.fetch = fakeFetch;
+            await expect(identity.logout()).resolves.toBeUndefined();
+            expect(fakeFetch).toHaveBeenCalledTimes(2);
+            expect(fakeFetch.mock.calls[0][0]).toMatch(/ajax\/logout.js/);
+            expect(fakeFetch.mock.calls[1][0]).toMatch(/authn\/api\/identity\/logout/);
+        });
+        test('Should be able to log out from BFF', async () => {
+            const identity = new Identity({ clientId: 'foo', redirectUri: 'http://foo.com', window: {} });
+            const fakeFetch = jest.fn();
+            fakeFetch.mockImplementation(async () => ({ ok: true, json: async () => ({})}));
+            identity._spid.fetch = fakeFetch;
+            identity._bffService.fetch = fakeFetch;
+            await expect(identity.logout()).resolves.toBeUndefined();
+            expect(fakeFetch).toHaveBeenCalledTimes(2);
+            expect(fakeFetch.mock.calls[0][0]).toMatch(/ajax\/logout.js/);
+            expect(fakeFetch.mock.calls[1][0]).toMatch(/authn\/api\/identity\/logout/);
+        });
+        test('Should handle error', async () => {
+            const identity = new Identity({ clientId: 'foo', redirectUri: 'http://foo.com', window: {} });
+            const fakeFetch = jest.fn();
+            fakeFetch.mockImplementation(async () => ({ ok: false }));
+            identity._spid.fetch = fakeFetch;
+            identity._bffService.fetch = fakeFetch;
+            await expect(identity.logout()).rejects.toMatchObject({
+                message: 'Could not log out from any endpoint'
+            });
+            expect(fakeFetch).toHaveBeenCalledTimes(2);
+            expect(fakeFetch.mock.calls[0][0]).toMatch(/ajax\/logout.js/);
+            expect(fakeFetch.mock.calls[1][0]).toMatch(/authn\/api\/identity\/logout/);
+        });
+    });
+
     describe('loginUrl()', () => {
-        const Identity = require('../identity');
         const testutils = require('../utils/testutils');
 
         test('returns the expected endpoint for old flows', () => {
@@ -87,7 +162,6 @@ describe('Identity', () => {
 
     describe('hasSession', () => {
         const fetch = require('fetch-jsonp');
-        const Identity = require('../src/identity');
         let identity;
 
         beforeEach(() => {
@@ -117,6 +191,25 @@ describe('Identity', () => {
         test('Does not auto login if autologin=false', async () => {
             await expect(identity.hasSession(false)).rejects.toMatchObject({ type: 'UserException' });
             expect(fetch).toHaveProperty('mock.calls.length', 1);
+        });
+
+        test('throws if autologin is not a bool', async () => {
+            await expect(identity.hasSession(123)).rejects.toMatchObject({
+                message: `Parameter 'autologin' must be boolean, was: "Number:123"`
+            });
+            await expect(identity.hasSession(new Date(0))).rejects.toMatchObject({
+                message: `Parameter 'autologin' must be boolean, was: "Date:0"`
+            });
+            await expect(identity.hasSession('')).rejects.toMatchObject({
+                message: `Parameter 'autologin' must be boolean, was: "String:"`
+            });
+            await expect(identity.hasSession(null)).rejects.toMatchObject({
+                message: `Parameter 'autologin' must be boolean, was: "object:null"`
+            });
+            await expect(identity.hasSession({})).rejects.toMatchObject({
+                message: `Parameter 'autologin' must be boolean, was: "Object:[object Object]"`
+            });
+            expect(fetch).toHaveProperty('mock.calls.length', 0);
         });
     });
 });
