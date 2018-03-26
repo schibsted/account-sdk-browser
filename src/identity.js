@@ -70,6 +70,19 @@ const HAS_SESSION_CACHE_KEY = 'hasSession-cache';
 const globalWindow = window;
 
 /**
+ * Get type and value of something
+ * @private
+ * @param {string} thing
+ * @returns {Array} Tuple of [type, value]
+ */
+function inspect(thing) {
+    if (thing === null) {
+        return [typeof thing, `${thing}`];
+    }
+    return [thing.constructor.name, thing.valueOf()];
+}
+
+/**
  * Provides Identity functionalty to a web page
  */
 class Identity extends EventEmitter {
@@ -310,7 +323,8 @@ class Identity extends EventEmitter {
      */
     async hasSession(autologin = true) {
         if (typeof autologin !== 'boolean') {
-            throw new SDKError(`Invalid autologin value for sessionCluster: "${autologin}"`)
+            const [type, value] = inspect(autologin);
+            throw new SDKError(`Parameter 'autologin' must be boolean, was: "${type}:${value}"`);
         }
         if (this._enableSessionCaching) {
             // Try to resolve from cache (it has a TTL)

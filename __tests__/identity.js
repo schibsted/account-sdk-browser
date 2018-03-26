@@ -195,19 +195,19 @@ describe('Identity', () => {
 
         test('throws if autologin is not a bool', async () => {
             await expect(identity.hasSession(123)).rejects.toMatchObject({
-                message: 'Invalid autologin value for sessionCluster: "123"'
+                message: `Parameter 'autologin' must be boolean, was: "Number:123"`
             });
             await expect(identity.hasSession(new Date(0))).rejects.toMatchObject({
-                message: 'Invalid autologin value for sessionCluster: "Thu Jan 01 1970 01:00:00 GMT+0100 (CET)"'
+                message: `Parameter 'autologin' must be boolean, was: "Date:0"`
             });
             await expect(identity.hasSession('')).rejects.toMatchObject({
-                message: 'Invalid autologin value for sessionCluster: ""'
+                message: `Parameter 'autologin' must be boolean, was: "String:"`
             });
             await expect(identity.hasSession(null)).rejects.toMatchObject({
-                message: 'Invalid autologin value for sessionCluster: "null"'
+                message: `Parameter 'autologin' must be boolean, was: "object:null"`
             });
             await expect(identity.hasSession({})).rejects.toMatchObject({
-                message: 'Invalid autologin value for sessionCluster: "[object Object]"'
+                message: `Parameter 'autologin' must be boolean, was: "Object:[object Object]"`
             });
             expect(fetch).toHaveProperty('mock.calls.length', 0);
         });
