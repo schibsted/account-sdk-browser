@@ -192,5 +192,24 @@ describe('Identity', () => {
             await expect(identity.hasSession(false)).rejects.toMatchObject({ type: 'UserException' });
             expect(fetch).toHaveProperty('mock.calls.length', 1);
         });
+
+        test('throws if autologin is not a bool', async () => {
+            await expect(identity.hasSession(123)).rejects.toMatchObject({
+                message: 'Invalid autologin value for sessionCluster: "123"'
+            });
+            await expect(identity.hasSession(new Date(0))).rejects.toMatchObject({
+                message: 'Invalid autologin value for sessionCluster: "Thu Jan 01 1970 01:00:00 GMT+0100 (CET)"'
+            });
+            await expect(identity.hasSession('')).rejects.toMatchObject({
+                message: 'Invalid autologin value for sessionCluster: ""'
+            });
+            await expect(identity.hasSession(null)).rejects.toMatchObject({
+                message: 'Invalid autologin value for sessionCluster: "null"'
+            });
+            await expect(identity.hasSession({})).rejects.toMatchObject({
+                message: 'Invalid autologin value for sessionCluster: "[object Object]"'
+            });
+            expect(fetch).toHaveProperty('mock.calls.length', 0);
+        });
     });
 });
