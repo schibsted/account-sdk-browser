@@ -1,5 +1,24 @@
 # Changelog
 
+## v3.0.0-beta.6 (2018-04-03)
+
+### New features
+
+* ES5 generation has been added. This is an opt-in feature, so a user can do:
+
+      // Either 1)
+      const Account = require('@schibsted/account-sdk-browser');
+      // ... or 2)
+      const Account = require('@schibsted/account-sdk-browser/es5');
+      
+      // The shortcuts work as well (if you only want Identity stuff, for instance):
+      const Identity = require('@schibsted/account-sdk-browser/es5/identity');
+
+### Changes
+
+* Removed `parcel-bundler` and started using `webpack` instead. This was done to ease the production
+  of ES5 code
+
 ## v3.0.0-beta.5 (2018-03-21)
 
 ### Fixes
