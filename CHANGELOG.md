@@ -1,6 +1,13 @@
 # Changelog
 
-## v3.0.0-beta.6 (2018-04-03)
+## v3.0.0-beta.7 (2018-04-03)
+
+### Fixes
+
+* Webpack options needed tweaking, so -beta.6 didn't work at all. The code in this version is
+  otherwise identical to -beta.6, so the `build.sh` script has the only change.
+
+## v3.0.0-beta.6 (2018-04-03) — removed from npm, didn't work
 
 ### New features
 
