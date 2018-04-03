@@ -10,6 +10,7 @@ script: npm run cover
 before_deploy:
   - npm config set @schibsted:registry=https://registry.npmjs.org/
   - npm config set //registry.npmjs.org/:_authToken=${NPMJS_AUTHTOKEN}
+  - npm run build
   - npm run docs
 deploy:
   - provider: script
