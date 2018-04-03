@@ -20,7 +20,10 @@ products and subscriptions, etc.
       `/payment'` if you don't need all of it, and you wish to reduce the size of included code on
       your site.
 1. Build your site as you prefer. This library uses modern JavaScript syntax (including async/await
-   and other ES2017 features). Use babel or something similar if you need to cater to older browsers
+   and other ES2017 features) by default. We recommend that you do any transpilation yourself for
+   the browser versions you need to cater to. But — if needed, you can replace
+   `/account-sdk-browser` with `/account-sdk-browser/es5` if you want to opt-in to our babelified
+   versions.
 
 ## Upgrading from 2.x
 
@@ -61,9 +64,14 @@ document in full. But ok, let's present some highlighted differences:
 #### Polyfills required for older browsers
 
 This SDK uses modern JavaScript features. If you support older browsers, you should use a tool like
-babel to transform the JavaScript as needed. We consider this to be out of scope of this SDK.
-Though, if popular demand becomes high enough, we are open to reconsider this policy. If you have
-questions, contact us on support@spid.no, and we'll try to assist you as best we can.
+babel to transform the JavaScript as needed. However — since certain teams have deployment pipelines
+where it's difficult to do their own transpilation, we do provide some opt-in es5 files as well:
+
+1. `@schibsted/account-sdk-browser/es5`: Include both `Identity`, `Monetization` and `Payment`.
+1. `@schibsted/account-sdk-browser/es5/global`: Include both `Identity`, `Monetization` and
+   `Payment`. In addition, add them as variables to the global `window` object.
+1. `@schibsted/account-sdk-browser/es5/identity`, `@schibsted/account-sdk-browser/es5/monetization`
+   or `@schibsted/account-sdk-browser/es5/payment` can be used to only include each class by itself.
 
 ## Events
 
