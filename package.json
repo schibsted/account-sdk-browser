@@ -10,6 +10,7 @@
     "lint": "eslint .",
     "pretest": "npm run lint",
     "test": "jest",
+    "precover": "npm run lint",
     "cover": "jest --coverage",
     "postcover": "codecov"
   },
