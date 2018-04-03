@@ -1,16 +1,16 @@
 {
   "name": "@schibsted/account-sdk-browser",
-  "version": "3.0.0-beta.5",
+  "version": "3.0.0-beta.6",
   "description": "Schibsted Account SDK for browsers",
   "main": "index.js",
   "scripts": {
-    "build-es5": "parcel build old.js",
-    "build": "parcel build index.js",
+    "build": "./build.sh",
     "clean": "rimraf .cache coverage dist docs",
     "docs": "rimraf docs && jsdoc -c ./utils/jsdoc.js --verbose",
     "lint": "eslint .",
     "pretest": "npm run lint",
     "test": "jest",
+    "precover": "npm run lint",
     "cover": "jest --coverage",
     "postcover": "codecov"
   },
@@ -22,6 +22,7 @@
   },
   "devDependencies": {
     "babel-core": "^6.26.0",
+    "babel-loader": "^7.1.4",
     "babel-plugin-transform-builtin-extend": "^1.1.2",
     "babel-preset-env": "^1.6.1",
     "codecov": "^3.0.0",
@@ -32,8 +33,9 @@
     "jest-junit": "^3.4.1",
     "jsdoc": "^3.5.5",
     "node-fetch": "^1.7.3",
-    "parcel-bundler": "^1.5.0",
     "regenerator-runtime": "^0.11.1",
+    "webpack": "^4.4.1",
+    "webpack-cli": "^2.0.13",
     "whatwg-url": "^6.4.0"
   },
   "repository": {

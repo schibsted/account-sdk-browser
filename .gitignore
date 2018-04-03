@@ -1,6 +1,6 @@
 .DS_Store
 .cache
+/es5
 coverage
-dist/
 docs/
 node_modules/

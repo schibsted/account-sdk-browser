@@ -10,9 +10,9 @@
 
 require('regenerator-runtime/runtime');
 
-const Identity = require('./identity');
-const Monetization = require('./monetization');
-const Payment = require('./payment');
+const Identity = require('../../identity');
+const Monetization = require('../../monetization');
+const Payment = require('../../payment');
 
 window.Identity = Identity;
 window.Monetization = Monetization;

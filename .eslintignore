@@ -1,5 +1,5 @@
 .vscode/
+/es5
 coverage
-dist/
 docs/
 node_modules/

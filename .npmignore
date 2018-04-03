@@ -3,4 +3,5 @@
 !identity.js
 !monetization.js
 !payment.js
+!es5/*.js
 !src/**/*
