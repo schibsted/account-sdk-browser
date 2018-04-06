@@ -37,7 +37,7 @@ document in full. But ok, let's present some highlighted differences:
 * Instead of using `SPiD.init()` for initialization, the new SDK exports three classes; `Identity`,
    `Monetization` and `Payment`
 * The `'SPiD.'` string is removed from the name of all SDK events. So the event that used to be
-   `'SPiD.login'` is not just `'login'`
+   `'SPiD.login'` is now just `'login'`
 * You don't log in by setting `window.location`. Instead, you use the `login()` method on an
    instance of `Identity`
 * The JavaScript code in this browser SDK does **NOT** set any `document.cookie = ...` by default.
