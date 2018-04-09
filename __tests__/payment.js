@@ -14,19 +14,178 @@ describe('Payment', () => {
                 .toThrowError(/Cannot read property 'clientId' of undefined/);
         });
 
-        test('throws if the server setting is missing or has wrong type', () => {
-            expect(() => new Payment({ client_id: 'xxxx' }))
+        test('throws if the clientId setting is missing or has wrong type', () => {
+            expect(() => new Payment({}))
                 .toThrowError(/clientId parameter is required/);
-            expect(() => new Payment({ client_id: 'xxxx', server: true }))
+            expect(() => new Payment({ clientId: true }))
                 .toThrowError(/clientId parameter is required/);
         });
 
-        test('throws if the client_id setting is missing or has wrong type', () => {
-            expect(() => new Payment({ server: 'spp.dev' }))
-                .toThrowError(/clientId parameter is required/);
-            expect(() => new Payment({ server: 'spp.dev', client_id: true }))
-                .toThrowError(/clientId parameter is required/);
+        test('should work if all params are ok', () => {
+            const mon = new Payment({ clientId: 'a' });
+            expect(mon).not.toBeNull();
+            expect(mon).toBeDefined();
         });
     });
 
+    describe('payWithPaylink()', () => {
+        let payment;
+        let window;
+        const paylink = 'http://foo.bar';
+        const open = (url, windowName, features) => ({ url, windowName, features });
+
+        beforeEach(() => {
+            window = { location: {}, screen: {}, open };
+            payment = new Payment({ clientId: 'a', redirectUri: 'http://redirect.foo', window });
+        });
+
+        test('should work for a paylink', async () => {
+            const response = await payment.payWithPaylink({ paylink });
+            expect(response).toBeNull();
+            expect(window.location.href).toMatch('paylink=http%3A%2F%2Ffoo.bar');
+        });
+
+        test('should open a popup when preferPopup==true', async () => {
+            const popup = await payment.payWithPaylink({ paylink, preferPopup: true });
+            expect(popup).toMatchObject({
+                url: expect.stringMatching('paylink=http%3A%2F%2Ffoo.bar'),
+                windowName: 'Schibsted Account',
+                features: 'scrollbars=yes,location=yes,status=no,menubar=no,toolbar=no,resizable=yes,width=360,height=570'
+            });
+        });
+
+        test('should fall back if preferPopup==true but fails to create popup', async () => {
+            window = { location: {}, screen: {}, open: () => null };
+            payment = new Payment({ clientId: 'a', redirectUri: 'http://redirect.foo', window });
+            const popup = await payment.payWithPaylink({ paylink, preferPopup: true });
+            expect(popup).toBeNull();
+            expect(window.location.href).toMatch('paylink=http%3A%2F%2Ffoo.bar');
+        });
+
+        test('should reset popup before creating new one', async () => {
+            const oldPopup = { close: () => {} };
+            payment.popup = oldPopup;
+            const popup = await payment.payWithPaylink({ paylink, preferPopup: true });
+            expect(payment.popup).toBe(popup);
+            expect(payment.popup).not.toBe(oldPopup);
+        });
+
+        test('should close existing popup before creating new one', async () => {
+            const oldPopup = { close: jest.fn() };
+            payment.popup = oldPopup;
+            const popup = await payment.payWithPaylink({ paylink, preferPopup: true });
+            expect(payment.popup).toBe(popup);
+            expect(payment.popup).not.toBe(oldPopup);
+            expect(oldPopup.close).toBeCalled();
+        });
+
+        test('should not try to close existing popup if already closed', async () => {
+            const oldPopup = { close: jest.fn(), closed: true };
+            payment.popup = oldPopup;
+            const popup = await payment.payWithPaylink({ paylink, preferPopup: true });
+            expect(payment.popup).toBe(popup);
+            expect(payment.popup).not.toBe(oldPopup);
+            expect(oldPopup.close).not.toBeCalled();
+        });
+    });
+
+    describe('purchasePaylinkUrl', () => {
+        let payment;
+        const open = (url, windowName, features) => ({ url, windowName, features });
+        const window = { location: {}, screen: {}, open };
+
+        beforeEach(() => {
+            payment = new Payment({ clientId: 'a', redirectUri: 'http://redirect.foo', window });
+        });
+
+        test('should work with simple paylinkId', () => {
+            const url = payment.purchasePaylinkUrl('abc');
+            expect(url).toMatch(/purchase\?client_id=a&redirect_uri=http%3A%2F%2Fredirect.foo&paylink=abc/);
+        });
+
+        test('should fail without redirectUri', () => {
+            payment = new Payment({ clientId: 'a', window });
+            expect(() => payment.purchasePaylinkUrl('abc')).toThrowError(/redirectUri is invalid/);
+        });
+    });
+
+    describe('purchaseHistoryUrl', () => {
+        let payment;
+        const open = (url, windowName, features) => ({ url, windowName, features });
+        const window = { location: {}, screen: {}, open };
+
+        beforeEach(() => {
+            payment = new Payment({ clientId: 'a', redirectUri: 'http://redirect.foo', window });
+        });
+
+        test('should work with implicit redirectUri', () => {
+            const url = payment.purchaseHistoryUrl();
+            expect(url).toMatch(/purchasehistory\?client_id=a&redirect_uri=http%3A%2F%2Fredirect.foo/);
+        });
+
+        test('should fail without redirectUri', () => {
+            payment = new Payment({ clientId: 'a', window });
+            expect(() => payment.purchaseHistoryUrl('abc')).toThrowError(/redirectUri is invalid/);
+        });
+    });
+
+    describe('redeemUrl', () => {
+        let payment;
+        const open = (url, windowName, features) => ({ url, windowName, features });
+        const window = { location: {}, screen: {}, open };
+
+        beforeEach(() => {
+            payment = new Payment({ clientId: 'a', redirectUri: 'http://redirect.foo', window });
+        });
+
+        test('should work with implicit redirectUri', () => {
+            const url = payment.redeemUrl('123');
+            expect(url).toMatch(/redeem\?client_id=a&redirect_uri=http%3A%2F%2Fredirect.foo&voucher_code=123/);
+        });
+
+        test('should fail without redirectUri', () => {
+            payment = new Payment({ clientId: 'a', window });
+            expect(() => payment.redeemUrl('abc')).toThrowError(/redirectUri is invalid/);
+        });
+    });
+
+    describe('purchaseProductFlowUrl', () => {
+        let payment;
+        const open = (url, windowName, features) => ({ url, windowName, features });
+        const window = { location: {}, screen: {}, open };
+
+        beforeEach(() => {
+            payment = new Payment({ clientId: 'a', redirectUri: 'http://redirect.foo', window });
+        });
+
+        test('should work with implicit redirectUri', () => {
+            const url = payment.purchaseProductFlowUrl('123');
+            expect(url).toMatch(/checkout\?client_id=a&redirect_uri=http%3A%2F%2Fredirect.foo&response_type=code&flow=payment&product_id=123/);
+        });
+
+        test('should fail without redirectUri', () => {
+            payment = new Payment({ clientId: 'a', window });
+            expect(() => payment.purchaseProductFlowUrl('abc')).toThrowError(/redirectUri is invalid/);
+        });
+    });
+
+    describe('purchaseCampaignFlowUrl', () => {
+        let payment;
+        const open = (url, windowName, features) => ({ url, windowName, features });
+        const window = { location: {}, screen: {}, open };
+
+        beforeEach(() => {
+            payment = new Payment({ clientId: 'a', redirectUri: 'http://redirect.foo', window });
+        });
+
+        test('should work with implicit redirectUri', () => {
+            const url = payment.purchaseCampaignFlowUrl();
+            expect(url).toMatch(/checkout\?client_id=a&redirect_uri=http%3A%2F%2Fredirect.foo&response_type=code&flow=payment&campaign_id=null&product_id=null&voucher_code=null/);
+        });
+
+        test('should fail without redirectUri', () => {
+            payment = new Payment({ clientId: 'a', window });
+            expect(() => payment.purchaseCampaignFlowUrl('abc')).toThrowError(/redirectUri is invalid/);
+        });
+    });
 });
