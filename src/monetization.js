@@ -12,7 +12,7 @@ const JSONPClient = require('./JSONPClient');
 const Cache = require('./cache');
 const spidTalk = require('./spidTalk');
 
-const DEFAULT_CACHE_EXPIRES_IN = 0;
+const DEFAULT_CACHE_EXPIRES_IN = 30;
 const globalWindow = window;
 
 /**
@@ -59,7 +59,7 @@ class Monetization extends EventEmitter {
      * @returns {Object} The data object returned from Schibsted Account
      */
     async hasProduct(productId, spId) {
-        const cacheKey = `prd_${productId}`;
+        const cacheKey = `prd_${productId}_${spId}`;
         const cachedVal = this.cache.get(cacheKey);
         if (cachedVal) {
             return cachedVal;
@@ -85,7 +85,7 @@ class Monetization extends EventEmitter {
      * @returns {Object} The data object returned from Schibsted Account
      */
     async hasSubscription(subscriptionId, spId) {
-        const cacheKey = `sub_${subscriptionId}`;
+        const cacheKey = `sub_${subscriptionId}_${spId}`;
         const cachedVal = this.cache.get(cacheKey);
         if (cachedVal) {
             return cachedVal;

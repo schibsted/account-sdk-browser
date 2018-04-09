@@ -44,10 +44,10 @@ function open(parentWindow, url, windowName = '', windowFeatures) {
     const { height, width } = parentWindow.screen;
 
     let mergedFeatures = cloneDefined(defaultWindowFeatures, windowFeatures);
-    if (Number.isFinite(mergedFeatures.width)) {
+    if (Number.isFinite(mergedFeatures.width) && Number.isFinite(width)) {
         mergedFeatures.left = (width - mergedFeatures.width) / 2;
     }
-    if (Number.isFinite(mergedFeatures.height)) {
+    if (Number.isFinite(mergedFeatures.height) && Number.isFinite(height)) {
         mergedFeatures.top = (height - mergedFeatures.height) / 2;
     }
     const features = serialize(mergedFeatures);

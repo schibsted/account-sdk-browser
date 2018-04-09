@@ -57,6 +57,54 @@ const mockSPiDOk = {
     sp_id: 'some-jwt-token',
     sig: 'some-encrypted-value'
 };
+const mockSPiDProduct = {
+    result: true,
+    serverTime: 1520610964,
+    expiresIn: 2592000,
+    visitor: {
+        uid: '1234',
+        user_id: '12345'
+    },
+    id: '59e9eaaaacb3ad0aaaedaaaa',
+    userId: 12345,
+    uuid: 'aaaaaaaa-de42-5c4b-80ee-eeeeeeeeeeee',
+    displayName: 'bruce_wayne',
+    givenName: 'Bruce',
+    familyName: 'Wayne',
+    gender: 'withheld',
+    photo: 'https://secure.gravatar.com/avatar/1234?s=200',
+    tracking: true,
+    userStatus: 'connected',
+    clientAgreementAccepted: true,
+    defaultAgreementAccepted: true,
+    sp_id: 'some-jwt-token',
+    sig: 'some-encrypted-value'
+};
+const mockSPiDProductNoExpires = {
+    result: true,
+    serverTime: 1520610964,
+    visitor: {
+        uid: '1234',
+        user_id: '12345'
+    },
+    id: '59e9eaaaacb3ad0aaaedaaaa',
+    userId: 12345,
+    uuid: 'aaaaaaaa-de42-5c4b-80ee-eeeeeeeeeeee',
+    displayName: 'bruce_wayne',
+    givenName: 'Bruce',
+    familyName: 'Wayne',
+    gender: 'withheld',
+    photo: 'https://secure.gravatar.com/avatar/1234?s=200',
+    tracking: true,
+    userStatus: 'connected',
+    clientAgreementAccepted: true,
+    defaultAgreementAccepted: true,
+    sp_id: 'some-jwt-token',
+    sig: 'some-encrypted-value'
+};
+const mockSPiDProductMissing = {
+    result: false
+};
 
 const mockFn = jest.fn().mockImplementation(mock);
 
@@ -77,8 +125,36 @@ const mock = async (url) => {
     }
     if (pathname === '/ajax/hasSession.js') { // SPiD
         return { ok: true, json: async () => mockSPiDOk };
+    } else if (pathname === '/ajax/hasproduct.js') {
+        const productId = search.get('product_id');
+        const spId = search.get('sp_id');
+        switch (productId) {
+        case 'existing':
+            return { ok: true, json: async () => mockSPiDProduct };
+        case 'existing_no_expires':
+            return { ok: true, json: async () => mockSPiDProductNoExpires };
+        case 'existing_for_john':
+            if (spId === 'john') {
+                return { ok: true, json: async () => mockSPiDProduct };
+            }
+        }
+        return { ok: true, json: async () => mockSPiDProductMissing };
+    } else if (pathname === '/ajax/hassubscription.js') {
+        const subscriptionId = search.get('product_id');
+        const spId = search.get('sp_id');
+        switch (subscriptionId) {
+        case 'existing':
+            return { ok: true, json: async () => mockSPiDProduct };
+        case 'existing_no_expires':
+            return { ok: true, json: async () => mockSPiDProductNoExpires };
+        case 'existing_for_john':
+            if (spId === 'john') {
+                return { ok: true, json: async () => mockSPiDProduct };
+            }
+        }
+        return { ok: true, json: async () => mockSPiDProductMissing };
     }
-    return;
+    return { statusText: `Unimplemented mock response for url: '${url}'` };
 }
 
 mockFn.mockImplementation(mock);
