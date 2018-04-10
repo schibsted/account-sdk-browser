@@ -211,5 +211,39 @@ describe('Identity', () => {
             });
             expect(fetch).toHaveProperty('mock.calls.length', 0);
         });
+
+        test('should be able to set varnish cookie', async () => {
+            await identity.hasSession();
+            expect(document.cookie).toBe('');
+            identity.enableVarnishCookie();
+            await identity.hasSession();
+            expect(document.cookie).toBe('SP_ID=some-jwt-token');
+        });
+
+        test('should not set varnish cookie if session has no `expiresIn`', async () => {
+            identity.enableVarnishCookie();
+            const func = async () => ({ ok: true, json: async() => ({ result: true, sp_id: 'abc' }) });
+            fetch.mockImplementationOnce(func);
+            await identity.hasSession();
+            expect(document.cookie).toBe('');
+        });
+
+        describe('`baseDomain`', () => {
+            test('should respect `baseDomain` from session', async () => {
+                identity.enableVarnishCookie();
+                const session1 = { result: true, sp_id: 'abc', expiresIn: 3600, baseDomain: 'foo.com' };
+                fetch.mockImplementationOnce(async () => ({ ok: true, json: async() => session1 }));
+                await identity.hasSession();
+                expect(document.cookie).toBe('');
+            });
+
+            test('should respect `baseDomain` from session', async () => {
+                identity.enableVarnishCookie();
+                const session2 = { result: true, sp_id: 'abc', expiresIn: 3600 };
+                fetch.mockImplementationOnce(async () => ({ ok: true, json: async() => session2 }));
+                await identity.hasSession();
+                expect(document.cookie).toBe('SP_ID=abc');
+            });
+        });
     });
 });

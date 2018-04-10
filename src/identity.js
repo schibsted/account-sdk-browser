@@ -105,7 +105,7 @@ class Identity extends EventEmitter {
         this._sessionInitiatedSent = false;
         this.window = window;
         this.clientId = clientId;
-        this.cache = new Cache(window && window.localStorage);
+        this._initCache();
         this.redirectUri = redirectUri;
         this.log = log;
 
@@ -269,11 +269,21 @@ class Identity extends EventEmitter {
     }
 
     /**
+     * Create a fresh cache for this instance
+     * @private
+     * @returns {void}
+     */
+    _initCache() {
+        this.cache = new Cache(this.window && this.window.localStorage);
+    }
+
+    /**
      * Set the Varnish cookie (`SP_ID`) when hasSession() is called.
      * @returns {void}
      */
     enableVarnishCookie() {
         this.setVarnishCookie = true;
+        this._initCache();
     }
 
     /**
@@ -293,14 +303,14 @@ class Identity extends EventEmitter {
             date.setTime(0);
         }
         // If the domain is missing or of the wrong type, we'll use document.domain
-        if (typeof sessionData.baseDomain !== 'string') {
-            sessionData.baseDomain = document.domain;
-        }
-        var cookie = [
+        const domain = (typeof sessionData.baseDomain === 'string')
+            ? sessionData.baseDomain
+            : (document.domain || '');
+        const cookie = [
             `SP_ID=${sessionData.sp_id}`,
             `expires=${date.toUTCString()}`,
             `path=/`,
-            `domain=.${sessionData.baseDomain}`
+            `domain=.${domain}`
         ].join('; ');
         document.cookie = cookie;
     }
