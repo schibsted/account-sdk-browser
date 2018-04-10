@@ -22,10 +22,7 @@ class JSONPClient extends RESTClient {
      */
     constructor(options) {
         super(cloneDefined({ fetch }, options));
-
-        // Set minimum refresh timeout
-        this.timeout = options.timeout === undefined ?
-            config.JSONP.TIMEOUT : Number(options.timeout);
+        this.timeout = options.timeout ? Number(options.timeout) : config.JSONP.TIMEOUT;
     }
 
     /**

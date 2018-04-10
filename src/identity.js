@@ -296,7 +296,7 @@ class Identity extends EventEmitter {
         if (!this.setVarnishCookie) {
             return;
         }
-        var date = new Date();
+        const date = new Date();
         if (typeof sessionData.expiresIn === 'number' && sessionData.expiresIn > 0) {
             date.setTime(date.getTime() + (sessionData.expiresIn * 1000));
         } else {
@@ -469,14 +469,14 @@ class Identity extends EventEmitter {
     /**
      * Retrieve the sp_id (Varnish ID)
      * @todo Is this an accurate description?
-     * @return {string|undefined} - The sp_id string or undefined (if the server didn't return it)
+     * @return {string|null} - The sp_id string or null (if the server didn't return it)
      */
     async getSpId() {
         try {
             const user = await this.hasSession();
             return user.sp_id;
         } catch (_) {
-            return undefined;
+            return null;
         }
     }
 

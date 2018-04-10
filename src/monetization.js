@@ -65,7 +65,7 @@ class Monetization extends EventEmitter {
             return cachedVal;
         }
         const params = { product_id: productId }
-        if (spId !== undefined) {
+        if (spId) {
             params.sp_id = spId;
         }
         const data = await this._spid.get('ajax/hasproduct.js', params);
@@ -91,7 +91,7 @@ class Monetization extends EventEmitter {
             return cachedVal;
         }
         const params = { product_id: subscriptionId }
-        if (spId !== undefined) {
+        if (spId) {
             params.sp_id = spId;
         }
         const data = await this._spid.get('ajax/hassubscription.js', params);
