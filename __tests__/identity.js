@@ -166,10 +166,7 @@ describe('Identity', () => {
 
         beforeEach(() => {
             fetch.mockClear()
-            identity = new Identity({
-                clientId: 'foo',
-                redirectUri: 'http://example.com',
-            });
+            identity = new Identity({ clientId: 'foo', redirectUri: 'http://example.com' });
         });
 
         test('Calls hasSession with autologin=1 (not "true")', async () => {
@@ -261,6 +258,37 @@ describe('Identity', () => {
 
             // two calls per hasSession() invocation, since our mock is set up this way
             expect(fetch.mock.calls.length).toBe(2);
+        });
+    });
+
+    describe('isLoggedIn', () => {
+        const fetch = require('fetch-jsonp');
+        let identity;
+
+        beforeEach(() => {
+            fetch.mockClear()
+            identity = new Identity({ clientId: 'foo', redirectUri: 'http://example.com' });
+        });
+
+        test('should work when we get a `result` from hasSession', async () => {
+            fetch.mockImplementation(() => ({ ok: true, json: async () => ({ result: true }) }));
+            const v = await identity.isLoggedIn();
+            expect(v).toBe(true);
+            fetch.mockImplementation(() => ({ ok: true, json: async () => ({ result: false }) }));
+            const v2 = await identity.isLoggedIn();
+            expect(v2).toBe(true);
+        });
+
+        test(`should fail when we don't get a 'result' from hasSession`, async () => {
+            fetch.mockImplementation(() => ({ ok: true, json: async () => ({}) }));
+            const v = await identity.isLoggedIn();
+            expect(v).toBe(false);
+        });
+
+        test(`should handle hasSession failure without throwing`, async () => {
+            fetch.mockImplementation(() => ({ ok: false, statusText: 'Blah!' }));
+            const v = await identity.isLoggedIn();
+            expect(v).toBe(false);
         });
     });
 });
