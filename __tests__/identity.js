@@ -441,4 +441,29 @@ describe('Identity', () => {
             });
         });
     });
+
+    describe('getSpId', () => {
+        const fetch = require('fetch-jsonp');
+        let identity;
+
+        beforeEach(() => {
+            fetch.mockClear();
+            identity = new Identity({ clientId: 'foo', redirectUri: 'http://example.com' });
+        });
+
+        test(`should fail when we don't get a 'spId' from hasSession`, async () => {
+            fetch.mockImplementationOnce(() => ({ ok: true, json: async () => ({}) }));
+            await expect(identity.getSpId()).resolves.toBeNull();
+        });
+
+        test(`should work when we get a 'spId' from hasSession`, async () => {
+            fetch.mockImplementationOnce(() => ({ ok: true, json: async () => ({ sp_id: '123' }) }));
+            await expect(identity.getSpId()).resolves.toBe('123');
+        });
+
+        test(`should propagate errors from HasSession call (why, though?)`, async () => {
+            fetch.mockImplementationOnce(() => ({ ok: false, statusText: 'Blah!' }));
+            await expect(identity.getSpId()).resolves.toBeNull();
+        });
+    });
 });

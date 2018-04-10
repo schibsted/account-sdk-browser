@@ -468,7 +468,7 @@ class Identity extends EventEmitter {
     async getSpId() {
         try {
             const user = await this.hasSession();
-            return user.sp_id;
+            return user.sp_id || null;
         } catch (_) {
             return null;
         }
