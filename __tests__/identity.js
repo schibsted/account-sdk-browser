@@ -353,4 +353,33 @@ describe('Identity', () => {
             });
         });
     });
+
+    describe('getUserId', () => {
+        const fetch = require('fetch-jsonp');
+        let identity;
+
+        beforeEach(() => {
+            fetch.mockClear();
+            identity = new Identity({ clientId: 'foo', redirectUri: 'http://example.com' });
+        });
+
+        test(`should fail when we don't get a 'userId' from hasSession`, async () => {
+            fetch.mockImplementationOnce(() => ({ ok: true, json: async () => ({}) }));
+            await expect(identity.getUserId()).rejects.toMatchObject({
+                message: 'The user is not connected to this merchant'
+            });
+        });
+
+        test(`should work when we get a 'userId' from hasSession`, async () => {
+            fetch.mockImplementationOnce(() => ({ ok: true, json: async () => ({ userId: '123' }) }));
+            await expect(identity.getUserId()).resolves.toBe('123');
+        });
+
+        test(`should propagate errors from HasSession call (why, though?)`, async () => {
+            fetch.mockImplementationOnce(() => ({ ok: false, statusText: 'Blah!' }));
+            await expect(identity.getUserId()).rejects.toMatchObject({
+                message: 'HasSession failed'
+            });
+        });
+    });
 });
