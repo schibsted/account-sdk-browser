@@ -87,7 +87,7 @@ describe('Identity', () => {
         test('Should be able to log out from SPiD', async () => {
             const identity = new Identity({ clientId: 'foo', redirectUri: 'http://foo.com', window: {} });
             const fakeFetch = jest.fn();
-            fakeFetch.mockImplementation(async () => ({ ok: true, json: async () => ({})}));
+            fakeFetch.mockImplementationOnce(async () => ({ ok: true, json: async () => ({})}));
             identity._spid.fetch = fakeFetch;
             identity._bffService.fetch = fakeFetch;
             await expect(identity.logout()).resolves.toBeUndefined();
@@ -98,7 +98,7 @@ describe('Identity', () => {
         test('Should be able to log out from BFF', async () => {
             const identity = new Identity({ clientId: 'foo', redirectUri: 'http://foo.com', window: {} });
             const fakeFetch = jest.fn();
-            fakeFetch.mockImplementation(async () => ({ ok: true, json: async () => ({})}));
+            fakeFetch.mockImplementationOnce(async () => ({ ok: true, json: async () => ({})}));
             identity._spid.fetch = fakeFetch;
             identity._bffService.fetch = fakeFetch;
             await expect(identity.logout()).resolves.toBeUndefined();
@@ -109,7 +109,7 @@ describe('Identity', () => {
         test('Should handle error', async () => {
             const identity = new Identity({ clientId: 'foo', redirectUri: 'http://foo.com', window: {} });
             const fakeFetch = jest.fn();
-            fakeFetch.mockImplementation(async () => ({ ok: false }));
+            fakeFetch.mockImplementationOnce(async () => ({ ok: false }));
             identity._spid.fetch = fakeFetch;
             identity._bffService.fetch = fakeFetch;
             await expect(identity.logout()).rejects.toMatchObject({
@@ -165,7 +165,7 @@ describe('Identity', () => {
         let identity;
 
         beforeEach(() => {
-            fetch.mockClear()
+            fetch.mockClear();
             identity = new Identity({ clientId: 'foo', redirectUri: 'http://example.com' });
         });
 
@@ -266,27 +266,27 @@ describe('Identity', () => {
         let identity;
 
         beforeEach(() => {
-            fetch.mockClear()
+            fetch.mockClear();
             identity = new Identity({ clientId: 'foo', redirectUri: 'http://example.com' });
         });
 
         test('should work when we get a `result` from hasSession', async () => {
-            fetch.mockImplementation(() => ({ ok: true, json: async () => ({ result: true }) }));
+            fetch.mockImplementationOnce(() => ({ ok: true, json: async () => ({ result: true }) }));
             const v = await identity.isLoggedIn();
             expect(v).toBe(true);
-            fetch.mockImplementation(() => ({ ok: true, json: async () => ({ result: false }) }));
+            fetch.mockImplementationOnce(() => ({ ok: true, json: async () => ({ result: false }) }));
             const v2 = await identity.isLoggedIn();
             expect(v2).toBe(true);
         });
 
         test(`should fail when we don't get a 'result' from hasSession`, async () => {
-            fetch.mockImplementation(() => ({ ok: true, json: async () => ({}) }));
+            fetch.mockImplementationOnce(() => ({ ok: true, json: async () => ({}) }));
             const v = await identity.isLoggedIn();
             expect(v).toBe(false);
         });
 
         test(`should handle hasSession failure without throwing`, async () => {
-            fetch.mockImplementation(() => ({ ok: false, statusText: 'Blah!' }));
+            fetch.mockImplementationOnce(() => ({ ok: false, statusText: 'Blah!' }));
             const v = await identity.isLoggedIn();
             expect(v).toBe(false);
         });
@@ -297,27 +297,27 @@ describe('Identity', () => {
         let identity;
 
         beforeEach(() => {
-            fetch.mockClear()
+            fetch.mockClear();
             identity = new Identity({ clientId: 'foo', redirectUri: 'http://example.com' });
         });
 
         test('should work when we get a `result` from hasSession', async () => {
-            fetch.mockImplementation(() => ({ ok: true, json: async () => ({ result: true }) }));
+            fetch.mockImplementationOnce(() => ({ ok: true, json: async () => ({ result: true }) }));
             const v = await identity.isConnected();
             expect(v).toBe(true);
-            fetch.mockImplementation(() => ({ ok: true, json: async () => ({ result: false }) }));
+            fetch.mockImplementationOnce(() => ({ ok: true, json: async () => ({ result: false }) }));
             const v2 = await identity.isConnected();
             expect(v2).toBe(false);
         });
 
         test(`should fail when we don't get a 'result' from hasSession`, async () => {
-            fetch.mockImplementation(() => ({ ok: true, json: async () => ({}) }));
+            fetch.mockImplementationOnce(() => ({ ok: true, json: async () => ({}) }));
             const v = await identity.isConnected();
             expect(v).toBe(false);
         });
 
         test(`should handle hasSession failure without throwing`, async () => {
-            fetch.mockImplementation(() => ({ ok: false, statusText: 'Blah!' }));
+            fetch.mockImplementationOnce(() => ({ ok: false, statusText: 'Blah!' }));
             const v = await identity.isConnected();
             expect(v).toBe(false);
         });
