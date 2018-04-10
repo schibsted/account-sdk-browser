@@ -405,9 +405,6 @@ class Identity extends EventEmitter {
      */
     async getUser() {
         const user = await this.hasSession();
-        if (!isObject(user)) {
-            throw new SDKError('Could not get the user. Maybe not logged in to Schibsted?');
-        }
         if (!user.result) {
             throw new SDKError('The user is not connected to this merchant');
         }

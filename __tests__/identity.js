@@ -322,4 +322,35 @@ describe('Identity', () => {
             expect(v).toBe(false);
         });
     });
+
+    describe('getUser', () => {
+        const fetch = require('fetch-jsonp');
+        let identity;
+
+        beforeEach(() => {
+            fetch.mockClear();
+            identity = new Identity({ clientId: 'foo', redirectUri: 'http://example.com' });
+        });
+
+        test('should work when we get a `result` from hasSession', async () => {
+            const session = await identity.hasSession();
+            const user = await identity.getUser();
+            expect(user).toMatchObject(session);
+            expect(user).not.toBe(session); // should be cloned (not sure why, though..)
+        });
+
+        test(`should fail when we don't get a 'result' from hasSession`, async () => {
+            fetch.mockImplementationOnce(() => ({ ok: true, json: async () => ({}) }));
+            await expect(identity.getUser()).rejects.toMatchObject({
+                message: 'The user is not connected to this merchant'
+            });
+        });
+
+        test(`should propagate errors from HasSession call (why, though?)`, async () => {
+            fetch.mockImplementationOnce(() => ({ ok: false, statusText: 'Blah!' }));
+            await expect(identity.getUser()).rejects.toMatchObject({
+                message: 'HasSession failed'
+            });
+        });
+    });
 });
