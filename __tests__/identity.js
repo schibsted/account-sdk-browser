@@ -382,4 +382,33 @@ describe('Identity', () => {
             });
         });
     });
+
+    describe('getUserUuid', () => {
+        const fetch = require('fetch-jsonp');
+        let identity;
+
+        beforeEach(() => {
+            fetch.mockClear();
+            identity = new Identity({ clientId: 'foo', redirectUri: 'http://example.com' });
+        });
+
+        test(`should fail when we don't get a 'uuid' from hasSession`, async () => {
+            fetch.mockImplementationOnce(() => ({ ok: true, json: async () => ({}) }));
+            await expect(identity.getUserUuid()).rejects.toMatchObject({
+                message: 'The user is not connected to this merchant'
+            });
+        });
+
+        test(`should work when we get a 'uuid' from hasSession`, async () => {
+            fetch.mockImplementationOnce(() => ({ ok: true, json: async () => ({ uuid: '123' }) }));
+            await expect(identity.getUserUuid()).resolves.toBe('123');
+        });
+
+        test(`should propagate errors from HasSession call (why, though?)`, async () => {
+            fetch.mockImplementationOnce(() => ({ ok: false, statusText: 'Blah!' }));
+            await expect(identity.getUserUuid()).rejects.toMatchObject({
+                message: 'HasSession failed'
+            });
+        });
+    });
 });

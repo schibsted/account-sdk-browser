@@ -431,17 +431,17 @@ class Identity extends EventEmitter {
 
     /**
      * In Schibsted Account, there are two ways of identifying a user; the `userId` and the `uuid`.
-     * There are reasons for them both existing. The `uuid` is universally unique, and we recommend
-     * that you use that whenever that works for you. The `userId` is a numeric identifier, but
-     * since Schibsted Account is deployed separately in Norway and Sweden, there are a lot of
-     * duplicates. The `userId` was introduced early, so many sites still need to use them for
-     * legacy reasons
+     * There are reasons for them both existing. The `uuid` is universally unique, and might be
+     * recommended for all use at a future time. The `userId` is a numeric identifier, but since
+     * Schibsted Account is deployed separately in Norway and Sweden, there are a lot of duplicates
+     * in these two environments. The `userId` was introduced early, so many sites still need to use
+     * them for legacy reasons
      * @throws {SDKError} If the user isn't connected to the merchant
      * @return {string} The `uuid` field (not to be confused with the `userId`)
      */
-    async getUserUuidId() {
+    async getUserUuid() {
         const user = await this.hasSession();
-        if (isObject(user)) {
+        if (user.uuid) {
             return user.uuid;
         }
         throw new SDKError('The user is not connected to this merchant');
