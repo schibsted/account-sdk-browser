@@ -245,5 +245,22 @@ describe('Identity', () => {
                 expect(document.cookie).toBe('SP_ID=abc');
             });
         });
+
+        test('should never cache if caching is off', async () => {
+            identity._enableSessionCaching = false;
+            await identity.hasSession();
+            await identity.hasSession();
+
+            // two calls per hasSession() invocation, since our mock is set up this way
+            expect(fetch.mock.calls.length).toBe(4);
+        });
+
+        test('should use cached value on subsequent calls by default', async () => {
+            await identity.hasSession();
+            await identity.hasSession();
+
+            // two calls per hasSession() invocation, since our mock is set up this way
+            expect(fetch.mock.calls.length).toBe(2);
+        });
     });
 });
