@@ -450,17 +450,14 @@ class Identity extends EventEmitter {
     /**
      * This is how we identify the current visitor whether logged in or not.
      * The unique visitor id can be used to track the user for analytics (Mixpanel).
-     * @return {Promise}
+     * @return {string}
      */
-    getVisitorId() {
-        return this.hasSession()
-            .then(user => user.visitor.uid)
-            .catch(data => {
-                if (data.response && data.response.visitor) {
-                    return data.response.visitor.uid;
-                }
-                throw data.error;
-            });
+    async getVisitorId() {
+        const user = await this.hasSession()
+        if (user.visitor && user.visitor.uid) {
+            return user.visitor.uid;
+        }
+        throw new SDKError('No visitor id available for this user');
     }
 
     /**

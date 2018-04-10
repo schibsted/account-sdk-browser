@@ -411,4 +411,34 @@ describe('Identity', () => {
             });
         });
     });
+
+    describe('getVisitorId', () => {
+        const fetch = require('fetch-jsonp');
+        let identity;
+
+        beforeEach(() => {
+            fetch.mockClear();
+            identity = new Identity({ clientId: 'foo', redirectUri: 'http://example.com' });
+        });
+
+        test(`should fail when we don't get a 'visitor' from hasSession`, async () => {
+            fetch.mockImplementationOnce(() => ({ ok: true, json: async () => ({}) }));
+            await expect(identity.getVisitorId()).rejects.toMatchObject({
+                message: 'No visitor id available for this user'
+            });
+        });
+
+        test(`should work when we get a 'visitor' from hasSession`, async () => {
+            fetch.mockImplementationOnce(() =>
+                ({ ok: true, json: async () => ({ visitor: { uid: '123' } }) }));
+            await expect(identity.getVisitorId()).resolves.toBe('123');
+        });
+
+        test(`should propagate errors from HasSession call (why, though?)`, async () => {
+            fetch.mockImplementationOnce(() => ({ ok: false, statusText: 'Blah!' }));
+            await expect(identity.getVisitorId()).rejects.toMatchObject({
+                message: 'HasSession failed'
+            });
+        });
+    });
 });
