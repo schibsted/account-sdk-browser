@@ -14,4 +14,14 @@ describe('SDKError', () => {
         // expect(e.toString()).toBe('SDKError: foo\n    bar: baz');
         expect(e.toString()).toMatch(/SDKError: foo/);
     });
+
+    test('Should be able to stringify an error with params by explicit function invocation', () => {
+        const e = new SDKError('foo', { bar: 'baz' });
+        expect(SDKError.prototype.toString.call(e)).toMatch(/SDKError: foo\n {4}bar: baz/);
+    });
+
+    test('Should be able to stringify an error by explicit function invocation', () => {
+        const e = new SDKError('foo');
+        expect(SDKError.prototype.toString.call(e)).toMatch(/SDKError: foo/);
+    });
 });

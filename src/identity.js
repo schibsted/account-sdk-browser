@@ -105,7 +105,7 @@ class Identity extends EventEmitter {
         this._sessionInitiatedSent = false;
         this.window = window;
         this.clientId = clientId;
-        this.cache = new Cache(window && window.localStorage);
+        this._initCache();
         this.redirectUri = redirectUri;
         this.log = log;
 
@@ -269,11 +269,21 @@ class Identity extends EventEmitter {
     }
 
     /**
+     * Create a fresh cache for this instance
+     * @private
+     * @returns {void}
+     */
+    _initCache() {
+        this.cache = new Cache(this.window && this.window.localStorage);
+    }
+
+    /**
      * Set the Varnish cookie (`SP_ID`) when hasSession() is called.
      * @returns {void}
      */
     enableVarnishCookie() {
         this.setVarnishCookie = true;
+        this._initCache();
     }
 
     /**
@@ -286,21 +296,21 @@ class Identity extends EventEmitter {
         if (!this.setVarnishCookie) {
             return;
         }
-        var date = new Date();
+        const date = new Date();
         if (typeof sessionData.expiresIn === 'number' && sessionData.expiresIn > 0) {
             date.setTime(date.getTime() + (sessionData.expiresIn * 1000));
         } else {
             date.setTime(0);
         }
         // If the domain is missing or of the wrong type, we'll use document.domain
-        if (typeof sessionData.baseDomain !== 'string') {
-            sessionData.baseDomain = document.domain;
-        }
-        var cookie = [
+        const domain = (typeof sessionData.baseDomain === 'string')
+            ? sessionData.baseDomain
+            : (document.domain || '');
+        const cookie = [
             `SP_ID=${sessionData.sp_id}`,
             `expires=${date.toUTCString()}`,
             `path=/`,
-            `domain=.${sessionData.baseDomain}`
+            `domain=.${domain}`
         ].join('; ');
         document.cookie = cookie;
     }
@@ -395,9 +405,6 @@ class Identity extends EventEmitter {
      */
     async getUser() {
         const user = await this.hasSession();
-        if (!isObject(user)) {
-            throw new SDKError('Could not get the user. Maybe not logged in to Schibsted?');
-        }
         if (!user.result) {
             throw new SDKError('The user is not connected to this merchant');
         }
@@ -416,7 +423,7 @@ class Identity extends EventEmitter {
      */
     async getUserId() {
         const user = await this.hasSession();
-        if (isObject(user)) {
+        if (user.userId) {
             return user.userId;
         }
         throw new SDKError('The user is not connected to this merchant');
@@ -424,17 +431,17 @@ class Identity extends EventEmitter {
 
     /**
      * In Schibsted Account, there are two ways of identifying a user; the `userId` and the `uuid`.
-     * There are reasons for them both existing. The `uuid` is universally unique, and we recommend
-     * that you use that whenever that works for you. The `userId` is a numeric identifier, but
-     * since Schibsted Account is deployed separately in Norway and Sweden, there are a lot of
-     * duplicates. The `userId` was introduced early, so many sites still need to use them for
-     * legacy reasons
+     * There are reasons for them both existing. The `uuid` is universally unique, and might be
+     * recommended for all use at a future time. The `userId` is a numeric identifier, but since
+     * Schibsted Account is deployed separately in Norway and Sweden, there are a lot of duplicates
+     * in these two environments. The `userId` was introduced early, so many sites still need to use
+     * them for legacy reasons
      * @throws {SDKError} If the user isn't connected to the merchant
      * @return {string} The `uuid` field (not to be confused with the `userId`)
      */
-    async getUserUuidId() {
+    async getUserUuid() {
         const user = await this.hasSession();
-        if (isObject(user)) {
+        if (user.uuid) {
             return user.uuid;
         }
         throw new SDKError('The user is not connected to this merchant');
@@ -443,30 +450,27 @@ class Identity extends EventEmitter {
     /**
      * This is how we identify the current visitor whether logged in or not.
      * The unique visitor id can be used to track the user for analytics (Mixpanel).
-     * @return {Promise}
+     * @return {string}
      */
-    getVisitorId() {
-        return this.hasSession()
-            .then(user => user.visitor.uid)
-            .catch(data => {
-                if (data.response && data.response.visitor) {
-                    return data.response.visitor.uid;
-                }
-                throw data.error;
-            });
+    async getVisitorId() {
+        const user = await this.hasSession()
+        if (user.visitor && user.visitor.uid) {
+            return user.visitor.uid;
+        }
+        throw new SDKError('No visitor id available for this user');
     }
 
     /**
      * Retrieve the sp_id (Varnish ID)
      * @todo Is this an accurate description?
-     * @return {string|undefined} - The sp_id string or undefined (if the server didn't return it)
+     * @return {string|null} - The sp_id string or null (if the server didn't return it)
      */
     async getSpId() {
         try {
             const user = await this.hasSession();
-            return user.sp_id;
+            return user.sp_id || null;
         } catch (_) {
-            return undefined;
+            return null;
         }
     }
 

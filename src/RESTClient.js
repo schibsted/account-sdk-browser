@@ -80,12 +80,12 @@ class RESTClient {
 
         this.defaultParams = defaultParams;
 
-        if (log !== undefined) {
+        if (log) {
             assert(isFunction(log), `log must be a function but it is ${log}`);
             this.log = log;
         }
 
-        if (fetch !== undefined) {
+        if (fetch) {
             assert(isFunction(fetch), 'Fetch should be a function');
             this.fetch = fetch;
         }

@@ -36,7 +36,7 @@ function cloneDefined(...sources) {
         assert(isObject(src));
         if (isNonEmptyObj(src)) {
             Object.entries(src).forEach(([key, val]) => {
-                if (val !== undefined ) {
+                if (val !== undefined ) { // eslint-disable-line no-undefined
                     dest[key] = isObject(val) ? cloneDeep(val) : val;
                 }
             });

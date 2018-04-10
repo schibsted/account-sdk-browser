@@ -9,14 +9,12 @@ env:
     mocha: true
     es6: true
 rules:
-    no-undefined: off
-    no-var: off
+    no-undefined: error
+    no-var: error
     indent:
       - warn
       - 4
-    no-unused-vars:
-      - error
-      - argsIgnorePattern: next
+    no-unused-vars: error
     require-jsdoc:
       - warn
       - require:
@@ -29,8 +27,3 @@ rules:
       - warn
       - requireParamDescription: false
         requireReturnDescription: false
-    max-nested-callbacks:
-      - error
-      - 5
-    camelcase: off
-    padded-blocks: off

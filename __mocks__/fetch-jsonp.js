@@ -106,8 +106,6 @@ const mockSPiDProductMissing = {
     result: false
 };
 
-const mockFn = jest.fn().mockImplementation(mock);
-
 const mock = async (url) => {
     const { pathname, searchParams: search } = new URL(url);
     const autologin = search.get('autologin');
@@ -157,6 +155,6 @@ const mock = async (url) => {
     return { statusText: `Unimplemented mock response for url: '${url}'` };
 }
 
-mockFn.mockImplementation(mock);
+const mockFn = jest.fn().mockImplementation(mock);
 
 module.exports = mockFn;
