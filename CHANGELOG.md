@@ -1,5 +1,24 @@
 # Changelog
 
+## v3.0.0-rc.0 (2018-04-10)
+
+### Breaking changes
+
+* The function `Identity.getUserUuidId` is renamed to `Identity.getUserUuid`. This was a typo in the
+  previous function name that was not detected until now :-/
+* The function `Identity.getSpId` now returns `string|null` instead of `string|undefined`.
+
+### Fixes
+
+* The Identity class now clears its internal cache if `enableVarnishCookie()` is called. Previously,
+  calling `hasSession` after calling `enableVarnishCookie` would re-use any cached value and thus
+  skip setting the varnish cookie.
+
+### Changes
+
+* The function `Identity.getVisitorId` is now marked `async` in the codebase. It always returned a
+  Promise, so functionally it does the same as before. Syntax has just been modernised.
+
 ## v3.0.0-beta.7 (2018-04-03)
 
 ### Fixes
