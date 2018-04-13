@@ -4,13 +4,11 @@
 
 'use strict';
 
-const validate = require('../src/validate');
+import { isStr, isNonEmptyString, isObject, isNonEmptyObj } from '../src/validate';
 
 describe('validate', () => {
 
     describe('isStr()', () => {
-
-        const { isStr, isNonEmptyString } = validate;
 
         test('returns false for non strings', () => {
             expect(isStr()).toBe(false);
@@ -37,9 +35,6 @@ describe('validate', () => {
     });
 
     describe('isObject()', () => {
-
-        const { isObject } = validate;
-
         test('returns false for non-object values', () => {
             expect(isObject()).toBe(false);
             expect(isObject(1)).toBe(false);
@@ -62,8 +57,6 @@ describe('validate', () => {
     });
 
     describe('isNonEmptyObj()', () => {
-
-        const { isNonEmptyObj } = validate;
 
         test('returns false for non-object values', () => {
             expect(isNonEmptyObj()).toBe(false);

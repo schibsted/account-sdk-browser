@@ -4,7 +4,7 @@
 
 'use strict';
 
-const Payment = require('../payment');
+import { Payment } from '../payment';
 
 describe('Payment', () => {
 

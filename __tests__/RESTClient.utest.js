@@ -5,7 +5,7 @@
 'use strict';
 
 const { ENDPOINTS } = require('../src/config');
-let RESTClient = require('../src/RESTClient');
+let { RESTClient } = require('../src/RESTClient');
 
 describe('RESTClient', () => {
     test('has the REST methods for get and go', () => {
@@ -26,7 +26,7 @@ describe('RESTClient', () => {
             }
         };
         jest.resetModuleRegistry();
-        RESTClient = require('../src/RESTClient');
+        ({ RESTClient } = require('../src/RESTClient'));
         const restClient = new RESTClient({
             serverUrl: 'DEV',
             envDic: ENDPOINTS.SPiD,

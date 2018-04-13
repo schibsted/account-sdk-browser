@@ -9,8 +9,8 @@
  * @private
  */
 
-const { assert, isObject, isNonEmptyObj } = require('./validate');
-const SDKError = require('./SDKError');
+import { assert, isObject, isNonEmptyObj } from './validate';
+import SDKError from './SDKError';
 
 /**
  * Similar to Object.assign({}, src) but only clones the keys of an object that have non-undefined
@@ -27,7 +27,7 @@ const SDKError = require('./SDKError');
  * @return {object} a new object that is similar to src with all the key/values where the
  *         keys for undefined values are removed.
  */
-function cloneDefined(...sources) {
+export function cloneDefined(...sources) {
     const dest = {};
     if (!(sources && sources.length)) {
         throw new SDKError('No objects to clone');
@@ -53,9 +53,7 @@ function cloneDefined(...sources) {
  * @throws {SDKError} - if the obj is not an accepted type or is not
  *         stringifiable by JSON for example if it has loops
  */
-function cloneDeep(obj) {
+export function cloneDeep(obj) {
     assert(typeof obj === 'object', `obj should be an object (even null) but it is ${obj}`);
     return JSON.parse(JSON.stringify(obj)) || obj;
 }
-
-module.exports = { cloneDefined, cloneDeep };

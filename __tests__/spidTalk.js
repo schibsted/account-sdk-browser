@@ -2,7 +2,7 @@
  * See LICENSE.md in the project root.
  */
 
-const spidTalk = require('../src/spidTalk');
+import * as spidTalk from '../src/spidTalk';
 
 describe('spidTalk', () => {
     test('should be able to call response function', () => {

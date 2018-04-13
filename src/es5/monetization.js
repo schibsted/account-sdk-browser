@@ -4,6 +4,6 @@
 
 'use strict';
 
-require('regenerator-runtime/runtime');
+import 'regenerator-runtime/runtime';
 
-module.exports = require('../monetization');
+export { Monetization } from '../../monetization';

@@ -4,10 +4,10 @@
 
 'use strict';
 
-const SDKError = require('./SDKError');
-const { cloneDefined } = require('./object');
-const { urlMapper } = require('./url');
-const { assert, isObject, isFunction, isStr, isNonEmptyString } = require('./validate');
+import SDKError from './SDKError';
+import { cloneDefined } from './object';
+import { urlMapper } from './url';
+import { assert, isObject, isFunction, isStr, isNonEmptyString } from './validate';
 
 /**
  * Converts a series of parameters of various types to a string that's suitable for logging.
@@ -58,7 +58,7 @@ const globalFetch = window.fetch && window.fetch.bind(window);
  * @memberof core
  * @private
  */
-class RESTClient {
+export class RESTClient {
 
     /**
      * @param {object} options
@@ -184,4 +184,4 @@ class RESTClient {
     }
 }
 
-module.exports = RESTClient;
+export default RESTClient;

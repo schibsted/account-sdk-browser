@@ -4,8 +4,6 @@
 
 'use strict';
 
-const Identity = require('./identity');
-const Monetization = require('./monetization');
-const Payment = require('./payment');
-
-module.exports = { Identity, Monetization, Payment };
+export * from './identity.js';
+export * from './monetization.js';
+export * from './payment.js';

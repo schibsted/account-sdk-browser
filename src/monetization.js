@@ -4,13 +4,13 @@
 
 'use strict';
 
-const { assert, isStr, isNonEmptyString, isUrl } = require('./validate');
-const { urlMapper } = require('./url');
-const { ENDPOINTS } = require('./config');
-const EventEmitter = require('tiny-emitter');
-const JSONPClient = require('./JSONPClient');
-const Cache = require('./cache');
-const spidTalk = require('./spidTalk');
+import { assert, isStr, isNonEmptyString, isUrl } from './validate';
+import { urlMapper } from './url';
+import { ENDPOINTS } from './config';
+import EventEmitter from 'tiny-emitter';
+import JSONPClient from './JSONPClient';
+import Cache from './cache';
+import * as spidTalk from './spidTalk';
 
 const DEFAULT_CACHE_EXPIRES_IN = 30;
 const globalWindow = window;
@@ -18,7 +18,7 @@ const globalWindow = window;
 /**
  * Provides features related to monetization
  */
-class Monetization extends EventEmitter {
+export class Monetization extends EventEmitter {
     /**
      * @param {object} options
      * @param {string} options.clientId - Mandatory client id
@@ -125,4 +125,4 @@ class Monetization extends EventEmitter {
     }
 }
 
-module.exports = Monetization;
+export default Monetization;

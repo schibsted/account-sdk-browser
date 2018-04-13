@@ -70,4 +70,6 @@ const config = {
     JSONP: { TIMEOUT: 7000 }, // ms
 }
 
-module.exports = config;
+export default config;
+export const ENDPOINTS = config.ENDPOINTS;
+export const JSONP = config.JSONP;

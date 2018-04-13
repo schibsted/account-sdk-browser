@@ -4,7 +4,7 @@
 
 'use strict';
 
-const Monetization = require('../monetization');
+import Monetization from '../monetization';
 
 describe('Monetization', () => {
 

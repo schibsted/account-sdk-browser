@@ -18,7 +18,7 @@ function stringify(search) {
  * @param {string} second - the second url
  * @return {Array} - returns the URL objects that are made from first and second
  */
-function compareUrls(first, second) {
+export function compareUrls(first, second) {
     const firstUrl = new URL(first);
     const secondUrl = new URL(second);
     expect(firstUrl).toBeDefined();
@@ -43,10 +43,8 @@ function compareUrls(first, second) {
  * @param {string} second - the second url
  * @return {void}
  */
-function compareUrlsStrict(first, second) {
+export function compareUrlsStrict(first, second) {
     const [firstUrl, secondUrl] = compareUrls(first, second);
     expect(firstUrl.href).toBe(secondUrl.href);
     expect(firstUrl.search).toBe(secondUrl.search);
 }
-
-module.exports = { compareUrls, compareUrlsStrict };

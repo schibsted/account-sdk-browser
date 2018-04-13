@@ -4,8 +4,8 @@
 
 'use strict';
 
-const { ENDPOINTS, JSONP } = require('../src/config');
-const JSONPClient = require('../src/JSONPClient');
+import { ENDPOINTS, JSONP } from '../src/config';
+import JSONPClient from '../src/JSONPClient';
 
 describe('JSONPClient', () => {
     test('Should have a default timeout', () => {
