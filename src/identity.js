@@ -493,12 +493,12 @@ class Identity extends EventEmitter {
      * scope is allowed, while `invalid_scope` is returned when the client asks for a scope you
      * aren’t allowed to request.
      * @see https://tools.ietf.org/html/rfc6749#section-3.3
-     * @param {string} [options.redirectUri] - Redirect uri that will receive the code. Must exactly
-     * match a redirectUri from your client in self-service
+     * @param {string} [options.redirectUri=this.redirectUri] - Redirect uri that will receive the
+     * code. Must exactly match a redirectUri from your client in self-service
      * @param {boolean} [options.preferPopup=false] - Should we try to open a popup window?
      * @param {boolean} [options.newFlow=true] - Should we try the new GDPR-safe flow or the
      * legacy/stable SPiD flow?
-     * @param {string} [loginHint=''] - user email hint
+     * @param {string} [options.loginHint=''] - user email hint
      * @return {Window|null} - Reference to popup window if created (or `null` otherwise)
      */
     login({
