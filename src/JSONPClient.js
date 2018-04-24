@@ -4,17 +4,17 @@
 
 'use strict';
 
-const { cloneDefined } = require('./object');
-const RESTClient = require('./RESTClient');
-const config = require('./config');
-const fetch = require('fetch-jsonp');
+import { cloneDefined } from './object';
+import RESTClient from './RESTClient';
+import config from './config';
+import fetch from 'fetch-jsonp';
 
 /**
  * To enable communication with JSONP endpoints
  * @memberof core
  * @private
  */
-class JSONPClient extends RESTClient {
+export default class JSONPClient extends RESTClient {
     /**
      * @param {object} options - See the `options` parameter of {@link RESTClient#constructor}
      * @param {number} [options.timeout=7000] - Timeout for fetch requests in milliseconds
@@ -45,5 +45,3 @@ class JSONPClient extends RESTClient {
         return super.go(Object.assign({ fetchOptions }, options));
     }
 }
-
-module.exports = JSONPClient;

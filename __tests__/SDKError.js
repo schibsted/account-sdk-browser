@@ -4,7 +4,7 @@
 
 'use strict';
 
-const SDKError = require('../src/SDKError');
+import SDKError from '../src/SDKError';
 
 describe('SDKError', () => {
     test('Should be able to stringify an error', () => {

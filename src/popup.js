@@ -2,8 +2,8 @@
  * See LICENSE.md in the project root.
  */
 
-const { assert, isObject, isUrl } = require('./validate');
-const { cloneDefined } = require('./object');
+import { assert, isObject, isUrl } from './validate';
+import { cloneDefined } from './object';
 
 /**
  * Serializes an object to string.
@@ -37,7 +37,7 @@ const defaultWindowFeatures = {
  * @returns {Window|null} - A reference to the popup window
  * @private
  */
-function open(parentWindow, url, windowName = '', windowFeatures) {
+export function open(parentWindow, url, windowName = '', windowFeatures) {
     assert(isObject(parentWindow), `window was supposed to be an object but it is ${parentWindow}`);
     assert(isUrl(url), 'Invalid URL for popup');
 
@@ -53,5 +53,3 @@ function open(parentWindow, url, windowName = '', windowFeatures) {
     const features = serialize(mergedFeatures);
     return parentWindow.open(url, windowName, features);
 }
-
-module.exports = { open };

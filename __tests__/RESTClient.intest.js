@@ -4,9 +4,9 @@
 
 'use strict';
 
-const fetch = require('node-fetch');
-const RESTClient = require('../src/RESTClient');
-const config = require('../src/config');
+import fetch from 'node-fetch';
+import RESTClient from '../src/RESTClient';
+import config from '../src/config';
 
 describe('RESTClient', () => {
 

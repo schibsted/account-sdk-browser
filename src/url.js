@@ -4,7 +4,7 @@
 
 'use strict'
 
-const { assert, isNonEmptyString, isUrl, isNonEmptyObj } = require('./validate');
+import { assert, isNonEmptyString, isUrl, isNonEmptyObj } from './validate';
 
 /**
  * A simple utility function that allows looking up URLs from a dictionary
@@ -15,7 +15,7 @@ const { assert, isNonEmptyString, isUrl, isNonEmptyObj } = require('./validate')
  * @throws {SDKError} - If the url is not an string or is an empty string
  * @return {string} The url that points to the server
  */
-function urlMapper(url, urlMap) {
+export function urlMapper(url, urlMap) {
     if (isUrl(url, 'hostname')) {
         return url;
     }
@@ -25,5 +25,3 @@ function urlMapper(url, urlMap) {
     assert(isUrl(resultUrl, 'hostname'), `The urlMap object does not have a url for ${url}`);
     return resultUrl;
 }
-
-module.exports = { urlMapper };

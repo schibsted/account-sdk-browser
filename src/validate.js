@@ -4,7 +4,7 @@
 
 'use strict';
 
-const SDKError = require('./SDKError');
+import SDKError from './SDKError';
 
 /*
  * This module defines a set of validation functions which are used in the rest of the SDK.
@@ -22,7 +22,7 @@ const SDKError = require('./SDKError');
  * @throws {SDKError} - If the condition is falsy it throws the appropriate error
  * @return {void}
  */
-function assert(condition, message = 'Assertion failed') {
+export function assert(condition, message = 'Assertion failed') {
     if (!condition) {
         throw new SDKError(message);
     }
@@ -34,7 +34,7 @@ function assert(condition, message = 'Assertion failed') {
  * @param {*} value - The value to check
  * @return {boolean}
  */
-function isStr(value) {
+export function isStr(value) {
     return typeof value === 'string';
 }
 
@@ -44,7 +44,7 @@ function isStr(value) {
  * @param {*} value - The value to check
  * @return {boolean}
  */
-function isNonEmptyString(value) {
+export function isNonEmptyString(value) {
     return typeof value === 'string' && value.length > 0;
 }
 
@@ -54,7 +54,7 @@ function isNonEmptyString(value) {
  * @param {*} value - The value to check
  * @return {boolean}
  */
-function isObject(value) {
+export function isObject(value) {
     return typeof value === 'object' && value !== null;
 }
 
@@ -64,7 +64,7 @@ function isObject(value) {
  * @param {*} value - The value to check
  * @return {boolean}
  */
-function isNonEmptyObj(value) {
+export function isNonEmptyObj(value) {
     return isObject(value) && Object.keys(value).length > 0;
 }
 
@@ -76,7 +76,7 @@ function isNonEmptyObj(value) {
  * URL object
  * @return {boolean}
  */
-function isUrl(value, ...mandatoryFields) {
+export function isUrl(value, ...mandatoryFields) {
     try {
         const parsedUrl = new URL(value);
         return mandatoryFields.every(f => parsedUrl[f]);
@@ -92,7 +92,7 @@ function isUrl(value, ...mandatoryFields) {
  * @param {*} value - The value to check
  * @return {boolean}
  */
-function isFunction(value) {
+export function isFunction(value) {
     return typeof value === 'function';
 }
 
@@ -105,7 +105,7 @@ function isFunction(value) {
  * @param {boolean} [caseSensitive=false] - Should the check be case sensitive
  * @return {boolean}
  */
-function isStrIn(value, possibilities, caseSensitive = false) {
+export function isStrIn(value, possibilities, caseSensitive = false) {
     const _isSameStrCaseInsensitive = str => // eslint-disable-line require-jsdoc
         isStr(str) && value.toUpperCase() === str.toUpperCase();
     if (!(isStr(value) && Array.isArray(possibilities))) {
@@ -116,7 +116,3 @@ function isStrIn(value, possibilities, caseSensitive = false) {
     }
     return possibilities.some(_isSameStrCaseInsensitive);
 }
-
-module.exports = {
-    assert, isObject, isNonEmptyObj, isUrl, isFunction, isStrIn, isStr, isNonEmptyString
-};

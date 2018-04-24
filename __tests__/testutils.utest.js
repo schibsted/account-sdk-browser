@@ -2,7 +2,7 @@
  * See LICENSE.md in the project root.
  */
 
-const testUtils = require('../utils/testutils');
+import * as testUtils from '../utils/testutils';
 
 describe('testutils', () => {
     describe('equal', () => {

@@ -2,4 +2,4 @@
  * See LICENSE.md in the project root.
  */
 
-module.exports = require('./src/identity');
+export { default, Identity } from './src/identity.js';

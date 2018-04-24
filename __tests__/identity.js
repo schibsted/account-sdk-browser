@@ -4,13 +4,14 @@
 
 'use strict';
 
-const Identity = require('../src/identity');
-const { URL } = require('url');
+import Identity from '../identity';
+import { URL } from 'url';
+import { URL as u } from 'whatwg-url';
 
 describe('Identity', () => {
 
     beforeAll(() => {
-        global.URL = require('whatwg-url').URL;
+        global.URL = u;
     });
 
     describe('constructor()', () => {

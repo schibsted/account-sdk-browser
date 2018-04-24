@@ -4,7 +4,7 @@
 
 'use strict';
 
-const SDKError = require('./SDKError');
+import SDKError from './SDKError';
 
 /**
  * Check whether we are able to use web storage
@@ -67,7 +67,7 @@ class LiteralCache {
  * Cache class that attempts WebStorage (session/local storage), and falls back to JS object literal
  * @private
  */
-class Cache {
+export default class Cache {
     /**
      * @param {Storage} [store] - A reference to either `sessionStorage` or `localStorage` from a
      * `Window` object
@@ -136,5 +136,3 @@ class Cache {
         }
     }
 }
-
-module.exports = Cache;

@@ -4,9 +4,9 @@
 
 'use strict';
 
-const { URL } = require('whatwg-url');
-const { urlMapper } = require('../src/url');
-const RESTClient = require('../src/RESTClient');
+import { URL } from 'whatwg-url';
+import { urlMapper } from '../src/url';
+import RESTClient from '../src/RESTClient';
 
 describe('url', () => {
 

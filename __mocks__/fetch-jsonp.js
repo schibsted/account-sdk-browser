@@ -1,4 +1,4 @@
-const { URL } = require('url');
+import { URL } from 'url';
 
 const mockHasSessionLoginRequired = {
     error: {

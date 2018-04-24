@@ -2,4 +2,4 @@
  * See LICENSE.md in the project root.
  */
 
-module.exports = require('./src/monetization');
+export { default, Monetization } from './src/monetization.js';

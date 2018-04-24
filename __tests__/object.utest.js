@@ -4,7 +4,7 @@
 
 'use strict';
 
-const { cloneDefined, cloneDeep } = require('../src/object');
+import { cloneDefined, cloneDeep } from '../src/object';
 
 describe('object', () => {
 

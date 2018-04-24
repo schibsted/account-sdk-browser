@@ -4,7 +4,7 @@
 
 'use strict';
 
-const Cache = require('../src/cache');
+import Cache from '../src/cache';
 
 const webStorageMock = () => {
     const mock = {

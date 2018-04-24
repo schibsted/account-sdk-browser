@@ -4,17 +4,17 @@
 
 'use strict';
 
-const { assert, isStr, isNonEmptyString, isObject, isUrl, isStrIn } = require('./validate');
-const { cloneDeep } = require('./object');
-const { urlMapper } = require('./url');
-const { ENDPOINTS } = require('./config');
-const EventEmitter = require('tiny-emitter');
-const JSONPClient = require('./JSONPClient');
-const Cache = require('./cache');
-const popup = require('./popup');
-const RESTClient = require('./RESTClient');
-const SDKError = require('./SDKError');
-const spidTalk = require('./spidTalk');
+import { assert, isStr, isNonEmptyString, isObject, isUrl, isStrIn } from './validate';
+import { cloneDeep } from './object';
+import { urlMapper } from './url';
+import { ENDPOINTS } from './config';
+import EventEmitter from 'tiny-emitter';
+import JSONPClient from './JSONPClient';
+import Cache from './cache';
+import * as popup from './popup';
+import RESTClient from './RESTClient';
+import SDKError from './SDKError';
+import * as spidTalk from './spidTalk';
 
 /**
  * @typedef {object} Identity#HasSessionSuccessResponse
@@ -85,7 +85,7 @@ function inspect(thing) {
 /**
  * Provides Identity functionalty to a web page
  */
-class Identity extends EventEmitter {
+export class Identity extends EventEmitter {
     /**
      * @param {object} options
      * @param {string} options.clientId - Example: "1234567890abcdef12345678"
@@ -690,4 +690,4 @@ class Identity extends EventEmitter {
     }
 }
 
-module.exports = Identity;
+export default Identity;

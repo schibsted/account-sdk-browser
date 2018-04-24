@@ -4,20 +4,20 @@
 
 'use strict';
 
-const { assert, isNonEmptyString, isUrl, isStr } = require('./validate');
-const { urlMapper } = require('./url');
-const { ENDPOINTS } = require('./config');
-const JSONPClient = require('./JSONPClient');
-const popup = require('./popup');
-const RESTClient = require('./RESTClient');
-const spidTalk = require('./spidTalk');
+import { assert, isNonEmptyString, isUrl, isStr } from './validate';
+import { urlMapper } from './url';
+import { ENDPOINTS } from './config';
+import JSONPClient from './JSONPClient';
+import * as popup from './popup';
+import RESTClient from './RESTClient';
+import * as spidTalk from './spidTalk';
 
 const globalWindow = window;
 
 /**
  * Provides features related to payment
  */
-class Payment {
+export class Payment {
     /**
      * @param {object} options
      * @param {string} options.clientId - Mandatory client id
@@ -177,4 +177,4 @@ class Payment {
     }
 }
 
-module.exports = Payment;
+export default Payment;

@@ -18,7 +18,7 @@ const STRINGIFY_TYPES = ['boolean', 'number', 'string'];
  * @summary When the SDK throws an error, it's supposed to be an instance of this class
  * @private
  */
-class SDKError extends Error {
+export default class SDKError extends Error {
     /**
      * @property {number} code - The HTTP error code
      * @extends {Error}
@@ -48,5 +48,3 @@ class SDKError extends Error {
         return additionalInfo ? `${ret}\n${additionalInfo}` : ret;
     }
 }
-
-module.exports = SDKError;

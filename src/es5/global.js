@@ -8,12 +8,10 @@
 
 'use strict';
 
-require('regenerator-runtime/runtime');
+import 'regenerator-runtime/runtime';
 
-const Identity = require('../../identity');
-const Monetization = require('../../monetization');
-const Payment = require('../../payment');
+import Identity from '../../identity';
+import Monetization from '../../monetization';
+import Payment from '../../payment';
 
-window.Identity = Identity;
-window.Monetization = Monetization;
-window.Payment = Payment;
+Object.assign(window, { Identity, Monetization, Payment });

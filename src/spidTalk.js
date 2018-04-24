@@ -9,7 +9,7 @@
  * @private
  */
 
-const { isFunction } = require('./validate');
+import { isFunction } from './validate';
 
 /**
  * This is a workaround for making the old SPiD/hassess on JSONP APIs compatible with more common
@@ -28,7 +28,7 @@ const { isFunction } = require('./validate');
  *        be omitted.
  * @return {void}
  */
-function emulate(global) {
+export function emulate(global) {
     if (global.SPiD === null || typeof global.SPiD !== 'object') {
         global.SPiD = {};
     }
@@ -39,5 +39,3 @@ function emulate(global) {
         global.SPiD.Talk.response = (callbackName, data) => global[callbackName](data);
     }
 }
-
-module.exports = { emulate };

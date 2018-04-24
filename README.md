@@ -14,16 +14,17 @@ products and subscriptions, etc.
 ## Getting started
 
 1. Do `npm install --save @schibsted/account-sdk-browser`
-1. Use this library as you would any other npm module (`const schAccount =
-   require('@schibsted/account-sdk-browser')` for instance)
-   1. It's possible to `require('@schibsted/account-sdk-browser/identity')` or `/monetization'` or
-      `/payment'` if you don't need all of it, and you wish to reduce the size of included code on
-      your site.
+1. Use this library as you would any other npm module: `import { Identity, Monetization, Payment }
+   from '@schibsted/account-sdk-browser'`
+   1. If you use the CommonJS `require` syntax and you both want to reduce the size of your
+      JavaScript bundle **and** don't need all of Identity, Monetization and Payment modules from
+      this SDK — it's possible to `require('@schibsted/account-sdk-browser/identity')` (note the
+      `/identity` at the end) or `/monetization'` or `/payment'`
 1. Build your site as you prefer. This library uses modern JavaScript syntax (including async/await
    and other ES2017 features) by default. We recommend that you do any transpilation yourself for
    the browser versions you need to cater to. But — if needed, you can replace
    `/account-sdk-browser` with `/account-sdk-browser/es5` if you want to opt-in to our babelified
-   versions.
+   versions
 
 ## Upgrading from 2.x
 
@@ -89,7 +90,7 @@ Let's start with a bit of example code:
 #### Example
 
 ```javascript
-const Identity = require('@schibsted/account-sdk-browser/identity')
+import { Identity } from '@schibsted/account-sdk-browser'
 
 const identity = new Identity({
     clientId: '56e9a5d1eee0000000000000',
@@ -98,7 +99,7 @@ const identity = new Identity({
 })
 
 async function whenSiteLoaded() {
-    const loginContainer = document.getElementById('login-container');
+    const loginContainer = document.getElementById('login-container')
     if (await identity.isLoggedIn()) {
         const user = await identity.getUser()
         const span = document.createElement('span')
@@ -185,22 +186,22 @@ asynchronously.
 #### Example
 
 ```javascript
-const Monetization = require('@schibsted/account-sdk-browser/monetization');
+import { Monetization } from '@schibsted/account-sdk-browser'
 
 const monetization = new Monetization({
     clientId: '56e9a5d1eee0000000000000',
     redirectUri: 'https://awesomenews.site', // ensure it's listed in selfservice
     env: 'PRE', // Schibsted Account env. A url or a special key: 'PRE', 'PRO' or 'PRO_NO'
-});
+})
 
 try {
     // Check if the user has access to a a particular product
     // You need the sp_id parameter that is obtained from an Identity instance
-    const sp_id = await identity.getSpId();
-    const data = await monetization.hasProduct(productId, sp_id);
-    alert(`User has access to ${productId}? ${data.result}`);
+    const sp_id = await identity.getSpId()
+    const data = await monetization.hasProduct(productId, sp_id)
+    alert(`User has access to ${productId}? ${data.result}`)
 } catch (err) {
-    alert(`Could not query if the user has access to ${productId} because ${err}`);
+    alert(`Could not query if the user has access to ${productId} because ${err}`)
 }
 ```
 
@@ -212,20 +213,20 @@ pages for redeeming voucher codes, reviewing payment history, and more.
 #### Example
 
 ```javascript
-const Payment = require('@schibsted/account-sdk-browser/payment');
+import { Payment } from '@schibsted/account-sdk-browser'
 
 const paymentSDK = new Payment({
     clientId: '56e9a5d1eee0000000000000',
     redirectUri: 'https://awesomenews.site', // ensure it's listed in selfservice
     env: 'PRE', // Schibsted Account env. A url or a special key: 'PRE', 'PRO' or 'PRO_NO'
-});
+})
 
 // Get the url to paymentSDK with paylink
-const paylink = '...';
-const paylinkUrl = paymentSDK.purchasePaylinkUrl(paylink);
+const paylink = '...'
+const paylinkUrl = paymentSDK.purchasePaylinkUrl(paylink)
 
 // Or another example --- pay with paylink in a popup
-paymentSDK.payWithPaylink(paylink);
+paymentSDK.payWithPaylink(paylink)
 ```
 
 ## Appendix
