@@ -2062,7 +2062,7 @@ legacy/stable SPiD flow?</p></td>
 
     
 
-    <h4 class="name" id="logout"><span class="type-signature"></span>logout<span class="signature">(redirectUri<span class="signature-attributes">opt</span>)</span><span class="type-signature"> &rarr; {Promise.&lt;void>}</span></h4>
+    <h4 class="name" id="logout"><span class="type-signature">(async) </span>logout<span class="signature">()</span><span class="type-signature"> &rarr; {void}</span></h4>
 
     
 
@@ -2074,7 +2074,7 @@ legacy/stable SPiD flow?</p></td>
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="identity.js.html">identity.js</a>, <a href="identity.js.html#line532">line 532</a>
+        <a href="identity.js.html">identity.js</a>, <a href="identity.js.html#line530">line 530</a>
     </li></ul></dd>
     
 
@@ -2127,76 +2127,6 @@ legacy/stable SPiD flow?</p></td>
 
 
 
-    <h5>Parameters:</h5>
-    
-
-<table class="params">
-    <thead>
-    <tr>
-        
-        <th>Name</th>
-        
-
-        <th>Type</th>
-
-        
-        <th>Attributes</th>
-        
-
-        
-        <th>Default</th>
-        
-
-        <th class="last">Description</th>
-    </tr>
-    </thead>
-
-    <tbody>
-    
-
-        <tr>
-            
-                <td class="name"><code>redirectUri</code></td>
-            
-
-            <td class="type">
-            
-                
-<span class="param-type">string</span>
-
-
-            
-            </td>
-
-            
-                <td class="attributes">
-                
-                    &lt;optional><br>
-                
-
-                
-
-                
-                </td>
-            
-
-            
-                <td class="default">
-                
-                    <code>this.redirectUri</code>
-                
-                </td>
-            
-
-            <td class="description last"><p>Uri to send the user to after logout. Must
-       exactly match a redirectUri from your client in self-service</p></td>
-        </tr>
-
-    
-    </tbody>
-</table>
-
-
 
 
 
@@ -2220,7 +2150,7 @@ legacy/stable SPiD flow?</p></td>
     </dt>
     <dd>
         
-<span class="param-type">Promise.&lt;void></span>
+<span class="param-type">void</span>
 
 
     </dd>
@@ -2246,7 +2176,7 @@ legacy/stable SPiD flow?</p></td>
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="identity.js.html">identity.js</a>, <a href="identity.js.html#line577">line 577</a>
+        <a href="identity.js.html">identity.js</a>, <a href="identity.js.html#line573">line 573</a>
     </li></ul></dd>
     
 
@@ -2632,7 +2562,7 @@ login? If this parameter is set to false, the <code>acrValues</code> parameter d
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="identity.js.html">identity.js</a>, <a href="identity.js.html#line620">line 620</a>
+        <a href="identity.js.html">identity.js</a>, <a href="identity.js.html#line616">line 616</a>
     </li></ul></dd>
     
 
@@ -2807,7 +2737,7 @@ login? If this parameter is set to false, the <code>acrValues</code> parameter d
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="identity.js.html">identity.js</a>, <a href="identity.js.html#line633">line 633</a>
+        <a href="identity.js.html">identity.js</a>, <a href="identity.js.html#line629">line 629</a>
     </li></ul></dd>
     
 
@@ -2909,7 +2839,7 @@ login? If this parameter is set to false, the <code>acrValues</code> parameter d
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="identity.js.html">identity.js</a>, <a href="identity.js.html#line641">line 641</a>
+        <a href="identity.js.html">identity.js</a>, <a href="identity.js.html#line637">line 637</a>
     </li></ul></dd>
     
 
@@ -3011,7 +2941,7 @@ login? If this parameter is set to false, the <code>acrValues</code> parameter d
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="identity.js.html">identity.js</a>, <a href="identity.js.html#line650">line 650</a>
+        <a href="identity.js.html">identity.js</a>, <a href="identity.js.html#line646">line 646</a>
     </li></ul></dd>
     
 
@@ -3120,7 +3050,7 @@ login? If this parameter is set to false, the <code>acrValues</code> parameter d
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="identity.js.html">identity.js</a>, <a href="identity.js.html#line660">line 660</a>
+        <a href="identity.js.html">identity.js</a>, <a href="identity.js.html#line656">line 656</a>
     </li></ul></dd>
     
 
@@ -3304,7 +3234,7 @@ login? If this parameter is set to false, the <code>acrValues</code> parameter d
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="identity.js.html">identity.js</a>, <a href="identity.js.html#line674">line 674</a>
+        <a href="identity.js.html">identity.js</a>, <a href="identity.js.html#line670">line 670</a>
     </li></ul></dd>
     
 
@@ -3488,7 +3418,7 @@ login? If this parameter is set to false, the <code>acrValues</code> parameter d
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="identity.js.html">identity.js</a>, <a href="identity.js.html#line688">line 688</a>
+        <a href="identity.js.html">identity.js</a>, <a href="identity.js.html#line684">line 684</a>
     </li></ul></dd>
     
 
@@ -5503,7 +5433,7 @@ no logged-in user neither before nor after <a href="Identity.html#hasSession"><c
 <br class="clear">
 
 <footer>
-    Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.5.5</a> on Fri Apr 13 2018 11:42:50 GMT+0000 (UTC) using the <a href="https://github.com/clenemt/docdash">docdash</a> theme.
+    Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.5.5</a> on Tue Apr 24 2018 10:35:27 GMT+0000 (UTC) using the <a href="https://github.com/clenemt/docdash">docdash</a> theme.
 </footer>
 
 <script>prettyPrint();</script>
