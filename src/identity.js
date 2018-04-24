@@ -525,12 +525,9 @@ class Identity extends EventEmitter {
 
     /**
      * Logs the user out from the Identity platform
-     * @param {string} [redirectUri=this.redirectUri] - Uri to send the user to after logout. Must
-     *        exactly match a redirectUri from your client in self-service
-     * @return {Promise<void>}
+     * @return {void}
      */
-    logout(redirectUri = this.redirectUri) {
-        assert(isUrl(redirectUri), `logout(): redirectUri must be a valid url but is ${redirectUri}`);
+    async logout() {
         // At the moment we have two endpoints that can have user session: SPiD and BFF
         // if one of them returns success, we assume that the login was successful
         // but if both fail, then we haven't really logged the user out.
@@ -541,19 +538,18 @@ class Identity extends EventEmitter {
          * @return {Promise}
          */
         const booleanize = p => p.then(() => true, () => false);
-        return Promise.all([
-            booleanize(this._spid.get('ajax/logout.js', { redirect_uri: redirectUri })),
-            booleanize(this._bffService.get('api/identity/logout'))
-        ]).then(([spidLoggedOut, bffLoggedOut]) => {
-            if (spidLoggedOut || bffLoggedOut) {
-                this.cache.delete(HAS_SESSION_CACHE_KEY);
-                this.emit('logout');
-            } else {
-                const err = new SDKError('Could not log out from any endpoint');
-                this.emit('error', err);
-                throw err;
-            }
-        });
+        const [spidLoggedOut, bffLoggedOut] = await Promise.all([
+            booleanize(this._spid.get('ajax/logout.js')),
+            booleanize(this._bffService.get('api/identity/logout')),
+        ]);
+        if (spidLoggedOut || bffLoggedOut) {
+            this.cache.delete(HAS_SESSION_CACHE_KEY);
+            this.emit('logout');
+        } else {
+            const err = new SDKError('Could not log out from any endpoint');
+            this.emit('error', err);
+            throw err;
+        }
     }
 
     /**
