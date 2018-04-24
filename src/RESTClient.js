@@ -45,7 +45,7 @@ function encode(str) {
     return encodeURIComponent(str).replace(/[!'()~]|%20|%00/g, match => replace[match]);
 }
 
-const globalFetch = window.fetch;
+const globalFetch = window.fetch && window.fetch.bind(window);
 
 /**
  * This class can be used for creating a wrapper around a server and all its endpoints.

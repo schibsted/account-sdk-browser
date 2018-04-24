@@ -5,7 +5,7 @@
 'use strict';
 
 const { ENDPOINTS } = require('../src/config');
-const RESTClient = require('../src/RESTClient');
+let RESTClient = require('../src/RESTClient');
 
 describe('RESTClient', () => {
     test('has the REST methods for get and go', () => {
@@ -17,6 +17,21 @@ describe('RESTClient', () => {
 
         expect(typeof restClient.get).toBe('function');
         expect(typeof restClient.go).toBe('function');
+    });
+
+    test('fetch default works', () => {
+        window.fetch = function () {
+            if (this !== window) {
+                throw new Error('Illegal invocation!');
+            }
+        };
+        jest.resetModuleRegistry();
+        RESTClient = require('../src/RESTClient');
+        const restClient = new RESTClient({
+            serverUrl: 'DEV',
+            envDic: ENDPOINTS.SPiD,
+        });
+        expect(restClient.fetch).not.toThrow(/Illegal invocation/);
     });
 
     test('Supplied log function is called', async () => {
