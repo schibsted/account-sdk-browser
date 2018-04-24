@@ -37,6 +37,16 @@ document in full. But ok, let's present some highlighted differences:
 
 * Instead of using `SPiD.init()` for initialization, the new SDK exports three classes; `Identity`,
    `Monetization` and `Payment`
+* Many features (like logging in) requires a `redirectUri` parameter — both in the 2.x and 3.x
+  versions of the SDK. An important difference in the new version of our backends, is that we strive
+  to be more compliant with OpenID Connect standards. This means that redirect uris need to match
+  **exactly** (that is — including the query string). This will be a breaking change for some
+  people, because in the 2.x world, a redirect uri might look like `https://site.com` in self
+  service, and a login attempt with `redirectUri=https://site.com?article=1234` would then be ok
+  because it would only match on domain+path — but not query string. However — this will **not**
+  work in the 3.x world. OpenID Connect **does** have a suggestion for how to handle these
+  situations though, which is a parameter called `state` that you send in addition to the
+  `redirectUri`. See [this paragraph](#regarding-state) for more information.
 * The `'SPiD.'` string is removed from the name of all SDK events. So the event that used to be
    `'SPiD.login'` is now just `'login'`
 * You don't log in by setting `window.location`. Instead, you use the `login()` method on an
@@ -114,6 +124,34 @@ function userClicksLogIn() {
     identity.login({ state: 'some-random-string-1234-foobar-wonky-pig' })
 }
 ```
+
+<a name="regarding-state"></a>
+
+#### Regarding `state`
+
+This parameter is an OpenID Connect parameter (described in [this paragraph in the
+spec](http://openid.net/specs/openid-connect-core-1_0.html#rfc.section.3.1.2.1)). It's formatted as
+an opaque string. This means you can send anything that can be serialized to a string. In practice,
+we have good experience sending something like a JSON value like a base64-url-encoded value — it's
+just an easy way to avoid browsers or backends messing with special characters.
+
+But as a trivial example, if you call `Identity.login(..)` with params
+`redirectUri=https://site.com&state=article%3D1234` — then at the end of the authentication flow,
+the user will be sent back to your redirectUri, and the `state` parameter will be forwarded along
+with the auth `code` parameter.
+
+It is recommended that you provide a unique identifier as part of the state, to prevent CSRF
+attacks. For example this can be accomplished by:
+1. Your backend generates random token: `1234abcd`, saves it in some tokenCache, and forwards to
+   your browser frontend
+1. Your frontend calls `Identity.login` with `state = base64Urlencode({ token: '1234abcd', article:
+   '1234', ... })`
+1. When auth flow completes, the user is redirected back to your site. Then, your backend sees the
+   query parameters `code` (which it can exchange for OAuth tokens for the user) and `state`
+1. Your backend can do `decodedState = base64Urldecode(query.state)` and then verify that its
+   `tokenCache.contains(decodedState.token)`. If that fails, then possibly a CSRF attack was
+   attempted. If successful, remove the token from the tokenCache so the same token can't be used
+   again, and continue to show `decodedState.article`
 
 #### Authentication methods
 
