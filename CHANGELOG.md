@@ -1,5 +1,38 @@
 # Changelog
 
+## v3.0.0-rc.1 (2018-04-24)
+
+### Breaking changes
+
+* [#24](https://github.com/schibsted/account-sdk-browser/issues/24) — Change from CommonJS to ES
+  Modules syntax (that is — change from require/module.exports to using import/export syntax). Yeah,
+  this is a change that touched basically all the files in the whole project, but shouldn't really
+  change the usage much. It **is** a breaking change for some people using the CommonJS format. If
+  you find yourself in this group, your change should be:
+
+      // from when you were using rc.0 or older:
+      const Identity = require('@schibsted/account-sdk-browser/identity')
+
+      // to now, using rc.1:
+      const { Identity } = require('@schibsted/account-sdk-browser/identity')
+
+  If you already used the syntax `const { Identity } = require('@schibsted/account-sdk-browser')`
+  (that is — not the bundle-optimized version), then no change should be necessary
+
+### Fixes
+
+* [#23](https://github.com/schibsted/account-sdk-browser/issues/23) — The `Identity.logout()` docs
+  should now be up to date
+* An internal usage of fetch was failing and has been fixed. It could cause the `Identity.logout()`
+  function to not clear all of its cookies. In the worst case, this could in turn cause the browser
+  to be confused about whether a user was logged in or not
+
+### Changes
+
+* The documentation has been updated to have more details about how `redirectUri` is different
+  between the old 2.x versions of the SDK and this 3.x version. Also, a section on the OpenID
+  Connect parameter `state` has been added
+
 ## v3.0.0-rc.0 (2018-04-10)
 
 ### Breaking changes
