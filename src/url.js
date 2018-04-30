@@ -16,12 +16,10 @@ import { assert, isNonEmptyString, isUrl, isNonEmptyObj } from './validate';
  * @return {string} The url that points to the server
  */
 export function urlMapper(url, urlMap) {
-    if (isUrl(url, 'hostname')) {
-        return url;
-    }
     assert(isNonEmptyString(url), `"url" param must be a non empty string: ${typeof url}`);
-    assert(isNonEmptyObj(urlMap), 'urlMap must be an object');
-    const resultUrl = urlMap[url];
-    assert(isUrl(resultUrl, 'hostname'), `The urlMap object does not have a url for ${url}`);
-    return resultUrl;
+    if (isNonEmptyObj(urlMap) && isUrl(urlMap[url])) {
+        return urlMap[url];
+    }
+    assert(isUrl(url, 'hostname'), `Bad URL given: '${url}'`);
+    return url;
 }
