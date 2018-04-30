@@ -21,21 +21,21 @@
     "tiny-emitter": "^2.0.2"
   },
   "devDependencies": {
-    "babel-core": "^6.26.0",
+    "babel-core": "^6.26.3",
     "babel-loader": "^7.1.4",
     "babel-preset-env": "^1.6.1",
-    "codecov": "^3.0.0",
+    "codecov": "^3.0.1",
     "docdash": "git+https://github.com/torarvid/docdash.git#v0.5.0",
     "eslint": "^4.16.0",
-    "eslint-plugin-import": "^2.8.0",
+    "eslint-plugin-import": "^2.11.0",
     "jest": "^22.1.4",
-    "jest-junit": "^3.4.1",
+    "jest-junit": "^3.7.0",
     "jsdoc": "^3.5.5",
-    "node-fetch": "^1.7.3",
+    "node-fetch": "^2.1.2",
     "regenerator-runtime": "^0.11.1",
-    "webpack": "^4.4.1",
-    "webpack-cli": "^2.0.13",
-    "whatwg-url": "^6.4.0"
+    "webpack": "^4.6.0",
+    "webpack-cli": "^2.1.2",
+    "whatwg-url": "^6.4.1"
   },
   "repository": {
     "type": "git",
