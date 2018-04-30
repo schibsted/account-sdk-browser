@@ -21,10 +21,9 @@ products and subscriptions, etc.
       this SDK — it's possible to `require('@schibsted/account-sdk-browser/identity')` (note the
       `/identity` at the end) or `/monetization'` or `/payment'`
 1. Build your site as you prefer. This library uses modern JavaScript syntax (including async/await
-   and other ES2017 features) by default. We recommend that you do any transpilation yourself for
-   the browser versions you need to cater to. But — if needed, you can replace
-   `/account-sdk-browser` with `/account-sdk-browser/es5` if you want to opt-in to our babelified
-   versions
+   and other ES2017 and WHATWG features) by default. We recommend that you do any transpilation
+   yourself for the browser versions you need to cater to. See [this paragraph](#polyfills-yo) for
+   info about our babelified version and info about polyfills.
 
 ## Upgrading from 2.x
 
@@ -72,6 +71,8 @@ document in full. But ok, let's present some highlighted differences:
   `NO ACCESS` on the `POST /signup` endpoint, **users will not be able to sign up to your site**
   using the new flows.
 
+<a name="polyfills-yo"></a>
+
 #### Polyfills required for older browsers
 
 This SDK uses modern JavaScript features. If you support older browsers, you should use a tool like
@@ -83,6 +84,13 @@ where it's difficult to do their own transpilation, we do provide some opt-in es
    `Payment`. In addition, add them as variables to the global `window` object.
 1. `@schibsted/account-sdk-browser/es5/identity`, `@schibsted/account-sdk-browser/es5/monetization`
    or `@schibsted/account-sdk-browser/es5/payment` can be used to only include each class by itself.
+
+But then regardless of whether you use the es5 versions or not, you might need to polyfill certain
+things that might be missing in the browsers you wish to support. A quick test using IE11 showed
+that we needed polyfills for `Promise`, `URL`, `Object.entries`, `fetch` and `Number.isInteger`. We
+added them from polyfill.io like this:
+
+    <script src="https://cdn.polyfill.io/v2/polyfill.js?features=Promise,URL,Object.entries,fetch,Number.isInteger"></script>
 
 ## Events
 

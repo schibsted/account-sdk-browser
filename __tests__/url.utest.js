@@ -24,6 +24,11 @@ describe('url', () => {
             })).toBe('http://shorthand2.local');
         });
 
+        test('if the first parameter is a bad lookup key, fail', () => {
+            expect(() => urlMapper('BAD_KEY', {
+                'GOOD_KEY': 'http://shorthand1.local'
+            })).toThrow(/Bad URL given: 'BAD_KEY'/);
+        });
     });
 
     /*
