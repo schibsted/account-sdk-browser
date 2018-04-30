@@ -1,5 +1,14 @@
 # Changelog
 
+## v3.0.0-rc.2 (2018-04-30)
+
+### Fixes
+
+* [#31](https://github.com/schibsted/account-sdk-browser/issues/31) — Our internal helper function
+  `urlMapper` now doesn't perform calls like `new URL('PRE')` without first checking if `'PRE'` is a
+  key in our url map object. This should ensure that outdated browsers like IE11 (that require a
+  polyfill for WHATWG `URL`) don't get flustered in this scenario.
+
 ## v3.0.0-rc.1 (2018-04-24)
 
 ### Breaking changes
