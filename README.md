@@ -92,6 +92,26 @@ added them from polyfill.io like this:
 
     <script src="https://cdn.polyfill.io/v2/polyfill.js?features=Promise,URL,Object.entries,fetch,Number.isInteger"></script>
 
+## Example project
+
+There is an example that demonstrates how the SDK can be used. The code is
+[here](https://github.com/schibsted/sdk-example), and you can see it live
+[here](https://pro.sdk-example.com). You have a use-case that we haven't thought of? Ask us to add
+it by creating an [issue](https://github.com/schibsted/sdk-example/issues/new).
+
+You can use that code as inspiration or just fork and play with it. The account-sdk-browser NPM
+module is used for authenticating the user with Schibsted Account. Take a look at how the SDK is
+initialized.
+
+When a user wants to log in to your site, you direct them to a UI flow that is hosted by Schibsted
+Account. We authenticate the user and redirect them back to your site. This final redirect back to
+your site is done in accordance with the OAuth2 spec. That means that we pass a `code` in the query
+string in that redirect uri. You can use that `code` on your site backend along with your client
+credentials (client id & secret) to get an *Access Token* (AT) and *Refresh Token* (RT). You don't
+send the AT (and never ever the RT!) to the browser but rather keep it on the server side and
+associate it with that particular user session in order to be able to call Schibsted Account APIs on
+behalf of that user.
+
 ## Events
 
 The SDK fires events when something we deem interesting is happening. For example the
@@ -184,7 +204,9 @@ separate popup window and at the end of the auth flow. We recommend that you mak
 signal to your main page — using
 [postMessage](https://developer.mozilla.org/en-US/docs/Web/API/Window/postMessage) or something
 similar — to indicate that the user is logged in. If the popup window fails to open, it'll
-automatically fall back to the redirect flow.
+automatically fall back to the redirect flow. The SDK Example project mentioned above demonstrates
+how it can work. Again, you can see [sdk-example](https://github.com/schibsted/sdk-example) if you
+want a working example.
 
 #### Is the user logged in?
 
