@@ -48,8 +48,14 @@
         {
           "targets": {
             "browsers": [
-              "last 2 major versions",
-              "ie 9"
+              "> 1%",
+              "last 10 chrome major versions",
+              "last 10 firefox major versions",
+              "last 10 opera major versions",
+              "last 2 safari major versions",
+              "last 2 ios major versions",
+              "last 2 ie major versions",
+              "last 5 edge major versions"
             ]
           }
         }
