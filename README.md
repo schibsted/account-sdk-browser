@@ -52,8 +52,9 @@ document in full. But ok, let's present some highlighted differences:
    instance of `Identity`
 * The JavaScript code in this browser SDK does **NOT** set any `document.cookie = ...` by default.
    There is a function `enableVarnishCookie` that you can call on an `Identity` instance. This will
-   enable setting the `SP_ID` cookie whenever `hasSession()` is called. Any other cookie that you
-   need set, you will have to set yourself
+   enable setting the `SP_ID` cookie whenever `hasSession()` is called (though most browsers require
+   that you are on a "real domain" for this to work — so, **not** `localhost`). Any other cookie
+   that you need set, you will have to set yourself
 * You no longer `subscribe` to events but `listen` (using a function `.on` that's compatible with
    Node's `EventEmitter`). For example `SPiD.event.subscribe('SPiD.login', handler)` becomes
    `Identity.on('login', handler)`
