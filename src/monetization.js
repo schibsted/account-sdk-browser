@@ -56,7 +56,8 @@ export class Monetization extends EventEmitter {
      * Checks if the user has access to a particular product
      * @param {string} productId
      * @param {string} spId - The spId that was obtained from {@link Identity#hasSession}
-     * @returns {Object} The data object returned from Schibsted Account
+     * @returns {Object|null} The data object returned from Schibsted Account (or `null` if the user
+     * doesn't have access to the given product)
      */
     async hasProduct(productId, spId) {
         const cacheKey = `prd_${productId}_${spId}`;
@@ -82,7 +83,8 @@ export class Monetization extends EventEmitter {
      * Checks if the user has access to a particular subscription
      * @param {string} subscriptionId
      * @param {string} spId - The spid that was obtained from {@link Identity#hasSession}
-     * @returns {Object} The data object returned from Schibsted Account
+     * @returns {Object|null} The data object returned from Schibsted Account (or `null` if the user
+     * doesn't have access to the given subscription)
      */
     async hasSubscription(subscriptionId, spId) {
         const cacheKey = `sub_${subscriptionId}_${spId}`;
