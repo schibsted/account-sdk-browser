@@ -278,7 +278,8 @@ export class Identity extends EventEmitter {
     }
 
     /**
-     * Set the Varnish cookie (`SP_ID`) when hasSession() is called.
+     * Set the Varnish cookie (`SP_ID`) when hasSession() is called. Note that most browsers require
+     * that you are on a "real domain" for this to work — so, **not** `localhost`
      * @returns {void}
      */
     enableVarnishCookie() {
