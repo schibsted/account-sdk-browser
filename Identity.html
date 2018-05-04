@@ -2066,6 +2066,8 @@ legacy/stable SPiD flow?</p></td>
     <h4 class="name" id="logout"><span class="type-signature">(async) </span>logout<span class="signature">()</span><span class="type-signature"> &rarr; {void}</span></h4>
 
     
+    <p class="summary"><p>Logs the user out from the Identity platform</p></p>
+    
 
 
 
@@ -2075,7 +2077,7 @@ legacy/stable SPiD flow?</p></td>
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="identity.js.html">identity.js</a>, <a href="identity.js.html#line531">line 531</a>
+        <a href="identity.js.html">identity.js</a>, <a href="identity.js.html#line538">line 538</a>
     </li></ul></dd>
     
 
@@ -2115,7 +2117,13 @@ legacy/stable SPiD flow?</p></td>
 
 
 <div class="description">
-    <p>Logs the user out from the Identity platform</p>
+    <p><strong>Note</strong>: Your site origin should be listed as a redirect_uri in selfservice for
+this to work. On the Schibsted Account side, we check CORS headers against the list of
+redirect_uris. For most sites, this will work already, since this matching is only done on
+the origin part of the uri, and most sites already have that in their redirect_uri list. So
+if you have a redirect_uri <code>https://mysite.news/article</code>, then this will work when coming
+from any <code>https://mysite.news</code> location. Note however, that the protocol matters, so it will
+not work for <code>http://mysite.news</code> (only <code>https</code>).</p>
 </div>
 
 
@@ -2177,7 +2185,7 @@ legacy/stable SPiD flow?</p></td>
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="identity.js.html">identity.js</a>, <a href="identity.js.html#line574">line 574</a>
+        <a href="identity.js.html">identity.js</a>, <a href="identity.js.html#line581">line 581</a>
     </li></ul></dd>
     
 
@@ -2563,7 +2571,7 @@ login? If this parameter is set to false, the <code>acrValues</code> parameter d
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="identity.js.html">identity.js</a>, <a href="identity.js.html#line617">line 617</a>
+        <a href="identity.js.html">identity.js</a>, <a href="identity.js.html#line624">line 624</a>
     </li></ul></dd>
     
 
@@ -2738,7 +2746,7 @@ login? If this parameter is set to false, the <code>acrValues</code> parameter d
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="identity.js.html">identity.js</a>, <a href="identity.js.html#line630">line 630</a>
+        <a href="identity.js.html">identity.js</a>, <a href="identity.js.html#line637">line 637</a>
     </li></ul></dd>
     
 
@@ -2840,7 +2848,7 @@ login? If this parameter is set to false, the <code>acrValues</code> parameter d
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="identity.js.html">identity.js</a>, <a href="identity.js.html#line638">line 638</a>
+        <a href="identity.js.html">identity.js</a>, <a href="identity.js.html#line645">line 645</a>
     </li></ul></dd>
     
 
@@ -2942,7 +2950,7 @@ login? If this parameter is set to false, the <code>acrValues</code> parameter d
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="identity.js.html">identity.js</a>, <a href="identity.js.html#line647">line 647</a>
+        <a href="identity.js.html">identity.js</a>, <a href="identity.js.html#line654">line 654</a>
     </li></ul></dd>
     
 
@@ -3051,7 +3059,7 @@ login? If this parameter is set to false, the <code>acrValues</code> parameter d
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="identity.js.html">identity.js</a>, <a href="identity.js.html#line657">line 657</a>
+        <a href="identity.js.html">identity.js</a>, <a href="identity.js.html#line664">line 664</a>
     </li></ul></dd>
     
 
@@ -3235,7 +3243,7 @@ login? If this parameter is set to false, the <code>acrValues</code> parameter d
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="identity.js.html">identity.js</a>, <a href="identity.js.html#line671">line 671</a>
+        <a href="identity.js.html">identity.js</a>, <a href="identity.js.html#line678">line 678</a>
     </li></ul></dd>
     
 
@@ -3419,7 +3427,7 @@ login? If this parameter is set to false, the <code>acrValues</code> parameter d
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="identity.js.html">identity.js</a>, <a href="identity.js.html#line685">line 685</a>
+        <a href="identity.js.html">identity.js</a>, <a href="identity.js.html#line692">line 692</a>
     </li></ul></dd>
     
 
@@ -5434,7 +5442,7 @@ no logged-in user neither before nor after <a href="Identity.html#hasSession"><c
 <br class="clear">
 
 <footer>
-    Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.5.5</a> on Thu May 03 2018 10:24:38 GMT+0000 (UTC) using the <a href="https://github.com/clenemt/docdash">docdash</a> theme.
+    Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.5.5</a> on Fri May 04 2018 10:35:20 GMT+0000 (UTC) using the <a href="https://github.com/clenemt/docdash">docdash</a> theme.
 </footer>
 
 <script>prettyPrint();</script>
