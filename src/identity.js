@@ -525,7 +525,14 @@ export class Identity extends EventEmitter {
     }
 
     /**
-     * Logs the user out from the Identity platform
+     * @summary Logs the user out from the Identity platform
+     * @description **Note**: Your site origin should be listed as a redirect_uri in selfservice for
+     * this to work. On the Schibsted Account side, we check CORS headers against the list of
+     * redirect_uris. For most sites, this will work already, since this matching is only done on
+     * the origin part of the uri, and most sites already have that in their redirect_uri list. So
+     * if you have a redirect_uri `https://mysite.news/article`, then this will work when coming
+     * from any `https://mysite.news` location. Note however, that the protocol matters, so it will
+     * not work for `http://mysite.news` (only `https`).
      * @return {void}
      */
     async logout() {
