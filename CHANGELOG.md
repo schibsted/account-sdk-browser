@@ -1,5 +1,23 @@
 # Changelog
 
+## v3.0.0-rc.3 (2018-05-14)
+
+### Fixes
+
+* [#38](https://github.com/schibsted/account-sdk-browser/issues/38) — Source maps are now included
+  for generated ES5 files
+* [#22](https://github.com/schibsted/account-sdk-browser/issues/22) — Documented that varnish
+  cookies need an Origin that is `!== localhost` for the logic to work in most (all?) browsers
+* [#21](https://github.com/schibsted/account-sdk-browser/issues/21) — Fix documentation issue on
+  `Monetization.hasProduct` and `Monetization.hasSubscription`
+
+### Changes
+
+* Documentation (the main README.md file) has been updated to point to the SDK Example project in
+  case people might want to go look at it
+* Be more explicit about the browsers supported in our ES5 generated files. In package.json for
+  those who are curious
+
 ## v3.0.0-rc.2 (2018-04-30)
 
 ### Fixes
