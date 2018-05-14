@@ -4,4 +4,5 @@
 !monetization.js
 !payment.js
 !es5/*.js
+!es5/*.js.map
 !src/**/*
