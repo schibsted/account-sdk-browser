@@ -341,6 +341,7 @@ export class Identity extends EventEmitter {
             // Try to resolve from cache (it has a TTL)
             const cachedData = this.cache.get(HAS_SESSION_CACHE_KEY);
             if (cachedData) {
+                this._emitSessionEvent(this._session, cachedData);
                 return cachedData;
             }
         }
