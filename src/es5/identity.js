@@ -4,6 +4,7 @@
 
 'use strict';
 
-import 'regenerator-runtime/runtime';
+window.regeneratorRuntime = require('regenerator-runtime');
+const { Identity } = require('../identity');
 
-export { Identity } from '../identity';
+module.exports = { Identity };

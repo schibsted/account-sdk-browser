@@ -4,6 +4,7 @@
 
 'use strict';
 
-import 'regenerator-runtime/runtime';
+window.regeneratorRuntime = require('regenerator-runtime');
+const { Payment } = require('../payment');
 
-export { Payment } from '../../payment';
+module.exports = { Payment };

@@ -4,8 +4,10 @@
 
 'use strict';
 
-import 'regenerator-runtime/runtime';
+window.regeneratorRuntime = require('regenerator-runtime');
 
-export { Identity } from '../../identity';
-export { Monetization } from '../../monetization';
-export { Payment } from '../../payment';
+const { Identity } = require('../identity');
+const { Monetization } = require('../monetization');
+const { Payment } = require('../payment');
+
+module.exports = { Identity, Monetization, Payment };
