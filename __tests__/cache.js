@@ -94,6 +94,15 @@ describe('cache', () => {
                     }, 10); // wait 10 ms, then check
                 });
             });
+            test('values should not expire if expiresIn is large', () => {
+                cache.set('foo', 'bar', 2592000000);
+                return new Promise((resolve) => {
+                    setTimeout(() => {
+                        expect(cache.get('foo')).toBe('bar');
+                        resolve();
+                    }, 10); // wait 10 ms, then check
+                });
+            });
             test('should be able to delete values', () => {
                 cache.set('foo', 'bar', 10000);
                 cache.delete('foo');

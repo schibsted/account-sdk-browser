@@ -260,6 +260,14 @@ describe('Identity', () => {
             // two calls per hasSession() invocation, since our mock is set up this way
             expect(fetch.mock.calls.length).toBe(2);
         });
+
+        test('should emit event both when "real" and "cached" values are used', async () => {
+            const spy = jest.fn();
+            identity.on('login', spy);
+            await identity.hasSession();
+            await identity.hasSession();
+            expect(spy).toHaveBeenCalledTimes(2);
+        });
     });
 
     describe('isLoggedIn', () => {

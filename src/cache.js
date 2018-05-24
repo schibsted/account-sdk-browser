@@ -63,6 +63,8 @@ class LiteralCache {
     }
 }
 
+const maxExpiresIn = Math.pow(2, 31) - 1;
+
 /**
  * Cache class that attempts WebStorage (session/local storage), and falls back to JS object literal
  * @private
@@ -113,6 +115,7 @@ export default class Cache {
         if (expiresIn <= 0) {
             return;
         }
+        expiresIn = Math.min(maxExpiresIn, expiresIn);
 
         try {
             const expiresOn = Math.floor(Date.now() + expiresIn);
