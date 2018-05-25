@@ -13,7 +13,7 @@ import Cache from './cache';
 import * as spidTalk from './spidTalk';
 
 const DEFAULT_CACHE_EXPIRES_IN = 30;
-const globalWindow = () => window; // eslint-disable-line require-jsdoc
+const globalWindow = () => window;
 
 /**
  * Provides features related to monetization

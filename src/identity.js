@@ -67,7 +67,7 @@ import * as spidTalk from './spidTalk';
  */
 
 const HAS_SESSION_CACHE_KEY = 'hasSession-cache';
-const globalWindow = () => window; // eslint-disable-line require-jsdoc
+const globalWindow = () => window;
 
 /**
  * Get type and value of something

@@ -45,7 +45,6 @@ function encode(str) {
     return encodeURIComponent(str).replace(/[!'()~]|%20|%00/g, match => replace[match]);
 }
 
-// eslint-disable-next-line require-jsdoc
 const globalFetch = () => window.fetch && window.fetch.bind(window);
 
 /**

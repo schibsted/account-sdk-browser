@@ -106,7 +106,7 @@ export function isFunction(value) {
  * @return {boolean}
  */
 export function isStrIn(value, possibilities, caseSensitive = false) {
-    const _isSameStrCaseInsensitive = str => // eslint-disable-line require-jsdoc
+    const _isSameStrCaseInsensitive = str =>
         isStr(str) && value.toUpperCase() === str.toUpperCase();
     if (!(isStr(value) && Array.isArray(possibilities))) {
         return false;
