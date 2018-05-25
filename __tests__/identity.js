@@ -5,6 +5,7 @@
 'use strict';
 
 import Identity from '../identity';
+import { compareUrls } from './utils';
 import { URL } from 'url';
 import { URL as u } from 'whatwg-url';
 
@@ -123,8 +124,6 @@ describe('Identity', () => {
     });
 
     describe('loginUrl()', () => {
-        const testutils = require('../utils/testutils');
-
         test('returns the expected endpoint for old flows', () => {
             const identity = new Identity({
                 env: 'PRO_NO',
@@ -132,7 +131,7 @@ describe('Identity', () => {
                 redirectUri: 'http://example.com',
                 window: {},
             });
-            testutils.compareUrls(identity.loginUrl(
+            compareUrls(identity.loginUrl(
                 'dummy-state',
                 'otp-email',
                 undefined, // eslint-disable-line no-undefined
@@ -149,7 +148,7 @@ describe('Identity', () => {
                 redirectUri: 'http://example.com',
                 window: {},
             });
-            testutils.compareUrls(identity.loginUrl(
+            compareUrls(identity.loginUrl(
                 'dummy-state',
                 undefined, // eslint-disable-line no-undefined
                 undefined, // eslint-disable-line no-undefined
