@@ -490,6 +490,8 @@ that you are on a &quot;real domain&quot; for this to work — so, <strong>not</
     <h4 class="name" id="hasSession"><span class="type-signature">(async) </span>hasSession<span class="signature">(autologin<span class="signature-attributes">opt</span>)</span><span class="type-signature"> &rarr; {<a href="Identity.html#HasSessionSuccessResponse">Identity#HasSessionSuccessResponse</a>|<a href="Identity.html#HasSessionFailureResponse">Identity#HasSessionFailureResponse</a>}</span></h4>
 
     
+    <p class="summary"><p>Queries the hassession endpoint and returns information about the status of the user</p></p>
+    
 
 
 
@@ -499,7 +501,7 @@ that you are on a &quot;real domain&quot; for this to work — so, <strong>not</
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="identity.js.html">identity.js</a>, <a href="identity.js.html#line335">line 335</a>
+        <a href="identity.js.html">identity.js</a>, <a href="identity.js.html#line340">line 340</a>
     </li></ul></dd>
     
 
@@ -539,7 +541,10 @@ that you are on a &quot;real domain&quot; for this to work — so, <strong>not</
 
 
 <div class="description">
-    <p>Queries the hassession endpoint</p>
+    <p>When we send a request to this endpoint, cookies sent along with the request
+determines the status of the user. If the user is not currently logged in, but has a cookie
+with the &quot;Remember me&quot; flag switched on, calling this function will attempt to automatically
+perform a login on the user</p>
 </div>
 
 
@@ -613,7 +618,8 @@ that you are on a &quot;real domain&quot; for this to work — so, <strong>not</
                 </td>
             
 
-            <td class="description last"><p>-</p></td>
+            <td class="description last"><p>Set this to <code>false</code> if you do <strong>not</strong> want the auto-login
+to happen</p></td>
         </tr>
 
     
@@ -717,6 +723,9 @@ if, say, the user is not logged in)</li>
     <h4 class="name" id="isLoggedIn"><span class="type-signature">(async) </span>isLoggedIn<span class="signature">()</span><span class="type-signature"> &rarr; {boolean}</span></h4>
 
     
+    <p class="summary"><p>Allows the client app to check if the user is logged in to Schibsted's Single Sign
+On (SSO) solution (SPiD).</p></p>
+    
 
 
 
@@ -726,7 +735,7 @@ if, say, the user is not logged in)</li>
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="identity.js.html">identity.js</a>, <a href="identity.js.html#line375">line 375</a>
+        <a href="identity.js.html">identity.js</a>, <a href="identity.js.html#line382">line 382</a>
     </li></ul></dd>
     
 
@@ -766,8 +775,8 @@ if, say, the user is not logged in)</li>
 
 
 <div class="description">
-    <p>Allows the client app to check if the user is logged in to Schibsted's Single Sign On (SSO)
-solution (SPiD).</p>
+    <p>This function calls <a href="Identity.html#hasSession"><code>Identity#hasSession</code></a> internally and thus has the side
+effect that it might perform an auto-login on the user</p>
 </div>
 
 
@@ -831,7 +840,7 @@ solution (SPiD).</p>
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="identity.js.html">identity.js</a>, <a href="identity.js.html#line391">line 391</a>
+        <a href="identity.js.html">identity.js</a>, <a href="identity.js.html#line400">line 400</a>
     </li></ul></dd>
     
 
@@ -871,9 +880,8 @@ solution (SPiD).</p>
 
 
 <div class="description">
-    <p>Allows the caller to check if the current user is connected to the client_id in Schibsted's
-Single Sign On (SSO) solution (SPiD). Being connected means that the user has agreed for
-their account to be used by your web app and have accepted the required terms.</p>
+    <p>This function calls <a href="Identity.html#hasSession"><code>Identity#hasSession</code></a> internally and thus has the side
+effect that it might perform an auto-login on the user</p>
 </div>
 
 
@@ -926,6 +934,8 @@ their account to be used by your web app and have accepted the required terms.</
     <h4 class="name" id="getUser"><span class="type-signature">(async) </span>getUser<span class="signature">()</span><span class="type-signature"> &rarr; {HasSessionSuccessResponse}</span></h4>
 
     
+    <p class="summary"><p>Returns information about the user</p></p>
+    
 
 
 
@@ -935,7 +945,7 @@ their account to be used by your web app and have accepted the required terms.</
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="identity.js.html">identity.js</a>, <a href="identity.js.html#line408">line 408</a>
+        <a href="identity.js.html">identity.js</a>, <a href="identity.js.html#line419">line 419</a>
     </li></ul></dd>
     
 
@@ -975,7 +985,8 @@ their account to be used by your web app and have accepted the required terms.</
 
 
 <div class="description">
-    <p>Returns information about the user</p>
+    <p>This function calls <a href="Identity.html#hasSession"><code>Identity#hasSession</code></a> internally and thus has the side
+effect that it might perform an auto-login on the user</p>
 </div>
 
 
@@ -1084,6 +1095,13 @@ their account to be used by your web app and have accepted the required terms.</
     <h4 class="name" id="getUserId"><span class="type-signature">(async) </span>getUserId<span class="signature">()</span><span class="type-signature"> &rarr; {string}</span></h4>
 
     
+    <p class="summary"><p>In Schibsted Account, there are two ways of identifying a user; the <code>userId</code> and the
+<code>uuid</code>. There are reasons for them both existing. The <code>userId</code> is a numeric identifier, but
+since Schibsted Account is deployed separately in Norway and Sweden, there are a lot of
+duplicates. The <code>userId</code> was introduced early, so many sites still need to use them for
+legacy reasons. The <code>uuid</code> is universally unique, and so — if we could disregard a lot of
+Schibsted components depending on the numeric <code>userId</code> — it would be a good identifier to use</p></p>
+    
 
 
 
@@ -1093,7 +1111,7 @@ their account to be used by your web app and have accepted the required terms.</
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="identity.js.html">identity.js</a>, <a href="identity.js.html#line426">line 426</a>
+        <a href="identity.js.html">identity.js</a>, <a href="identity.js.html#line439">line 439</a>
     </li></ul></dd>
     
 
@@ -1133,12 +1151,8 @@ their account to be used by your web app and have accepted the required terms.</
 
 
 <div class="description">
-    <p>In Schibsted Account, there are two ways of identifying a user; the <code>userId</code> and the <code>uuid</code>.
-There are reasons for them both existing. The <code>uuid</code> is universally unique, and we recommend
-that you use that whenever that works for you. The <code>userId</code> is a numeric identifier, but
-since Schibsted Account is deployed separately in Norway and Sweden, there are a lot of
-duplicates. The <code>userId</code> was introduced early, so many sites still need to use them for
-legacy reasons</p>
+    <p>This function calls <a href="Identity.html#hasSession"><code>Identity#hasSession</code></a> internally and thus has the side
+effect that it might perform an auto-login on the user</p>
 </div>
 
 
@@ -1224,6 +1238,13 @@ legacy reasons</p>
     <h4 class="name" id="getUserUuid"><span class="type-signature">(async) </span>getUserUuid<span class="signature">()</span><span class="type-signature"> &rarr; {string}</span></h4>
 
     
+    <p class="summary"><p>In Schibsted Account, there are two ways of identifying a user; the <code>userId</code> and the
+<code>uuid</code>. There are reasons for them both existing. The <code>userId</code> is a numeric identifier, but
+since Schibsted Account is deployed separately in Norway and Sweden, there are a lot of
+duplicates. The <code>userId</code> was introduced early, so many sites still need to use them for
+legacy reasons. The <code>uuid</code> is universally unique, and so — if we could disregard a lot of
+Schibsted components depending on the numeric <code>userId</code> — it would be a good identifier to use</p></p>
+    
 
 
 
@@ -1233,7 +1254,7 @@ legacy reasons</p>
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="identity.js.html">identity.js</a>, <a href="identity.js.html#line444">line 444</a>
+        <a href="identity.js.html">identity.js</a>, <a href="identity.js.html#line459">line 459</a>
     </li></ul></dd>
     
 
@@ -1273,12 +1294,8 @@ legacy reasons</p>
 
 
 <div class="description">
-    <p>In Schibsted Account, there are two ways of identifying a user; the <code>userId</code> and the <code>uuid</code>.
-There are reasons for them both existing. The <code>uuid</code> is universally unique, and might be
-recommended for all use at a future time. The <code>userId</code> is a numeric identifier, but since
-Schibsted Account is deployed separately in Norway and Sweden, there are a lot of duplicates
-in these two environments. The <code>userId</code> was introduced early, so many sites still need to use
-them for legacy reasons</p>
+    <p>This function calls <a href="Identity.html#hasSession"><code>Identity#hasSession</code></a> internally and thus has the side
+effect that it might perform an auto-login on the user</p>
 </div>
 
 
@@ -1364,6 +1381,9 @@ them for legacy reasons</p>
     <h4 class="name" id="getVisitorId"><span class="type-signature">(async) </span>getVisitorId<span class="signature">()</span><span class="type-signature"> &rarr; {string}</span></h4>
 
     
+    <p class="summary"><p>This is how we identify the current visitor whether logged in or not. The unique
+visitor id can be used to track the user for analytics (Mixpanel)</p></p>
+    
 
 
 
@@ -1373,7 +1393,7 @@ them for legacy reasons</p>
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="identity.js.html">identity.js</a>, <a href="identity.js.html#line457">line 457</a>
+        <a href="identity.js.html">identity.js</a>, <a href="identity.js.html#line474">line 474</a>
     </li></ul></dd>
     
 
@@ -1413,8 +1433,8 @@ them for legacy reasons</p>
 
 
 <div class="description">
-    <p>This is how we identify the current visitor whether logged in or not.
-The unique visitor id can be used to track the user for analytics (Mixpanel).</p>
+    <p>This function calls <a href="Identity.html#hasSession"><code>Identity#hasSession</code></a> internally and thus has the side
+effect that it might perform an auto-login on the user</p>
 </div>
 
 
@@ -1467,6 +1487,8 @@ The unique visitor id can be used to track the user for analytics (Mixpanel).</p
     <h4 class="name" id="getSpId"><span class="type-signature">(async) </span>getSpId<span class="signature">()</span><span class="type-signature"> &rarr; {string|null}</span></h4>
 
     
+    <p class="summary"><p>Retrieve the sp_id (Varnish ID)</p></p>
+    
 
 
 
@@ -1476,7 +1498,7 @@ The unique visitor id can be used to track the user for analytics (Mixpanel).</p
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="identity.js.html">identity.js</a>, <a href="identity.js.html#line470">line 470</a>
+        <a href="identity.js.html">identity.js</a>, <a href="identity.js.html#line489">line 489</a>
     </li></ul></dd>
     
 
@@ -1523,7 +1545,8 @@ The unique visitor id can be used to track the user for analytics (Mixpanel).</p
 
 
 <div class="description">
-    <p>Retrieve the sp_id (Varnish ID)</p>
+    <p>This function calls <a href="Identity.html#hasSession"><code>Identity#hasSession</code></a> internally and thus has the side
+effect that it might perform an auto-login on the user</p>
 </div>
 
 
@@ -1596,7 +1619,7 @@ The unique visitor id can be used to track the user for analytics (Mixpanel).</p
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="identity.js.html">identity.js</a>, <a href="identity.js.html#line506">line 506</a>
+        <a href="identity.js.html">identity.js</a>, <a href="identity.js.html#line525">line 525</a>
     </li></ul></dd>
     
 
@@ -2077,7 +2100,7 @@ legacy/stable SPiD flow?</p></td>
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="identity.js.html">identity.js</a>, <a href="identity.js.html#line539">line 539</a>
+        <a href="identity.js.html">identity.js</a>, <a href="identity.js.html#line558">line 558</a>
     </li></ul></dd>
     
 
@@ -2185,7 +2208,7 @@ not work for <code>http://mysite.news</code> (only <code>https</code>).</p>
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="identity.js.html">identity.js</a>, <a href="identity.js.html#line582">line 582</a>
+        <a href="identity.js.html">identity.js</a>, <a href="identity.js.html#line601">line 601</a>
     </li></ul></dd>
     
 
@@ -2571,7 +2594,7 @@ login? If this parameter is set to false, the <code>acrValues</code> parameter d
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="identity.js.html">identity.js</a>, <a href="identity.js.html#line625">line 625</a>
+        <a href="identity.js.html">identity.js</a>, <a href="identity.js.html#line644">line 644</a>
     </li></ul></dd>
     
 
@@ -2746,7 +2769,7 @@ login? If this parameter is set to false, the <code>acrValues</code> parameter d
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="identity.js.html">identity.js</a>, <a href="identity.js.html#line638">line 638</a>
+        <a href="identity.js.html">identity.js</a>, <a href="identity.js.html#line657">line 657</a>
     </li></ul></dd>
     
 
@@ -2848,7 +2871,7 @@ login? If this parameter is set to false, the <code>acrValues</code> parameter d
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="identity.js.html">identity.js</a>, <a href="identity.js.html#line646">line 646</a>
+        <a href="identity.js.html">identity.js</a>, <a href="identity.js.html#line665">line 665</a>
     </li></ul></dd>
     
 
@@ -2950,7 +2973,7 @@ login? If this parameter is set to false, the <code>acrValues</code> parameter d
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="identity.js.html">identity.js</a>, <a href="identity.js.html#line655">line 655</a>
+        <a href="identity.js.html">identity.js</a>, <a href="identity.js.html#line674">line 674</a>
     </li></ul></dd>
     
 
@@ -3059,7 +3082,7 @@ login? If this parameter is set to false, the <code>acrValues</code> parameter d
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="identity.js.html">identity.js</a>, <a href="identity.js.html#line665">line 665</a>
+        <a href="identity.js.html">identity.js</a>, <a href="identity.js.html#line684">line 684</a>
     </li></ul></dd>
     
 
@@ -3243,7 +3266,7 @@ login? If this parameter is set to false, the <code>acrValues</code> parameter d
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="identity.js.html">identity.js</a>, <a href="identity.js.html#line679">line 679</a>
+        <a href="identity.js.html">identity.js</a>, <a href="identity.js.html#line698">line 698</a>
     </li></ul></dd>
     
 
@@ -3427,7 +3450,7 @@ login? If this parameter is set to false, the <code>acrValues</code> parameter d
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="identity.js.html">identity.js</a>, <a href="identity.js.html#line693">line 693</a>
+        <a href="identity.js.html">identity.js</a>, <a href="identity.js.html#line712">line 712</a>
     </li></ul></dd>
     
 
@@ -5442,7 +5465,7 @@ no logged-in user neither before nor after <a href="Identity.html#hasSession"><c
 <br class="clear">
 
 <footer>
-    Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.5.5</a> on Fri May 25 2018 13:27:17 GMT+0000 (UTC) using the <a href="https://github.com/clenemt/docdash">docdash</a> theme.
+    Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.5.5</a> on Sun May 27 2018 10:05:29 GMT+0000 (UTC) using the <a href="https://github.com/clenemt/docdash">docdash</a> theme.
 </footer>
 
 <script>prettyPrint();</script>
