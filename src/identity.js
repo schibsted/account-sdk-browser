@@ -317,8 +317,13 @@ export class Identity extends EventEmitter {
     }
 
     /**
-     * Queries the hassession endpoint
-     * @param {boolean} [autologin=true] -
+     * @summary Queries the hassession endpoint and returns information about the status of the user
+     * @description When we send a request to this endpoint, cookies sent along with the request
+     * determines the status of the user. If the user is not currently logged in, but has a cookie
+     * with the "Remember me" flag switched on, calling this function will attempt to automatically
+     * perform a login on the user
+     * @param {boolean} [autologin=true] - Set this to `false` if you do **not** want the auto-login
+     * to happen
      * @throws {SDKError} - If the call to the hasSession service fails in any way (this will happen
      * if, say, the user is not logged in)
      * @fires Identity#visitor
@@ -368,8 +373,10 @@ export class Identity extends EventEmitter {
     }
 
     /**
-     * Allows the client app to check if the user is logged in to Schibsted's Single Sign On (SSO)
-     * solution (SPiD).
+     * @summary Allows the client app to check if the user is logged in to Schibsted's Single Sign
+     * On (SSO) solution (SPiD).
+     * @description This function calls {@link Identity#hasSession} internally and thus has the side
+     * effect that it might perform an auto-login on the user
      * @return {boolean}
      */
     async isLoggedIn() {
@@ -382,9 +389,11 @@ export class Identity extends EventEmitter {
     }
 
     /**
-     * Allows the caller to check if the current user is connected to the client_id in Schibsted's
-     * Single Sign On (SSO) solution (SPiD). Being connected means that the user has agreed for
-     * their account to be used by your web app and have accepted the required terms.
+     * @summary Allows the caller to check if the current user is connected to the client_id in
+     * Schibsted's Single Sign On (SSO) solution (SPiD). Being connected means that the user has
+     * agreed for their account to be used by your web app and have accepted the required terms
+     * @description This function calls {@link Identity#hasSession} internally and thus has the side
+     * effect that it might perform an auto-login on the user
      * @summary Check if the user is connected to the client_id
      * @return {boolean}
      */
@@ -400,7 +409,9 @@ export class Identity extends EventEmitter {
     }
 
     /**
-     * Returns information about the user
+     * @summary Returns information about the user
+     * @description This function calls {@link Identity#hasSession} internally and thus has the side
+     * effect that it might perform an auto-login on the user
      * @throws {SDKError} If the user isn't connected to the merchant
      * @throws {SDKError} If we couldn't get the user
      * @return {HasSessionSuccessResponse}
@@ -414,12 +425,14 @@ export class Identity extends EventEmitter {
     }
 
     /**
-     * In Schibsted Account, there are two ways of identifying a user; the `userId` and the `uuid`.
-     * There are reasons for them both existing. The `uuid` is universally unique, and we recommend
-     * that you use that whenever that works for you. The `userId` is a numeric identifier, but
+     * @summary In Schibsted Account, there are two ways of identifying a user; the `userId` and the
+     * `uuid`. There are reasons for them both existing. The `userId` is a numeric identifier, but
      * since Schibsted Account is deployed separately in Norway and Sweden, there are a lot of
      * duplicates. The `userId` was introduced early, so many sites still need to use them for
-     * legacy reasons
+     * legacy reasons. The `uuid` is universally unique, and so — if we could disregard a lot of
+     * Schibsted components depending on the numeric `userId` — it would be a good identifier to use
+     * @description This function calls {@link Identity#hasSession} internally and thus has the side
+     * effect that it might perform an auto-login on the user
      * @throws {SDKError} If the user isn't connected to the merchant
      * @return {string} The `userId` field (not to be confused with the `uuid`)
      */
@@ -432,12 +445,14 @@ export class Identity extends EventEmitter {
     }
 
     /**
-     * In Schibsted Account, there are two ways of identifying a user; the `userId` and the `uuid`.
-     * There are reasons for them both existing. The `uuid` is universally unique, and might be
-     * recommended for all use at a future time. The `userId` is a numeric identifier, but since
-     * Schibsted Account is deployed separately in Norway and Sweden, there are a lot of duplicates
-     * in these two environments. The `userId` was introduced early, so many sites still need to use
-     * them for legacy reasons
+     * @summary In Schibsted Account, there are two ways of identifying a user; the `userId` and the
+     * `uuid`. There are reasons for them both existing. The `userId` is a numeric identifier, but
+     * since Schibsted Account is deployed separately in Norway and Sweden, there are a lot of
+     * duplicates. The `userId` was introduced early, so many sites still need to use them for
+     * legacy reasons. The `uuid` is universally unique, and so — if we could disregard a lot of
+     * Schibsted components depending on the numeric `userId` — it would be a good identifier to use
+     * @description This function calls {@link Identity#hasSession} internally and thus has the side
+     * effect that it might perform an auto-login on the user
      * @throws {SDKError} If the user isn't connected to the merchant
      * @return {string} The `uuid` field (not to be confused with the `userId`)
      */
@@ -450,8 +465,10 @@ export class Identity extends EventEmitter {
     }
 
     /**
-     * This is how we identify the current visitor whether logged in or not.
-     * The unique visitor id can be used to track the user for analytics (Mixpanel).
+     * @summary This is how we identify the current visitor whether logged in or not. The unique
+     * visitor id can be used to track the user for analytics (Mixpanel)
+     * @description This function calls {@link Identity#hasSession} internally and thus has the side
+     * effect that it might perform an auto-login on the user
      * @return {string}
      */
     async getVisitorId() {
@@ -463,7 +480,9 @@ export class Identity extends EventEmitter {
     }
 
     /**
-     * Retrieve the sp_id (Varnish ID)
+     * @summary Retrieve the sp_id (Varnish ID)
+     * @description This function calls {@link Identity#hasSession} internally and thus has the side
+     * effect that it might perform an auto-login on the user
      * @todo Is this an accurate description?
      * @return {string|null} - The sp_id string or null (if the server didn't return it)
      */
