@@ -12,7 +12,7 @@ import * as popup from './popup';
 import RESTClient from './RESTClient';
 import * as spidTalk from './spidTalk';
 
-const globalWindow = window;
+const globalWindow = () => window; // eslint-disable-line require-jsdoc
 
 /**
  * Provides features related to payment
@@ -25,7 +25,7 @@ export class Payment {
      * @param {string} [options.env=PRE] - Schibsted Account environment: `PRE`, `PRO` or `PRO_NO`
      * @throws {SDKError} - If any of options are invalid
      */
-    constructor({ clientId, redirectUri, env = 'PRE', window = globalWindow }) {
+    constructor({ clientId, redirectUri, env = 'PRE', window = globalWindow() }) {
         spidTalk.emulate(window);
         assert(isNonEmptyString(clientId), 'clientId parameter is required');
 

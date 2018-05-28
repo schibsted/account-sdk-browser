@@ -67,7 +67,7 @@ import * as spidTalk from './spidTalk';
  */
 
 const HAS_SESSION_CACHE_KEY = 'hasSession-cache';
-const globalWindow = window;
+const globalWindow = () => window; // eslint-disable-line require-jsdoc
 
 /**
  * Get type and value of something
@@ -95,7 +95,7 @@ export class Identity extends EventEmitter {
      * no logging will be done
      * @throws {SDKError} - If any of options are invalid
      */
-    constructor({ clientId, redirectUri, env = 'PRE', log, window = globalWindow }) {
+    constructor({ clientId, redirectUri, env = 'PRE', log, window = globalWindow() }) {
         super();
         assert(isNonEmptyString(clientId), 'clientId parameter is required');
         assert(isObject(window), 'The reference to window is missing');
