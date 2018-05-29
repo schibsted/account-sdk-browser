@@ -5,6 +5,7 @@
 'use strict';
 
 import Identity from '../identity';
+import { compareUrls } from './utils';
 import { URL } from 'url';
 import { URL as u } from 'whatwg-url';
 
@@ -123,8 +124,6 @@ describe('Identity', () => {
     });
 
     describe('loginUrl()', () => {
-        const testutils = require('../utils/testutils');
-
         test('returns the expected endpoint for old flows', () => {
             const identity = new Identity({
                 env: 'PRO_NO',
@@ -132,11 +131,11 @@ describe('Identity', () => {
                 redirectUri: 'http://example.com',
                 window: {},
             });
-            testutils.compareUrls(identity.loginUrl(
+            compareUrls(identity.loginUrl(
                 'dummy-state',
                 'otp-email',
-                undefined, // eslint-disable-line no-undefined
-                undefined, // eslint-disable-line no-undefined
+                undefined,
+                undefined,
                 false,
                 'dev@spid.no'
             ), 'https://payment.schibsted.no/flow/login?client_id=foo&state=dummy-state&scope=openid&response_type=code&redirect_uri=http%3A%2F%2Fexample.com&email=dev@spid.no');
@@ -149,11 +148,11 @@ describe('Identity', () => {
                 redirectUri: 'http://example.com',
                 window: {},
             });
-            testutils.compareUrls(identity.loginUrl(
+            compareUrls(identity.loginUrl(
                 'dummy-state',
-                undefined, // eslint-disable-line no-undefined
-                undefined, // eslint-disable-line no-undefined
-                undefined, // eslint-disable-line no-undefined
+                undefined,
+                undefined,
+                undefined,
                 true,
                 'dev@spid.no'
             ), 'https://login.schibsted.com/oauth/authorize?new-flow=true&redirect_uri=http%3A%2F%2Fexample.com&client_id=foo&state=dummy-state&response_type=code&scope=openid&login_hint=dev@spid.no');

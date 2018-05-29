@@ -1,5 +1,6 @@
 rules:
     require-jsdoc: 0
+    no-undefined: 0
 globals:
     beforeAll: true
     expect: true

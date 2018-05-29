@@ -49,7 +49,7 @@ describe('object', () => {
         });
 
         test('ignores the values that are undefined', () => {
-            const obj = { a: 19834, b: undefined, c: 'to be deleted' }; // eslint-disable-line no-undefined
+            const obj = { a: 19834, b: undefined, c: 'to be deleted' };
             delete obj.c;
             const clonedObj = cloneDefined(obj);
             expect(clonedObj).toEqual({ a: 19834 });

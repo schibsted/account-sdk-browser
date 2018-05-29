@@ -2,24 +2,24 @@
  * See LICENSE.md in the project root.
  */
 
-import * as testUtils from '../utils/testutils';
+import { compareUrls } from './utils';
 
 describe('testutils', () => {
     describe('equal', () => {
         test('can compare simple urls', () => {
-            testUtils.compareUrls('https://example.com', 'https://example.com');
+            compareUrls('https://example.com', 'https://example.com');
         });
 
         test('can compare urls searchParams', () => {
-            testUtils.compareUrls('https://example.com?foo=bar', 'https://example.com?foo=bar');
+            compareUrls('https://example.com?foo=bar', 'https://example.com?foo=bar');
         });
 
         test('can compare multiple urls searchParams', () => {
-            testUtils.compareUrls('https://example.com?foo=bar&baz=qux', 'https://example.com?baz=qux&foo=bar');
+            compareUrls('https://example.com?foo=bar&baz=qux', 'https://example.com?baz=qux&foo=bar');
         });
 
         test('can compare searchParams with multivalues', () => {
-            testUtils.compareUrls('https://example.com?foo=bar&foo=qux', 'https://example.com?foo=qux&foo=bar');
+            compareUrls('https://example.com?foo=bar&foo=qux', 'https://example.com?foo=qux&foo=bar');
         });
     });
 });
