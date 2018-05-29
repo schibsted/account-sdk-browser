@@ -45,7 +45,8 @@ function encode(str) {
     return encodeURIComponent(str).replace(/[!'()~]|%20|%00/g, match => replace[match]);
 }
 
-const globalFetch = window.fetch && window.fetch.bind(window);
+// eslint-disable-next-line require-jsdoc
+const globalFetch = () => window.fetch && window.fetch.bind(window);
 
 /**
  * This class can be used for creating a wrapper around a server and all its endpoints.
@@ -73,7 +74,7 @@ export class RESTClient {
      * @param {object} [options.defaultParams={}] - a set of parameters to add to every call custom.
      *        As long as it supports the standard fetch API we're good.
      */
-    constructor({ serverUrl = 'PRE', envDic, fetch = globalFetch, log, defaultParams = {}}) {
+    constructor({ serverUrl = 'PRE', envDic, fetch = globalFetch(), log, defaultParams = {}}) {
         assert(isObject(defaultParams), `defaultParams should be a non-null object`);
 
         this.url = new URL(urlMapper(serverUrl, envDic));

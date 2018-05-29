@@ -13,7 +13,7 @@ import Cache from './cache';
 import * as spidTalk from './spidTalk';
 
 const DEFAULT_CACHE_EXPIRES_IN = 30;
-const globalWindow = window;
+const globalWindow = () => window; // eslint-disable-line require-jsdoc
 
 /**
  * Provides features related to monetization
@@ -26,7 +26,7 @@ export class Monetization extends EventEmitter {
      * @param {string} [options.env=PRE] - Schibsted Account environment: `PRE`, `PRO` or `PRO_NO`
      * @throws {SDKError} - If any of options are invalid
      */
-    constructor({ clientId, redirectUri, env = 'PRE', window = globalWindow }) {
+    constructor({ clientId, redirectUri, env = 'PRE', window = globalWindow() }) {
         super();
         spidTalk.emulate(window);
         // validate options
