@@ -22,7 +22,7 @@ rules:
           FunctionDeclaration: true
           ClassDeclaration: true
           MethodDefinition: true
-          ArrowFunctionExpression: true
+          ArrowFunctionExpression: false
           FunctionExpression: true
     valid-jsdoc:
       - warn

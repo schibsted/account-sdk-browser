@@ -12,7 +12,7 @@ import * as popup from './popup';
 import RESTClient from './RESTClient';
 import * as spidTalk from './spidTalk';
 
-const globalWindow = () => window; // eslint-disable-line require-jsdoc
+const globalWindow = () => window;
 
 /**
  * Provides features related to payment
