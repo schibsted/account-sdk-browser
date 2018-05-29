@@ -1,5 +1,24 @@
 # Changelog
 
+## v3.0.0-rc.4 (2018-05-29)
+
+### Fixes
+
+* [#37](https://github.com/schibsted/account-sdk-browser/issues/37) — The files in the `es5`
+  directory have been rewritten to CommonJS syntax (yes, like in the good 'ol days). I still don't
+  fully understand what was happening here, but at least now it seems like it works for people
+* [#40](https://github.com/schibsted/account-sdk-browser/issues/40) — Events are now emitted from
+  Identity when a call to `hasSession()` used a cached value
+* [#41](https://github.com/schibsted/account-sdk-browser/issues/41) — References to the global
+  `window` have all been wrapped in functions, so that it can be loaded in Server-side rendering
+  contexts
+* The caching could fail if the cache time in milliseconds were greater than `2^31 - 1` (just under
+  25 days). This has been fixed by capping the cache time to that maximum value
+
+### Changes
+
+* Documentation for the `Identity` class has been updated
+
 ## v3.0.0-rc.3 (2018-05-14)
 
 ### Fixes
