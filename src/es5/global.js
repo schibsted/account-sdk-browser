@@ -8,11 +8,6 @@
 
 'use strict';
 
-const regeneratorRuntime = require('regenerator-runtime');
-const { Identity } = require('../identity');
-const { Monetization } = require('../monetization');
-const { Payment } = require('../payment');
+const { Identity, Monetization, Payment } = require('./index');
 
-module.exports = { Identity, Monetization, Payment };
-
-Object.assign(window, { Identity, Monetization, Payment, regeneratorRuntime });
+Object.assign(window, { Identity, Monetization, Payment });
