@@ -315,7 +315,6 @@ browser side. Nevertheless, here is a short description of them.
      they don't have to authenticate again. If it is `false`, it should be interpreted as the user
      does not want to be automatically logged in to any site when their session expires
    * `v`: the version number
-1. The **visitor** cookie: Cookie name in production environments is `spiduid`.
 1. The **session** cookies: Cookie names in production environments are `identity`, and `SPID_SE` or
    `SPID_NO`. It contains:
    * `user`: an object (if it's missing, a call to hassession will return a `401` with a

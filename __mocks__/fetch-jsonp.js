@@ -11,10 +11,6 @@ const mockHasSessionLoginRequired = {
         serverTime: 1520599943,
         expiresIn: null,
         baseDomain: 'localhost',
-        visitor: {
-            uid: 'Xytpn4Xoi8rb9Xso27ks',
-            user_id: '36424'
-        }
     }
 };
 const mockHasSessionUserException = {
@@ -28,20 +24,12 @@ const mockHasSessionUserException = {
         serverTime: 1520599943,
         expiresIn: null,
         baseDomain: 'localhost',
-        visitor: {
-            uid: 'Xytpn4Xoi8rb9Xso27ks',
-            user_id: '36424'
-        }
     }
 };
 const mockSPiDOk = {
     result: true,
     serverTime: 1520610964,
     expiresIn: 2592000,
-    visitor: {
-        uid: '1234',
-        user_id: '12345'
-    },
     id: '59e9eaaaacb3ad0aaaedaaaa',
     userId: 12345,
     uuid: 'aaaaaaaa-de42-5c4b-80ee-eeeeeeeeeeee',
@@ -61,10 +49,6 @@ const mockSPiDProduct = {
     result: true,
     serverTime: 1520610964,
     expiresIn: 2592000,
-    visitor: {
-        uid: '1234',
-        user_id: '12345'
-    },
     id: '59e9eaaaacb3ad0aaaedaaaa',
     userId: 12345,
     uuid: 'aaaaaaaa-de42-5c4b-80ee-eeeeeeeeeeee',
@@ -83,10 +67,6 @@ const mockSPiDProduct = {
 const mockSPiDProductNoExpires = {
     result: true,
     serverTime: 1520610964,
-    visitor: {
-        uid: '1234',
-        user_id: '12345'
-    },
     id: '59e9eaaaacb3ad0aaaedaaaa',
     userId: 12345,
     uuid: 'aaaaaaaa-de42-5c4b-80ee-eeeeeeeeeeee',
