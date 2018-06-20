@@ -31,9 +31,6 @@ import * as spidTalk from './spidTalk';
  * @property {string} sig - Example: 'NCdzXaz4ZRb7...' The sig parameter is a concatenation of an
  * HMAC SHA-256 signature string, a dot (.) and a base64url encoded JSON object (session). @see
  * http://techdocs.spid.no/sdks/js/response-signature-and-validation/
- * @property {object} visitor
- * @property {string} visitor.uid - Example: 'Xtvqe0Xoo8ninX70izuy'
- * @property {string} visitor.user_id - Example: '37162'
  * @property {string} displayName - (Only for connected users) Example: 'batman'
  * @property {string} givenName - (Only for connected users) Example: 'Bruce'
  * @property {string} familyName - (Only for connected users) Example: 'Wayne'
@@ -61,9 +58,6 @@ import * as spidTalk from './spidTalk';
  * @property {number} response.expiresIn - Time span in milliseconds. Example: 30 * 60 * 1000 (for 30 minutes)
  * @property {boolean} response.result
  * @property {number} response.serverTime - Server time in seconds since the Unix Epoch. Example: 1506287788
- * @property {object} response.visitor
- * @property {string} response.visitor.uid - Example: "Xg1dc8Xowsz3dXc5fd3j"
- * @property {boolean} response.visitor.user_id
  */
 
 const HAS_SESSION_CACHE_KEY = 'hasSession-cache';
@@ -189,13 +183,6 @@ export class Identity extends EventEmitter {
      * @returns {void}
      */
     _emitSessionEvent(previous, current) {
-        /**
-         * Emitted when there is a visitor property in the response from {@link Identity#hasSession}
-         * @event Identity#visitor
-         */
-        if (current.visitor) {
-            this.emit('visitor', current.visitor);
-        }
         /**
          * Emitted when the user is logged in (This happens as a result of calling
          * {@link Identity#hasSession}, so it is also emitted if the user was previously logged in)
@@ -326,7 +313,6 @@ export class Identity extends EventEmitter {
      * to happen
      * @throws {SDKError} - If the call to the hasSession service fails in any way (this will happen
      * if, say, the user is not logged in)
-     * @fires Identity#visitor
      * @fires Identity#login
      * @fires Identity#logout
      * @fires Identity#userChange
@@ -462,21 +448,6 @@ export class Identity extends EventEmitter {
             return user.uuid;
         }
         throw new SDKError('The user is not connected to this merchant');
-    }
-
-    /**
-     * @summary This is how we identify the current visitor whether logged in or not. The unique
-     * visitor id can be used to track the user for analytics (Mixpanel)
-     * @description This function calls {@link Identity#hasSession} internally and thus has the side
-     * effect that it might perform an auto-login on the user
-     * @return {string}
-     */
-    async getVisitorId() {
-        const user = await this.hasSession()
-        if (user.visitor && user.visitor.uid) {
-            return user.visitor.uid;
-        }
-        throw new SDKError('No visitor id available for this user');
     }
 
     /**
