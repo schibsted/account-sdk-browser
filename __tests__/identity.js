@@ -378,8 +378,17 @@ describe('Identity', () => {
             });
         });
 
+        test(`should fail when we get a 'userId' from hasSession but result is false`, async () => {
+            const result = { result: false, userId: '123' };
+            fetch.mockImplementationOnce(() => ({ ok: true, json: async () => (result) }));
+            await expect(identity.getUserId()).rejects.toMatchObject({
+                message: 'The user is not connected to this merchant'
+            });
+        });
+
         test(`should work when we get a 'userId' from hasSession`, async () => {
-            fetch.mockImplementationOnce(() => ({ ok: true, json: async () => ({ userId: '123' }) }));
+            const result = { result: true, userId: '123' };
+            fetch.mockImplementationOnce(() => ({ ok: true, json: async () => (result) }));
             await expect(identity.getUserId()).resolves.toBe('123');
         });
 
@@ -407,8 +416,17 @@ describe('Identity', () => {
             });
         });
 
+        test(`should fail when we get a 'uuid' from hasSession but result is false`, async () => {
+            const result = { result: false, uuid: '123' };
+            fetch.mockImplementationOnce(() => ({ ok: true, json: async () => (result) }));
+            await expect(identity.getUserUuid()).rejects.toMatchObject({
+                message: 'The user is not connected to this merchant'
+            });
+        });
+
         test(`should work when we get a 'uuid' from hasSession`, async () => {
-            fetch.mockImplementationOnce(() => ({ ok: true, json: async () => ({ uuid: '123' }) }));
+            const result = { result: true, uuid: '123' };
+            fetch.mockImplementationOnce(() => ({ ok: true, json: async () => (result) }));
             await expect(identity.getUserUuid()).resolves.toBe('123');
         });
 

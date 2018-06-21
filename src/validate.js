@@ -69,7 +69,7 @@ export function isNonEmptyObj(value) {
 }
 
 /**
- * Checks if a given string is a valid URL TODO test me
+ * Checks if a given string is a valid URL
  * @memberof core
  * @param {string} value - The string to be tested
  * @param {...string} [mandatoryFields] - A list of mandatory fields that should exist in the parsed
@@ -87,7 +87,6 @@ export function isUrl(value, ...mandatoryFields) {
 
 /**
  * Checks if a given value is a function
- * TODO test me
  * @memberof core
  * @param {*} value - The value to check
  * @return {boolean}
