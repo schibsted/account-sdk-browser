@@ -635,10 +635,14 @@ export class Identity extends EventEmitter {
 
     /**
      * The phone editing page url
+     * @param {string} [redirectUri=this.redirectUri]
      * @return {string}
      */
-    phonesUrl() {
-        return this._spid.makeUrl('account/phones');
+    phonesUrl(redirectUri = this.redirectUri) {
+        return this._spid.makeUrl('account/phones', {
+            response_type: 'code',
+            redirect_uri: redirectUri
+        });
     }
 
     /**
