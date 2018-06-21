@@ -289,16 +289,6 @@ export class Identity extends EventEmitter {
         if (!this.setVarnishCookie) {
             return;
         }
-        this._setVarnishCookie(sessionData);
-    }
-
-    /**
-     * Set the Varnish cookie
-     * @private
-     * @param {HasSessionSuccessResponse} sessionData
-     * @returns {void}
-     */
-    _setVarnishCookie(sessionData) {
         const date = new Date();
         const validExpires = this.varnishExpiresIn
             || typeof sessionData.expiresIn === 'number' && sessionData.expiresIn > 0;
@@ -319,6 +309,26 @@ export class Identity extends EventEmitter {
             `domain=.${domain}`
         ].join('; ');
         document.cookie = cookie;
+    }
+
+    /**
+     * Clear the Varnish cookie if configured
+     * @private
+     * @returns {void}
+     */
+    _maybeClearVarnishCookie() {
+        if (this.setVarnishCookie) {
+            this._clearVarnishCookie();
+        }
+    }
+
+    /**
+     * Clear the Varnish cookie
+     * @private
+     * @returns {void}
+     */
+    _clearVarnishCookie() {
+        document.cookie = 'SP_ID=nothing; expires=Thu, 01 Jan 1970 00:00:00 GMT; path=/; domain=.';
     }
 
     /**
@@ -566,7 +576,8 @@ export class Identity extends EventEmitter {
             booleanize(this._bffService.get('api/identity/logout')),
         ]);
         if (spidLoggedOut || bffLoggedOut) {
-            this.cache.delete(HAS_SESSION_CACHE_KEY);
+            this._initCache();
+            this._maybeClearVarnishCookie();
             this.emit('logout');
         } else {
             const err = new SDKError('Could not log out from any endpoint');

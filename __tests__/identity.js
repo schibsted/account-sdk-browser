@@ -181,7 +181,7 @@ describe('Identity', () => {
         beforeEach(() => {
             fetch.mockClear();
             identity = new Identity({ clientId: 'foo', redirectUri: 'http://example.com' });
-            identity._setVarnishCookie({});
+            identity._clearVarnishCookie();
         });
 
         test('Calls hasSession with autologin=1 (not "true")', async () => {
@@ -268,6 +268,16 @@ describe('Identity', () => {
             await identity.hasSession();
             await new Promise((resolve) => setTimeout(resolve, 1010));
             expect(document.cookie).toBe('SP_ID=should_remain_after_one_sec');
+        });
+
+        test('should work to clear varnish cookie', async () => {
+            identity.enableVarnishCookie(3);
+            const session = { result: true, sp_id: 'should_be_cleared', expiresIn: 1 };
+            fetch.mockImplementationOnce(async () => ({ ok: true, json: async() => session }));
+            await identity.hasSession();
+            expect(document.cookie).toBe('SP_ID=should_be_cleared');
+            identity._maybeClearVarnishCookie();
+            expect(document.cookie).toBe('');
         });
 
         describe('`baseDomain`', () => {
