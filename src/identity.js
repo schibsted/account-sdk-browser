@@ -623,18 +623,26 @@ export class Identity extends EventEmitter {
 
     /**
      * The account summary page url
+     * @param {string} [redirectUri=this.redirectUri]
      * @return {string}
      */
-    accountUrl() {
-        return this._spid.makeUrl('account/summary');
+    accountUrl(redirectUri = this.redirectUri) {
+        return this._spid.makeUrl('account/summary', {
+            response_type: 'code',
+            redirect_uri: redirectUri
+        });
     }
 
     /**
      * The phone editing page url
+     * @param {string} [redirectUri=this.redirectUri]
      * @return {string}
      */
-    phonesUrl() {
-        return this._spid.makeUrl('account/phones');
+    phonesUrl(redirectUri = this.redirectUri) {
+        return this._spid.makeUrl('account/phones', {
+            response_type: 'code',
+            redirect_uri: redirectUri
+        });
     }
 
     /**

@@ -2,7 +2,7 @@
  * See LICENSE.md in the project root.
  */
 
-import { assert, isObject, isUrl } from './validate';
+import { assert, isObject, isUrl, isFunction } from './validate';
 import { cloneDefined } from './object';
 
 /**
@@ -37,8 +37,12 @@ const defaultWindowFeatures = {
  * @returns {Window|null} - A reference to the popup window
  * @private
  */
-export function open(parentWindow, url, windowName = '', windowFeatures) {
+export function open(parentWindow, url, windowName = '', windowFeatures = {}) {
     assert(isObject(parentWindow), `window was supposed to be an object but it is ${parentWindow}`);
+    assert(isObject(parentWindow.screen),
+        `window should be a valid Window object but it lacks a 'screen' property`);
+    assert(isFunction(parentWindow.open),
+        `window should be a valid Window object but it lacks an 'open' function`);
     assert(isUrl(url), 'Invalid URL for popup');
 
     const { height, width } = parentWindow.screen;

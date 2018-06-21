@@ -4,7 +4,7 @@
 
 'use strict';
 
-import { isStr, isNonEmptyString, isObject, isNonEmptyObj } from '../src/validate';
+import { isStr, isStrIn, isNonEmptyString, isObject, isNonEmptyObj } from '../src/validate';
 
 describe('validate', () => {
 
@@ -32,6 +32,49 @@ describe('validate', () => {
             expect(isStr('hi')).toBe(true);
         });
 
+    });
+
+    describe('isStrIn()', () => {
+
+        test('returns false for non strings as value', () => {
+            expect(isStrIn()).toBe(false);
+            expect(isStrIn(0)).toBe(false);
+            expect(isStrIn(1)).toBe(false);
+            expect(isStrIn(null)).toBe(false);
+            expect(isStrIn({})).toBe(false);
+            expect(isStrIn([])).toBe(false);
+            expect(isStrIn(true)).toBe(false);
+        });
+
+        test('returns false when options are empty', () => {
+            expect(isStrIn('hi', [])).toBe(false);
+            expect(isStrIn('', [])).toBe(false);
+            expect(isStrIn(undefined, [])).toBe(false);
+        });
+
+        test('returns false when options include value, case is wrong and sensitive=true', () => {
+            expect(isStrIn('hi', ['HI'], true)).toBe(false);
+            expect(isStrIn('hi', ['ho', 'HI'], true)).toBe(false);
+            expect(isStrIn('hi', ['Hi'], true)).toBe(false);
+        });
+
+        test('returns true when options include value, case is wrong and sensitive=false', () => {
+            expect(isStrIn('hi', ['HI'])).toBe(true);
+            expect(isStrIn('hi', ['ho', 'HI'])).toBe(true);
+            expect(isStrIn('hi', ['Hi'])).toBe(true);
+        });
+
+        test('returns true when options include value, case is correct and sensitive=true', () => {
+            expect(isStrIn('hi', ['hi'], true)).toBe(true);
+            expect(isStrIn('hi', ['ho', 'hi'], true)).toBe(true);
+            expect(isStrIn('hi', ['hi'], true)).toBe(true);
+        });
+
+        test('returns true when options include value, case is correct and sensitive=false', () => {
+            expect(isStrIn('hi', ['hi'])).toBe(true);
+            expect(isStrIn('hi', ['ho', 'hi'])).toBe(true);
+            expect(isStrIn('hi', ['hi'])).toBe(true);
+        });
     });
 
     describe('isObject()', () => {
