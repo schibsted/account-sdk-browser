@@ -553,8 +553,6 @@ export class Identity extends EventEmitter {
 
     /**
      * Generates the link to the new login page that'll be used in the popup or redirect flow
-     * @todo For now this leads to the same page as signup, some way to swich login tab in UI would
-     * be nice
      * @param {string} state - An opaque value used by the client to maintain state between the
      * request and callback. It's also recommended to prevent CSRF.
      * @see https://tools.ietf.org/html/rfc6749#section-10.12
