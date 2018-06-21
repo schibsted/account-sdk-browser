@@ -1,5 +1,26 @@
 # Changelog
 
+## v3.0.0-rc.5 (2018-06-21)
+
+### Breaking changes
+
+* The 'visitor' concept is being removed both from the Schibsted account backend and thus also from
+  the SDKs. This means that `Identity.getVisitorId` and all references to `visitor` including the
+  emitting of the `visitor` event is removed in this version. If you depend on it, now's the time to
+  stop doing that.
+
+### Fixes
+
+* The ES5 global file should now work correctly. Yeah — before, I once again failed to fix it, by
+  not making sure that the symbol `regeneratorRuntime` was bound to the `window` globally **before**
+  loading `Identity`, `Monetization` and `Payment`. Third time's the charm, though 🤞🏼
+* Both `Identity.getUserId` and `Identity.getUserUuid` now behave according to their documentation,
+  which is to say that they reject the returned Promise if the user is logged in, but not connected
+  to this merchant.
+* Two functions, `Identity.accountUrl` and `Identity.phonesUrl` did not take a `redirectUri`
+  parameter, causing the Schibsted account backend to render a default `Back to [Site]` link on that
+  web page. Now you should be able to pick any valid redirect uri here.
+
 ## v3.0.0-rc.4 (2018-05-29)
 
 ### Fixes
