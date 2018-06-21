@@ -424,7 +424,7 @@ export class Identity extends EventEmitter {
      */
     async getUserId() {
         const user = await this.hasSession();
-        if (user.userId) {
+        if (user.userId && user.result) {
             return user.userId;
         }
         throw new SDKError('The user is not connected to this merchant');
@@ -444,7 +444,7 @@ export class Identity extends EventEmitter {
      */
     async getUserUuid() {
         const user = await this.hasSession();
-        if (user.uuid) {
+        if (user.uuid && user.result) {
             return user.uuid;
         }
         throw new SDKError('The user is not connected to this merchant');
