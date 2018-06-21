@@ -445,59 +445,26 @@ describe('Identity', () => {
         });
     });
 
-    describe('accountUrl()', () => {
-        test('returns the expected endpoint with standard redirectUri and code', () => {
-            const identity = new Identity({
-                clientId: 'foo',
-                redirectUri: 'http://example.com',
+    describe('*Url()', () => {
+        const redirects = [undefined, 'http://other.example.com'];
+        describe.each(redirects)(`redirect='%s'`, (redirect) => {
+            const urlFunctions = [
+                ['accountUrl', '/account/summary'],
+                ['phonesUrl', '/account/phones'],
+                ['logoutUrl', '/logout'],
+                ['authFlowUrl', '/flow/auth'],
+                ['signupFlowUrl', '/flow/signup'],
+                ['signinFlowUrl', '/flow/signin'],
+            ];
+            test.each(urlFunctions)('%s -> %s', (func, pathname) => {
+                const identity = new Identity({ clientId: 'foo', redirectUri: 'http://example.com' });
+                const url = new URL(identity[func](redirect));
+                expect(url.origin).toBe('https://identity-pre.schibsted.com');
+                expect(url.pathname).toBe(pathname);
+                expect(url.searchParams.get('client_id')).toBe('foo');
+                expect(url.searchParams.get('response_type')).toBe('code');
+                expect(url.searchParams.get('redirect_uri')).toBe(redirect || identity.redirectUri);
             });
-            const url = new URL(identity.accountUrl());
-            expect(url.origin).toBe('https://identity-pre.schibsted.com');
-            expect(url.pathname).toBe('/account/summary');
-            expect(url.searchParams.get('client_id')).toBe('foo');
-            expect(url.searchParams.get('response_type')).toBe('code');
-            expect(url.searchParams.get('redirect_uri')).toBe('http://example.com');
-        });
-
-        test('returns the expected endpoint with custom redirectUri and code', () => {
-            const identity = new Identity({
-                clientId: 'foo',
-                redirectUri: 'http://example.com',
-            });
-            const url = new URL(identity.accountUrl('http://other.example.com'));
-            expect(url.origin).toBe('https://identity-pre.schibsted.com');
-            expect(url.pathname).toBe('/account/summary');
-            expect(url.searchParams.get('client_id')).toBe('foo');
-            expect(url.searchParams.get('response_type')).toBe('code');
-            expect(url.searchParams.get('redirect_uri')).toBe('http://other.example.com');
-        });
-    });
-
-    describe('phonesUrl()', () => {
-        test('returns the expected endpoint with standard redirectUri and code', () => {
-            const identity = new Identity({
-                clientId: 'foo',
-                redirectUri: 'http://example.com',
-            });
-            const url = new URL(identity.phonesUrl());
-            expect(url.origin).toBe('https://identity-pre.schibsted.com');
-            expect(url.pathname).toBe('/account/phones');
-            expect(url.searchParams.get('client_id')).toBe('foo');
-            expect(url.searchParams.get('response_type')).toBe('code');
-            expect(url.searchParams.get('redirect_uri')).toBe('http://example.com');
-        });
-
-        test('returns the expected endpoint with custom redirectUri and code', () => {
-            const identity = new Identity({
-                clientId: 'foo',
-                redirectUri: 'http://example.com',
-            });
-            const url = new URL(identity.phonesUrl('http://other.example.com'));
-            expect(url.origin).toBe('https://identity-pre.schibsted.com');
-            expect(url.pathname).toBe('/account/phones');
-            expect(url.searchParams.get('client_id')).toBe('foo');
-            expect(url.searchParams.get('response_type')).toBe('code');
-            expect(url.searchParams.get('redirect_uri')).toBe('http://other.example.com');
         });
     });
 });
