@@ -158,6 +158,20 @@ describe('Identity', () => {
             ), 'https://login.schibsted.com/oauth/authorize?new-flow=true&redirect_uri=http%3A%2F%2Fexample.com&client_id=foo&state=dummy-state&response_type=code&scope=openid&login_hint=dev@spid.no');
         });
 
+        test('returns the expected endpoint for new flows with default params', () => {
+            const identity = new Identity({
+                env: 'PRO',
+                clientId: 'foo',
+                redirectUri: 'http://example.com',
+                window: {},
+            });
+            compareUrls(identity.loginUrl(
+                'dummy-state',
+                undefined,
+                undefined,
+                undefined,
+            ), 'https://login.schibsted.com/oauth/authorize?new-flow=true&redirect_uri=http%3A%2F%2Fexample.com&client_id=foo&state=dummy-state&response_type=code&scope=openid&login_hint=');
+        });
     });
 
     describe('hasSession', () => {
@@ -359,6 +373,53 @@ describe('Identity', () => {
             await expect(identity.getUser()).rejects.toMatchObject({
                 message: 'HasSession failed'
             });
+        });
+    });
+
+    describe('_emitSessionEvent', () => {
+        const fetch = require('fetch-jsonp');
+        let identity;
+
+        beforeEach(() => {
+            fetch.mockClear();
+            identity = new Identity({ clientId: 'foo', redirectUri: 'http://example.com' });
+        });
+
+        test(`spy notices a 'login' event`, async () => {
+            const spy = jest.spyOn(identity, 'emit');
+            await identity.hasSession();
+            expect(spy).toHaveProperty('mock.calls.length');
+            expect(spy.mock.calls.length).toBeGreaterThan(0);
+            expect(spy.mock.calls.some(c => c[0] === 'login')).toBe(true);
+        });
+
+        test(`spy notices a 'logout' event`, async () => {
+            await identity.hasSession(); // initialize with a session
+            await identity.logout(); // then log out
+
+            fetch.mockImplementationOnce(() => ({ ok: true, json: async () => ({}) }));
+            const spy = jest.spyOn(identity, 'emit');
+
+            await identity.hasSession(); // then call hassession again, now with logged out user
+
+            expect(spy).toHaveProperty('mock.calls.length');
+            expect(spy.mock.calls.length).toBeGreaterThan(0);
+            expect(spy.mock.calls.some(c => c[0] === 'logout')).toBe(true);
+        });
+
+        test(`spy notices a 'userChange' event`, async () => {
+            await identity.hasSession(); // initialize with a session
+            await identity.logout(); // then log out
+
+            const newUser = { result: true, userId: 99999 };
+            fetch.mockImplementationOnce(() => ({ ok: true, json: async () => (newUser) }));
+            const spy = jest.spyOn(identity, 'emit');
+
+            await identity.hasSession(); // then call hassession again, now with user=newUser
+
+            expect(spy).toHaveProperty('mock.calls.length');
+            expect(spy.mock.calls.length).toBeGreaterThan(0);
+            expect(spy.mock.calls.some(c => c[0] === 'userChange')).toBe(true);
         });
     });
 

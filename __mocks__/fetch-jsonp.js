@@ -131,6 +131,8 @@ const mock = async (url) => {
             }
         }
         return { ok: true, json: async () => mockSPiDProductMissing };
+    } else if (pathname === '/ajax/logout.js') {
+        return { ok: true, json: async () => {} };
     }
     return { statusText: `Unimplemented mock response for url: '${url}'` };
 }
