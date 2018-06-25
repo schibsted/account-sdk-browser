@@ -1,4 +1,4 @@
-# Contributors to Schibsted Account SDK for browsers, who do not necessarily hold the copyright
+# Contributors to Schibsted account SDK for browsers, who do not necessarily hold the copyright
 
 Schibsted Media Products & Technology
 

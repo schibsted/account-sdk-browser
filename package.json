@@ -1,7 +1,7 @@
 {
   "name": "@schibsted/account-sdk-browser",
   "version": "3.0.0-rc.5",
-  "description": "Schibsted Account SDK for browsers",
+  "description": "Schibsted account SDK for browsers",
   "main": "index.js",
   "scripts": {
     "build": "./build.sh",

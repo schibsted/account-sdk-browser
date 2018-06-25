@@ -1,11 +1,11 @@
-# Contributing to Schibsted Account SDK for browsers
+# Contributing to Schibsted account SDK for browsers
 
 Aww, thanks for wanting to help out :tada:! We would be very grateful if you would discuss your idea
 in an issue before implementing it, add tests for new features or bug fixes, and finally validate
 your code (by running `npm test`) before making a PR.
 
 ## Code of Conduct
-The project is governed by the [Schibsted Account Code of Conduct](../CODE_OF_CONDUCT.md). Please
+The project is governed by the [Schibsted account Code of Conduct](../CODE_OF_CONDUCT.md). Please
 report unacceptable behavior to support@spid.no.
 
 ## License

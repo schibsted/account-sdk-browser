@@ -23,7 +23,7 @@ export class Monetization extends EventEmitter {
      * @param {object} options
      * @param {string} options.clientId - Mandatory client id
      * @param {string} [options.redirectUri] - Redirect uri
-     * @param {string} [options.env=PRE] - Schibsted Account environment: `PRE`, `PRO` or `PRO_NO`
+     * @param {string} [options.env=PRE] - Schibsted account environment: `PRE`, `PRO` or `PRO_NO`
      * @throws {SDKError} - If any of options are invalid
      */
     constructor({ clientId, redirectUri, env = 'PRE', window = globalWindow() }) {
@@ -56,7 +56,7 @@ export class Monetization extends EventEmitter {
      * Checks if the user has access to a particular product
      * @param {string} productId
      * @param {string} spId - The spId that was obtained from {@link Identity#hasSession}
-     * @returns {Object|null} The data object returned from Schibsted Account (or `null` if the user
+     * @returns {Object|null} The data object returned from Schibsted account (or `null` if the user
      * doesn't have access to the given product)
      */
     async hasProduct(productId, spId) {
@@ -83,7 +83,7 @@ export class Monetization extends EventEmitter {
      * Checks if the user has access to a particular subscription
      * @param {string} subscriptionId
      * @param {string} spId - The spid that was obtained from {@link Identity#hasSession}
-     * @returns {Object|null} The data object returned from Schibsted Account (or `null` if the user
+     * @returns {Object|null} The data object returned from Schibsted account (or `null` if the user
      * doesn't have access to the given subscription)
      */
     async hasSubscription(subscriptionId, spId) {

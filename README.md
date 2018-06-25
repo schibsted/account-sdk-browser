@@ -4,10 +4,10 @@
 [![Code coverage](https://codecov.io/gh/schibsted/account-sdk-browser/branch/master/graph/badge.svg)](https://codecov.io/gh/schibsted/account-sdk-browser)
 [![Snyk](https://snyk.io/test/github/schibsted/account-sdk-browser/badge.svg?targetFile=package.json)](https://snyk.io/test/github/schibsted/account-sdk-browser)
 
-# Schibsted Account SDK for browsers
+# Schibsted account SDK for browsers
 
-Welcome! This is the home of the Schibsted Account JavaScript SDK for use by any website that wishes
-to use Schibsted Account to sign up and log in users. Use it to generate URLs for your site's "Log
+Welcome! This is the home of the Schibsted account JavaScript SDK for use by any website that wishes
+to use Schibsted account to sign up and log in users. Use it to generate URLs for your site's "Log
 in" button, query the logged-in status of your users, and to check whether they have access to
 products and subscriptions, etc.
 
@@ -45,7 +45,7 @@ document in full. But ok, let's present some highlighted differences:
   because it would only match on domain+path — but not query string. However — this will **not**
   work in the 3.x world. OpenID Connect **does** have a suggestion for how to handle these
   situations though, which is a parameter called `state` that you send in addition to the
-  `redirectUri`. See [this paragraph](#regarding-state) for more information.
+  `redirectUri`. See [this paragraph](#regarding-state) for more information
 * The `'SPiD.'` string is removed from the name of all SDK events. So the event that used to be
    `'SPiD.login'` is now just `'login'`
 * You don't log in by setting `window.location`. Instead, you use the `login()` method on an
@@ -55,22 +55,25 @@ document in full. But ok, let's present some highlighted differences:
    enable setting the `SP_ID` cookie whenever `hasSession()` is called (though most browsers require
    that you are on a "real domain" for this to work — so, **not** `localhost`). Any other cookie
    that you need set, you will have to set yourself
-* You no longer `subscribe` to events but `listen` (using a function `.on` that's compatible with
-   Node's `EventEmitter`). For example `SPiD.event.subscribe('SPiD.login', handler)` becomes
-   `Identity.on('login', handler)`
-* SPiD URI is gone. There are a handful of `***Url()` functions in each SDK for the relevant flows
 * The new SDK uses promises where it makes sense (often written as `async` functions). For example
    `Identity.logout()` returns a promise
+* Listening to events is still supported, although since many functions return Promises, we expect
+   many users will find the use of Promise results preferable. But for those that prefer the events,
+   it works using a function `.on` that's compatible with Node's `EventEmitter`. For example
+   `SPiD.event.subscribe('SPiD.login', handler)` from 2.x becomes `Identity.on('login', handler)`.
+   Also, the functions `.off` and `.once` are supported
+* SPiD URI is gone. There are a handful of `***Url()` functions in each of the `Identity`,
+  `Monetization` and `Payment` classes for the relevant flows
 * The new SDK has inline jsdoc documentation that's available
    [here](https://schibsted.github.io/account-sdk-browser/) instead of tech docs.
    These documents will always be up to date with the latest release so make sure to run `npm
    outdated` in your project to be notified about any new releases
-* The new UI flows are different than the old ones in that they use the Schibsted Account API
+* The new UI flows are different than the old ones in that they use the Schibsted account API
   endpoints just like any other client. For most clients this means absolutely nothing at all, but
   for some, it's quite important; If you have ever asked our support staff to disable certain API
   endpoint accesses, there is a chance that you'll encounter problems. For instance, if you've set
   `NO ACCESS` on the `POST /signup` endpoint, **users will not be able to sign up to your site**
-  using the new flows.
+  using the new flows
 
 <a name="polyfills-yo"></a>
 
@@ -101,7 +104,7 @@ There is an example that demonstrates how the SDK can be used. The code is
 it by creating an [issue](https://github.com/schibsted/sdk-example/issues/new).
 
 You can use that code as inspiration or just fork and play with it. The account-sdk-browser NPM
-module is used for authenticating the user with Schibsted Account. Take a look at how the SDK is
+module is used for authenticating the user with Schibsted account. Take a look at how the SDK is
 initialized.
 
 When a user wants to log in to your site, you direct them to a UI flow that is hosted by Schibsted
@@ -110,7 +113,7 @@ your site is done in accordance with the OAuth2 spec. That means that we pass a 
 string in that redirect uri. You can use that `code` on your site backend along with your client
 credentials (client id & secret) to get an *Access Token* (AT) and *Refresh Token* (RT). You don't
 send the AT (and never ever the RT!) to the browser but rather keep it on the server side and
-associate it with that particular user session in order to be able to call Schibsted Account APIs on
+associate it with that particular user session in order to be able to call Schibsted account APIs on
 behalf of that user.
 
 ## Events
@@ -134,7 +137,7 @@ import { Identity } from '@schibsted/account-sdk-browser'
 const identity = new Identity({
     clientId: '56e9a5d1eee0000000000000',
     redirectUri: 'https://awesomenews.site', // ensure it's listed in selfservice
-    env: 'PRE', // Schibsted Account env. A url or a special key: 'PRE', 'PRO' or 'PRO_NO'
+    env: 'PRE', // Schibsted account env. A url or a special key: 'PRE', 'PRO' or 'PRO_NO'
 })
 
 async function whenSiteLoaded() {
@@ -184,7 +187,7 @@ attacks. For example this can be accomplished by:
 
 #### Authentication methods
 
-Although Schibsted Account abstracts away the details of how the users sign up or log in, it's worth
+Although Schibsted account abstracts away the details of how the users sign up or log in, it's worth
 mentioning that your end users have a few ways to log in:
 
 * Username & password: pretty self-explanatory; users register using an email address and a
@@ -198,7 +201,7 @@ The default is username & password. If you wish to use one of the passwordless l
 `login()` function takes an optional parameter called `acrValues` (yeah, it's an OAuth specific
 name). Please set this parameter to either `otp-email` or `otp-sms`.
 
-The classic way to authenticate a user, is to send them from your site to the Schibsted Account
+The classic way to authenticate a user, is to send them from your site to the Schibsted account
 domain, let the user authenticate there, and then have us redirect them back to your site. If you
 prefer, we also provide a popup that you can use. In this method, the authentication happens on a
 separate popup window and at the end of the auth flow. We recommend that you make the popup send a
@@ -211,15 +214,15 @@ want a working example.
 
 #### Is the user logged in?
 
-Schibsted Account relies on browser cookies to determine whether a user is recognized as logged in.
+Schibsted account relies on browser cookies to determine whether a user is recognized as logged in.
 The SDK provides functions that can be used to check if the user that's visiting your site is
 already a Schibsted user or not.
 
 * [Identity#isLoggedIn](https://schibsted.github.io/account-sdk-browser/Identity.html#isLoggedIn)
-  tells you if the user that is visiting your site is already logged in to Schibsted Account or not.
+  tells you if the user that is visiting your site is already logged in to Schibsted account or not.
 * [Identity#isConnected](https://schibsted.github.io/account-sdk-browser/Identity.html#isConnected)
   tells you if the user is connected to your client. A user might have `isLoggedIn=true` and at the
-  same time `isConnected=false` if they have logged in to Schibsted Account, but not accepted terms
+  same time `isConnected=false` if they have logged in to Schibsted account, but not accepted terms
   and privacy policy for your site.
 
 If you've lately changed your terms & conditions, maybe the user still hasn't accepted them. In that
@@ -228,13 +231,13 @@ will just ask them to accept those terms and redirect them right back to your si
 
 #### Logging out
 
-If you want to log the user out of Schibsted Account, you can call
+If you want to log the user out of Schibsted account, you can call
 [Identity#logout](https://schibsted.github.io/account-sdk-browser/Identity.html#logout). This
-will remove the Schibsted Account browser session, and so log the user out of all Schibsted sites in
+will remove the Schibsted account browser session, and so log the user out of all Schibsted sites in
 that browser.
 
 On your site backend, it may or may not make sense to remove the access/refresh tokens that you got
-from Schibsted Account. This can simply be achieved by removing it from your session or just
+from Schibsted account. This can simply be achieved by removing it from your session or just
 deleting the session. At this time, there are no ways to invalidate the tokens so they will not be
 usable. *In the future you might be able to invalidate tokens. This comes in handy if you know that
 a token is compromised and you don't want them to be usable in the future.*
@@ -260,7 +263,7 @@ import { Monetization } from '@schibsted/account-sdk-browser'
 const monetization = new Monetization({
     clientId: '56e9a5d1eee0000000000000',
     redirectUri: 'https://awesomenews.site', // ensure it's listed in selfservice
-    env: 'PRE', // Schibsted Account env. A url or a special key: 'PRE', 'PRO' or 'PRO_NO'
+    env: 'PRE', // Schibsted account env. A url or a special key: 'PRE', 'PRO' or 'PRO_NO'
 })
 
 try {
@@ -287,7 +290,7 @@ import { Payment } from '@schibsted/account-sdk-browser'
 const paymentSDK = new Payment({
     clientId: '56e9a5d1eee0000000000000',
     redirectUri: 'https://awesomenews.site', // ensure it's listed in selfservice
-    env: 'PRE', // Schibsted Account env. A url or a special key: 'PRE', 'PRO' or 'PRO_NO'
+    env: 'PRE', // Schibsted account env. A url or a special key: 'PRE', 'PRO' or 'PRO_NO'
 })
 
 // Get the url to paymentSDK with paylink
@@ -302,7 +305,7 @@ paymentSDK.payWithPaylink(paylink)
 
 #### Cookies
 
-There are some cookies used by Schibsted Account. They should all be considered opaque on the
+There are some cookies used by Schibsted account. They should all be considered opaque on the
 browser side. Nevertheless, here is a short description of them.
 
 1. The **autologin** cookie (often called 'the remember-me-cookie'): The cookie name in the
@@ -310,7 +313,7 @@ browser side. Nevertheless, here is a short description of them.
    It's a JSON string that's encoded using the standard `encodeURIComponent()` function and is an
    object that contains two pieces of information that's important:
    * `remember`: if set to `true`, the user chose to be remembered and this means we usually support
-     auto-login (that is, if you call the Schibsted Account hassession service, and no session can
+     auto-login (that is, if you call the Schibsted account hassession service, and no session can
      be found in the session database, it will automatically create a new one for the user so that
      they don't have to authenticate again. If it is `false`, it should be interpreted as the user
      does not want to be automatically logged in to any site when their session expires
