@@ -645,15 +645,6 @@ export class Identity extends EventEmitter {
     }
 
     /**
-     * The url for making a JSONP call for accepting agreement
-     * @todo Should this be removed?
-     * @return {string}
-     */
-    agreementUrl() {
-        return this._spid.makeUrl('ajax/acceptAgreement.js');
-    }
-
-    /**
      * Url to render either signup or login
      * @see https://techdocs.spid.no/flows/auth-flow/
      * @param {string} [redirectUri=this.redirectUri]
