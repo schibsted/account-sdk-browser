@@ -27,10 +27,10 @@ products and subscriptions, etc.
 
 ## Upgrading from 2.x
 
-If you already use the 2.x branch of the SPiD JS SDK, certain changes will be required to use this
-version of the SDK. We have chosen what we believe to be a middle ground between "remembering the
-work done in the old SDK" and "starting fresh". Therefore it is recommended that you read this
-document in full. But ok, let's present some highlighted differences:
+If you already use the 2.x branch of the Schibsted account JS SDK, certain changes will be required
+to use this version of the SDK. We have chosen what we believe to be a middle ground between
+"remembering the work done in the old SDK" and "starting fresh". Therefore it is recommended that
+you read this document in full. But ok, let's present some highlighted differences:
 
 #### Differences from 2.x
 

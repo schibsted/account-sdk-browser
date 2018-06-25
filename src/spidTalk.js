@@ -5,14 +5,14 @@
 'use strict';
 
 /**
- * A workaround for how SPiD handles JSONP calls in the browser
+ * A workaround for how Schibsted account handles JSONP calls in the browser
  * @private
  */
 
 import { isFunction } from './validate';
 
 /**
- * This is a workaround for making the old SPiD/hassess on JSONP APIs compatible with more common
+ * This is a workaround for making the old SPiD/hassession on JSONP APIs compatible with more common
  * JSONP convention where the callback function is expected to exist in the global object.
  *
  * How does it work?

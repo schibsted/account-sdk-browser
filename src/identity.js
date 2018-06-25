@@ -360,8 +360,7 @@ export class Identity extends EventEmitter {
     }
 
     /**
-     * @summary Allows the client app to check if the user is logged in to Schibsted's Single Sign
-     * On (SSO) solution (SPiD).
+     * @summary Allows the client app to check if the user is logged in to Schibsted account
      * @description This function calls {@link Identity#hasSession} internally and thus has the side
      * effect that it might perform an auto-login on the user
      * @return {boolean}
@@ -377,8 +376,8 @@ export class Identity extends EventEmitter {
 
     /**
      * @summary Allows the caller to check if the current user is connected to the client_id in
-     * Schibsted's Single Sign On (SSO) solution (SPiD). Being connected means that the user has
-     * agreed for their account to be used by your web app and have accepted the required terms
+     * Schibsted account. Being connected means that the user has agreed for their account to be
+     * used by your web app and have accepted the required terms
      * @description This function calls {@link Identity#hasSession} internally and thus has the side
      * effect that it might perform an auto-login on the user
      * @summary Check if the user is connected to the client_id

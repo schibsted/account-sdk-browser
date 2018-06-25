@@ -86,7 +86,7 @@ describe('Identity', () => {
     });
 
     describe('logout()', () => {
-        test('Should be able to log out from SPiD', async () => {
+        test('Should be able to log out from Schibsted account', async () => {
             const identity = new Identity({ clientId: 'foo', redirectUri: 'http://foo.com', window: {} });
             const fakeFetch = jest.fn();
             fakeFetch.mockImplementationOnce(async () => ({ ok: true, json: async () => ({})}));
