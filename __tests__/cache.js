@@ -108,6 +108,46 @@ describe('cache', () => {
                 cache.delete('foo');
                 expect(cache.get('foo')).toBe(null);
             });
+
+            test('get should fail if impl fails to get', () => {
+                cache.cache.get = jest.fn().mockImplementationOnce(() => {
+                    throw new Error('get failure')
+                });
+                expect(() => cache.get('foo')).toThrow(/get failure/);
+            });
+
+            test('get should fail if impl returns non-json-parsable mess', () => {
+                cache.cache.get = jest.fn().mockImplementationOnce(() => ({}));
+                expect(() => cache.get('foo')).toThrow(/Unexpected token/);
+            });
+
+            test('get should fail if impl fails to delete', () => {
+                cache.cache.delete = jest.fn().mockImplementationOnce(() => {
+                    throw new Error('delete failure')
+                });
+                expect(() => cache.get('foo')).toThrow(/delete/);
+            });
+
+            test('set should fail if impl fails to set', () => {
+                cache.cache.set = jest.fn().mockImplementationOnce(() => {
+                    throw new Error('set failure')
+                });
+                expect(() => cache.set('foo', 123, 1000)).toThrow(/set failure/);
+            });
+
+            test('set should fail if value is not serializable', () => {
+                const cyclic = {};
+                cyclic.a = cyclic;
+                expect(() => cache.set('foo', cyclic, 1000))
+                    .toThrow(/Converting circular structure to JSON/);
+            });
+
+            test('delete should fail if impl fails to delete', () => {
+                cache.cache.delete = jest.fn().mockImplementationOnce(() => {
+                    throw new Error('delete failure')
+                });
+                expect(() => cache.delete('foo')).toThrow(/delete failure/);
+            });
         });
     });
 });

@@ -338,9 +338,10 @@ export class Identity extends EventEmitter {
         }
 
         try {
-            let data = await this._hasSession.get('rpc/hasSession.js', { autologin: autologin ? 1 : 0 });
+            const autoLoginConverted = autologin ? 1 : 0;
+            let data = await this._hasSession.get('rpc/hasSession.js', { autologin: autoLoginConverted });
             if (isObject(data.error) && data.error.type === 'LoginException') {
-                data = await this._spid.get('ajax/hasSession.js', { autologin: autologin ? 1 : 0 });
+                data = await this._spid.get('ajax/hasSession.js', { autologin: autoLoginConverted });
             }
             if (data.result) {
                 this.cache.set(HAS_SESSION_CACHE_KEY, data, data.expiresIn * 1000);
@@ -641,15 +642,6 @@ export class Identity extends EventEmitter {
             response_type: 'code',
             redirect_uri: redirectUri
         });
-    }
-
-    /**
-     * The url for making a JSONP call for accepting agreement
-     * @todo Should this be removed?
-     * @return {string}
-     */
-    agreementUrl() {
-        return this._spid.makeUrl('ajax/acceptAgreement.js');
     }
 
     /**
