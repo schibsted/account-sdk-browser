@@ -51,8 +51,8 @@
 <p><a href="https://travis-ci.org/schibsted/account-sdk-browser"><img src="https://travis-ci.org/schibsted/account-sdk-browser.svg?branch=master" alt="Build Status"></a>
 <a href="https://codecov.io/gh/schibsted/account-sdk-browser"><img src="https://codecov.io/gh/schibsted/account-sdk-browser/branch/master/graph/badge.svg" alt="Code coverage"></a>
 <a href="https://snyk.io/test/github/schibsted/account-sdk-browser"><img src="https://snyk.io/test/github/schibsted/account-sdk-browser/badge.svg?targetFile=package.json" alt="Snyk"></a></p>
-<h1>Schibsted Account SDK for browsers</h1><p>Welcome! This is the home of the Schibsted Account JavaScript SDK for use by any website that wishes
-to use Schibsted Account to sign up and log in users. Use it to generate URLs for your site's &quot;Log
+<h1>Schibsted account SDK for browsers</h1><p>Welcome! This is the home of the Schibsted account JavaScript SDK for use by any website that wishes
+to use Schibsted account to sign up and log in users. Use it to generate URLs for your site's &quot;Log
 in&quot; button, query the logged-in status of your users, and to check whether they have access to
 products and subscriptions, etc.</p>
 <h2>Getting started</h2><ol>
@@ -70,10 +70,10 @@ and other ES2017 and WHATWG features) by default. We recommend that you do any t
 yourself for the browser versions you need to cater to. See <a href="#polyfills-yo">this paragraph</a> for
 info about our babelified version and info about polyfills.</li>
 </ol>
-<h2>Upgrading from 2.x</h2><p>If you already use the 2.x branch of the SPiD JS SDK, certain changes will be required to use this
-version of the SDK. We have chosen what we believe to be a middle ground between &quot;remembering the
-work done in the old SDK&quot; and &quot;starting fresh&quot;. Therefore it is recommended that you read this
-document in full. But ok, let's present some highlighted differences:</p>
+<h2>Upgrading from 2.x</h2><p>If you already use the 2.x branch of the Schibsted account JS SDK, certain changes will be required
+to use this version of the SDK. We have chosen what we believe to be a middle ground between
+&quot;remembering the work done in the old SDK&quot; and &quot;starting fresh&quot;. Therefore it is recommended that
+you read this document in full. But ok, let's present some highlighted differences:</p>
 <h4>Differences from 2.x</h4><ul>
 <li>Instead of using <code>SPiD.init()</code> for initialization, the new SDK exports three classes; <code>Identity</code>,
  <code>Monetization</code> and <code>Payment</code></li>
@@ -86,7 +86,7 @@ service, and a login attempt with <code>redirectUri=https://site.com?article=123
 because it would only match on domain+path — but not query string. However — this will <strong>not</strong>
 work in the 3.x world. OpenID Connect <strong>does</strong> have a suggestion for how to handle these
 situations though, which is a parameter called <code>state</code> that you send in addition to the
-<code>redirectUri</code>. See <a href="#regarding-state">this paragraph</a> for more information.</li>
+<code>redirectUri</code>. See <a href="#regarding-state">this paragraph</a> for more information</li>
 <li>The <code>'SPiD.'</code> string is removed from the name of all SDK events. So the event that used to be
  <code>'SPiD.login'</code> is now just <code>'login'</code></li>
 <li>You don't log in by setting <code>window.location</code>. Instead, you use the <code>login()</code> method on an
@@ -96,22 +96,25 @@ situations though, which is a parameter called <code>state</code> that you send 
  enable setting the <code>SP_ID</code> cookie whenever <code>hasSession()</code> is called (though most browsers require
  that you are on a &quot;real domain&quot; for this to work — so, <strong>not</strong> <code>localhost</code>). Any other cookie
  that you need set, you will have to set yourself</li>
-<li>You no longer <code>subscribe</code> to events but <code>listen</code> (using a function <code>.on</code> that's compatible with
- Node's <code>EventEmitter</code>). For example <code>SPiD.event.subscribe('SPiD.login', handler)</code> becomes
- <code>Identity.on('login', handler)</code></li>
-<li>SPiD URI is gone. There are a handful of <code>***Url()</code> functions in each SDK for the relevant flows</li>
 <li>The new SDK uses promises where it makes sense (often written as <code>async</code> functions). For example
  <code>Identity.logout()</code> returns a promise</li>
+<li>Listening to events is still supported, although since many functions return Promises, we expect
+ many users will find the use of Promise results preferable. But for those that prefer the events,
+ it works using a function <code>.on</code> that's compatible with Node's <code>EventEmitter</code>. For example
+ <code>SPiD.event.subscribe('SPiD.login', handler)</code> from 2.x becomes <code>Identity.on('login', handler)</code>.
+ Also, the functions <code>.off</code> and <code>.once</code> are supported</li>
+<li>SPiD URI is gone. There are a handful of <code>***Url()</code> functions in each of the <code>Identity</code>,
+<code>Monetization</code> and <code>Payment</code> classes for the relevant flows</li>
 <li>The new SDK has inline jsdoc documentation that's available
  <a href="https://schibsted.github.io/account-sdk-browser/">here</a> instead of tech docs.
  These documents will always be up to date with the latest release so make sure to run <code>npm
  outdated</code> in your project to be notified about any new releases</li>
-<li>The new UI flows are different than the old ones in that they use the Schibsted Account API
+<li>The new UI flows are different than the old ones in that they use the Schibsted account API
 endpoints just like any other client. For most clients this means absolutely nothing at all, but
 for some, it's quite important; If you have ever asked our support staff to disable certain API
 endpoint accesses, there is a chance that you'll encounter problems. For instance, if you've set
 <code>NO ACCESS</code> on the <code>POST /signup</code> endpoint, <strong>users will not be able to sign up to your site</strong>
-using the new flows.</li>
+using the new flows</li>
 </ul>
 <p><a name="polyfills-yo"></a></p>
 <h4>Polyfills required for older browsers</h4><p>This SDK uses modern JavaScript features. If you support older browsers, you should use a tool like
@@ -133,7 +136,7 @@ added them from polyfill.io like this:</p>
 <a href="https://pro.sdk-example.com">here</a>. You have a use-case that we haven't thought of? Ask us to add
 it by creating an <a href="https://github.com/schibsted/sdk-example/issues/new">issue</a>.</p>
 <p>You can use that code as inspiration or just fork and play with it. The account-sdk-browser NPM
-module is used for authenticating the user with Schibsted Account. Take a look at how the SDK is
+module is used for authenticating the user with Schibsted account. Take a look at how the SDK is
 initialized.</p>
 <p>When a user wants to log in to your site, you direct them to a UI flow that is hosted by Schibsted
 Account. We authenticate the user and redirect them back to your site. This final redirect back to
@@ -141,7 +144,7 @@ your site is done in accordance with the OAuth2 spec. That means that we pass a 
 string in that redirect uri. You can use that <code>code</code> on your site backend along with your client
 credentials (client id &amp; secret) to get an <em>Access Token</em> (AT) and <em>Refresh Token</em> (RT). You don't
 send the AT (and never ever the RT!) to the browser but rather keep it on the server side and
-associate it with that particular user session in order to be able to call Schibsted Account APIs on
+associate it with that particular user session in order to be able to call Schibsted account APIs on
 behalf of that user.</p>
 <h2>Events</h2><p>The SDK fires events when something we deem interesting is happening. For example the
 <a href="https://schibsted.github.io/account-sdk-browser/Identity.html">Identity</a> class
@@ -155,7 +158,7 @@ methods are <code>.on(eventName, listener)</code> (to subscribe to an event) and
 const identity = new Identity({
     clientId: '56e9a5d1eee0000000000000',
     redirectUri: 'https://awesomenews.site', // ensure it's listed in selfservice
-    env: 'PRE', // Schibsted Account env. A url or a special key: 'PRE', 'PRO' or 'PRO_NO'
+    env: 'PRE', // Schibsted account env. A url or a special key: 'PRE', 'PRO' or 'PRO_NO'
 })
 
 async function whenSiteLoaded() {
@@ -196,7 +199,7 @@ query parameters <code>code</code> (which it can exchange for OAuth tokens for t
 attempted. If successful, remove the token from the tokenCache so the same token can't be used
 again, and continue to show <code>decodedState.article</code></li>
 </ol>
-<h4>Authentication methods</h4><p>Although Schibsted Account abstracts away the details of how the users sign up or log in, it's worth
+<h4>Authentication methods</h4><p>Although Schibsted account abstracts away the details of how the users sign up or log in, it's worth
 mentioning that your end users have a few ways to log in:</p>
 <ul>
 <li>Username &amp; password: pretty self-explanatory; users register using an email address and a
@@ -209,7 +212,7 @@ the code on their phone as an SMS</li>
 <p>The default is username &amp; password. If you wish to use one of the passwordless login methods, the
 <code>login()</code> function takes an optional parameter called <code>acrValues</code> (yeah, it's an OAuth specific
 name). Please set this parameter to either <code>otp-email</code> or <code>otp-sms</code>.</p>
-<p>The classic way to authenticate a user, is to send them from your site to the Schibsted Account
+<p>The classic way to authenticate a user, is to send them from your site to the Schibsted account
 domain, let the user authenticate there, and then have us redirect them back to your site. If you
 prefer, we also provide a popup that you can use. In this method, the authentication happens on a
 separate popup window and at the end of the auth flow. We recommend that you make the popup send a
@@ -219,26 +222,26 @@ similar — to indicate that the user is logged in. If the popup window fails to
 automatically fall back to the redirect flow. The SDK Example project mentioned above demonstrates
 how it can work. Again, you can see <a href="https://github.com/schibsted/sdk-example">sdk-example</a> if you
 want a working example.</p>
-<h4>Is the user logged in?</h4><p>Schibsted Account relies on browser cookies to determine whether a user is recognized as logged in.
+<h4>Is the user logged in?</h4><p>Schibsted account relies on browser cookies to determine whether a user is recognized as logged in.
 The SDK provides functions that can be used to check if the user that's visiting your site is
 already a Schibsted user or not.</p>
 <ul>
 <li><a href="https://schibsted.github.io/account-sdk-browser/Identity.html#isLoggedIn">Identity#isLoggedIn</a>
-tells you if the user that is visiting your site is already logged in to Schibsted Account or not.</li>
+tells you if the user that is visiting your site is already logged in to Schibsted account or not.</li>
 <li><a href="https://schibsted.github.io/account-sdk-browser/Identity.html#isConnected">Identity#isConnected</a>
 tells you if the user is connected to your client. A user might have <code>isLoggedIn=true</code> and at the
-same time <code>isConnected=false</code> if they have logged in to Schibsted Account, but not accepted terms
+same time <code>isConnected=false</code> if they have logged in to Schibsted account, but not accepted terms
 and privacy policy for your site.</li>
 </ul>
 <p>If you've lately changed your terms &amp; conditions, maybe the user still hasn't accepted them. In that
 case they are considered <em>not connected</em>. In that case, if they click &quot;Log in&quot; from your site, we
 will just ask them to accept those terms and redirect them right back to your site.</p>
-<h4>Logging out</h4><p>If you want to log the user out of Schibsted Account, you can call
+<h4>Logging out</h4><p>If you want to log the user out of Schibsted account, you can call
 <a href="https://schibsted.github.io/account-sdk-browser/Identity.html#logout">Identity#logout</a>. This
-will remove the Schibsted Account browser session, and so log the user out of all Schibsted sites in
+will remove the Schibsted account browser session, and so log the user out of all Schibsted sites in
 that browser.</p>
 <p>On your site backend, it may or may not make sense to remove the access/refresh tokens that you got
-from Schibsted Account. This can simply be achieved by removing it from your session or just
+from Schibsted account. This can simply be achieved by removing it from your session or just
 deleting the session. At this time, there are no ways to invalidate the tokens so they will not be
 usable. <em>In the future you might be able to invalidate tokens. This comes in handy if you know that
 a token is compromised and you don't want them to be usable in the future.</em></p>
@@ -257,7 +260,7 @@ asynchronously.</p>
 const monetization = new Monetization({
     clientId: '56e9a5d1eee0000000000000',
     redirectUri: 'https://awesomenews.site', // ensure it's listed in selfservice
-    env: 'PRE', // Schibsted Account env. A url or a special key: 'PRE', 'PRO' or 'PRO_NO'
+    env: 'PRE', // Schibsted account env. A url or a special key: 'PRE', 'PRO' or 'PRO_NO'
 })
 
 try {
@@ -275,7 +278,7 @@ pages for redeeming voucher codes, reviewing payment history, and more.</p>
 const paymentSDK = new Payment({
     clientId: '56e9a5d1eee0000000000000',
     redirectUri: 'https://awesomenews.site', // ensure it's listed in selfservice
-    env: 'PRE', // Schibsted Account env. A url or a special key: 'PRE', 'PRO' or 'PRO_NO'
+    env: 'PRE', // Schibsted account env. A url or a special key: 'PRE', 'PRO' or 'PRO_NO'
 })
 
 // Get the url to paymentSDK with paylink
@@ -283,7 +286,7 @@ const paylink = '...'
 const paylinkUrl = paymentSDK.purchasePaylinkUrl(paylink)
 
 // Or another example --- pay with paylink in a popup
-paymentSDK.payWithPaylink(paylink)</code></pre><h2>Appendix</h2><h4>Cookies</h4><p>There are some cookies used by Schibsted Account. They should all be considered opaque on the
+paymentSDK.payWithPaylink(paylink)</code></pre><h2>Appendix</h2><h4>Cookies</h4><p>There are some cookies used by Schibsted account. They should all be considered opaque on the
 browser side. Nevertheless, here is a short description of them.</p>
 <ol>
 <li>The <strong>autologin</strong> cookie (often called 'the remember-me-cookie'): The cookie name in the
@@ -291,7 +294,7 @@ production environments is <code>vgs_email</code>, because reasons (on PRE, it i
 It's a JSON string that's encoded using the standard <code>encodeURIComponent()</code> function and is an
 object that contains two pieces of information that's important:<ul>
 <li><code>remember</code>: if set to <code>true</code>, the user chose to be remembered and this means we usually support
-auto-login (that is, if you call the Schibsted Account hassession service, and no session can
+auto-login (that is, if you call the Schibsted account hassession service, and no session can
 be found in the session database, it will automatically create a new one for the user so that
 they don't have to authenticate again. If it is <code>false</code>, it should be interpreted as the user
 does not want to be automatically logged in to any site when their session expires</li>
@@ -337,7 +340,7 @@ License.</p></article>
 <br class="clear">
 
 <footer>
-    Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.5.5</a> on Mon Jun 25 2018 12:49:08 GMT+0000 (UTC) using the <a href="https://github.com/clenemt/docdash">docdash</a> theme.
+    Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.5.5</a> on Mon Jun 25 2018 14:14:15 GMT+0000 (UTC) using the <a href="https://github.com/clenemt/docdash">docdash</a> theme.
 </footer>
 
 <script>prettyPrint();</script>
