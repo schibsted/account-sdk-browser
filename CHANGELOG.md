@@ -1,5 +1,16 @@
 # Changelog
 
+## v3.0.0-rc.6 (2018-06-25)
+
+### Breaking changes
+
+* The `Identity.agreementUrl` has been removed. This function called an endpoint on the Schibsted
+  account backend that will be removed due to GDPR, and so it makes no sense to keep it in the SDK.
+
+### Other fixes
+
+* Some (mostly trivial) documentation polish here and there
+
 ## v3.0.0-rc.5 (2018-06-21)
 
 ### Breaking changes
