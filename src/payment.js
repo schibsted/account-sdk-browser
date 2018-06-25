@@ -22,7 +22,7 @@ export class Payment {
      * @param {object} options
      * @param {string} options.clientId - Mandatory client id
      * @param {string} [options.redirectUri] - Redirect uri
-     * @param {string} [options.env=PRE] - Schibsted Account environment: `PRE`, `PRO` or `PRO_NO`
+     * @param {string} [options.env=PRE] - Schibsted account environment: `PRE`, `PRO` or `PRO_NO`
      * @throws {SDKError} - If any of options are invalid
      */
     constructor({ clientId, redirectUri, env = 'PRE', window = globalWindow() }) {
@@ -93,7 +93,7 @@ export class Payment {
         const url = this.purchasePaylinkUrl(paylink, redirectUri);
         if (preferPopup) {
             this.popup =
-                popup.open(this.window, url, 'Schibsted Account', { width: 360, height: 570 });
+                popup.open(this.window, url, 'Schibsted account', { width: 360, height: 570 });
             if (this.popup) {
                 return this.popup;
             }

@@ -10,7 +10,7 @@ import config from '../src/config';
 
 describe('RESTClient', () => {
 
-    test('can make a call to SPiD DEV /api/2/version', () => {
+    test('can make a call to Schibsted account DEV /api/2/version', () => {
         const restClient = new RESTClient({
             serverUrl: 'PRE',
             envDic: config.ENDPOINTS.SPiD,

@@ -49,7 +49,7 @@ describe('Payment', () => {
             const popup = await payment.payWithPaylink({ paylink, preferPopup: true });
             expect(popup).toMatchObject({
                 url: expect.stringMatching('paylink=http%3A%2F%2Ffoo.bar'),
-                windowName: 'Schibsted Account',
+                windowName: 'Schibsted account',
                 features: 'scrollbars=yes,location=yes,status=no,menubar=no,toolbar=no,resizable=yes,width=360,height=570'
             });
         });

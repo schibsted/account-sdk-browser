@@ -84,7 +84,7 @@ export class Identity extends EventEmitter {
      * @param {object} options
      * @param {string} options.clientId - Example: "1234567890abcdef12345678"
      * @param {string} [options.redirectUri] - Example: "https://site.com"
-     * @param {string} [options.env='PRE'] - Schibsted Account environment: `PRE`, `PRO` or `PRO_NO`
+     * @param {string} [options.env='PRE'] - Schibsted account environment: `PRE`, `PRO` or `PRO_NO`
      * @param {function} [options.log] - A function that receives debug log information. If not set,
      * no logging will be done
      * @throws {SDKError} - If any of options are invalid
@@ -360,8 +360,7 @@ export class Identity extends EventEmitter {
     }
 
     /**
-     * @summary Allows the client app to check if the user is logged in to Schibsted's Single Sign
-     * On (SSO) solution (SPiD).
+     * @summary Allows the client app to check if the user is logged in to Schibsted account
      * @description This function calls {@link Identity#hasSession} internally and thus has the side
      * effect that it might perform an auto-login on the user
      * @return {boolean}
@@ -377,8 +376,8 @@ export class Identity extends EventEmitter {
 
     /**
      * @summary Allows the caller to check if the current user is connected to the client_id in
-     * Schibsted's Single Sign On (SSO) solution (SPiD). Being connected means that the user has
-     * agreed for their account to be used by your web app and have accepted the required terms
+     * Schibsted account. Being connected means that the user has agreed for their account to be
+     * used by your web app and have accepted the required terms
      * @description This function calls {@link Identity#hasSession} internally and thus has the side
      * effect that it might perform an auto-login on the user
      * @summary Check if the user is connected to the client_id
@@ -412,9 +411,9 @@ export class Identity extends EventEmitter {
     }
 
     /**
-     * @summary In Schibsted Account, there are two ways of identifying a user; the `userId` and the
+     * @summary In Schibsted account, there are two ways of identifying a user; the `userId` and the
      * `uuid`. There are reasons for them both existing. The `userId` is a numeric identifier, but
-     * since Schibsted Account is deployed separately in Norway and Sweden, there are a lot of
+     * since Schibsted account is deployed separately in Norway and Sweden, there are a lot of
      * duplicates. The `userId` was introduced early, so many sites still need to use them for
      * legacy reasons. The `uuid` is universally unique, and so — if we could disregard a lot of
      * Schibsted components depending on the numeric `userId` — it would be a good identifier to use
@@ -432,9 +431,9 @@ export class Identity extends EventEmitter {
     }
 
     /**
-     * @summary In Schibsted Account, there are two ways of identifying a user; the `userId` and the
+     * @summary In Schibsted account, there are two ways of identifying a user; the `userId` and the
      * `uuid`. There are reasons for them both existing. The `userId` is a numeric identifier, but
-     * since Schibsted Account is deployed separately in Norway and Sweden, there are a lot of
+     * since Schibsted account is deployed separately in Norway and Sweden, there are a lot of
      * duplicates. The `userId` was introduced early, so many sites still need to use them for
      * legacy reasons. The `uuid` is universally unique, and so — if we could disregard a lot of
      * Schibsted components depending on the numeric `userId` — it would be a good identifier to use
@@ -507,7 +506,7 @@ export class Identity extends EventEmitter {
         const url = this.loginUrl(state, acrValues, scope, redirectUri, newFlow, loginHint);
         if (preferPopup) {
             this.popup =
-                popup.open(this.window, url, 'Schibsted Account', { width: 360, height: 570 });
+                popup.open(this.window, url, 'Schibsted account', { width: 360, height: 570 });
             if (this.popup) {
                 return this.popup;
             }
@@ -519,7 +518,7 @@ export class Identity extends EventEmitter {
     /**
      * @summary Logs the user out from the Identity platform
      * @description **Note**: Your site origin should be listed as a redirect_uri in selfservice for
-     * this to work. On the Schibsted Account side, we check CORS headers against the list of
+     * this to work. On the Schibsted account side, we check CORS headers against the list of
      * redirect_uris. For most sites, this will work already, since this matching is only done on
      * the origin part of the uri, and most sites already have that in their redirect_uri list. So
      * if you have a redirect_uri `https://mysite.news/article`, then this will work when coming
@@ -563,7 +562,7 @@ export class Identity extends EventEmitter {
      * no effect if `newFlow` is false
      * @param {string} [scope='openid']
      * @param {string} [redirectUri=this.redirectUri]
-     * @param {boolean} [newFlow=true] - Should we try the new flow or the old Schibsted Account
+     * @param {boolean} [newFlow=true] - Should we try the new flow or the old Schibsted account
      * login? If this parameter is set to false, the `acrValues` parameter doesn't have any effect
      * @param {string} [loginHint=''] - user email hint
      * @return {string} - The url
