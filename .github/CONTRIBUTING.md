@@ -6,7 +6,7 @@ your code (by running `npm test`) before making a PR.
 
 ## Code of Conduct
 The project is governed by the [Schibsted account Code of Conduct](../CODE_OF_CONDUCT.md). Please
-report unacceptable behavior to support@spid.no.
+report unacceptable behavior to schibstedaccount@schibsted.com.
 
 ## License
 This SDK is released under the [MIT License](../LICENSE.md). Unless you explicitly state otherwise,
