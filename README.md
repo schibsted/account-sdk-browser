@@ -11,6 +11,8 @@ to use Schibsted account to sign up and log in users. Use it to generate URLs fo
 in" button, query the logged-in status of your users, and to check whether they have access to
 products and subscriptions, etc.
 
+<a name="getting-started"></a>
+
 ## Getting started
 
 1. Do `npm install --save @schibsted/account-sdk-browser`
@@ -25,12 +27,16 @@ products and subscriptions, etc.
    yourself for the browser versions you need to cater to. See [this paragraph](#polyfills-yo) for
    info about our babelified version and info about polyfills.
 
+<a name="upgrading-from-2.x"></a>
+
 ## Upgrading from 2.x
 
 If you already use the 2.x branch of the Schibsted account JS SDK, certain changes will be required
 to use this version of the SDK. We have chosen what we believe to be a middle ground between
 "remembering the work done in the old SDK" and "starting fresh". Therefore it is recommended that
 you read this document in full. But ok, let's present some highlighted differences:
+
+<a name="differences-from-2.x"></a>
 
 #### Differences from 2.x
 
@@ -96,6 +102,8 @@ added them from polyfill.io like this:
 
     <script src="https://cdn.polyfill.io/v2/polyfill.js?features=Promise,URL,Object.entries,fetch,Number.isInteger"></script>
 
+<a name="example-project"></a>
+
 ## Example project
 
 There is an example that demonstrates how the SDK can be used. The code is
@@ -116,6 +124,8 @@ send the AT (and never ever the RT!) to the browser but rather keep it on the se
 associate it with that particular user session in order to be able to call Schibsted account APIs on
 behalf of that user.
 
+<a name="events"></a>
+
 ## Events
 
 The SDK fires events when something we deem interesting is happening. For example the
@@ -124,6 +134,8 @@ emits some events when the user is logged in or logged out. This SDK uses a fami
 very similar to Node's [EventEmitter](https://nodejs.org/api/events.html). The most important
 methods are `.on(eventName, listener)` (to subscribe to an event) and `.off(eventName, listener)`
 (to unsubscribe to an event).
+
+<a name="identity"></a>
 
 ## Identity
 
@@ -185,6 +197,8 @@ attacks. For example this can be accomplished by:
    attempted. If successful, remove the token from the tokenCache so the same token can't be used
    again, and continue to show `decodedState.article`
 
+<a name="authentication-methods"></a>
+
 #### Authentication methods
 
 Although Schibsted account abstracts away the details of how the users sign up or log in, it's worth
@@ -212,6 +226,8 @@ automatically fall back to the redirect flow. The SDK Example project mentioned 
 how it can work. Again, you can see [sdk-example](https://github.com/schibsted/sdk-example) if you
 want a working example.
 
+<a name="is-the-user-logged-in"></a>
+
 #### Is the user logged in?
 
 Schibsted account relies on browser cookies to determine whether a user is recognized as logged in.
@@ -229,6 +245,8 @@ If you've lately changed your terms & conditions, maybe the user still hasn't ac
 case they are considered *not connected*. In that case, if they click "Log in" from your site, we
 will just ask them to accept those terms and redirect them right back to your site.
 
+<a name="logging-out"></a>
+
 #### Logging out
 
 If you want to log the user out of Schibsted account, you can call
@@ -241,6 +259,8 @@ from Schibsted account. This can simply be achieved by removing it from your ses
 deleting the session. At this time, there are no ways to invalidate the tokens so they will not be
 usable. *In the future you might be able to invalidate tokens. This comes in handy if you know that
 a token is compromised and you don't want them to be usable in the future.*
+
+<a name="monetization"></a>
 
 ## Monetization
 
@@ -277,6 +297,8 @@ try {
 }
 ```
 
+<a name="payment"></a>
+
 ## Payment
 
 This class provides methods for paying with a so-called paylink, buying a product, getting links to
@@ -300,6 +322,8 @@ const paylinkUrl = paymentSDK.purchasePaylinkUrl(paylink)
 // Or another example --- pay with paylink in a popup
 paymentSDK.payWithPaylink(paylink)
 ```
+
+<a name="appendix"></a>
 
 ## Appendix
 
