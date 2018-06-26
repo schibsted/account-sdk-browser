@@ -55,6 +55,7 @@
 to use Schibsted account to sign up and log in users. Use it to generate URLs for your site's &quot;Log
 in&quot; button, query the logged-in status of your users, and to check whether they have access to
 products and subscriptions, etc.</p>
+<p><a name="getting-started"></a></p>
 <h2>Getting started</h2><ol>
 <li>Do <code>npm install --save @schibsted/account-sdk-browser</code></li>
 <li>Use this library as you would any other npm module: <code>import { Identity, Monetization, Payment }
@@ -70,10 +71,12 @@ and other ES2017 and WHATWG features) by default. We recommend that you do any t
 yourself for the browser versions you need to cater to. See <a href="#polyfills-yo">this paragraph</a> for
 info about our babelified version and info about polyfills.</li>
 </ol>
+<p><a name="upgrading-from-2.x"></a></p>
 <h2>Upgrading from 2.x</h2><p>If you already use the 2.x branch of the Schibsted account JS SDK, certain changes will be required
 to use this version of the SDK. We have chosen what we believe to be a middle ground between
 &quot;remembering the work done in the old SDK&quot; and &quot;starting fresh&quot;. Therefore it is recommended that
 you read this document in full. But ok, let's present some highlighted differences:</p>
+<p><a name="differences-from-2.x"></a></p>
 <h4>Differences from 2.x</h4><ul>
 <li>Instead of using <code>SPiD.init()</code> for initialization, the new SDK exports three classes; <code>Identity</code>,
  <code>Monetization</code> and <code>Payment</code></li>
@@ -131,7 +134,8 @@ or <code>@schibsted/account-sdk-browser/es5/payment</code> can be used to only i
 things that might be missing in the browsers you wish to support. A quick test using IE11 showed
 that we needed polyfills for <code>Promise</code>, <code>URL</code>, <code>Object.entries</code>, <code>fetch</code> and <code>Number.isInteger</code>. We
 added them from polyfill.io like this:</p>
-<pre class="prettyprint source"><code>&lt;script src=&quot;https://cdn.polyfill.io/v2/polyfill.js?features=Promise,URL,Object.entries,fetch,Number.isInteger&quot;>&lt;/script></code></pre><h2>Example project</h2><p>There is an example that demonstrates how the SDK can be used. The code is
+<pre class="prettyprint source"><code>&lt;script src=&quot;https://cdn.polyfill.io/v2/polyfill.js?features=Promise,URL,Object.entries,fetch,Number.isInteger&quot;>&lt;/script></code></pre><p><a name="example-project"></a></p>
+<h2>Example project</h2><p>There is an example that demonstrates how the SDK can be used. The code is
 <a href="https://github.com/schibsted/sdk-example">here</a>, and you can see it live
 <a href="https://pro.sdk-example.com">here</a>. You have a use-case that we haven't thought of? Ask us to add
 it by creating an <a href="https://github.com/schibsted/sdk-example/issues/new">issue</a>.</p>
@@ -146,12 +150,14 @@ credentials (client id &amp; secret) to get an <em>Access Token</em> (AT) and <e
 send the AT (and never ever the RT!) to the browser but rather keep it on the server side and
 associate it with that particular user session in order to be able to call Schibsted account APIs on
 behalf of that user.</p>
+<p><a name="events"></a></p>
 <h2>Events</h2><p>The SDK fires events when something we deem interesting is happening. For example the
 <a href="https://schibsted.github.io/account-sdk-browser/Identity.html">Identity</a> class
 emits some events when the user is logged in or logged out. This SDK uses a familar interface that's
 very similar to Node's <a href="https://nodejs.org/api/events.html">EventEmitter</a>. The most important
 methods are <code>.on(eventName, listener)</code> (to subscribe to an event) and <code>.off(eventName, listener)</code>
 (to unsubscribe to an event).</p>
+<p><a name="identity"></a></p>
 <h2>Identity</h2><p>Let's start with a bit of example code:</p>
 <h4>Example</h4><pre class="prettyprint source lang-javascript"><code>import { Identity } from '@schibsted/account-sdk-browser'
 
@@ -199,6 +205,7 @@ query parameters <code>code</code> (which it can exchange for OAuth tokens for t
 attempted. If successful, remove the token from the tokenCache so the same token can't be used
 again, and continue to show <code>decodedState.article</code></li>
 </ol>
+<p><a name="authentication-methods"></a></p>
 <h4>Authentication methods</h4><p>Although Schibsted account abstracts away the details of how the users sign up or log in, it's worth
 mentioning that your end users have a few ways to log in:</p>
 <ul>
@@ -222,6 +229,7 @@ similar — to indicate that the user is logged in. If the popup window fails to
 automatically fall back to the redirect flow. The SDK Example project mentioned above demonstrates
 how it can work. Again, you can see <a href="https://github.com/schibsted/sdk-example">sdk-example</a> if you
 want a working example.</p>
+<p><a name="is-the-user-logged-in"></a></p>
 <h4>Is the user logged in?</h4><p>Schibsted account relies on browser cookies to determine whether a user is recognized as logged in.
 The SDK provides functions that can be used to check if the user that's visiting your site is
 already a Schibsted user or not.</p>
@@ -236,6 +244,7 @@ and privacy policy for your site.</li>
 <p>If you've lately changed your terms &amp; conditions, maybe the user still hasn't accepted them. In that
 case they are considered <em>not connected</em>. In that case, if they click &quot;Log in&quot; from your site, we
 will just ask them to accept those terms and redirect them right back to your site.</p>
+<p><a name="logging-out"></a></p>
 <h4>Logging out</h4><p>If you want to log the user out of Schibsted account, you can call
 <a href="https://schibsted.github.io/account-sdk-browser/Identity.html#logout">Identity#logout</a>. This
 will remove the Schibsted account browser session, and so log the user out of all Schibsted sites in
@@ -245,6 +254,7 @@ from Schibsted account. This can simply be achieved by removing it from your ses
 deleting the session. At this time, there are no ways to invalidate the tokens so they will not be
 usable. <em>In the future you might be able to invalidate tokens. This comes in handy if you know that
 a token is compromised and you don't want them to be usable in the future.</em></p>
+<p><a name="monetization"></a></p>
 <h2>Monetization</h2><p>This class has two important endpoints:</p>
 <ul>
 <li><a href="https://schibsted.github.io/account-sdk-browser/Monetization.html#hasProduct">Monetization#hasProduct</a>
@@ -271,7 +281,8 @@ try {
     alert(`User has access to ${productId}? ${data.result}`)
 } catch (err) {
     alert(`Could not query if the user has access to ${productId} because ${err}`)
-}</code></pre><h2>Payment</h2><p>This class provides methods for paying with a so-called paylink, buying a product, getting links to
+}</code></pre><p><a name="payment"></a></p>
+<h2>Payment</h2><p>This class provides methods for paying with a so-called paylink, buying a product, getting links to
 pages for redeeming voucher codes, reviewing payment history, and more.</p>
 <h4>Example</h4><pre class="prettyprint source lang-javascript"><code>import { Payment } from '@schibsted/account-sdk-browser'
 
@@ -286,7 +297,8 @@ const paylink = '...'
 const paylinkUrl = paymentSDK.purchasePaylinkUrl(paylink)
 
 // Or another example --- pay with paylink in a popup
-paymentSDK.payWithPaylink(paylink)</code></pre><h2>Appendix</h2><h4>Cookies</h4><p>There are some cookies used by Schibsted account. They should all be considered opaque on the
+paymentSDK.payWithPaylink(paylink)</code></pre><p><a name="appendix"></a></p>
+<h2>Appendix</h2><h4>Cookies</h4><p>There are some cookies used by Schibsted account. They should all be considered opaque on the
 browser side. Nevertheless, here is a short description of them.</p>
 <ol>
 <li>The <strong>autologin</strong> cookie (often called 'the remember-me-cookie'): The cookie name in the
@@ -340,7 +352,7 @@ License.</p></article>
 <br class="clear">
 
 <footer>
-    Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.5.5</a> on Mon Jun 25 2018 14:14:15 GMT+0000 (UTC) using the <a href="https://github.com/clenemt/docdash">docdash</a> theme.
+    Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.5.5</a> on Tue Jun 26 2018 12:54:02 GMT+0000 (UTC) using the <a href="https://github.com/clenemt/docdash">docdash</a> theme.
 </footer>
 
 <script>prettyPrint();</script>
