@@ -180,7 +180,7 @@ export class RESTClient {
      */
     static search(query, useDefaultParams, defaultParams) {
         const params = useDefaultParams ? cloneDefined(defaultParams, query) : cloneDefined(query);
-        return Object.keys(params).map(p => params[p] !== null ? `${encode(p)}=${encode(params[p])}` : '').join('&');
+        return Object.keys(params).map(p => `${encode(p)}=${encode(params[p])}`).join('&');
     }
 }
 

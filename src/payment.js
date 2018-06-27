@@ -164,7 +164,7 @@ export class Payment {
      * @param {string} [redirectUri=this.redirectUri]
      * @return {string} - The url to the products review page
      */
-    purchaseCampaignFlowUrl(campaignId = null, productId = null, voucherCode = null, redirectUri = this.redirectUri) {
+    purchaseCampaignFlowUrl(campaignId, productId, voucherCode, redirectUri = this.redirectUri) {
         assert(isUrl(redirectUri), `purchaseProductUrl(): redirectUri is invalid`);
         return this._bff.makeUrl('flow/checkout', {
             response_type: 'code',
