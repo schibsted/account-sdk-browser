@@ -180,12 +180,17 @@ describe('Payment', () => {
 
         test('should work with implicit redirectUri', () => {
             const url = payment.purchaseCampaignFlowUrl();
-            expect(url).toMatch(/checkout\?client_id=a&redirect_uri=http%3A%2F%2Fredirect.foo&response_type=code&flow=payment&campaign_id=null&product_id=null&voucher_code=null/);
+            expect(url).toMatch(/checkout\?client_id=a&redirect_uri=http%3A%2F%2Fredirect.foo&response_type=code&flow=payment/);
         });
 
         test('should fail without redirectUri', () => {
             payment = new Payment({ clientId: 'a', window });
             expect(() => payment.purchaseCampaignFlowUrl('abc')).toThrowError(/redirectUri is invalid/);
+        });
+
+        test('should build uri with campaign_id and product_id', () => {
+            const url = payment.purchaseCampaignFlowUrl(12, 20032);
+            expect(url).toMatch(/checkout\?client_id=a&redirect_uri=http%3A%2F%2Fredirect.foo&response_type=code&flow=payment&campaign_id=12&product_id=20032/);
         });
     });
 });

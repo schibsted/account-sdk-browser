@@ -160,7 +160,7 @@ export class Payment {
      * @todo Check working-ness for BFF + SPiD
      * @param {string} campaignId
      * @param {string} productId
-     * @param {string} voucherCode
+     * @param {string} [voucherCode]
      * @param {string} [redirectUri=this.redirectUri]
      * @return {string} - The url to the products review page
      */
