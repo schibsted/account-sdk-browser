@@ -132,6 +132,7 @@ export class Payment {
      */
     purchasePaylinkUrl(paylinkId, redirectUri = this.redirectUri) {
         assert(isUrl(redirectUri), `purchasePaylinkUrl(): redirectUri is invalid`);
+        assert(isNonEmptyString(paylinkId), `purchasePaylinkUrl(): paylinkId is required`);
         return this._bff.makeUrl('payment/purchase', {
             paylink: paylinkId,
             redirect_uri: redirectUri
@@ -147,6 +148,7 @@ export class Payment {
      */
     purchaseProductFlowUrl(productId, redirectUri = this.redirectUri) {
         assert(isUrl(redirectUri), `purchaseProductUrl(): redirectUri is invalid`);
+        assert(isNonEmptyString(productId), `purchaseProductFlowUrl(): productId is required`);
         return this._bff.makeUrl('flow/checkout', {
             response_type: 'code',
             flow: 'payment',
@@ -165,7 +167,9 @@ export class Payment {
      * @return {string} - The url to the products review page
      */
     purchaseCampaignFlowUrl(campaignId, productId, voucherCode, redirectUri = this.redirectUri) {
-        assert(isUrl(redirectUri), `purchaseProductUrl(): redirectUri is invalid`);
+        assert(isUrl(redirectUri), `purchaseCampaignFlowUrl(): redirectUri is invalid`);
+        assert(isNonEmptyString(campaignId), `purchaseCampaignFlowUrl(): campaignId is required`);
+        assert(isNonEmptyString(productId), `purchaseCampaignFlowUrl(): productId is required`);
         return this._bff.makeUrl('flow/checkout', {
             response_type: 'code',
             flow: 'payment',

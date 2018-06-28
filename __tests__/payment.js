@@ -107,6 +107,10 @@ describe('Payment', () => {
             payment = new Payment({ clientId: 'a', window });
             expect(() => payment.purchasePaylinkUrl('abc')).toThrowError(/redirectUri is invalid/);
         });
+
+        test('should fail without paylinkId', () => {
+            expect(() => payment.purchasePaylinkUrl()).toThrowError(/paylinkId is required/);
+        });
     });
 
     describe('purchaseHistoryUrl', () => {
@@ -167,6 +171,10 @@ describe('Payment', () => {
             payment = new Payment({ clientId: 'a', window });
             expect(() => payment.purchaseProductFlowUrl('abc')).toThrowError(/redirectUri is invalid/);
         });
+
+        test('should fail without product id', () => {
+            expect(() => payment.purchaseProductFlowUrl()).toThrowError(/productId is required/);
+        });
     });
 
     describe('purchaseCampaignFlowUrl', () => {
@@ -179,8 +187,8 @@ describe('Payment', () => {
         });
 
         test('should work with implicit redirectUri', () => {
-            const url = payment.purchaseCampaignFlowUrl();
-            expect(url).toMatch(/checkout\?client_id=a&redirect_uri=http%3A%2F%2Fredirect.foo&response_type=code&flow=payment/);
+            const url = payment.purchaseCampaignFlowUrl('12', '20032');
+            expect(url).toMatch(/checkout\?client_id=a&redirect_uri=http%3A%2F%2Fredirect.foo&response_type=code&flow=payment&campaign_id=12&product_id=20032/);
         });
 
         test('should fail without redirectUri', () => {
@@ -189,8 +197,12 @@ describe('Payment', () => {
         });
 
         test('should build uri with campaign_id and product_id', () => {
-            const url = payment.purchaseCampaignFlowUrl(12, 20032);
+            const url = payment.purchaseCampaignFlowUrl('12', '20032');
             expect(url).toMatch(/checkout\?client_id=a&redirect_uri=http%3A%2F%2Fredirect.foo&response_type=code&flow=payment&campaign_id=12&product_id=20032/);
+        });
+
+        test('should fail without campaign id', () => {
+            expect(() => payment.purchaseCampaignFlowUrl()).toThrowError(/campaignId is required/);
         });
     });
 });
