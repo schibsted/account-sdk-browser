@@ -61,8 +61,33 @@ you read this document in full. But ok, let's present some highlighted differenc
    enable setting the `SP_ID` cookie whenever `hasSession()` is called (though most browsers require
    that you are on a "real domain" for this to work — so, **not** `localhost`). Any other cookie
    that you need set, you will have to set yourself
-* The new SDK uses promises where it makes sense (often written as `async` functions). For example
-   `Identity.logout()` returns a promise
+* All functions that used to take callback functions in the 2.x version of the SDK don't do that
+   anymore. The new SDK instead uses promises where it makes sense (often written as `async`
+   functions). For example `Identity.logout()` returns a promise. So, for instance if you used to do
+   this in v2.x:
+   ```javascript
+   identity.hasSession((err, data) => {
+       if (err) {
+           console.log('Nooo!', err)
+       } else {
+           console.log('Yay', data)
+       }
+   });
+   ```
+   Now you should instead do:
+   ```javascript
+   // Either
+   identity.hasSession()
+       .then(data => console.log('Yay', data))
+       .catch(err => console.log('Nooo!', err));
+   // ... or if you're using async functions
+   try {
+       const data = await identity.hasSession();
+       console.log('Yay', data);    
+   } catch (err) {
+       console.log('Nooo!', err);
+   }
+   ```
 * Listening to events is still supported, although since many functions return Promises, we expect
    many users will find the use of Promise results preferable. But for those that prefer the events,
    it works using a function `.on` that's compatible with Node's `EventEmitter`. For example
@@ -97,10 +122,14 @@ where it's difficult to do their own transpilation, we do provide some opt-in es
 
 But then regardless of whether you use the es5 versions or not, you might need to polyfill certain
 things that might be missing in the browsers you wish to support. A quick test using IE11 showed
-that we needed polyfills for `Promise`, `URL`, `Object.entries`, `fetch` and `Number.isInteger`. We
-added them from polyfill.io like this:
+that we needed polyfills for `Promise`, `URL`, `Object.entries`, `fetch`, `Number.isFinite` and
+`Number.isInteger`. If you want any sort of debugging to work (say, if you're passing a function
+using `console.log` as a parameter to any SDK function that supports logging), you might also need
+to polyfill `console` and `console.log` (yeah, it's baffling, but a [known
+issue](https://stackoverflow.com/questions/22315167/in-ie11-how-to-use-console-log) in IE). We added
+them from polyfill.io like this:
 
-    <script src="https://cdn.polyfill.io/v2/polyfill.js?features=Promise,URL,Object.entries,fetch,Number.isInteger"></script>
+    <script src="https://cdn.polyfill.io/v2/polyfill.js?features=Promise,URL,Object.entries,fetch,Number.isFinite,Number.isInteger,console,console.log"></script>
 
 <a name="example-project"></a>
 
