@@ -1,5 +1,18 @@
 # Changelog
 
+## v3.0.0-rc.7 (2018-07-11)
+
+### Fixes
+
+* There was a caching issue that caused a flood of requests to the Schibsted account hasSession
+  endpoint. This is fixed in this release. Please update ASAP!
+* The `Payment.purchaseCampaignFlowUrl` function used to have `null` as a default parameter for some
+  parameters that were required. This signature has been updated to match the documentation
+
+### Other changes
+
+* Documentation updates
+
 ## v3.0.0-rc.6 (2018-06-25)
 
 ### Breaking changes

@@ -83,7 +83,7 @@ you read this document in full. But ok, let's present some highlighted differenc
    // ... or if you're using async functions
    try {
        const data = await identity.hasSession();
-       console.log('Yay', data);    
+       console.log('Yay', data);
    } catch (err) {
        console.log('Nooo!', err);
    }
