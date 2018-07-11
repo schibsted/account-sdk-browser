@@ -332,6 +332,9 @@ export class Identity extends EventEmitter {
             // Try to resolve from cache (it has a TTL)
             const cachedData = this.cache.get(HAS_SESSION_CACHE_KEY);
             if (cachedData) {
+                if (cachedData.error) {
+                    throw new SDKError('HasSession endpoint returned an error', cachedData.error);
+                }
                 this._emitSessionEvent(this._session, cachedData);
                 return cachedData;
             }
@@ -343,8 +346,9 @@ export class Identity extends EventEmitter {
             if (isObject(data.error) && data.error.type === 'LoginException') {
                 data = await this._spid.get('ajax/hasSession.js', { autologin: autoLoginConverted });
             }
-            if (data.result) {
-                this.cache.set(HAS_SESSION_CACHE_KEY, data, data.expiresIn * 1000);
+            if (this._enableSessionCaching) {
+                const expiresIn = 1000 * (data.expiresIn || 300);
+                this.cache.set(HAS_SESSION_CACHE_KEY, data, expiresIn);
             }
             if (data.error) {
                 throw new SDKError('HasSession endpoint returned an error', data.error);

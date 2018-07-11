@@ -274,6 +274,13 @@ describe('Identity', () => {
             expect(fetch.mock.calls.length).toBe(2);
         });
 
+        test('should cache value even when an error is returned', async () => {
+            await expect(identity.hasSession(false)).rejects.toMatchObject({ type: 'UserException' });
+            await expect(identity.hasSession(false)).rejects.toMatchObject({ type: 'UserException' });
+
+            expect(fetch).toHaveProperty('mock.calls.length', 1);
+        });
+
         test('should emit event both when "real" and "cached" values are used', async () => {
             const spy = jest.fn();
             identity.on('login', spy);
@@ -296,9 +303,6 @@ describe('Identity', () => {
             fetch.mockImplementationOnce(() => ({ ok: true, json: async () => ({ result: true }) }));
             const v = await identity.isLoggedIn();
             expect(v).toBe(true);
-            fetch.mockImplementationOnce(() => ({ ok: true, json: async () => ({ result: false }) }));
-            const v2 = await identity.isLoggedIn();
-            expect(v2).toBe(true);
         });
 
         test(`should fail when we don't get a 'result' from hasSession`, async () => {
@@ -323,16 +327,13 @@ describe('Identity', () => {
             identity = new Identity({ clientId: 'foo', redirectUri: 'http://example.com' });
         });
 
-        test('should work when we get a `result` from hasSession', async () => {
+        test('should work when `!!result` from hasSession', async () => {
             fetch.mockImplementationOnce(() => ({ ok: true, json: async () => ({ result: true }) }));
             const v = await identity.isConnected();
             expect(v).toBe(true);
-            fetch.mockImplementationOnce(() => ({ ok: true, json: async () => ({ result: false }) }));
-            const v2 = await identity.isConnected();
-            expect(v2).toBe(false);
         });
 
-        test(`should fail when we don't get a 'result' from hasSession`, async () => {
+        test(`should fail when '!result' from hasSession`, async () => {
             fetch.mockImplementationOnce(() => ({ ok: true, json: async () => ({}) }));
             const v = await identity.isConnected();
             expect(v).toBe(false);
@@ -361,7 +362,7 @@ describe('Identity', () => {
             expect(user).not.toBe(session); // should be cloned (not sure why, though..)
         });
 
-        test(`should fail when we don't get a 'result' from hasSession`, async () => {
+        test(`should fail when 'result' is false from hasSession`, async () => {
             fetch.mockImplementationOnce(() => ({ ok: true, json: async () => ({}) }));
             await expect(identity.getUser()).rejects.toMatchObject({
                 message: 'The user is not connected to this merchant'
