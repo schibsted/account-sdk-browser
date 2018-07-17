@@ -1,5 +1,11 @@
 # Changelog
 
+## v3.0.0-rc.8 (2018-07-17)
+
+### Fixes
+
+* Remove not logged in user cache on login call https://github.com/schibsted/account-sdk-browser/issues/62
+
 ## v3.0.0-rc.7 (2018-07-11)
 
 ### Fixes
