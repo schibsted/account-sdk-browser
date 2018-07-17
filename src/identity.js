@@ -507,6 +507,7 @@ export class Identity extends EventEmitter {
         loginHint = ''
     }) {
         this._closePopup();
+        this.cache.delete(HAS_SESSION_CACHE_KEY);
         const url = this.loginUrl(state, acrValues, scope, redirectUri, newFlow, loginHint);
         if (preferPopup) {
             this.popup =
