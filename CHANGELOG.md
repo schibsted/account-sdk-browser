@@ -1,5 +1,11 @@
 # Changelog
 
+## v3.0.0-rc.9 (2018-08-07)
+
+### Fixes
+
+* Fixed CSP issue (https://github.com/facebook/regenerator/issues/336)
+
 ## v3.0.0-rc.8 (2018-07-17)
 
 ### Fixes
