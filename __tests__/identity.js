@@ -261,6 +261,15 @@ describe('Identity', () => {
             expect(document.cookie).toBe('SP_ID=should_not_expire');
         });
 
+        test('should work to set varnish cache expiration', async () => {
+            identity.enableVarnishCookie(3);
+            const session = { result: true, sp_id: 'should_remain_after_one_sec', expiresIn: 1 };
+            fetch.mockImplementationOnce(async () => ({ ok: true, json: async() => session }));
+            await identity.hasSession();
+            await new Promise((resolve) => setTimeout(resolve, 1010));
+            expect(document.cookie).toBe('SP_ID=should_remain_after_one_sec');
+        });
+
         describe('`baseDomain`', () => {
             test('should respect `baseDomain` from session', async () => {
                 identity.enableVarnishCookie();

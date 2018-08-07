@@ -267,10 +267,15 @@ export class Identity extends EventEmitter {
     /**
      * Set the Varnish cookie (`SP_ID`) when hasSession() is called. Note that most browsers require
      * that you are on a "real domain" for this to work — so, **not** `localhost`
+     * @param {number} [expiresIn] Override this to set number of seconds before the varnish cookie
+     * expires. The default is to use the same time that hasSession responses are cached for
      * @returns {void}
      */
-    enableVarnishCookie() {
+    enableVarnishCookie(expiresIn = 0) {
+        assert(Number.isInteger(expiresIn), `'expiresIn' must be an integer`);
+        assert(expiresIn >= 0, `'expiresIn' cannot be negative`);
         this.setVarnishCookie = true;
+        this.varnishExpiresIn = expiresIn;
         this._initCache();
     }
 
@@ -295,8 +300,11 @@ export class Identity extends EventEmitter {
      */
     _setVarnishCookie(sessionData) {
         const date = new Date();
-        if (typeof sessionData.expiresIn === 'number' && sessionData.expiresIn > 0) {
-            date.setTime(date.getTime() + (sessionData.expiresIn * 1000));
+        const validExpires = this.varnishExpiresIn
+            || typeof sessionData.expiresIn === 'number' && sessionData.expiresIn > 0;
+        if (validExpires) {
+            const expires = this.varnishExpiresIn || sessionData.expiresIn;
+            date.setTime(date.getTime() + (expires * 1000));
         } else {
             date.setTime(0);
         }
