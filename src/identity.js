@@ -284,6 +284,16 @@ export class Identity extends EventEmitter {
         if (!this.setVarnishCookie) {
             return;
         }
+        this._setVarnishCookie(sessionData);
+    }
+
+    /**
+     * Set the Varnish cookie
+     * @private
+     * @param {HasSessionSuccessResponse} sessionData
+     * @returns {void}
+     */
+    _setVarnishCookie(sessionData) {
         const date = new Date();
         if (typeof sessionData.expiresIn === 'number' && sessionData.expiresIn > 0) {
             date.setTime(date.getTime() + (sessionData.expiresIn * 1000));
@@ -324,6 +334,14 @@ export class Identity extends EventEmitter {
      * @return {Identity#HasSessionSuccessResponse|Identity#HasSessionFailureResponse}
      */
     async hasSession(autologin = true) {
+        const postProcess = (sessionData) => {
+            if (sessionData.error) {
+                throw new SDKError('HasSession endpoint returned an error', sessionData.error);
+            }
+            this._maybeSetVarnishCookie(sessionData);
+            this._emitSessionEvent(this._session, sessionData);
+        };
+
         if (typeof autologin !== 'boolean') {
             const [type, value] = inspect(autologin);
             throw new SDKError(`Parameter 'autologin' must be boolean, was: "${type}:${value}"`);
@@ -332,10 +350,7 @@ export class Identity extends EventEmitter {
             // Try to resolve from cache (it has a TTL)
             const cachedData = this.cache.get(HAS_SESSION_CACHE_KEY);
             if (cachedData) {
-                if (cachedData.error) {
-                    throw new SDKError('HasSession endpoint returned an error', cachedData.error);
-                }
-                this._emitSessionEvent(this._session, cachedData);
+                postProcess(cachedData);
                 return cachedData;
             }
         }
@@ -350,11 +365,7 @@ export class Identity extends EventEmitter {
                 const expiresIn = 1000 * (data.expiresIn || 300);
                 this.cache.set(HAS_SESSION_CACHE_KEY, data, expiresIn);
             }
-            if (data.error) {
-                throw new SDKError('HasSession endpoint returned an error', data.error);
-            }
-            this._maybeSetVarnishCookie(data);
-            this._emitSessionEvent(this._session, data);
+            postProcess(data);
             this._session = data;
             return data;
         } catch (err) {

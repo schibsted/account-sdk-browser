@@ -181,6 +181,7 @@ describe('Identity', () => {
         beforeEach(() => {
             fetch.mockClear();
             identity = new Identity({ clientId: 'foo', redirectUri: 'http://example.com' });
+            identity._setVarnishCookie({});
         });
 
         test('Calls hasSession with autologin=1 (not "true")', async () => {
@@ -237,6 +238,27 @@ describe('Identity', () => {
             fetch.mockImplementationOnce(func);
             await identity.hasSession();
             expect(document.cookie).toBe('');
+        });
+
+        test('should set varnish cookie also when reading from cache', async () => {
+            identity.enableVarnishCookie();
+            const session = { result: true, sp_id: 'should_not_expire', expiresIn: 2 };
+            fetch.mockImplementationOnce(async () => ({ ok: true, json: async() => session }));
+            await identity.hasSession();
+            expect(document.cookie).toBe('SP_ID=should_not_expire');
+
+            // 1. Here we first wait a little bit (*less* than the 2 second cache expiry)
+            await new Promise((resolve) => setTimeout(resolve, 1800));
+
+            // 2. Then we fetch session info — this should fetch from the cache and set the varnish
+            //    cookie again. In other words, it should exist in document.cookie for at least 2s
+            await identity.hasSession();
+
+            // 3. Finally, we wait another second. In total, we have waited slightly more than 3
+            //    seconds required to expire the *initial* varnish cookie, but as long as the
+            //    retrieval from cache also sets the cookie, we should be good
+            await new Promise((resolve) => setTimeout(resolve, 1000));
+            expect(document.cookie).toBe('SP_ID=should_not_expire');
         });
 
         describe('`baseDomain`', () => {
