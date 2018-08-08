@@ -267,10 +267,15 @@ export class Identity extends EventEmitter {
     /**
      * Set the Varnish cookie (`SP_ID`) when hasSession() is called. Note that most browsers require
      * that you are on a "real domain" for this to work — so, **not** `localhost`
+     * @param {number} [expiresIn] Override this to set number of seconds before the varnish cookie
+     * expires. The default is to use the same time that hasSession responses are cached for
      * @returns {void}
      */
-    enableVarnishCookie() {
+    enableVarnishCookie(expiresIn = 0) {
+        assert(Number.isInteger(expiresIn), `'expiresIn' must be an integer`);
+        assert(expiresIn >= 0, `'expiresIn' cannot be negative`);
         this.setVarnishCookie = true;
+        this.varnishExpiresIn = expiresIn;
         this._initCache();
     }
 
@@ -285,8 +290,11 @@ export class Identity extends EventEmitter {
             return;
         }
         const date = new Date();
-        if (typeof sessionData.expiresIn === 'number' && sessionData.expiresIn > 0) {
-            date.setTime(date.getTime() + (sessionData.expiresIn * 1000));
+        const validExpires = this.varnishExpiresIn
+            || typeof sessionData.expiresIn === 'number' && sessionData.expiresIn > 0;
+        if (validExpires) {
+            const expires = this.varnishExpiresIn || sessionData.expiresIn;
+            date.setTime(date.getTime() + (expires * 1000));
         } else {
             date.setTime(0);
         }
@@ -301,6 +309,26 @@ export class Identity extends EventEmitter {
             `domain=.${domain}`
         ].join('; ');
         document.cookie = cookie;
+    }
+
+    /**
+     * Clear the Varnish cookie if configured
+     * @private
+     * @returns {void}
+     */
+    _maybeClearVarnishCookie() {
+        if (this.setVarnishCookie) {
+            this._clearVarnishCookie();
+        }
+    }
+
+    /**
+     * Clear the Varnish cookie
+     * @private
+     * @returns {void}
+     */
+    _clearVarnishCookie() {
+        document.cookie = 'SP_ID=nothing; expires=Thu, 01 Jan 1970 00:00:00 GMT; path=/; domain=.';
     }
 
     /**
@@ -324,6 +352,14 @@ export class Identity extends EventEmitter {
      * @return {Identity#HasSessionSuccessResponse|Identity#HasSessionFailureResponse}
      */
     async hasSession(autologin = true) {
+        const postProcess = (sessionData) => {
+            if (sessionData.error) {
+                throw new SDKError('HasSession endpoint returned an error', sessionData.error);
+            }
+            this._maybeSetVarnishCookie(sessionData);
+            this._emitSessionEvent(this._session, sessionData);
+        };
+
         if (typeof autologin !== 'boolean') {
             const [type, value] = inspect(autologin);
             throw new SDKError(`Parameter 'autologin' must be boolean, was: "${type}:${value}"`);
@@ -332,10 +368,7 @@ export class Identity extends EventEmitter {
             // Try to resolve from cache (it has a TTL)
             const cachedData = this.cache.get(HAS_SESSION_CACHE_KEY);
             if (cachedData) {
-                if (cachedData.error) {
-                    throw new SDKError('HasSession endpoint returned an error', cachedData.error);
-                }
-                this._emitSessionEvent(this._session, cachedData);
+                postProcess(cachedData);
                 return cachedData;
             }
         }
@@ -350,11 +383,7 @@ export class Identity extends EventEmitter {
                 const expiresIn = 1000 * (data.expiresIn || 300);
                 this.cache.set(HAS_SESSION_CACHE_KEY, data, expiresIn);
             }
-            if (data.error) {
-                throw new SDKError('HasSession endpoint returned an error', data.error);
-            }
-            this._maybeSetVarnishCookie(data);
-            this._emitSessionEvent(this._session, data);
+            postProcess(data);
             this._session = data;
             return data;
         } catch (err) {
@@ -547,7 +576,8 @@ export class Identity extends EventEmitter {
             booleanize(this._bffService.get('api/identity/logout')),
         ]);
         if (spidLoggedOut || bffLoggedOut) {
-            this.cache.delete(HAS_SESSION_CACHE_KEY);
+            this._initCache();
+            this._maybeClearVarnishCookie();
             this.emit('logout');
         } else {
             const err = new SDKError('Could not log out from any endpoint');
