@@ -1,5 +1,19 @@
 # Changelog
 
+## v3.0.0-rc.9 (2018-08-08)
+
+### Fixes
+
+* Upgraded regenerator-runtime to fix [this CSP
+  issue](https://github.com/facebook/regenerator/issues/336) (courtesy of @henninga)
+* [#64](https://github.com/schibsted/account-sdk-browser/issues/64) — This issue was fixed in two
+  ways. First, by changing the implementation so we set the Varnish cookie on every call to
+  `hasSession` (before we didn't do so when a `hasSession` returned cached data). Second, we
+  introduced an optional parameter `expiresIn` on the `Identity.enableVarnishCookie` where you can
+  override the default expiry of the Varnish cookie.
+* [#54](https://github.com/schibsted/account-sdk-browser/issues/54) — Ensure that we clear the
+  Varnish cookie when a user logs out.
+
 ## v3.0.0-rc.8 (2018-07-17)
 
 ### Fixes
