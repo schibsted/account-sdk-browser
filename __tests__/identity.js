@@ -108,6 +108,35 @@ describe('Identity', () => {
             expect(fakeFetch.mock.calls[0][0]).toMatch(/ajax\/logout.js/);
             expect(fakeFetch.mock.calls[1][0]).toMatch(/authn\/api\/identity\/logout/);
         });
+        test('Should clear cache when logging out', async () => {
+            const webStorageMock = () => {
+                const mock = {
+                    store: {},
+                    setItem: (k, v) => mock.store[k] = v,
+                    getItem: (k) => mock.store[k],
+                    removeItem: (k) => delete mock.store[k],
+                };
+                return mock;
+            };
+            const window = { localStorage: webStorageMock() };
+            const identity = new Identity({ clientId: 'foo', redirectUri: 'http://foo.com', window });
+            const fakeFetch = jest.fn();
+            const sessionResponse = { ok: true, json: async () => ({ result: true })};
+            fakeFetch.mockImplementationOnce(async () => sessionResponse);
+            identity._spid.fetch = fakeFetch;
+            await identity.hasSession();
+            expect(fakeFetch).toHaveBeenCalledTimes(1);
+            const fakeFetch2 = jest.fn();
+            fakeFetch2.mockImplementationOnce(async () => ({ ok: true, json: async () => ({})}));
+            identity._spid.fetch = fakeFetch2;
+            identity._bffService.fetch = fakeFetch2;
+            await identity.logout();
+
+            fakeFetch.mockImplementationOnce(async () => sessionResponse);
+            identity._spid.fetch = fakeFetch;
+            await identity.hasSession();
+            expect(fakeFetch).toHaveBeenCalledTimes(2); // now it should have been called again, so 2
+        });
         test('Should handle error', async () => {
             const identity = new Identity({ clientId: 'foo', redirectUri: 'http://foo.com', window: {} });
             const fakeFetch = jest.fn();
