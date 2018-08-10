@@ -1,5 +1,12 @@
 # Changelog
 
+## v3.0.0-rc.10 (2018-08-10)
+
+### Fixes
+
+* [#68](https://github.com/schibsted/account-sdk-browser/issues/68) — Cache was not cleared after
+  calling `Identity.logout()` or `Identity.enableVarnishCache`
+
 ## v3.0.0-rc.9 (2018-08-08)
 
 ### Fixes
