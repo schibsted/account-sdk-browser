@@ -99,7 +99,7 @@ export class Identity extends EventEmitter {
         this._sessionInitiatedSent = false;
         this.window = window;
         this.clientId = clientId;
-        this._initCache();
+        this.cache = new Cache(this.window && this.window.localStorage);
         this.redirectUri = redirectUri;
         this.log = log;
 
@@ -256,15 +256,6 @@ export class Identity extends EventEmitter {
     }
 
     /**
-     * Create a fresh cache for this instance
-     * @private
-     * @returns {void}
-     */
-    _initCache() {
-        this.cache = new Cache(this.window && this.window.localStorage);
-    }
-
-    /**
      * Set the Varnish cookie (`SP_ID`) when hasSession() is called. Note that most browsers require
      * that you are on a "real domain" for this to work — so, **not** `localhost`
      * @param {number} [expiresIn] Override this to set number of seconds before the varnish cookie
@@ -276,7 +267,7 @@ export class Identity extends EventEmitter {
         assert(expiresIn >= 0, `'expiresIn' cannot be negative`);
         this.setVarnishCookie = true;
         this.varnishExpiresIn = expiresIn;
-        this._initCache();
+        this.cache.delete(HAS_SESSION_CACHE_KEY);
     }
 
     /**
@@ -576,7 +567,7 @@ export class Identity extends EventEmitter {
             booleanize(this._bffService.get('api/identity/logout')),
         ]);
         if (spidLoggedOut || bffLoggedOut) {
-            this._initCache();
+            this.cache.delete(HAS_SESSION_CACHE_KEY);
             this._maybeClearVarnishCookie();
             this.emit('logout');
         } else {
