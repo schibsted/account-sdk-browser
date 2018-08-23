@@ -12,6 +12,7 @@ import EventEmitter from 'tiny-emitter';
 import JSONPClient from './JSONPClient';
 import Cache from './cache';
 import * as popup from './popup';
+import ItpModal from './ItpModal';
 import RESTClient from './RESTClient';
 import SDKError from './SDKError';
 import * as spidTalk from './spidTalk';
@@ -61,6 +62,7 @@ import * as spidTalk from './spidTalk';
  */
 
 const HAS_SESSION_CACHE_KEY = 'hasSession-cache';
+const LOGIN_IN_PROGRESS_KEY = 'loginInProgress-cache';
 const globalWindow = () => window;
 
 /**
@@ -101,10 +103,15 @@ export class Identity extends EventEmitter {
         this.clientId = clientId;
         this.cache = new Cache(this.window && this.window.localStorage);
         this.redirectUri = redirectUri;
+        this.env = env;
         this.log = log;
 
         // Internal hack: set to false to always refresh from hassession
         this._enableSessionCaching = true;
+
+        // Internal hack: set to true if the SDK is being used inside the ITP iframe to
+        // avoid using the hasSession service and to prevent infinite iframe recursion
+        this._itpMode = false;
 
         // Old session
         this._session = {};
@@ -323,6 +330,15 @@ export class Identity extends EventEmitter {
     }
 
     /**
+     * Check if we need to use the ITP workaround for Safari versions > 12
+     * @returns {boolean}
+     */
+    _itpModalRequired() {
+        return document.requestStorageAccess &&
+            navigator.userAgent.includes('Version/12.');
+    }
+
+    /**
      * @summary Queries the hassession endpoint and returns information about the status of the user
      * @description When we send a request to this endpoint, cookies sent along with the request
      * determines the status of the user. If the user is not currently logged in, but has a cookie
@@ -366,10 +382,21 @@ export class Identity extends EventEmitter {
 
         try {
             const autoLoginConverted = autologin ? 1 : 0;
-            let data = await this._hasSession.get('rpc/hasSession.js', { autologin: autoLoginConverted });
-            if (isObject(data.error) && data.error.type === 'LoginException') {
+            let data = null;
+            if (!this._itpMode) {
+                data = await this._hasSession.get('rpc/hasSession.js', { autologin: autoLoginConverted });
+            }
+            if (this._itpMode || (isObject(data.error) && data.error.type === 'LoginException')) {
                 data = await this._spid.get('ajax/hasSession.js', { autologin: autoLoginConverted });
             }
+            if (this._itpModalRequired() && !this._itpMode &&
+                isObject(data.error) && data.error.type === 'UserException' &&
+                this.cache.get(LOGIN_IN_PROGRESS_KEY) !== null) {
+                this.cache.delete(LOGIN_IN_PROGRESS_KEY);
+                const modal = new ItpModal(this._spid, this.clientId, this.redirectUri, this.env);
+                data = await modal.show();
+            }
+
             if (this._enableSessionCaching) {
                 const expiresIn = 1000 * (data.expiresIn || 300);
                 this.cache.set(HAS_SESSION_CACHE_KEY, data, expiresIn);
@@ -535,6 +562,11 @@ export class Identity extends EventEmitter {
             if (this.popup) {
                 return this.popup;
             }
+        }
+        // for safari in a non-popup context, remember that we've got a login in progress so we can
+        // work around some ITP issues when we come back from Schibsted Account
+        if (this._itpModalRequired()) {
+            this.cache.set(LOGIN_IN_PROGRESS_KEY, {}, 1000 * 60 * 15);
         }
         this.window.location.href = url;
         return null;
