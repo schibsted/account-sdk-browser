@@ -240,7 +240,8 @@ mentioning that your end users have a few ways to log in:
 * Passwordless - SMS (BETA): similar to the previous method but instead of an email address, they receive
   the code on their phone as an SMS
 
-IMPORTANT: Passwordless using SMS is still in BETA. It's only recommended to use it for test and experiment purposes for now. Please let us know first if you will be using this. 
+IMPORTANT: Passwordless using SMS is still in BETA. It's only recommended to use it for testing and
+experimental purposes for now. Please let us know before using this in production.
 
 The default is username & password. If you wish to use one of the passwordless login methods, the
 `login()` function takes an optional parameter called `acrValues` (yeah, it's an OAuth specific
