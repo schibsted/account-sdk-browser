@@ -61,5 +61,6 @@
         }
       ]
     ]
-  }
+  },
+  "typings": "index.d.ts"
 }
