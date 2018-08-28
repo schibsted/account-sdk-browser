@@ -331,6 +331,7 @@ export class Identity extends EventEmitter {
 
     /**
      * Check if we need to use the ITP workaround for Safari versions >= 12
+     * @private
      * @returns {boolean}
      */
     _itpModalRequired() {
