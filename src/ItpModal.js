@@ -1,3 +1,5 @@
+const FADE_DURATION_MS = 500;
+
 /**
  * A dialog that is shown after coming back from a login flow in the cases where
  * Schibsted Account is flagged as a tracking site by Apple ITP2.
@@ -32,7 +34,7 @@ export default class ItpModal {
                 setTimeout(() => {
                     document.body.removeChild(modalEl);
                     this._restoreBodyScrolling();
-                }, 500);
+                }, FADE_DURATION_MS);
             };
 
             const handlePostMessage = (event) => {
@@ -52,6 +54,9 @@ export default class ItpModal {
                 reject('cancel');
             };
 
+            // setTimeout is necessary because we need the element to be "mounted" in the DOM
+            // with the old opacity (0) before setting the new opacity (1) or else we won't
+            // get the CSS animation
             setTimeout(() => {
                 modalEl.style.opacity = 1;
             }, 0);
@@ -76,7 +81,7 @@ export default class ItpModal {
             bottom: 0,
             left: 0,
             'background-color': 'rgba(0, 0, 0, .7)',
-            'transition': 'opacity .5s',
+            'transition': `opacity ${FADE_DURATION_MS}ms`,
             opacity: 0,
         });
 

@@ -330,12 +330,12 @@ export class Identity extends EventEmitter {
     }
 
     /**
-     * Check if we need to use the ITP workaround for Safari versions > 12
+     * Check if we need to use the ITP workaround for Safari versions >= 12
      * @returns {boolean}
      */
     _itpModalRequired() {
         return document.requestStorageAccess &&
-            navigator.userAgent.includes('Version/12.');
+            parseInt(navigator.userAgent.match(/Version\/(\d+)\./)[1], 10) >= 12;
     }
 
     /**
@@ -389,13 +389,15 @@ export class Identity extends EventEmitter {
             if (this._itpMode || (isObject(data.error) && data.error.type === 'LoginException')) {
                 data = await this._spid.get('ajax/hasSession.js', { autologin: autoLoginConverted });
             }
-            if (this._itpModalRequired() && !this._itpMode &&
+
+            const shouldShowItpModal = this._itpModalRequired() && !this._itpMode &&
                 isObject(data.error) && data.error.type === 'UserException' &&
-                this.cache.get(LOGIN_IN_PROGRESS_KEY) !== null) {
-                this.cache.delete(LOGIN_IN_PROGRESS_KEY);
+                this.cache.get(LOGIN_IN_PROGRESS_KEY) !== null;
+            if (shouldShowItpModal) {
                 const modal = new ItpModal(this._spid, this.clientId, this.redirectUri, this.env);
                 data = await modal.show();
             }
+            this.cache.delete(LOGIN_IN_PROGRESS_KEY);
 
             if (this._enableSessionCaching) {
                 const expiresIn = 1000 * (data.expiresIn || 300);
@@ -556,17 +558,19 @@ export class Identity extends EventEmitter {
         this._closePopup();
         this.cache.delete(HAS_SESSION_CACHE_KEY);
         const url = this.loginUrl(state, acrValues, scope, redirectUri, newFlow, loginHint);
+
+        // for safari, remember that we've got a login in progress so we can
+        // work around some ITP issues when we come back from Schibsted Account
+        if (this._itpModalRequired()) {
+            this.cache.set(LOGIN_IN_PROGRESS_KEY, {}, 1000 * 60 * 15);
+        }
+
         if (preferPopup) {
             this.popup =
                 popup.open(this.window, url, 'Schibsted account', { width: 360, height: 570 });
             if (this.popup) {
                 return this.popup;
             }
-        }
-        // for safari in a non-popup context, remember that we've got a login in progress so we can
-        // work around some ITP issues when we come back from Schibsted Account
-        if (this._itpModalRequired()) {
-            this.cache.set(LOGIN_IN_PROGRESS_KEY, {}, 1000 * 60 * 15);
         }
         this.window.location.href = url;
         return null;
