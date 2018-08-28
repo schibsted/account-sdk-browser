@@ -37,6 +37,7 @@ export default class SDKError extends Error {
 
     /**
      * Serializes the error printing any interesting additional info
+     * @private
      * @return {String}
      */
     toString() {
