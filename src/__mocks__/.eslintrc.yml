@@ -1,0 +1,8 @@
+rules:
+    require-jsdoc: 0
+    no-undefined: 0
+globals:
+    beforeAll: true
+    afterAll: true
+    expect: true
+    jest: true

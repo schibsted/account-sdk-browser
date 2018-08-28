@@ -4,7 +4,10 @@
 
 'use strict';
 
+jest.mock('../src/ItpModal');
+
 import Identity from '../identity';
+import ItpModal from '../src/ItpModal';
 import { compareUrls } from './utils';
 import { URL } from 'url';
 import { URL as u } from 'whatwg-url';
@@ -614,6 +617,99 @@ describe('Identity', () => {
                 expect(url.searchParams.get('client_id')).toBe('foo');
                 expect(url.searchParams.get('response_type')).toBe('code');
                 expect(url.searchParams.get('redirect_uri')).toBe(redirect || identity.redirectUri);
+            });
+        });
+    });
+
+    describe('ITP Modal', () => {
+        const LOGIN_IN_PROGRESS_KEY = 'loginInProgress-cache';
+        const existingUserAgent = navigator.userAgent;
+        const safari11 = "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_13_6) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/11.1.2 Safari/605.1.15";
+        const safari12 = "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_13_6) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/12.1 Safari/605.1.15";
+        const safari13 = "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_13_6) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/13.1 Safari/605.1.15";
+
+        function setUserAgent(userAgent) {
+            Object.defineProperty(window.navigator, "userAgent", { configurable: true });
+            Object.defineProperty(window.navigator, "userAgent", (function(_value){
+                return {
+                    get: function _get() {
+                        return _value;
+                    },
+                    set: function _set(v) {
+                        _value = v;
+                    }
+                };
+            })(userAgent));
+        }
+
+        beforeAll(() => {
+            document.requestStorageAccess = function() {};
+        });
+
+        afterAll(() => {
+            document.requestStorageAccess = undefined;
+            setUserAgent(existingUserAgent);
+        });
+
+        describe('_itpModalRequired', () => {
+            it('should be true for Safari 12', () => {
+                const identity = new Identity({ clientId: 'foo', redirectUri: 'http://example.com' });
+                setUserAgent(safari12);
+                expect(identity._itpModalRequired()).toBe(true);
+            });
+
+            it('should be true for Safari 13', () => {
+                const identity = new Identity({ clientId: 'foo', redirectUri: 'http://example.com' });
+                setUserAgent(safari13);
+                expect(identity._itpModalRequired()).toBe(true);
+            });
+
+            it('should be false for Safari 11', () => {
+                const identity = new Identity({ clientId: 'foo', redirectUri: 'http://example.com' });
+                setUserAgent(safari11);
+                expect(identity._itpModalRequired()).toBe(false);
+            });
+        });
+
+        it('should set value in cache when _itpMode===true && Safari12', () => {
+            const window = { location: {} };
+            const identity = new Identity({ clientId: 'foo', redirectUri: 'http://e.com', window });
+            identity._itpMode = true;
+            setUserAgent(safari12);
+            identity.login({ state: 'whatever' });
+            expect(identity.cache.get(LOGIN_IN_PROGRESS_KEY)).toMatchObject({});
+        });
+
+        describe('hasSession', () => {
+            const fetch = require('fetch-jsonp');
+            let identity;
+
+            beforeEach(() => {
+                fetch.mockClear();
+                identity = new Identity({ clientId: 'foo', redirectUri: 'http://example.com' });
+                ItpModal.mockClear();
+            });
+
+            it('should invoke the ItpModal when Safari12 && cache has LOGIN_IN_PROGRESS set', async () => {
+                setUserAgent(safari12);
+                identity.cache.set(LOGIN_IN_PROGRESS_KEY, {}, 1000 * 30);
+                fetch.mockImplementation(() => ({ ok: true, json: async () => ({ error: { type: 'UserException' }}) }));
+                const dummySession = await identity.hasSession();
+                expect(dummySession).toMatchObject({ foo: 'dummy itp modal return value' });
+                expect(fetch.mock.calls.length).toBe(1);
+                expect(ItpModal.mock.calls.length).toBe(1);
+                expect(identity.cache.get(LOGIN_IN_PROGRESS_KEY)).toBe(null);
+            });
+
+            it('should not invoke the ItpModal when _itpMode===true', async () => {
+                setUserAgent(safari12);
+                identity.cache.set(LOGIN_IN_PROGRESS_KEY, {}, 1000 * 30);
+                identity._itpMode = true;
+                fetch.mockImplementation(() => ({ ok: true, json: async () => ({ error: { type: 'UserException' }}) }));
+                await expect(identity.hasSession()).rejects.toMatchObject({ message: 'HasSession failed' });
+                expect(fetch.mock.calls.length).toBe(1);
+                expect(ItpModal.mock.calls.length).toBe(0);
+                expect(identity.cache.get(LOGIN_IN_PROGRESS_KEY)).toBe(null);
             });
         });
     });
