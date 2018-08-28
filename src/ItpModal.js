@@ -1,8 +1,20 @@
 const FADE_DURATION_MS = 500;
 
 /**
+ * Standard validator for events
+ * @private
+ * @param {ItpModal} itpModal
+ * @param {Event} event
+ * @returns {Boolean}
+ */
+export function eventValidatorFunc(itpModal, event) {
+    return itpModal._iframeUrl.startsWith(event.origin) && event.data;
+}
+
+/**
  * A dialog that is shown after coming back from a login flow in the cases where
  * Schibsted Account is flagged as a tracking site by Apple ITP2.
+ * @private
  */
 export default class ItpModal {
     /**
@@ -10,17 +22,20 @@ export default class ItpModal {
      * @param {string} clientId
      * @param {string} redirectUri
      * @param {string} env
+     * @param {Function} eventValidator
      */
-    constructor(spid, clientId, redirectUri, env) {
+    constructor(spid, clientId, redirectUri, env, eventValidator = eventValidatorFunc) {
         this._iframeUrl = spid.makeUrl('/authn/itp', {
             env,
             client_id: clientId,
             redirect_uri: redirectUri,
         });
+        this.isValidEvent = eventValidator;
     }
 
     /**
      * Show the ITP dialog
+     * @private
      * @returns {Promise} resolves to the hasSession data
      */
     show() {
@@ -38,7 +53,7 @@ export default class ItpModal {
             };
 
             const handlePostMessage = (event) => {
-                if (this._iframeUrl.startsWith(event.origin) && event.data) {
+                if (this.isValidEvent(this, event)) {
                     closeModal();
                     if (event.data.sessionData) {
                         resolve(event.data.sessionData);
