@@ -7,7 +7,7 @@
 import { assert, isStr, isNonEmptyString, isObject, isUrl, isStrIn } from './validate';
 import { cloneDeep } from './object';
 import { urlMapper } from './url';
-import { ENDPOINTS } from './config';
+import { ENDPOINTS, NAMESPACE } from './config';
 import EventEmitter from 'tiny-emitter';
 import JSONPClient from './JSONPClient';
 import Cache from './cache';
@@ -86,12 +86,13 @@ export class Identity extends EventEmitter {
      * @param {object} options
      * @param {string} options.clientId - Example: "1234567890abcdef12345678"
      * @param {string} [options.redirectUri] - Example: "https://site.com"
+     * @param {string} [options.sessionDomain] - Example: "https://id.site.com"
      * @param {string} [options.env='PRE'] - Schibsted account environment: `PRE`, `PRO` or `PRO_NO`
      * @param {function} [options.log] - A function that receives debug log information. If not set,
      * no logging will be done
      * @throws {SDKError} - If any of options are invalid
      */
-    constructor({ clientId, redirectUri, env = 'PRE', log, window = globalWindow() }) {
+    constructor({ clientId, redirectUri, sessionDomain, env = 'PRE', log, window = globalWindow() }) {
         super();
         assert(isNonEmptyString(clientId), 'clientId parameter is required');
         assert(isObject(window), 'The reference to window is missing');
@@ -105,6 +106,11 @@ export class Identity extends EventEmitter {
         this.redirectUri = redirectUri;
         this.env = env;
         this.log = log;
+
+        if (sessionDomain) {
+            assert(isUrl(sessionDomain), 'sessionDomain parameter is not a valid URL');
+            this._setSessionServiceUrl(sessionDomain);
+        }
 
         // Internal hack: set to false to always refresh from hassession
         this._enableSessionCaching = true;
@@ -164,6 +170,22 @@ export class Identity extends EventEmitter {
             serverUrl: urlMapper(url, ENDPOINTS.BFF),
             log: this.log,
             defaultParams: { client_id: this.clientId, redirect_uri: this.redirectUri },
+        });
+    }
+
+    /**
+     * Set session-service domain
+     * @private
+     * @param {string} domain - real URL — (**not** 'PRE' style env key)
+     * @returns {void}
+     */
+    _setSessionServiceUrl(domain) {
+        assert(isStr(domain), `domain parameter is invalid: ${domain}`);
+        const client_sdrn = `sdrn:${NAMESPACE[this.env]}:client:${this.clientId}`;
+        this._sessionService = new RESTClient({
+            serverUrl: domain,
+            log: this.log,
+            defaultParams: { client_sdrn, redirect_uri: this.redirectUri },
         });
     }
 

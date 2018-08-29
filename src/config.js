@@ -68,8 +68,16 @@ const config = {
         },
     },
     JSONP: { TIMEOUT: 7000 }, // ms
+    NAMESPACE: {
+        LOCAL: 'schibsted',
+        DEV: 'schibsted',
+        PRE: 'schibsted',
+        PRO: 'schibsted.com',
+        PRO_NO: 'spid.no',
+    }
 }
 
 export default config;
 export const ENDPOINTS = config.ENDPOINTS;
 export const JSONP = config.JSONP;
+export const NAMESPACE = config.NAMESPACE;
