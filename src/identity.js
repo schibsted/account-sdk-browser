@@ -407,23 +407,27 @@ export class Identity extends EventEmitter {
         }
 
         try {
-            const autoLoginConverted = autologin ? 1 : 0;
             let data = null;
-            if (!this._itpMode) {
-                data = await this._hasSession.get('rpc/hasSession.js', { autologin: autoLoginConverted });
-            }
-            if (this._itpMode || (isObject(data.error) && data.error.type === 'LoginException')) {
-                data = await this._spid.get('ajax/hasSession.js', { autologin: autoLoginConverted });
-            }
+            if (this._sessionService) {
+                data = await this._sessionService.get('/session');
+            } else {
+                const autoLoginConverted = autologin ? 1 : 0;
 
-            const shouldShowItpModal = this._itpModalRequired() && !this._itpMode &&
-                isObject(data.error) && data.error.type === 'UserException' &&
-                loginInProgress;
-            if (shouldShowItpModal) {
-                const modal = new ItpModal(this._spid, this.clientId, this.redirectUri, this.env);
-                data = await modal.show();
-            }
+                if (!this._itpMode) {
+                    data = await this._hasSession.get('rpc/hasSession.js', { autologin: autoLoginConverted });
+                }
+                if (this._itpMode || (isObject(data.error) && data.error.type === 'LoginException')) {
+                    data = await this._spid.get('ajax/hasSession.js', { autologin: autoLoginConverted });
+                }
 
+                const shouldShowItpModal = this._itpModalRequired() && !this._itpMode &&
+                    isObject(data.error) && data.error.type === 'UserException' &&
+                    loginInProgress;
+                if (shouldShowItpModal) {
+                    const modal = new ItpModal(this._spid, this.clientId, this.redirectUri, this.env);
+                    data = await modal.show();
+                }
+            }
             if (this._enableSessionCaching) {
                 const expiresIn = 1000 * (data.expiresIn || 300);
                 this.cache.set(HAS_SESSION_CACHE_KEY, data, expiresIn);
