@@ -607,16 +607,16 @@ export class Identity extends EventEmitter {
 
     /**
      * @summary Logs the user out from the Identity platform
-     * @description **Note**: Your site origin should be listed as a redirect_uri in selfservice for
-     * this to work. On the Schibsted account side, we check CORS headers against the list of
-     * redirect_uris. For most sites, this will work already, since this matching is only done on
-     * the origin part of the uri, and most sites already have that in their redirect_uri list. So
-     * if you have a redirect_uri `https://mysite.news/article`, then this will work when coming
-     * from any `https://mysite.news` location. Note however, that the protocol matters, so it will
-     * not work for `http://mysite.news` (only `https`).
+     * @description This function will redirect the user to Schibsted account to log out. Then,
+     * optionally, the browser is redirected to `redirectUri`.
+     * @param {string} [redirectUri] — The site to redirect to after logging out
      * @return {void}
      */
-    async logout() {
+    async logout(redirectUri) {
+        if (this._sessionService) {
+            window.location.href = this.logoutUrl(redirectUri);
+            return;
+        }
         // At the moment we have two endpoints that can have user session: SPiD and BFF
         // if one of them returns success, we assume that the login was successful
         // but if both fail, then we haven't really logged the user out.
