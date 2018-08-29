@@ -40,6 +40,7 @@ export default class ItpModal {
      */
     show() {
         return new Promise((resolve, reject) => {
+            this._preventBodyScrolling();
             const modalEl = this._buildModalElement();
             document.body.appendChild(modalEl);
 

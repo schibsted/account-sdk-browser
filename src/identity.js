@@ -360,6 +360,9 @@ export class Identity extends EventEmitter {
      * @return {Identity#HasSessionSuccessResponse|Identity#HasSessionFailureResponse}
      */
     async hasSession(autologin = true) {
+        const loginInProgress = this.cache.get(LOGIN_IN_PROGRESS_KEY) !== null;
+        this.cache.delete(LOGIN_IN_PROGRESS_KEY);
+
         const postProcess = (sessionData) => {
             if (sessionData.error) {
                 throw new SDKError('HasSession endpoint returned an error', sessionData.error);
@@ -393,12 +396,11 @@ export class Identity extends EventEmitter {
 
             const shouldShowItpModal = this._itpModalRequired() && !this._itpMode &&
                 isObject(data.error) && data.error.type === 'UserException' &&
-                this.cache.get(LOGIN_IN_PROGRESS_KEY) !== null;
+                loginInProgress;
             if (shouldShowItpModal) {
                 const modal = new ItpModal(this._spid, this.clientId, this.redirectUri, this.env);
                 data = await modal.show();
             }
-            this.cache.delete(LOGIN_IN_PROGRESS_KEY);
 
             if (this._enableSessionCaching) {
                 const expiresIn = 1000 * (data.expiresIn || 300);
