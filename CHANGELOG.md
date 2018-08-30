@@ -1,5 +1,18 @@
 # Changelog
 
+## v3.0.0-rc.11 (2018-08-30)
+
+### New features
+
+* Initial support for Safari 12. For users of this browser, there could be issues related to
+  Intelligent Tracking Prevention (ITP) v2. For the people who experience it, it would be impossible
+  to detect whether you're logged in or not from a given site (because cookies to Schibsted account
+  would be blocked because it's a third party). The Apple way to solve this, is to call
+  `requestStorageAccess` from an iframe, and let the user choose "Allow" in a scary Safari dialog.
+  Then cookies will once more be allowed to go to that third party. This SDK will now work around
+  this by showing a friendlier dialog before calling `requestStorageAccess` so people are hopefully
+  more inclined to click "Allow".
+
 ## v3.0.0-rc.10 (2018-08-10)
 
 ### Fixes
