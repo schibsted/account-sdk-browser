@@ -1,5 +1,6 @@
 *
 !index.js
+!index.d.ts
 !identity.js
 !monetization.js
 !payment.js

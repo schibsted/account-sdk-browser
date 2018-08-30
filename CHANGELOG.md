@@ -1,5 +1,9 @@
 # Changelog
 
+## v3.0.0-rc.12 (2018-08-30)
+
+This release is identical to rc.11 but includes index.d.ts in the npm package.
+
 ## v3.0.0-rc.11 (2018-08-30)
 
 ### New features
