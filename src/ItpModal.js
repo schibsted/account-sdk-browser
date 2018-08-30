@@ -24,9 +24,9 @@ export default class ItpModal {
      * @param {string} env
      * @param {Function} eventValidator
      */
-    constructor(spid, clientId, redirectUri, env, eventValidator = eventValidatorFunc) {
+    constructor(spid, clientId, redirectUri, environment, eventValidator = eventValidatorFunc) {
         this._iframeUrl = spid.makeUrl('/authn/itp', {
-            env,
+            environment,
             client_id: clientId,
             redirect_uri: redirectUri,
         });
