@@ -613,7 +613,14 @@ export class Identity extends EventEmitter {
      * @return {void}
      */
     async logout(redirectUri) {
+        const cleanup = () => {
+            this.cache.delete(HAS_SESSION_CACHE_KEY);
+            this._maybeClearVarnishCookie();
+            this.emit('logout');
+        }
+
         if (this._sessionService) {
+            cleanup();
             window.location.href = this.logoutUrl(redirectUri);
             return;
         }
@@ -632,9 +639,7 @@ export class Identity extends EventEmitter {
             booleanize(this._bffService.get('api/identity/logout')),
         ]);
         if (spidLoggedOut || bffLoggedOut) {
-            this.cache.delete(HAS_SESSION_CACHE_KEY);
-            this._maybeClearVarnishCookie();
-            this.emit('logout');
+            cleanup();
         } else {
             const err = new SDKError('Could not log out from any endpoint');
             this.emit('error', err);
