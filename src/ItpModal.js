@@ -21,7 +21,7 @@ export default class ItpModal {
      * @param {JSONPClient} spid
      * @param {string} clientId
      * @param {string} redirectUri
-     * @param {string} env
+     * @param {string} environment
      * @param {Function} eventValidator
      */
     constructor(spid, clientId, redirectUri, environment, eventValidator = eventValidatorFunc) {
