@@ -1,5 +1,13 @@
 # Changelog
 
+## v3.0.0-rc.13 (2018-08-31)
+
+### Fixes
+
+* The "Safari 12 ITP2 workaround" from v3.0.0-rc.11 had a bug where we passed the wrong query
+  parameter to the ITP dialog, so the dialog then failed to post a message back to the parent page.
+  In conclusion; calls to `Identity.hasSession` would still fail 😭.
+
 ## v3.0.0-rc.12 (2018-08-30)
 
 This release is identical to rc.11 but includes index.d.ts in the npm package.
