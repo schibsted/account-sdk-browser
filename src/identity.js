@@ -546,7 +546,13 @@ export class Identity extends EventEmitter {
      * @param {boolean} [options.preferPopup=false] - Should we try to open a popup window?
      * @param {boolean} [options.newFlow=true] - Should we try the new GDPR-safe flow or the
      * legacy/stable SPiD flow?
-     * @param {string} [options.loginHint=''] - user email hint
+     * @param {string} [options.Hint=''] - user email hint
+     * @param {string} [options.tag=''] - Pulse tag
+     * @param {string} [options.teaser=''] - Teaser slug. Teaser with given slug will be displayed
+     * in place of default teaser
+     * @param {number|string} [options.maxAge=''] - Specifies the allowable elapsed time in seconds since
+     * the last time the End-User was actively authenticated, if time expires re-authentication will
+     * be required. See OpenID spec for more information
      * @return {Window|null} - Reference to popup window if created (or `null` otherwise)
      */
     login({
@@ -556,11 +562,15 @@ export class Identity extends EventEmitter {
         redirectUri = this.redirectUri,
         preferPopup = false,
         newFlow = true,
-        loginHint = ''
+        loginHint = '',
+        tag = '',
+        teaser = '',
+        maxAge = ''
     }) {
         this._closePopup();
         this.cache.delete(HAS_SESSION_CACHE_KEY);
-        const url = this.loginUrl(state, acrValues, scope, redirectUri, newFlow, loginHint);
+        const url = this.loginUrl(state, acrValues, scope, redirectUri, newFlow, loginHint, maxAge,
+            tag, teaser);
 
         // for safari, remember that we've got a login in progress so we can
         // work around some ITP issues when we come back from Schibsted Account
@@ -630,6 +640,12 @@ export class Identity extends EventEmitter {
      * @param {boolean} [newFlow=true] - Should we try the new flow or the old Schibsted account
      * login? If this parameter is set to false, the `acrValues` parameter doesn't have any effect
      * @param {string} [loginHint=''] - user email hint
+     * @param {string} [tag=''] - Pulse tag
+     * @param {string} [teaser=''] - Teaser slug. Teaser with given slug will be displayed
+     * in place of default teaser
+     * @param {number|string} [maxAge=''] - Specifies the allowable elapsed time in seconds since
+     * the last time the End-User was actively authenticated, if time expires re-authentication will
+     * be required. See OpenID spec for more information
      * @return {string} - The url
      */
     loginUrl(
@@ -638,7 +654,10 @@ export class Identity extends EventEmitter {
         scope = 'openid',
         redirectUri = this.redirectUri,
         newFlow = true,
-        loginHint = ''
+        loginHint = '',
+        tag = '',
+        teaser = '',
+        maxAge = ''
     ) {
         assert(!acrValues || isStrIn(acrValues, ['', 'otp-email', 'otp-sms'], true),
             `The acrValues parameter is not acceptable: ${acrValues}`);
@@ -656,7 +675,10 @@ export class Identity extends EventEmitter {
                 scope,
                 state,
                 acr_values: acrValues,
-                login_hint: loginHint
+                login_hint: loginHint,
+                tag,
+                teaser,
+                max_age: maxAge
             });
         } else {
             // acrValues do not work with the old flows
@@ -665,7 +687,9 @@ export class Identity extends EventEmitter {
                 redirect_uri: redirectUri,
                 scope,
                 state,
-                email: loginHint
+                email: loginHint,
+                tag,
+                teaser
             });
         }
     }
