@@ -551,8 +551,9 @@ export class Identity extends EventEmitter {
      * @param {string} [options.teaser=''] - Teaser slug. Teaser with given slug will be displayed
      * in place of default teaser
      * @param {number|string} [options.maxAge=''] - Specifies the allowable elapsed time in seconds since
-     * the last time the End-User was actively authenticated, if time expires re-authentication will
-     * be required. See OpenID spec for more information
+     * the last time the End-User was actively authenticated. If last authentication time is more
+     * than maxAge seconds in the past, re-authentication will be required. See the OpenID Connect
+     * spec section 3.1.2.1 for more information
      * @return {Window|null} - Reference to popup window if created (or `null` otherwise)
      */
     login({
@@ -569,8 +570,8 @@ export class Identity extends EventEmitter {
     }) {
         this._closePopup();
         this.cache.delete(HAS_SESSION_CACHE_KEY);
-        const url = this.loginUrl(state, acrValues, scope, redirectUri, newFlow, loginHint, maxAge,
-            tag, teaser);
+        const url = this.loginUrl({ state, acrValues, scope, redirectUri, newFlow, loginHint, tag,
+            teaser, maxAge });
 
         // for safari, remember that we've got a login in progress so we can
         // work around some ITP issues when we come back from Schibsted Account
@@ -628,27 +629,29 @@ export class Identity extends EventEmitter {
 
     /**
      * Generates the link to the new login page that'll be used in the popup or redirect flow
-     * @param {string} state - An opaque value used by the client to maintain state between the
+     * @param {object} options
+     * @param {string} [options.state] - An opaque value used by the client to maintain state between the
      * request and callback. It's also recommended to prevent CSRF.
      * @see https://tools.ietf.org/html/rfc6749#section-10.12
-     * @param {string} [acrValues] - Authentication method. If omitted, user authenticates with
+     * @param {string} [options.acrValues] - Authentication method. If omitted, user authenticates with
      * username+password. If set to `'otp-email'`, then  passwordless login using email is used. If
      * `'otp-sms'`, then passwordless login using sms is used. Please note that this parameter has
      * no effect if `newFlow` is false
-     * @param {string} [scope='openid']
-     * @param {string} [redirectUri=this.redirectUri]
-     * @param {boolean} [newFlow=true] - Should we try the new flow or the old Schibsted account
+     * @param {string} [options.scope='openid']
+     * @param {string} [options.redirectUri=this.redirectUri]
+     * @param {boolean} [options.newFlow=true] - Should we try the new flow or the old Schibsted account
      * login? If this parameter is set to false, the `acrValues` parameter doesn't have any effect
-     * @param {string} [loginHint=''] - user email hint
-     * @param {string} [tag=''] - Pulse tag
-     * @param {string} [teaser=''] - Teaser slug. Teaser with given slug will be displayed
+     * @param {string} [options.loginHint=''] - user email hint
+     * @param {string} [options.tag=''] - Pulse tag
+     * @param {string} [options.teaser=''] - Teaser slug. Teaser with given slug will be displayed
      * in place of default teaser
-     * @param {number|string} [maxAge=''] - Specifies the allowable elapsed time in seconds since
-     * the last time the End-User was actively authenticated, if time expires re-authentication will
-     * be required. See OpenID spec for more information
+     * @param {number|string} [options.maxAge=''] - Specifies the allowable elapsed time in seconds since
+     * the last time the End-User was actively authenticated. If last authentication time is more
+     * than maxAge seconds in the past, re-authentication will be required. See the OpenID Connect
+     * spec section 3.1.2.1 for more information
      * @return {string} - The url
      */
-    loginUrl(
+    loginUrl({
         state,
         acrValues,
         scope = 'openid',
@@ -658,7 +661,19 @@ export class Identity extends EventEmitter {
         tag = '',
         teaser = '',
         maxAge = ''
-    ) {
+    }) {
+        if (typeof arguments[0] !== 'object') {
+            // backward compatibility
+            state = arguments[0];
+            acrValues = arguments[1];
+            scope = arguments[2] || scope;
+            redirectUri = arguments[3] || redirectUri;
+            newFlow = typeof arguments[4] === 'boolean' ? arguments[4] : newFlow;
+            loginHint = arguments[5] || loginHint;
+            tag = arguments[6] || tag;
+            teaser = arguments[7] || teaser;
+            maxAge = isNaN(arguments[8]) ? maxAge : arguments[8];
+        }
         assert(!acrValues || isStrIn(acrValues, ['', 'otp-email', 'otp-sms'], true),
             `The acrValues parameter is not acceptable: ${acrValues}`);
         assert(isUrl(redirectUri),
