@@ -573,11 +573,7 @@ export class Identity extends EventEmitter {
         const url = this.loginUrl({ state, acrValues, scope, redirectUri, newFlow, loginHint, tag,
             teaser, maxAge });
 
-        // for safari, remember that we've got a login in progress so we can
-        // work around some ITP issues when we come back from Schibsted Account
-        if (this._itpModalRequired()) {
-            this.cache.set(LOGIN_IN_PROGRESS_KEY, {}, 1000 * 60 * 15);
-        }
+        this.showItpModalUponReturning();
 
         if (preferPopup) {
             this.popup =
@@ -787,6 +783,37 @@ export class Identity extends EventEmitter {
             response_type: 'code',
             redirect_uri: redirectUri
         });
+    }
+
+    /**
+     * Call this method immediately before sending a user to a Schibsted account flow if you
+     * want to enable showing of the ITP modal upon returning to your site. You should
+     * send the user to a Schibsted account flow immediately after calling this method without
+     * invoking hasSession() again.
+     *
+     * Calling this is not required if you send the user to Schibsted account via the login()
+     * method.
+     *
+     * @return {void}
+     */
+    showItpModalUponReturning() {
+        // for safari, remember that we've got a login in progress so we can
+        // work around some ITP issues when we come back from Schibsted Account
+        if (this._itpModalRequired()) {
+            this.cache.set(LOGIN_IN_PROGRESS_KEY, {}, 1000 * 60 * 15);
+        }
+    }
+
+    /**
+     * When returning after performing a flow, this method can be called prior to calling
+     * hasSession() if you're certain that the user did not successfully log in. This will
+     * prevent the ITP modal from showing up erroneously. If you're unsure, don't call this
+     * method.
+     *
+     * @return {void}
+     */
+    suppressItpModal() {
+        this.cache.delete(LOGIN_IN_PROGRESS_KEY);
     }
 }
 
