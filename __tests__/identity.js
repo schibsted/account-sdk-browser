@@ -724,6 +724,30 @@ describe('Identity', () => {
             });
         });
 
+        it('should detect login-in-progress after showItpModalUponReturning', () => {
+            const identity = new Identity({ clientId: 'foo', redirectUri: 'http://example.com' });
+            setUserAgent(safari12);
+            expect(identity._itpModalRequired()).toBe(true);
+            identity.showItpModalUponReturning();
+            expect(identity.cache.get(LOGIN_IN_PROGRESS_KEY)).toMatchObject({});
+        });
+
+        it('should NOT detect login-in-progress if showItpModalUponReturning is not run', () => {
+            const identity = new Identity({ clientId: 'foo', redirectUri: 'http://example.com' });
+            setUserAgent(safari12);
+            expect(identity._itpModalRequired()).toBe(true);
+            expect(identity.cache.get(LOGIN_IN_PROGRESS_KEY)).toBeNull();
+        });
+
+        it('should NOT detect login-in-progress if suppressItpModal is run after showItpModalUponReturning', () => {
+            const identity = new Identity({ clientId: 'foo', redirectUri: 'http://example.com' });
+            setUserAgent(safari12);
+            expect(identity._itpModalRequired()).toBe(true);
+            identity.showItpModalUponReturning();
+            identity.suppressItpModal();
+            expect(identity.cache.get(LOGIN_IN_PROGRESS_KEY)).toBeNull();
+        });
+
         it('should set value in cache when _itpMode===true && Safari12', () => {
             const window = { location: {} };
             const identity = new Identity({ clientId: 'foo', redirectUri: 'http://e.com', window });
