@@ -1580,7 +1580,7 @@ effect that it might perform an auto-login on the user</p>
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="identity.js.html">identity.js</a>, <a href="identity.js.html#line552">line 552</a>
+        <a href="identity.js.html">identity.js</a>, <a href="identity.js.html#line559">line 559</a>
     </li></ul></dd>
     
 
@@ -1954,7 +1954,7 @@ legacy/stable SPiD flow?</p></td>
 
         <tr>
             
-                <td class="name"><code>loginHint</code></td>
+                <td class="name"><code>Hint</code></td>
             
 
             <td class="type">
@@ -1987,6 +1987,130 @@ legacy/stable SPiD flow?</p></td>
             
 
             <td class="description last"><p>user email hint</p></td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>tag</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">string</span>
+
+
+            
+            </td>
+
+            
+                <td class="attributes">
+                
+                    &lt;optional><br>
+                
+
+                
+
+                
+                </td>
+            
+
+            
+                <td class="default">
+                
+                    <code>''</code>
+                
+                </td>
+            
+
+            <td class="description last"><p>Pulse tag</p></td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>teaser</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">string</span>
+
+
+            
+            </td>
+
+            
+                <td class="attributes">
+                
+                    &lt;optional><br>
+                
+
+                
+
+                
+                </td>
+            
+
+            
+                <td class="default">
+                
+                    <code>''</code>
+                
+                </td>
+            
+
+            <td class="description last"><p>Teaser slug. Teaser with given slug will be displayed
+in place of default teaser</p></td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>maxAge</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">number</span>
+|
+
+<span class="param-type">string</span>
+
+
+            
+            </td>
+
+            
+                <td class="attributes">
+                
+                    &lt;optional><br>
+                
+
+                
+
+                
+                </td>
+            
+
+            
+                <td class="default">
+                
+                    <code>''</code>
+                
+                </td>
+            
+
+            <td class="description last"><p>Specifies the allowable elapsed time in seconds since
+the last time the End-User was actively authenticated. If last authentication time is more
+than maxAge seconds in the past, re-authentication will be required. See the OpenID Connect
+spec section 3.1.2.1 for more information</p></td>
         </tr>
 
     
@@ -2061,7 +2185,7 @@ legacy/stable SPiD flow?</p></td>
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="identity.js.html">identity.js</a>, <a href="identity.js.html#line593">line 593</a>
+        <a href="identity.js.html">identity.js</a>, <a href="identity.js.html#line604">line 604</a>
     </li></ul></dd>
     
 
@@ -2157,7 +2281,7 @@ not work for <code>http://mysite.news</code> (only <code>https</code>).</p>
 
     
 
-    <h4 class="name" id="loginUrl"><span class="type-signature"></span>loginUrl<span class="signature">(state, acrValues<span class="signature-attributes">opt</span>, scope<span class="signature-attributes">opt</span>, redirectUri<span class="signature-attributes">opt</span>, newFlow<span class="signature-attributes">opt</span>, loginHint<span class="signature-attributes">opt</span>)</span><span class="type-signature"> &rarr; {string}</span></h4>
+    <h4 class="name" id="loginUrl"><span class="type-signature"></span>loginUrl<span class="signature">(options)</span><span class="type-signature"> &rarr; {string}</span></h4>
 
     
 
@@ -2169,7 +2293,7 @@ not work for <code>http://mysite.news</code> (only <code>https</code>).</p>
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="identity.js.html">identity.js</a>, <a href="identity.js.html#line635">line 635</a>
+        <a href="identity.js.html">identity.js</a>, <a href="identity.js.html#line654">line 654</a>
     </li></ul></dd>
     
 
@@ -2231,6 +2355,48 @@ not work for <code>http://mysite.news</code> (only <code>https</code>).</p>
 
     <h5>Parameters:</h5>
     
+
+<table class="params">
+    <thead>
+    <tr>
+        
+        <th>Name</th>
+        
+
+        <th>Type</th>
+
+        
+
+        
+
+        <th class="last">Description</th>
+    </tr>
+    </thead>
+
+    <tbody>
+    
+
+        <tr>
+            
+                <td class="name"><code>options</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">object</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last">
+                <h6>Properties</h6>
+                
 
 <table class="params">
     <thead>
@@ -2488,6 +2654,137 @@ login? If this parameter is set to false, the <code>acrValues</code> parameter d
         </tr>
 
     
+
+        <tr>
+            
+                <td class="name"><code>tag</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">string</span>
+
+
+            
+            </td>
+
+            
+                <td class="attributes">
+                
+                    &lt;optional><br>
+                
+
+                
+
+                
+                </td>
+            
+
+            
+                <td class="default">
+                
+                    <code>''</code>
+                
+                </td>
+            
+
+            <td class="description last"><p>Pulse tag</p></td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>teaser</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">string</span>
+
+
+            
+            </td>
+
+            
+                <td class="attributes">
+                
+                    &lt;optional><br>
+                
+
+                
+
+                
+                </td>
+            
+
+            
+                <td class="default">
+                
+                    <code>''</code>
+                
+                </td>
+            
+
+            <td class="description last"><p>Teaser slug. Teaser with given slug will be displayed
+in place of default teaser</p></td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>maxAge</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">number</span>
+|
+
+<span class="param-type">string</span>
+
+
+            
+            </td>
+
+            
+                <td class="attributes">
+                
+                    &lt;optional><br>
+                
+
+                
+
+                
+                </td>
+            
+
+            
+                <td class="default">
+                
+                    <code>''</code>
+                
+                </td>
+            
+
+            <td class="description last"><p>Specifies the allowable elapsed time in seconds since
+the last time the End-User was actively authenticated. If last authentication time is more
+than maxAge seconds in the past, re-authentication will be required. See the OpenID Connect
+spec section 3.1.2.1 for more information</p></td>
+        </tr>
+
+    
+    </tbody>
+</table>
+
+            </td>
+        </tr>
+
+    
     </tbody>
 </table>
 
@@ -2547,7 +2844,7 @@ login? If this parameter is set to false, the <code>acrValues</code> parameter d
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="identity.js.html">identity.js</a>, <a href="identity.js.html#line678">line 678</a>
+        <a href="identity.js.html">identity.js</a>, <a href="identity.js.html#line717">line 717</a>
     </li></ul></dd>
     
 
@@ -2722,7 +3019,7 @@ login? If this parameter is set to false, the <code>acrValues</code> parameter d
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="identity.js.html">identity.js</a>, <a href="identity.js.html#line692">line 692</a>
+        <a href="identity.js.html">identity.js</a>, <a href="identity.js.html#line731">line 731</a>
     </li></ul></dd>
     
 
@@ -2893,7 +3190,7 @@ login? If this parameter is set to false, the <code>acrValues</code> parameter d
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="identity.js.html">identity.js</a>, <a href="identity.js.html#line704">line 704</a>
+        <a href="identity.js.html">identity.js</a>, <a href="identity.js.html#line743">line 743</a>
     </li></ul></dd>
     
 
@@ -3064,7 +3361,7 @@ login? If this parameter is set to false, the <code>acrValues</code> parameter d
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="identity.js.html">identity.js</a>, <a href="identity.js.html#line717">line 717</a>
+        <a href="identity.js.html">identity.js</a>, <a href="identity.js.html#line756">line 756</a>
     </li></ul></dd>
     
 
@@ -3248,7 +3545,7 @@ login? If this parameter is set to false, the <code>acrValues</code> parameter d
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="identity.js.html">identity.js</a>, <a href="identity.js.html#line731">line 731</a>
+        <a href="identity.js.html">identity.js</a>, <a href="identity.js.html#line770">line 770</a>
     </li></ul></dd>
     
 
@@ -3432,7 +3729,7 @@ login? If this parameter is set to false, the <code>acrValues</code> parameter d
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="identity.js.html">identity.js</a>, <a href="identity.js.html#line745">line 745</a>
+        <a href="identity.js.html">identity.js</a>, <a href="identity.js.html#line784">line 784</a>
     </li></ul></dd>
     
 
@@ -5175,7 +5472,7 @@ no logged-in user neither before nor after <a href="Identity.html#hasSession"><c
 <br class="clear">
 
 <footer>
-    Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.5.5</a> on Mon Sep 03 2018 14:16:56 GMT+0000 (UTC) using the <a href="https://github.com/clenemt/docdash">docdash</a> theme.
+    Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.5.5</a> on Tue Sep 04 2018 09:36:01 GMT+0000 (UTC) using the <a href="https://github.com/clenemt/docdash">docdash</a> theme.
 </footer>
 
 <script>prettyPrint();</script>
