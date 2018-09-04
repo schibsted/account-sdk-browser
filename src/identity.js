@@ -335,8 +335,15 @@ export class Identity extends EventEmitter {
      * @returns {boolean}
      */
     _itpModalRequired() {
-        return document.requestStorageAccess &&
-            parseInt(navigator.userAgent.match(/Version\/(\d+)\./)[1], 10) >= 12;
+        if (!document.requestStorageAccess) {
+            return false;
+        }
+
+        const safariVersion = navigator.userAgent.match(/Version\/(\d+)\./);
+        if (!safariVersion || safariVersion.length < 2) {
+            return false;
+        }
+        return parseInt(safariVersion[1], 10) >= 12;
     }
 
     /**
