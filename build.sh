@@ -10,3 +10,4 @@ webpack src/es5/identity.js -o es5/identity.js $COMMON_OPTS $CJS_OPTS
 webpack src/es5/monetization.js -o es5/monetization.js $COMMON_OPTS $CJS_OPTS
 webpack src/es5/payment.js -o es5/payment.js $COMMON_OPTS $CJS_OPTS
 webpack src/es5/global.js -o es5/global.js $COMMON_OPTS $WINDOW_OPTS
+cp src/es5/*.d.ts es5/
