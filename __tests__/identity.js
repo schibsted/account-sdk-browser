@@ -55,7 +55,7 @@ describe('Identity', () => {
             const identity = new Identity({ clientId: 'foo', redirectUri: 'http://foo.com', window });
             identity.login({ state: 'foo' });
             expect(window).toHaveProperty('location.href',
-                'https://identity-pre.schibsted.com/oauth/authorize?client_id=foo&redirect_uri=http%3A%2F%2Ffoo.com&response_type=code&new-flow=true&scope=openid&state=foo&login_hint=');
+                'https://identity-pre.schibsted.com/oauth/authorize?client_id=foo&redirect_uri=http%3A%2F%2Ffoo.com&response_type=code&new-flow=true&scope=openid&state=foo&login_hint=&tag=&teaser=&max_age=');
         });
         test('Should open popup if "preferPopup" is true', () => {
             const window = { screen: {}, open: () => ({ fakePopup: 'yup' }) };
@@ -68,7 +68,7 @@ describe('Identity', () => {
             const identity = new Identity({ clientId: 'foo', redirectUri: 'http://foo.com', window });
             identity.login({ state: 'foo', preferPopup: true });
             expect(window).toHaveProperty('location.href',
-                'https://identity-pre.schibsted.com/oauth/authorize?client_id=foo&redirect_uri=http%3A%2F%2Ffoo.com&response_type=code&new-flow=true&scope=openid&state=foo&login_hint=');
+                'https://identity-pre.schibsted.com/oauth/authorize?client_id=foo&redirect_uri=http%3A%2F%2Ffoo.com&response_type=code&new-flow=true&scope=openid&state=foo&login_hint=&tag=&teaser=&max_age=');
         });
         test('Should close previous popup if it exists (and is open)', () => {
             const window = { screen: {}, open: () => ({ fakePopup: 'yup' }) };
@@ -155,7 +155,55 @@ describe('Identity', () => {
         });
     });
 
-    describe('loginUrl()', () => {
+    describe('loginUrl() with options object', () => {
+        test('returns the expected endpoint for old flows', () => {
+            const identity = new Identity({
+                env: 'PRO_NO',
+                clientId: 'foo',
+                redirectUri: 'http://example.com',
+                window: {},
+            });
+            compareUrls(identity.loginUrl({
+                state: 'dummy-state',
+                acrValues: 'otp-email',
+                newFlow: false,
+                loginHint: 'dev@spid.no',
+                tag: 'sample-tag',
+                teaser: 'sample-teaser-slug'
+            }), 'https://payment.schibsted.no/flow/login?client_id=foo&state=dummy-state&scope=openid&response_type=code&redirect_uri=http%3A%2F%2Fexample.com&email=dev@spid.no&tag=sample-tag&teaser=sample-teaser-slug');
+        });
+
+        test('returns the expected endpoint for new flows', () => {
+            const identity = new Identity({
+                env: 'PRO',
+                clientId: 'foo',
+                redirectUri: 'http://example.com',
+                window: {},
+            });
+            compareUrls(identity.loginUrl({
+                state: 'dummy-state',
+                newFlow: true,
+                loginHint: 'dev@spid.no',
+                tag: 'sample-tag',
+                teaser: 'sample-teaser-slug',
+                maxAge: 0
+            }), 'https://login.schibsted.com/oauth/authorize?new-flow=true&redirect_uri=http%3A%2F%2Fexample.com&client_id=foo&state=dummy-state&response_type=code&scope=openid&login_hint=dev@spid.no&max_age=0&tag=sample-tag&teaser=sample-teaser-slug');
+        });
+
+        test('returns the expected endpoint for new flows with default params', () => {
+            const identity = new Identity({
+                env: 'PRO',
+                clientId: 'foo',
+                redirectUri: 'http://example.com',
+                window: {},
+            });
+            compareUrls(identity.loginUrl({
+                state: 'dummy-state',
+            }), 'https://login.schibsted.com/oauth/authorize?new-flow=true&redirect_uri=http%3A%2F%2Fexample.com&client_id=foo&state=dummy-state&response_type=code&scope=openid&login_hint=&max_age=&tag=&teaser=');
+        });
+    });
+
+    describe('loginUrl() with arguments', () => {
         test('returns the expected endpoint for old flows', () => {
             const identity = new Identity({
                 env: 'PRO_NO',
@@ -169,8 +217,10 @@ describe('Identity', () => {
                 undefined,
                 undefined,
                 false,
-                'dev@spid.no'
-            ), 'https://payment.schibsted.no/flow/login?client_id=foo&state=dummy-state&scope=openid&response_type=code&redirect_uri=http%3A%2F%2Fexample.com&email=dev@spid.no');
+                'dev@spid.no',
+                'sample-tag',
+                'sample-teaser-slug'
+            ), 'https://payment.schibsted.no/flow/login?client_id=foo&state=dummy-state&scope=openid&response_type=code&redirect_uri=http%3A%2F%2Fexample.com&email=dev@spid.no&tag=sample-tag&teaser=sample-teaser-slug');
         });
 
         test('returns the expected endpoint for new flows', () => {
@@ -186,8 +236,11 @@ describe('Identity', () => {
                 undefined,
                 undefined,
                 true,
-                'dev@spid.no'
-            ), 'https://login.schibsted.com/oauth/authorize?new-flow=true&redirect_uri=http%3A%2F%2Fexample.com&client_id=foo&state=dummy-state&response_type=code&scope=openid&login_hint=dev@spid.no');
+                'dev@spid.no',
+                'sample-tag',
+                'sample-teaser-slug',
+                0
+            ), 'https://login.schibsted.com/oauth/authorize?new-flow=true&redirect_uri=http%3A%2F%2Fexample.com&client_id=foo&state=dummy-state&response_type=code&scope=openid&login_hint=dev@spid.no&max_age=0&tag=sample-tag&teaser=sample-teaser-slug');
         });
 
         test('returns the expected endpoint for new flows with default params', () => {
@@ -202,7 +255,7 @@ describe('Identity', () => {
                 undefined,
                 undefined,
                 undefined,
-            ), 'https://login.schibsted.com/oauth/authorize?new-flow=true&redirect_uri=http%3A%2F%2Fexample.com&client_id=foo&state=dummy-state&response_type=code&scope=openid&login_hint=');
+            ), 'https://login.schibsted.com/oauth/authorize?new-flow=true&redirect_uri=http%3A%2F%2Fexample.com&client_id=foo&state=dummy-state&response_type=code&scope=openid&login_hint=&max_age=&tag=&teaser=');
         });
     });
 
@@ -669,6 +722,30 @@ describe('Identity', () => {
                 setUserAgent(safari11);
                 expect(identity._itpModalRequired()).toBe(false);
             });
+        });
+
+        it('should detect login-in-progress after showItpModalUponReturning', () => {
+            const identity = new Identity({ clientId: 'foo', redirectUri: 'http://example.com' });
+            setUserAgent(safari12);
+            expect(identity._itpModalRequired()).toBe(true);
+            identity.showItpModalUponReturning();
+            expect(identity.cache.get(LOGIN_IN_PROGRESS_KEY)).toMatchObject({});
+        });
+
+        it('should NOT detect login-in-progress if showItpModalUponReturning is not run', () => {
+            const identity = new Identity({ clientId: 'foo', redirectUri: 'http://example.com' });
+            setUserAgent(safari12);
+            expect(identity._itpModalRequired()).toBe(true);
+            expect(identity.cache.get(LOGIN_IN_PROGRESS_KEY)).toBeNull();
+        });
+
+        it('should NOT detect login-in-progress if suppressItpModal is run after showItpModalUponReturning', () => {
+            const identity = new Identity({ clientId: 'foo', redirectUri: 'http://example.com' });
+            setUserAgent(safari12);
+            expect(identity._itpModalRequired()).toBe(true);
+            identity.showItpModalUponReturning();
+            identity.suppressItpModal();
+            expect(identity.cache.get(LOGIN_IN_PROGRESS_KEY)).toBeNull();
         });
 
         it('should set value in cache when _itpMode===true && Safari12', () => {

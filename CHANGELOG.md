@@ -1,5 +1,12 @@
 # Changelog
 
+## v3.0.0-rc.14 (2018-09-03)
+
+### Changes
+
+* The only change is adding a typings file to the `es5` folder. There are no functional changes from
+  rc.13
+
 ## v3.0.0-rc.13 (2018-08-31)
 
 ### Fixes
