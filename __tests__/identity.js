@@ -8,6 +8,7 @@ jest.mock('../src/ItpModal');
 
 import Identity from '../identity';
 import ItpModal from '../src/ItpModal';
+import RESTClient from '../src/RESTClient';
 import { compareUrls } from './utils';
 import { URL } from 'url';
 import { URL as u } from 'whatwg-url';
@@ -381,6 +382,38 @@ describe('Identity', () => {
                 await identity.hasSession();
                 expect(document.cookie).toBe('SP_ID=abc');
             });
+        });
+
+        test('should go to session-service if defined', async () => {
+            const options = { clientId: 'foo', redirectUri: 'http://e.com', sessionDomain: 'http://id.e.com' };
+            const client_sdrn = `sdrn:schibsted:client:${options.clientId}`;
+            identity = new Identity(options);
+            identity._sessionService = new RESTClient({
+                serverUrl: options.sessionDomain,
+                fetch,
+                defaultParams: { client_sdrn, redirect_uri: options.redirectUri },
+            });
+            fetch.mockImplementationOnce(async () => ({ ok: false, status: 404, statusText: 'Not Found' }));
+            fetch.mockImplementationOnce(async () => ({ ok: true, json: async() => ({ error: { type: 'UserException' } }) }));
+            await expect(identity.hasSession()).rejects.toMatchObject({ message: 'HasSession failed' });
+            expect(fetch.mock.calls.length).toBe(2);
+            expect(fetch.mock.calls[0][0]).toMatch(/^http:\/\/id.e.com\//);
+            expect(fetch.mock.calls[1][0]).toMatch(/^https:\/\/session.identity-pre.schibsted.com\/rpc\/hasSession.js/);
+        });
+
+        test('should terminate "chain" if session-service call succeeds', async () => {
+            const options = { clientId: 'foo', redirectUri: 'http://e.com', sessionDomain: 'http://id.e.com' };
+            const client_sdrn = `sdrn:schibsted:client:${options.clientId}`;
+            identity = new Identity(options);
+            identity._sessionService = new RESTClient({
+                serverUrl: options.sessionDomain,
+                fetch,
+                defaultParams: { client_sdrn, redirect_uri: options.redirectUri },
+            });
+            fetch.mockImplementationOnce(async () => ({ ok: true, json: async() => ({}) }));
+            await expect(identity.hasSession()).resolves.toMatchObject({});
+            expect(fetch.mock.calls.length).toBe(1);
+            expect(fetch.mock.calls[0][0]).toMatch(/^http:\/\/id.e.com\//);
         });
 
         test('should never cache if caching is off', async () => {

@@ -427,7 +427,7 @@ export class Identity extends EventEmitter {
             }
             const autoLoginConverted = autologin ? 1 : 0;
 
-            if (!this._itpMode) {
+            if (!data && !this._itpMode) {
                 data = await this._hasSession.get('rpc/hasSession.js', { autologin: autoLoginConverted });
             }
             if (this._itpMode || (isObject(data.error) && data.error.type === 'LoginException')) {
