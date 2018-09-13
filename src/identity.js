@@ -5,7 +5,6 @@
 'use strict';
 
 import { assert, isStr, isNonEmptyString, isObject, isUrl, isStrIn } from './validate';
-import { cloneDeep } from './object';
 import { urlMapper } from './url';
 import { ENDPOINTS, NAMESPACE } from './config';
 import EventEmitter from 'tiny-emitter';
@@ -19,28 +18,18 @@ import * as spidTalk from './spidTalk';
 
 /**
  * @typedef {object} Identity#HasSessionSuccessResponse
- * @property {boolean} result - Is the user connected to the merchant? (it means that the merchant
- * id is in the list of merchants listed of this user in the database)? Example: false
- * @property {string} userStatus - Example: 'notConnected' or 'connected'
- * @property {string} baseDomain - Example: 'localhost'
- * @property {string} id - Example: '58eca10fdbb9f6df72c3368f'
  * @property {number} userId - Example: 37162
- * @property {string} uuid - Example: 'b3b23aa7-34f2-5d02-a10e-5a3455c6ab2c'
- * @property {string} sp_id - Example: 'eyJjbGllbnRfaWQ...'
- * @property {number} expiresIn - Example: 30 * 60 * 1000 (for 30 minutes)
- * @property {number} serverTime - Example: 1506285759
+ * @property {string} userUuid - Example: 'b3b23aa7-34f2-5d02-a10e-5a3455c6ab2c'
  * @property {string} sig - Example: 'NCdzXaz4ZRb7...' The sig parameter is a concatenation of an
  * HMAC SHA-256 signature string, a dot (.) and a base64url encoded JSON object (session). @see
  * http://techdocs.spid.no/sdks/js/response-signature-and-validation/
- * @property {string} displayName - (Only for connected users) Example: 'batman'
- * @property {string} givenName - (Only for connected users) Example: 'Bruce'
- * @property {string} familyName - (Only for connected users) Example: 'Wayne'
- * @property {string} gender - (Only for connected users) Example: 'male', 'female', 'undisclosed'
- * @property {string} photo - (Only for connected users) Example:
+ * @property {string} displayName - Example: 'batman'
+ * @property {string} givenName - Example: 'Bruce'
+ * @property {string} familyName - Example: 'Wayne'
+ * @property {string} gender - Example: 'male', 'female', 'undisclosed'
+ * @property {string} photoUrl - Example:
  * 'http://www.srv.com/some/picture.jpg'
- * @property {boolean} tracking - (Only for connected users)
- * @property {boolean} clientAgreementAccepted - (Only for connected users)
- * @property {boolean} defaultAgreementAccepted - (Only for connected users)
+ * @property {boolean} trackingEnabled - If the user has tracking enabled on their profile
  */
 
 /**
@@ -76,6 +65,31 @@ function inspect(thing) {
         return [typeof thing, `${thing}`];
     }
     return [thing.constructor.name, thing.valueOf()];
+}
+
+/**
+ * Munge session data in to the format that we want to provide
+ * to clients
+ * @private
+ * @param {object} sessionData
+ * @return {Identity#HasSessionSuccessResponse|Identity#HasSessionFailureResponse}
+ */
+function mungeSessionData(sessionData) {
+    if (sessionData.error) {
+        return sessionData.error;
+    } else {
+        return {
+            userId: sessionData.userId,
+            displayName: sessionData.displayName,
+            givenName: sessionData.givenName,
+            familyName: sessionData.familyName,
+            gender: sessionData.gender,
+            sig: sessionData.sig,
+            userUuid: sessionData.uuid,
+            photoUrl: sessionData.photo,
+            trackingEnabled: sessionData.tracking,
+        };
+    }
 }
 
 /**
@@ -200,7 +214,7 @@ export class Identity extends EventEmitter {
         this._hasSession = new JSONPClient({
             serverUrl: urlMapper(url, ENDPOINTS.HAS_SESSION),
             log: this.log,
-            defaultParams: { client_id: this.clientId, redirect_uri: this.redirectUri },
+            defaultParams: { client_id: "ha", redirect_uri: this.redirectUri },
         });
     }
 
@@ -212,20 +226,23 @@ export class Identity extends EventEmitter {
      * @returns {void}
      */
     _emitSessionEvent(previous, current) {
+
+        const clientSessionData = mungeSessionData(current);
+
         /**
          * Emitted when the user is logged in (This happens as a result of calling
          * {@link Identity#hasSession}, so it is also emitted if the user was previously logged in)
          * @event Identity#login
          */
         if (current.userId) {
-            this.emit('login', current);
+            this.emit('login', clientSessionData);
         }
         /**
          * Emitted when the user logged out
          * @event Identity#logout
          */
         if (previous.userId && !current.userId) {
-            this.emit('logout', current);
+            this.emit('logout', clientSessionData);
         }
         /**
          * Emitted when the user is changed. This happens as a result of calling
@@ -234,7 +251,7 @@ export class Identity extends EventEmitter {
          * @event Identity#userChange
          */
         if (previous.userId && current.userId && previous.userId !== current.userId) {
-            this.emit('userChange', current);
+            this.emit('userChange', clientSessionData);
         }
         if (previous.userId || current.userId) {
             /**
@@ -243,14 +260,14 @@ export class Identity extends EventEmitter {
              * In practice, this means the event is emitted a lot
              * @event Identity#sessionChange
              */
-            this.emit('sessionChange', current);
+            this.emit('sessionChange', clientSessionData);
         } else {
             /**
              * Emitted when there is no logged-in user. More specifically, it means that there was
              * no logged-in user neither before nor after {@link Identity#hasSession} was called
              * @event Identity#notLoggedin
              */
-            this.emit('notLoggedin', current);
+            this.emit('notLoggedin', clientSessionData);
         }
         /**
          * Emitted when the session is first created
@@ -258,15 +275,7 @@ export class Identity extends EventEmitter {
          */
         if (current.userId && !this._sessionInitiatedSent) {
             this._sessionInitiatedSent = true;
-            this.emit('sessionInit', current);
-        }
-        /**
-         * Emitted when the user status changes. This happens as a result of calling
-         * {@link Identity#hasSession}
-         * @event Identity#statusChange
-         */
-        if (previous.userStatus !== current.userStatus) {
-            this.emit('statusChange', current);
+            this.emit('sessionInit', clientSessionData);
         }
     }
 
@@ -389,6 +398,19 @@ export class Identity extends EventEmitter {
      * @return {Identity#HasSessionSuccessResponse|Identity#HasSessionFailureResponse}
      */
     async hasSession(autologin = true) {
+        return mungeSessionData(this._hasSessionImpl(autologin));
+    }
+
+    /**
+     * @private
+     * @param {*} autologin
+     * @see {Identity#hasSession}
+     * @returns {Identity#hasSession}
+     */
+    async _hasSessionImpl(autologin = true) {
+
+        console.log("# 1");
+
         const loginInProgress = this.cache.get(LOGIN_IN_PROGRESS_KEY) !== null;
         this.cache.delete(LOGIN_IN_PROGRESS_KEY);
 
@@ -398,26 +420,36 @@ export class Identity extends EventEmitter {
             }
             this._maybeSetVarnishCookie(sessionData);
             this._emitSessionEvent(this._session, sessionData);
+            this._session = sessionData;
+            return sessionData;
         };
 
         if (typeof autologin !== 'boolean') {
             const [type, value] = inspect(autologin);
             throw new SDKError(`Parameter 'autologin' must be boolean, was: "${type}:${value}"`);
         }
+        console.log("# 2");
         if (this._enableSessionCaching) {
             // Try to resolve from cache (it has a TTL)
             const cachedData = this.cache.get(HAS_SESSION_CACHE_KEY);
             if (cachedData) {
-                postProcess(cachedData);
-                return cachedData;
+                return postProcess(cachedData);
             }
         }
+        console.log("# 3");
 
         try {
             let data = null;
             if (this._sessionService) {
                 try {
                     data = await this._sessionService.get('/session');
+                    // If no error then we set a "result" property to defacto true because we are currently allow the spid has session as a
+                    // fallback, which returns an object with a result property set to true which determines that a user is logged in to
+                    // the merchant. The new session service does not support this concept and you are either logged in or not if you get
+                    // back a session or not.
+                    //
+                    // TOOD: remove this and related logic when/if we transition away from spid.hasSession
+                    data.result = true;
                 } catch (err) {
                     if (err.code !== 404) {
                         throw err;
@@ -425,29 +457,41 @@ export class Identity extends EventEmitter {
                     data = null; // fall through and try to fetch from old spid-hassession
                 }
             }
+            console.log("# 4");
             const autoLoginConverted = autologin ? 1 : 0;
 
             if (!data && !this._itpMode) {
+                console.log("# 4a");
                 data = await this._hasSession.get('rpc/hasSession.js', { autologin: autoLoginConverted });
             }
+            console.log("# 5");
             if (this._itpMode || (isObject(data.error) && data.error.type === 'LoginException')) {
+                console.log("# 5a");
                 data = await this._spid.get('ajax/hasSession.js', { autologin: autoLoginConverted });
             }
+            console.log(data);
+
+            console.log("# 6");
 
             const shouldShowItpModal = this._itpModalRequired() && !this._itpMode &&
                 isObject(data.error) && data.error.type === 'UserException' &&
                 loginInProgress;
             if (shouldShowItpModal) {
+                console.log("# 6a");
                 const modal = new ItpModal(this._spid, this.clientId, this.redirectUri, this.env);
                 data = await modal.show();
             }
+
+            console.log("# 7");
             if (this._enableSessionCaching) {
+                console.log("# 7a");
                 const expiresIn = 1000 * (data.expiresIn || 300);
                 this.cache.set(HAS_SESSION_CACHE_KEY, data, expiresIn);
             }
-            postProcess(data);
-            this._session = data;
-            return data;
+
+            console.log("# 8");
+
+            return postProcess(data);
         } catch (err) {
             this.emit('error', err);
             throw new SDKError('HasSession failed', err);
@@ -463,13 +507,15 @@ export class Identity extends EventEmitter {
     async isLoggedIn() {
         try {
             const data = await this.hasSession();
-            return 'result' in data;
+            return data.error == null;
         } catch (_) {
             return false;
         }
     }
 
     /**
+     * @deprecated Use isLoggedIn as that now returns true if user is logged in to Schibsted
+     * account AND the client_id
      * @summary Allows the caller to check if the current user is connected to the client_id in
      * Schibsted account. Being connected means that the user has agreed for their account to be
      * used by your web app and have accepted the required terms
@@ -479,14 +525,12 @@ export class Identity extends EventEmitter {
      * @return {boolean}
      */
     async isConnected() {
-        try {
-            const data = await this.hasSession();
-            // if data is not an object, the promise will fail.
-            // if the result is present, it's boolean. But if it's not, it should be assumed false.
-            return !!data.result;
-        } catch (_) {
-            return false;
+        if (this._sessionService) {
+            throw new SDKError('isConnected is not usable if session service domain is set');
         }
+        // the _session is set to whatever the hasSession returned, so check here that it
+        // has a result object.
+        return this.isLoggedIn && !!this._session.result;
     }
 
     /**
@@ -498,11 +542,10 @@ export class Identity extends EventEmitter {
      * @return {HasSessionSuccessResponse}
      */
     async getUser() {
-        const user = await this.hasSession();
-        if (!user.result) {
+        if (!this.isLoggedIn) {
             throw new SDKError('The user is not connected to this merchant');
         }
-        return cloneDeep(user);
+        return mungeSessionData(this._session);
     }
 
     /**
@@ -518,8 +561,8 @@ export class Identity extends EventEmitter {
      * @return {string} The `userId` field (not to be confused with the `uuid`)
      */
     async getUserId() {
-        const user = await this.hasSession();
-        if (user.userId && user.result) {
+        const user = await this.getUser();
+        if (user.userId) {
             return user.userId;
         }
         throw new SDKError('The user is not connected to this merchant');
@@ -538,8 +581,8 @@ export class Identity extends EventEmitter {
      * @return {string} The `uuid` field (not to be confused with the `userId`)
      */
     async getUserUuid() {
-        const user = await this.hasSession();
-        if (user.uuid && user.result) {
+        const user = await this.getUser();
+        if (user.uuid) {
             return user.uuid;
         }
         throw new SDKError('The user is not connected to this merchant');
@@ -554,7 +597,7 @@ export class Identity extends EventEmitter {
      */
     async getSpId() {
         try {
-            const user = await this.hasSession();
+            const user = await this.getUser
             return user.sp_id || null;
         } catch (_) {
             return null;
