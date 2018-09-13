@@ -99,6 +99,7 @@ export default class ItpModal {
             'background-color': 'rgba(0, 0, 0, .7)',
             'transition': `opacity ${FADE_DURATION_MS}ms`,
             opacity: 0,
+            'z-index': 10000,
         });
 
         const iframeEl = document.createElement('iframe');
