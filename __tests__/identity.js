@@ -272,7 +272,7 @@ describe('Identity', () => {
 
         test('Calls hasSession with autologin=1 (not "true")', async () => {
             const session = await identity.hasSession();
-            expect(session).toMatchObject({ result: true });
+            expect(session).toMatchObject({ userId: 12345 });
             expect(fetch).toHaveProperty('mock.calls.length', 2);
             const { searchParams } = new URL(fetch.mock.calls[0][0]);
             expect(searchParams.get('autologin')).toBe('1');
@@ -280,7 +280,7 @@ describe('Identity', () => {
 
         test('Calls SPiD on failure', async () => {
             const session = await identity.hasSession();
-            expect(session).toMatchObject({ result: true });
+            expect(session).toMatchObject({ userId: 12345 });
             expect(fetch).toHaveProperty('mock.calls.length', 2);
             expect(fetch.mock.calls[0][0]).toContain('session.identity-pre.schibsted.com/rpc');
             expect(fetch.mock.calls[1][0]).toContain('identity-pre.schibsted.com/ajax/');
