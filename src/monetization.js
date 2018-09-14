@@ -6,9 +6,10 @@
 
 import { assert, isStr, isNonEmptyString, isUrl } from './validate';
 import { urlMapper } from './url';
-import { ENDPOINTS } from './config';
+import { ENDPOINTS, NAMESPACE } from './config';
 import EventEmitter from 'tiny-emitter';
 import JSONPClient from './JSONPClient';
+import RESTClient from './RESTClient';
 import Cache from './cache';
 import * as spidTalk from './spidTalk';
 
@@ -24,9 +25,10 @@ export class Monetization extends EventEmitter {
      * @param {string} options.clientId - Mandatory client id
      * @param {string} [options.redirectUri] - Redirect uri
      * @param {string} [options.env=PRE] - Schibsted account environment: `PRE`, `PRO` or `PRO_NO`
+     * @param {string} [options.sessionDomain] - Example: "https://id.site.com"
      * @throws {SDKError} - If any of options are invalid
      */
-    constructor({ clientId, redirectUri, env = 'PRE', window = globalWindow() }) {
+    constructor({ clientId, redirectUri, env = 'PRE', sessionDomain, window = globalWindow() }) {
         super();
         spidTalk.emulate(window);
         // validate options
@@ -34,8 +36,14 @@ export class Monetization extends EventEmitter {
 
         this.cache = new Cache(window && window.sessionStorage);
         this.clientId = clientId;
+        this.env = env;
         this.redirectUri = redirectUri;
         this._setSpidServerUrl(env);
+
+        if (sessionDomain) {
+            assert(isUrl(sessionDomain), 'sessionDomain parameter is not a valid URL');
+            this._setSessionServiceUrl(sessionDomain);
+        }
     }
 
     /**
@@ -53,9 +61,27 @@ export class Monetization extends EventEmitter {
     }
 
     /**
+     * Set session-service domain
+     * @private
+     * @param {string} domain - real URL — (**not** 'PRE' style env key)
+     * @returns {void}
+     */
+    _setSessionServiceUrl(domain) {
+        assert(isStr(domain), `domain parameter is invalid: ${domain}`);
+        const client_sdrn = `sdrn:${NAMESPACE[this.env]}:client:${this.clientId}`;
+        this._sessionService = new RESTClient({
+            serverUrl: domain,
+            log: this.log,
+            defaultParams: { client_sdrn, redirect_uri: this.redirectUri },
+        });
+    }
+
+    /**
      * Checks if the user has access to a particular product
      * @param {string} productId
-     * @param {string} spId - The spId that was obtained from {@link Identity#hasSession}
+     * @param {string} [spId] - Only required if not using the session-service (i.e. only required
+     * if not setting `sessionDomain` in the constructor). The spId that was obtained from
+     * {@link Identity#hasSession}
      * @returns {Object|null} The data object returned from Schibsted account (or `null` if the user
      * doesn't have access to the given product)
      */
@@ -65,11 +91,17 @@ export class Monetization extends EventEmitter {
         if (cachedVal) {
             return cachedVal;
         }
-        const params = { product_id: productId }
-        if (spId) {
-            params.sp_id = spId;
+        let data = null;
+        if (this._sessionService) {
+            data = await this._sessionService.get(`/hasProduct/${productId}`);
         }
-        const data = await this._spid.get('ajax/hasproduct.js', params);
+        if (!data) {
+            const params = { product_id: productId }
+            if (spId) {
+                params.sp_id = spId;
+            }
+            data = await this._spid.get('ajax/hasproduct.js', params);
+        }
         if (!data.result) {
             return null;
         }
@@ -82,7 +114,9 @@ export class Monetization extends EventEmitter {
     /**
      * Checks if the user has access to a particular subscription
      * @param {string} subscriptionId
-     * @param {string} spId - The spid that was obtained from {@link Identity#hasSession}
+     * @param {string} [spId] - Only required if not using the session-service (i.e. only required
+     * if not setting `sessionDomain` in the constructor). The spId that was obtained from
+     * {@link Identity#hasSession}
      * @returns {Object|null} The data object returned from Schibsted account (or `null` if the user
      * doesn't have access to the given subscription)
      */
@@ -92,11 +126,17 @@ export class Monetization extends EventEmitter {
         if (cachedVal) {
             return cachedVal;
         }
-        const params = { product_id: subscriptionId }
-        if (spId) {
-            params.sp_id = spId;
+        let data = null;
+        if (this._sessionService) {
+            data = await this._sessionService.get(`/hasSubscription/${subscriptionId}`);
         }
-        const data = await this._spid.get('ajax/hassubscription.js', params);
+        if (!data) {
+            const params = { product_id: subscriptionId }
+            if (spId) {
+                params.sp_id = spId;
+            }
+            data = await this._spid.get('ajax/hassubscription.js', params);
+        }
         if (!data.result) {
             return null;
         }
