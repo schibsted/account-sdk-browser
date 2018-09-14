@@ -1,5 +1,40 @@
 # Changelog
 
+## v3.0.0-rc.16 (2018-09-14)
+
+### Fixes
+
+* ITP: Set the z-index of the ITP dialog to a "zooper high value" to 🤞🏼 ensure 🤞🏼 that it hovers
+  above the main site content
+
+## v3.0.0-rc.15 (2018-09-06)
+
+### New features
+
+* Support for new `Identity.login` parameters: `tag`, `teaser` and `maxAge`
+* ITP: There are explicit methods in Identity for users that don't use the `login` method. See the
+  docs for
+  [showItpModalUponReturning](https://schibsted.github.io/account-sdk-browser/Identity.html#showItpModalUponReturning)
+  and
+  [suppressItpModal](https://schibsted.github.io/account-sdk-browser/Identity.html#suppressItpModal)
+  if you're interested
+
+### Breaking changes (ish)
+
+* The `Identity.loginUrl` method used to take a lot of arguments, and with this release it was about
+  to become even more (with the added `tag`, `teaser` and `maxAge` params mentioned above). This
+  release changes the signature to have a single `options` object instead of the argument list. In
+  this case we made it backwards-compatible, so it won't break (YET!) if you continue using an
+  argument list. Beware though, that passing a list of arguments is considered DEPRECATED as of now
+* The es5 folder now contains both minified and unminified code. The minified ones have the
+  `.min.js` suffix. Before, only minified files were published, so if you're using those, you might
+  suddenly have bigger files than you did before. Sorry.. 🤷🏼‍
+
+### Fixes
+
+* [#76](https://github.com/schibsted/account-sdk-browser/issues/76) — Login on Chrome/iOS should now
+  work once again
+
 ## v3.0.0-rc.14 (2018-09-03)
 
 ### Changes
