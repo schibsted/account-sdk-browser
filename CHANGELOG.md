@@ -1,5 +1,12 @@
 # Changelog
 
+## v3.0.0-rc.16 (2018-09-14)
+
+### Fixes
+
+* ITP: Set the z-index of the ITP dialog to a "zooper high value" to 🤞🏼 ensure 🤞🏼 that it hovers
+  above the main site content
+
 ## v3.0.0-rc.15 (2018-09-06)
 
 ### New features
