@@ -90,26 +90,11 @@ describe('Identity', () => {
 
     describe('logout()', () => {
         test('Should be able to log out from Schibsted account', async () => {
-            const identity = new Identity({ clientId: 'foo', redirectUri: 'http://foo.com', window: {} });
-            const fakeFetch = jest.fn();
-            fakeFetch.mockImplementationOnce(async () => ({ ok: true, json: async () => ({})}));
-            identity._spid.fetch = fakeFetch;
-            identity._bffService.fetch = fakeFetch;
-            await expect(identity.logout()).resolves.toBeUndefined();
-            expect(fakeFetch).toHaveBeenCalledTimes(2);
-            expect(fakeFetch.mock.calls[0][0]).toMatch(/ajax\/logout.js/);
-            expect(fakeFetch.mock.calls[1][0]).toMatch(/authn\/api\/identity\/logout/);
-        });
-        test('Should be able to log out from BFF', async () => {
-            const identity = new Identity({ clientId: 'foo', redirectUri: 'http://foo.com', window: {} });
-            const fakeFetch = jest.fn();
-            fakeFetch.mockImplementationOnce(async () => ({ ok: true, json: async () => ({})}));
-            identity._spid.fetch = fakeFetch;
-            identity._bffService.fetch = fakeFetch;
-            await expect(identity.logout()).resolves.toBeUndefined();
-            expect(fakeFetch).toHaveBeenCalledTimes(2);
-            expect(fakeFetch.mock.calls[0][0]).toMatch(/ajax\/logout.js/);
-            expect(fakeFetch.mock.calls[1][0]).toMatch(/authn\/api\/identity\/logout/);
+            const window = { location: {} };
+            const identity = new Identity({ clientId: 'foo', redirectUri: 'http://foo.com', window});
+            identity.logout();
+
+            expect(window.location.href).toBe('https://identity-pre.schibsted.com/logout?client_id=foo&redirect_uri=http%3A%2F%2Ffoo.com&response_type=code');
         });
         test('Should clear cache when logging out', async () => {
             const webStorageMock = () => {
@@ -121,7 +106,7 @@ describe('Identity', () => {
                 };
                 return mock;
             };
-            const window = { localStorage: webStorageMock() };
+            const window = { localStorage: webStorageMock(), location: {} };
             const identity = new Identity({ clientId: 'foo', redirectUri: 'http://foo.com', window });
             const fakeFetch = jest.fn();
             const sessionResponse = { ok: true, json: async () => ({ result: true })};
@@ -133,25 +118,12 @@ describe('Identity', () => {
             fakeFetch2.mockImplementationOnce(async () => ({ ok: true, json: async () => ({})}));
             identity._spid.fetch = fakeFetch2;
             identity._bffService.fetch = fakeFetch2;
-            await identity.logout();
+            identity.logout();
 
             fakeFetch.mockImplementationOnce(async () => sessionResponse);
             identity._spid.fetch = fakeFetch;
             await identity.hasSession();
             expect(fakeFetch).toHaveBeenCalledTimes(2); // now it should have been called again, so 2
-        });
-        test('Should handle error', async () => {
-            const identity = new Identity({ clientId: 'foo', redirectUri: 'http://foo.com', window: {} });
-            const fakeFetch = jest.fn();
-            fakeFetch.mockImplementationOnce(async () => ({ ok: false }));
-            identity._spid.fetch = fakeFetch;
-            identity._bffService.fetch = fakeFetch;
-            await expect(identity.logout()).rejects.toMatchObject({
-                message: 'Could not log out from any endpoint'
-            });
-            expect(fakeFetch).toHaveBeenCalledTimes(2);
-            expect(fakeFetch.mock.calls[0][0]).toMatch(/ajax\/logout.js/);
-            expect(fakeFetch.mock.calls[1][0]).toMatch(/authn\/api\/identity\/logout/);
         });
     });
 
@@ -509,7 +481,7 @@ describe('Identity', () => {
 
         beforeEach(() => {
             fetch.mockClear();
-            identity = new Identity({ clientId: 'foo', redirectUri: 'http://example.com' });
+            identity = new Identity({ clientId: 'foo', redirectUri: 'http://example.com', window: { location: {} } });
         });
 
         test(`spy notices a 'login' event`, async () => {
@@ -522,7 +494,7 @@ describe('Identity', () => {
 
         test(`spy notices a 'logout' event`, async () => {
             await identity.hasSession(); // initialize with a session
-            await identity.logout(); // then log out
+            identity.logout(); // then log out
 
             fetch.mockImplementationOnce(() => ({ ok: true, json: async () => ({}) }));
             const spy = jest.spyOn(identity, 'emit');
@@ -536,7 +508,7 @@ describe('Identity', () => {
 
         test(`spy notices a 'userChange' event`, async () => {
             await identity.hasSession(); // initialize with a session
-            await identity.logout(); // then log out
+            identity.logout(); // then log out
 
             const newUser = { result: true, userId: 99999 };
             fetch.mockImplementationOnce(() => ({ ok: true, json: async () => (newUser) }));
