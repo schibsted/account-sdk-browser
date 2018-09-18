@@ -1,5 +1,13 @@
 # Changelog
 
+## v3.0.0-rc.17 (2018-09-18)
+
+### Fixes
+
+* Varnish cookie fixes: 1) The localstorage item was wrongly cleared when calling
+  `Identity.enableVarnishCookie()`, and 2) The varnish cookie was not removed correctly when calling
+  `Identity.logout()`.
+
 ## v3.0.0-rc.16 (2018-09-14)
 
 ### Fixes
