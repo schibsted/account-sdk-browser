@@ -2171,7 +2171,7 @@ spec section 3.1.2.1 for more information</p></td>
 
     
 
-    <h4 class="name" id="logout"><span class="type-signature">(async) </span>logout<span class="signature">()</span><span class="type-signature"> &rarr; {void}</span></h4>
+    <h4 class="name" id="logout"><span class="type-signature"></span>logout<span class="signature">(redirectUri)</span><span class="type-signature"> &rarr; {void}</span></h4>
 
     
     <p class="summary"><p>Logs the user out from the Identity platform</p></p>
@@ -2185,7 +2185,7 @@ spec section 3.1.2.1 for more information</p></td>
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="identity.js.html">identity.js</a>, <a href="identity.js.html#line609">line 609</a>
+        <a href="identity.js.html">identity.js</a>, <a href="identity.js.html#line604">line 604</a>
     </li></ul></dd>
     
 
@@ -2224,15 +2224,6 @@ spec section 3.1.2.1 for more information</p></td>
 
 
 
-<div class="description">
-    <p><strong>Note</strong>: Your site origin should be listed as a redirect_uri in selfservice for
-this to work. On the Schibsted account side, we check CORS headers against the list of
-redirect_uris. For most sites, this will work already, since this matching is only done on
-the origin part of the uri, and most sites already have that in their redirect_uri list. So
-if you have a redirect_uri <code>https://mysite.news/article</code>, then this will work when coming
-from any <code>https://mysite.news</code> location. Note however, that the protocol matters, so it will
-not work for <code>http://mysite.news</code> (only <code>https</code>).</p>
-</div>
 
 
 
@@ -2242,6 +2233,55 @@ not work for <code>http://mysite.news</code> (only <code>https</code>).</p>
 
 
 
+
+    <h5>Parameters:</h5>
+    
+
+<table class="params">
+    <thead>
+    <tr>
+        
+        <th>Name</th>
+        
+
+        <th>Type</th>
+
+        
+
+        
+
+        <th class="last">Description</th>
+    </tr>
+    </thead>
+
+    <tbody>
+    
+
+        <tr>
+            
+                <td class="name"><code>redirectUri</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">string</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last"><p>Where to redirect the browser after logging out of Schibsted
+account</p></td>
+        </tr>
+
+    
+    </tbody>
+</table>
 
 
 
@@ -2293,7 +2333,7 @@ not work for <code>http://mysite.news</code> (only <code>https</code>).</p>
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="identity.js.html">identity.js</a>, <a href="identity.js.html#line659">line 659</a>
+        <a href="identity.js.html">identity.js</a>, <a href="identity.js.html#line635">line 635</a>
     </li></ul></dd>
     
 
@@ -2844,7 +2884,7 @@ spec section 3.1.2.1 for more information</p></td>
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="identity.js.html">identity.js</a>, <a href="identity.js.html#line722">line 722</a>
+        <a href="identity.js.html">identity.js</a>, <a href="identity.js.html#line698">line 698</a>
     </li></ul></dd>
     
 
@@ -3019,7 +3059,7 @@ spec section 3.1.2.1 for more information</p></td>
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="identity.js.html">identity.js</a>, <a href="identity.js.html#line736">line 736</a>
+        <a href="identity.js.html">identity.js</a>, <a href="identity.js.html#line712">line 712</a>
     </li></ul></dd>
     
 
@@ -3190,7 +3230,7 @@ spec section 3.1.2.1 for more information</p></td>
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="identity.js.html">identity.js</a>, <a href="identity.js.html#line748">line 748</a>
+        <a href="identity.js.html">identity.js</a>, <a href="identity.js.html#line724">line 724</a>
     </li></ul></dd>
     
 
@@ -3361,7 +3401,7 @@ spec section 3.1.2.1 for more information</p></td>
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="identity.js.html">identity.js</a>, <a href="identity.js.html#line761">line 761</a>
+        <a href="identity.js.html">identity.js</a>, <a href="identity.js.html#line737">line 737</a>
     </li></ul></dd>
     
 
@@ -3545,7 +3585,7 @@ spec section 3.1.2.1 for more information</p></td>
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="identity.js.html">identity.js</a>, <a href="identity.js.html#line775">line 775</a>
+        <a href="identity.js.html">identity.js</a>, <a href="identity.js.html#line751">line 751</a>
     </li></ul></dd>
     
 
@@ -3729,7 +3769,7 @@ spec section 3.1.2.1 for more information</p></td>
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="identity.js.html">identity.js</a>, <a href="identity.js.html#line789">line 789</a>
+        <a href="identity.js.html">identity.js</a>, <a href="identity.js.html#line765">line 765</a>
     </li></ul></dd>
     
 
@@ -3913,7 +3953,7 @@ spec section 3.1.2.1 for more information</p></td>
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="identity.js.html">identity.js</a>, <a href="identity.js.html#line808">line 808</a>
+        <a href="identity.js.html">identity.js</a>, <a href="identity.js.html#line784">line 784</a>
     </li></ul></dd>
     
 
@@ -4020,7 +4060,7 @@ method.</p>
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="identity.js.html">identity.js</a>, <a href="identity.js.html#line824">line 824</a>
+        <a href="identity.js.html">identity.js</a>, <a href="identity.js.html#line800">line 800</a>
     </li></ul></dd>
     
 
@@ -5684,7 +5724,7 @@ no logged-in user neither before nor after <a href="Identity.html#hasSession"><c
 <br class="clear">
 
 <footer>
-    Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.5.5</a> on Tue Sep 18 2018 10:20:59 GMT+0000 (UTC) using the <a href="https://github.com/clenemt/docdash">docdash</a> theme.
+    Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.5.5</a> on Tue Sep 18 2018 15:02:52 GMT+0000 (UTC) using the <a href="https://github.com/clenemt/docdash">docdash</a> theme.
 </footer>
 
 <script>prettyPrint();</script>
