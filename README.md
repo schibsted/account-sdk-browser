@@ -63,7 +63,7 @@ you read this document in full. But ok, let's present some highlighted differenc
    that you need set, you will have to set yourself
 * All functions that used to take callback functions in the 2.x version of the SDK don't do that
    anymore. The new SDK instead uses promises where it makes sense (often written as `async`
-   functions). For example `Identity.logout()` returns a promise. So, for instance if you used to do
+   functions). For example `Identity.getUser()` returns a promise. So, for instance if you used to do
    this in v2.x:
    ```javascript
    identity.hasSession((err, data) => {
