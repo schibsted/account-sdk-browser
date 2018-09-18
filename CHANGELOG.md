@@ -1,5 +1,16 @@
 # Changelog
 
+## v3.0.0-rc.18 (2018-09-18 — second one today, yay 🎉)
+
+### Breaking changes
+
+* The `Identity.logout()` function is no longer an `async` function, and now does a full-page
+  redirect to the Schibsted account domain to log the user out. This is because we can't trust that
+  the XHR way of logging people out will work for Safari 12 users. Sorry for the breaking change,
+  but at least it works in a consistent way. It now also takes a parameter `redirectUri` that
+  defaults to the `redirectUri` from the `Identity` constructor. The browser will be redirected
+  there after Schibsted account has logged the user out
+
 ## v3.0.0-rc.17 (2018-09-18)
 
 ### Fixes
