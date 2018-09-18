@@ -274,7 +274,6 @@ export class Identity extends EventEmitter {
         assert(expiresIn >= 0, `'expiresIn' cannot be negative`);
         this.setVarnishCookie = true;
         this.varnishExpiresIn = expiresIn;
-        this.cache.delete(HAS_SESSION_CACHE_KEY);
     }
 
     /**
