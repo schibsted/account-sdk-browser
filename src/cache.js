@@ -8,16 +8,17 @@ import SDKError from './SDKError';
 
 /**
  * Check whether we are able to use web storage
- * @param {Storage} store - A reference to either `sessionStorage` or `localStorage` from a `Window`
- * object
+ * @param {Storage} storeProvider - A function to return a WebStorage instance (either
+ * `sessionStorage` or `localStorage` from a `Window` object)
  * @private
  * @returns {boolean}
  */
-function webStorageWorks(store) {
-    if (!store) {
+function webStorageWorks(storeProvider) {
+    if (!storeProvider) {
         return false;
     }
     try {
+        const store = storeProvider();
         const randomKey = 'x-x-x-x'.replace(/x/g, () => Math.random());
         const testValue = 'TEST-VALUE';
         store.setItem(randomKey, testValue);
@@ -71,13 +72,13 @@ const maxExpiresIn = Math.pow(2, 31) - 1;
  */
 export default class Cache {
     /**
-     * @param {Storage} [store] - A reference to either `sessionStorage` or `localStorage` from a
-     * `Window` object
+     * @param {Storage} [storeProvider] - A function to return a WebStorage instance (either
+     * `sessionStorage` or `localStorage` from a `Window` object)
      * @throws {SDKError} - If sessionStorage or localStorage are not accessible
      */
-    constructor(store) {
-        if (webStorageWorks(store)) {
-            this.cache = new WebStorageCache(store);
+    constructor(storeProvider) {
+        if (webStorageWorks(storeProvider)) {
+            this.cache = new WebStorageCache(storeProvider());
             this.type = 'WebStorage';
         } else {
             this.cache = new LiteralCache();

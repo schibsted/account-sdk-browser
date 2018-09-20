@@ -34,7 +34,7 @@ export class Monetization extends EventEmitter {
         // validate options
         assert(isNonEmptyString(clientId), 'clientId parameter is required');
 
-        this.cache = new Cache(window && window.sessionStorage);
+        this.cache = new Cache(() => window && window.sessionStorage);
         this.clientId = clientId;
         this.env = env;
         this.redirectUri = redirectUri;
