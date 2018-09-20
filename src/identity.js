@@ -563,6 +563,8 @@ export class Identity extends EventEmitter {
      * the last time the End-User was actively authenticated. If last authentication time is more
      * than maxAge seconds in the past, re-authentication will be required. See the OpenID Connect
      * spec section 3.1.2.1 for more information
+     * @param {string} [options.locale=''] - Optional parameter to overwrite client locale setting.
+     * New flows supports nb_NO, fi_FI, sv_SE, en_US
      * @return {Window|null} - Reference to popup window if created (or `null` otherwise)
      */
     login({
@@ -575,12 +577,13 @@ export class Identity extends EventEmitter {
         loginHint = '',
         tag = '',
         teaser = '',
-        maxAge = ''
+        maxAge = '',
+        locale = ''
     }) {
         this._closePopup();
         this.cache.delete(HAS_SESSION_CACHE_KEY);
         const url = this.loginUrl({ state, acrValues, scope, redirectUri, newFlow, loginHint, tag,
-            teaser, maxAge });
+            teaser, maxAge, locale });
 
         this.showItpModalUponReturning();
 
@@ -630,6 +633,8 @@ export class Identity extends EventEmitter {
      * the last time the End-User was actively authenticated. If last authentication time is more
      * than maxAge seconds in the past, re-authentication will be required. See the OpenID Connect
      * spec section 3.1.2.1 for more information
+     * @param {string} [options.locale=''] - Optional parameter to overwrite client locale setting.
+     * New flows supports nb_NO, fi_FI, sv_SE, en_US
      * @return {string} - The url
      */
     loginUrl({
@@ -641,7 +646,8 @@ export class Identity extends EventEmitter {
         loginHint = '',
         tag = '',
         teaser = '',
-        maxAge = ''
+        maxAge = '',
+        locale = ''
     }) {
         if (typeof arguments[0] !== 'object') {
             // backward compatibility
@@ -674,7 +680,8 @@ export class Identity extends EventEmitter {
                 login_hint: loginHint,
                 tag,
                 teaser,
-                max_age: maxAge
+                max_age: maxAge,
+                locale
             });
         } else {
             // acrValues do not work with the old flows
@@ -685,7 +692,8 @@ export class Identity extends EventEmitter {
                 state,
                 email: loginHint,
                 tag,
-                teaser
+                teaser,
+                locale
             });
         }
     }
