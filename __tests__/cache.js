@@ -31,21 +31,32 @@ describe('cache', () => {
             expect(cache.type).toBe('ObjectLiteralStorage');
         });
         test('can force a cache with session storage', () => {
-            const cache = new Cache(webStorageMock());
+            const cache = new Cache(webStorageMock);
             expect(cache.type).toBe('WebStorage');
         });
         test('Falls back to object literal storage if supplied storage throws', () => {
-            const cache = new Cache(throwingStorageMock);
+            const cache = new Cache(() => throwingStorageMock);
             expect(cache.type).toBe('ObjectLiteralStorage');
             expect(throwingStorageMock.spy).toHaveBeenCalledTimes(1);
             expect(throwingStorageMock.spy.mock.calls[0][1]).toBe('TEST-VALUE');
+        });
+        test('Falls back to object literal storage if fetching localStorage throws exception', () => {
+            const spy = jest.fn().mockImplementation(() => {
+                throw Error('Private mode, yo');
+            });
+            const throwingWindowInstance = {
+                get localStorage() { return spy(); }
+            };
+            const cache = new Cache(() => throwingWindowInstance.localStorage);
+            expect(cache.type).toBe('ObjectLiteralStorage');
+            expect(spy).toHaveBeenCalledTimes(1);
         });
     });
     describe('web storage', () => {
         describe('get/set/clear', () => {
             let cache;
             beforeEach(() => {
-                cache = new Cache(webStorageMock());
+                cache = new Cache(webStorageMock);
             });
             test('can read/write values', () => {
                 cache.set('foo', 'bar', 1000);
