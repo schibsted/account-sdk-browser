@@ -421,6 +421,18 @@ describe('Identity', () => {
             await identity.hasSession();
             expect(spy).toHaveBeenCalledTimes(2);
         });
+
+        test('should return the same promise if invoked multiple times', async () => {
+            let outerPromise;
+            fetch.mockImplementationOnce(async () => {
+                const innerPromise = identity.hasSession(); // NOTE: no 'await' — we want the promise
+                expect(innerPromise).toBe(outerPromise);
+                return { ok: true, json: async () => ({ sp_id: 'inner-promise' }) };
+            });
+            outerPromise = identity.hasSession();
+            const dummy = await outerPromise;
+            expect(dummy).toMatchObject({ sp_id: 'inner-promise' });
+        });
     });
 
     describe('isLoggedIn', () => {
@@ -793,7 +805,6 @@ describe('Identity', () => {
                 await expect(identity.hasSession()).rejects.toMatchObject({ message: 'HasSession failed' });
                 expect(fetch.mock.calls.length).toBe(1);
                 expect(ItpModal.mock.calls.length).toBe(0);
-                expect(identity.cache.get(LOGIN_IN_PROGRESS_KEY)).toBe(null);
             });
         });
     });

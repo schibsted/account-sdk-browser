@@ -388,72 +388,86 @@ export class Identity extends EventEmitter {
      * @fires Identity#sessionInit
      * @fires Identity#statusChange
      * @fires Identity#error
-     * @return {Identity#HasSessionSuccessResponse|Identity#HasSessionFailureResponse}
+     * @return {Promise<Identity#HasSessionSuccessResponse|Identity#HasSessionFailureResponse>}
      */
-    async hasSession(autologin = true) {
-        const loginInProgress = this.cache.get(LOGIN_IN_PROGRESS_KEY) !== null;
-        this.cache.delete(LOGIN_IN_PROGRESS_KEY);
-
-        const postProcess = (sessionData) => {
-            if (sessionData.error) {
-                throw new SDKError('HasSession endpoint returned an error', sessionData.error);
-            }
-            this._maybeSetVarnishCookie(sessionData);
-            this._emitSessionEvent(this._session, sessionData);
-        };
-
-        if (typeof autologin !== 'boolean') {
-            const [type, value] = inspect(autologin);
-            throw new SDKError(`Parameter 'autologin' must be boolean, was: "${type}:${value}"`);
-        }
-        if (this._enableSessionCaching) {
-            // Try to resolve from cache (it has a TTL)
-            const cachedData = this.cache.get(HAS_SESSION_CACHE_KEY);
-            if (cachedData) {
-                postProcess(cachedData);
-                return cachedData;
-            }
-        }
-
-        try {
-            let data = null;
-            if (this._sessionService) {
-                try {
-                    data = await this._sessionService.get('/session');
-                } catch (err) {
-                    if (err.code !== 404) {
-                        throw err;
+    hasSession(autologin = true) {
+        if (!this._hasSessionInProgress) {
+            const promiseFn = async (resolve, reject) => {
+                const postProcess = (sessionData) => {
+                    if (sessionData.error) {
+                        throw new SDKError('HasSession endpoint returned an error', sessionData.error);
                     }
-                    data = null; // fall through and try to fetch from old spid-hassession
+                    this._maybeSetVarnishCookie(sessionData);
+                    this._emitSessionEvent(this._session, sessionData);
+                };
+
+                if (typeof autologin !== 'boolean') {
+                    const [type, value] = inspect(autologin);
+                    reject(new SDKError(`Parameter 'autologin' must be boolean, was: "${type}:${value}"`));
+                    return;
                 }
-            }
-            const autoLoginConverted = autologin ? 1 : 0;
 
-            if (!data && !this._itpMode) {
-                data = await this._hasSession.get('rpc/hasSession.js', { autologin: autoLoginConverted });
-            }
-            if (this._itpMode || (isObject(data.error) && data.error.type === 'LoginException')) {
-                data = await this._spid.get('ajax/hasSession.js', { autologin: autoLoginConverted });
-            }
+                try {
+                    if (this._enableSessionCaching) {
+                        // Try to resolve from cache (it has a TTL)
+                        const cachedData = this.cache.get(HAS_SESSION_CACHE_KEY);
+                        if (cachedData) {
+                            postProcess(cachedData);
+                            resolve(cachedData);
+                            return;
+                        }
+                    }
 
-            const shouldShowItpModal = this._itpModalRequired() && !this._itpMode &&
-                isObject(data.error) && data.error.type === 'UserException' &&
-                loginInProgress;
-            if (shouldShowItpModal) {
-                const modal = new ItpModal(this._spid, this.clientId, this.redirectUri, this.env);
-                data = await modal.show();
-            }
-            if (this._enableSessionCaching) {
-                const expiresIn = 1000 * (data.expiresIn || 300);
-                this.cache.set(HAS_SESSION_CACHE_KEY, data, expiresIn);
-            }
-            postProcess(data);
-            this._session = data;
-            return data;
-        } catch (err) {
-            this.emit('error', err);
-            throw new SDKError('HasSession failed', err);
+                    let data = null;
+                    if (this._sessionService) {
+                        try {
+                            data = await this._sessionService.get('/session');
+                        } catch (err) {
+                            if (err.code !== 404) {
+                                throw err;
+                            }
+                            data = null; // fall through and try to fetch from old spid-hassession
+                        }
+                    }
+                    const autoLoginConverted = autologin ? 1 : 0;
+
+                    if (!data && !this._itpMode) {
+                        data = await this._hasSession.get('rpc/hasSession.js', { autologin: autoLoginConverted });
+                    }
+                    if (this._itpMode || (isObject(data.error) && data.error.type === 'LoginException')) {
+                        data = await this._spid.get('ajax/hasSession.js', { autologin: autoLoginConverted });
+                    }
+
+                    const shouldShowItpModal = this._itpModalRequired() && !this._itpMode &&
+                        isObject(data.error) && data.error.type === 'UserException' &&
+                        this.cache.get(LOGIN_IN_PROGRESS_KEY) !== null;
+                    if (shouldShowItpModal) {
+                        this.cache.delete(LOGIN_IN_PROGRESS_KEY);
+                        const modal = new ItpModal(this._spid, this.clientId, this.redirectUri, this.env);
+                        data = await modal.show();
+                    }
+                    if (this._enableSessionCaching) {
+                        const expiresIn = 1000 * (data.expiresIn || 300);
+                        this.cache.set(HAS_SESSION_CACHE_KEY, data, expiresIn);
+                    }
+                    postProcess(data);
+                    this._session = data;
+                    resolve(data);
+                } catch (err) {
+                    this.emit('error', err);
+                    reject(new SDKError('HasSession failed', err));
+                }
+            };
+            const promise = new Promise((yay, nay) => setTimeout(() => promiseFn(yay, nay), 0));
+            this._hasSessionInProgress = promise.then(v => {
+                this._hasSessionInProgress = null;
+                return v;
+            }, e => {
+                this._hasSessionInProgress = null;
+                throw e;
+            });
         }
+        return this._hasSessionInProgress;
     }
 
     /**
