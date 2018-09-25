@@ -296,7 +296,6 @@ export class Identity extends EventEmitter {
         assert(expiresIn >= 0, `'expiresIn' cannot be negative`);
         this.setVarnishCookie = true;
         this.varnishExpiresIn = expiresIn;
-        this.cache.delete(HAS_SESSION_CACHE_KEY);
     }
 
     /**
@@ -348,7 +347,10 @@ export class Identity extends EventEmitter {
      * @returns {void}
      */
     _clearVarnishCookie() {
-        document.cookie = 'SP_ID=nothing; expires=Thu, 01 Jan 1970 00:00:00 GMT; path=/; domain=.';
+        const domain = (typeof this._session && this._session.baseDomain === 'string')
+            ? this._session.baseDomain
+            : (document.domain || '');
+        document.cookie = `SP_ID=nothing; expires=Thu, 01 Jan 1970 00:00:00 GMT; path=/; domain=.${domain}`;
     }
 
     /**
@@ -593,6 +595,8 @@ export class Identity extends EventEmitter {
      * the last time the End-User was actively authenticated. If last authentication time is more
      * than maxAge seconds in the past, re-authentication will be required. See the OpenID Connect
      * spec section 3.1.2.1 for more information
+     * @param {string} [options.locale=''] - Optional parameter to overwrite client locale setting.
+     * New flows supports nb_NO, fi_FI, sv_SE, en_US
      * @return {Window|null} - Reference to popup window if created (or `null` otherwise)
      */
     login({
@@ -605,12 +609,13 @@ export class Identity extends EventEmitter {
         loginHint = '',
         tag = '',
         teaser = '',
-        maxAge = ''
+        maxAge = '',
+        locale = ''
     }) {
         this._closePopup();
         this.cache.delete(HAS_SESSION_CACHE_KEY);
         const url = this.loginUrl({ state, acrValues, scope, redirectUri, newFlow, loginHint, tag,
-            teaser, maxAge });
+            teaser, maxAge, locale });
 
         this.showItpModalUponReturning();
 
@@ -627,44 +632,15 @@ export class Identity extends EventEmitter {
 
     /**
      * @summary Logs the user out from the Identity platform
-     * @description This function will redirect the user to Schibsted account to log out. Then,
-     * optionally, the browser is redirected to `redirectUri`.
-     * @param {string} [redirectUri] — The site to redirect to after logging out
+     * @param {string} redirectUri - Where to redirect the browser after logging out of Schibsted
+     * account
      * @return {void}
      */
-    async logout(redirectUri) {
-        const cleanup = () => {
-            this.cache.delete(HAS_SESSION_CACHE_KEY);
-            this._maybeClearVarnishCookie();
-            this.emit('logout');
-        }
-
-        if (this._sessionService) {
-            cleanup();
-            window.location.href = this.logoutUrl(redirectUri);
-            return;
-        }
-        // At the moment we have two endpoints that can have user session: SPiD and BFF
-        // if one of them returns success, we assume that the login was successful
-        // but if both fail, then we haven't really logged the user out.
-        /**
-         * A little utility function that returns a boolean based on if a promise has failed or
-         * succeeded.
-         * @param {Promise} p
-         * @return {Promise}
-         */
-        const booleanize = p => p.then(() => true, () => false);
-        const [spidLoggedOut, bffLoggedOut] = await Promise.all([
-            booleanize(this._spid.get('ajax/logout.js')),
-            booleanize(this._bffService.get('api/identity/logout')),
-        ]);
-        if (spidLoggedOut || bffLoggedOut) {
-            cleanup();
-        } else {
-            const err = new SDKError('Could not log out from any endpoint');
-            this.emit('error', err);
-            throw err;
-        }
+    logout(redirectUri = this.redirectUri) {
+        this.cache.delete(HAS_SESSION_CACHE_KEY);
+        this._maybeClearVarnishCookie();
+        this.emit('logout');
+        this.window.location.href = this.logoutUrl(redirectUri);
     }
 
     /**
@@ -689,6 +665,8 @@ export class Identity extends EventEmitter {
      * the last time the End-User was actively authenticated. If last authentication time is more
      * than maxAge seconds in the past, re-authentication will be required. See the OpenID Connect
      * spec section 3.1.2.1 for more information
+     * @param {string} [options.locale=''] - Optional parameter to overwrite client locale setting.
+     * New flows supports nb_NO, fi_FI, sv_SE, en_US
      * @return {string} - The url
      */
     loginUrl({
@@ -700,7 +678,8 @@ export class Identity extends EventEmitter {
         loginHint = '',
         tag = '',
         teaser = '',
-        maxAge = ''
+        maxAge = '',
+        locale = ''
     }) {
         if (typeof arguments[0] !== 'object') {
             // backward compatibility
@@ -733,7 +712,8 @@ export class Identity extends EventEmitter {
                 login_hint: loginHint,
                 tag,
                 teaser,
-                max_age: maxAge
+                max_age: maxAge,
+                locale
             });
         } else {
             // acrValues do not work with the old flows
@@ -744,7 +724,8 @@ export class Identity extends EventEmitter {
                 state,
                 email: loginHint,
                 tag,
-                teaser
+                teaser,
+                locale
             });
         }
     }
