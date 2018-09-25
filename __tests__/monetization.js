@@ -28,6 +28,11 @@ describe('Monetization', () => {
             expect(mon).not.toBeNull();
             expect(mon).toBeDefined();
         });
+
+        test('should accept sessionDomain param', () => {
+            const mon = new Monetization({ clientId: 'a', sessionDomain: 'https://session.example' });
+            expect(mon._sessionService).toBeDefined();
+        });
     });
 
     describe('hasProduct()', () => {
@@ -100,6 +105,15 @@ describe('Monetization', () => {
 
             expect(mon._spid.go.mock.calls.length).toBe(1);
         });
+
+        test('should use session service if defined', async () => {
+            mon = new Monetization({ clientId: 'a', sessionDomain: 'https://session.example' });
+            mon._spid.go.mockClear();
+            mon._sessionService.go.mockClear();
+            await mon.hasProduct('existing');
+            expect(mon._sessionService.go.mock.calls.length).toBe(1);
+            expect(mon._spid.go.mock.calls.length).toBe(0);
+        });
     });
 
     describe('hasSubscription()', () => {
@@ -171,6 +185,15 @@ describe('Monetization', () => {
             await mon.hasSubscription('existing_no_expires');
 
             expect(mon._spid.go.mock.calls.length).toBe(1);
+        });
+
+        test('should use session service if defined', async () => {
+            mon = new Monetization({ clientId: 'a', sessionDomain: 'https://session.example' });
+            mon._spid.go.mockClear();
+            mon._sessionService.go.mockClear();
+            await mon.hasSubscription('existing');
+            expect(mon._sessionService.go.mock.calls.length).toBe(1);
+            expect(mon._spid.go.mock.calls.length).toBe(0);
         });
     });
 
