@@ -4,6 +4,8 @@
 
 'use strict';
 
+jest.mock('../src/RESTClient');
+
 import Monetization from '../monetization';
 
 describe('Monetization', () => {
@@ -35,7 +37,7 @@ describe('Monetization', () => {
             mon = new Monetization({ clientId: 'a' });
         });
 
-        test('should get response for existing product', async () => {
+        test('should get response for existing product (no qualifier)', async () => {
             const response = await mon.hasProduct('existing');
             expect(response).not.toBeNull();
             expect(response).toBeDefined();
@@ -70,33 +72,33 @@ describe('Monetization', () => {
         });
 
         test('should use cache if called twice with same args', async () => {
-            mon._spid.fetch.mockClear();
+            mon._spid.go.mockClear();
             await mon.hasProduct('existing');
             await mon.hasProduct('non_existing_1');
             await mon.hasProduct('non_existing_2');
             await mon.hasProduct('existing');
 
             // we call it 4 times, but 3 unique products
-            expect(mon._spid.fetch.mock.calls.length).toBe(3);
+            expect(mon._spid.go.mock.calls.length).toBe(3);
         });
 
         test(`should not use cache when products don't exist (really? is this correct?)`, async () => {
-            mon._spid.fetch.mockClear();
+            mon._spid.go.mockClear();
             await mon.hasProduct('non_existing_1');
             await mon.hasProduct('non_existing_2');
             await mon.hasProduct('non_existing_2');
             await mon.hasProduct('non_existing_2');
 
             // we call it 4 times, but 2 unique products — but none of these products exist
-            expect(mon._spid.fetch.mock.calls.length).toBe(4);
+            expect(mon._spid.go.mock.calls.length).toBe(4);
         });
 
         test('should cache response for <default> time even if expiresIn missing', async () => {
-            mon._spid.fetch.mockClear();
+            mon._spid.go.mockClear();
             await mon.hasProduct('existing_no_expires');
             await mon.hasProduct('existing_no_expires');
 
-            expect(mon._spid.fetch.mock.calls.length).toBe(1);
+            expect(mon._spid.go.mock.calls.length).toBe(1);
         });
     });
 
@@ -142,33 +144,33 @@ describe('Monetization', () => {
         });
 
         test('should use cache if called twice with same args', async () => {
-            mon._spid.fetch.mockClear();
+            mon._spid.go.mockClear();
             await mon.hasSubscription('existing');
             await mon.hasSubscription('non_existing_1');
             await mon.hasSubscription('non_existing_2');
             await mon.hasSubscription('existing');
 
             // we call it 4 times, but 3 unique products
-            expect(mon._spid.fetch.mock.calls.length).toBe(3);
+            expect(mon._spid.go.mock.calls.length).toBe(3);
         });
 
         test(`should not use cache when products don't exist (really? is this correct?)`, async () => {
-            mon._spid.fetch.mockClear();
+            mon._spid.go.mockClear();
             await mon.hasSubscription('non_existing_1');
             await mon.hasSubscription('non_existing_2');
             await mon.hasSubscription('non_existing_2');
             await mon.hasSubscription('non_existing_2');
 
             // we call it 4 times, but 2 unique products — but none of these products exist
-            expect(mon._spid.fetch.mock.calls.length).toBe(4);
+            expect(mon._spid.go.mock.calls.length).toBe(4);
         });
 
         test('should cache response for <default> time even if expiresIn missing', async () => {
-            mon._spid.fetch.mockClear();
+            mon._spid.go.mockClear();
             await mon.hasSubscription('existing_no_expires');
             await mon.hasSubscription('existing_no_expires');
 
-            expect(mon._spid.fetch.mock.calls.length).toBe(1);
+            expect(mon._spid.go.mock.calls.length).toBe(1);
         });
     });
 
