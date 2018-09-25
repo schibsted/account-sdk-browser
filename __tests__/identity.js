@@ -433,6 +433,21 @@ describe('Identity', () => {
             const dummy = await outerPromise;
             expect(dummy).toMatchObject({ sp_id: 'inner-promise' });
         });
+
+        test('should throw error if session-service returns error without 404', async () => {
+            const options = { clientId: 'foo', redirectUri: 'http://e.com', sessionDomain: 'http://id.e.com' };
+            const client_sdrn = `sdrn:schibsted:client:${options.clientId}`;
+            identity = new Identity(options);
+            identity._sessionService = new RESTClient({
+                serverUrl: options.sessionDomain,
+                fetch,
+                defaultParams: { client_sdrn, redirect_uri: options.redirectUri },
+            });
+            fetch.mockImplementationOnce(async () => ({ ok: false, status: 401, statusText: 'Unauthorized' }));
+            await expect(identity.hasSession()).rejects.toMatchObject({ message: 'HasSession failed' });
+            expect(fetch.mock.calls.length).toBe(1);
+            expect(fetch.mock.calls[0][0]).toMatch(/^http:\/\/id.e.com\//);
+        });
     });
 
     describe('isLoggedIn', () => {
@@ -699,6 +714,7 @@ describe('Identity', () => {
         const safari11 = "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_13_6) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/11.1.2 Safari/605.1.15";
         const safari12 = "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_13_6) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/12.1 Safari/605.1.15";
         const safari13 = "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_13_6) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/13.1 Safari/605.1.15";
+        const chrome = 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_14_0) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/69.0.3497.100 Safari/537.36';
 
         function setUserAgent(userAgent) {
             Object.defineProperty(window.navigator, "userAgent", { configurable: true });
@@ -739,6 +755,12 @@ describe('Identity', () => {
             it('should be false for Safari 11', () => {
                 const identity = new Identity({ clientId: 'foo', redirectUri: 'http://example.com' });
                 setUserAgent(safari11);
+                expect(identity._itpModalRequired()).toBe(false);
+            });
+
+            it('should be false for Chrome', () => {
+                const identity = new Identity({ clientId: 'foo', redirectUri: 'http://example.com' });
+                setUserAgent(chrome);
                 expect(identity._itpModalRequired()).toBe(false);
             });
         });
