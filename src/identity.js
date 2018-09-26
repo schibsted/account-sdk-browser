@@ -21,9 +21,10 @@ import * as spidTalk from './spidTalk';
  * @typedef {object} Identity#HasSessionSuccessResponse
  * @property {boolean} result - Is the user connected to the merchant? (it means that the merchant
  * id is in the list of merchants listed of this user in the database)? Example: false
- * @property {string} userStatus - Example: 'notConnected' or 'connected'
+ * @property {string} userStatus - Example: 'notConnected' or 'connected'. Deprecated, use
+ * `Identity.isConnected()`
  * @property {string} baseDomain - Example: 'localhost'
- * @property {string} id - Example: '58eca10fdbb9f6df72c3368f'
+ * @property {string} id - Example: '58eca10fdbb9f6df72c3368f'. Obsolete
  * @property {number} userId - Example: 37162
  * @property {string} uuid - Example: 'b3b23aa7-34f2-5d02-a10e-5a3455c6ab2c'
  * @property {string} sp_id - Example: 'eyJjbGllbnRfaWQ...'
