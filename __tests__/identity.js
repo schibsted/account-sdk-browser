@@ -423,15 +423,14 @@ describe('Identity', () => {
         });
 
         test('should return the same promise if invoked multiple times', async () => {
-            let outerPromise;
-            fetch.mockImplementationOnce(async () => {
-                const innerPromise = identity.hasSession(); // NOTE: no 'await' — we want the promise
-                expect(innerPromise).toBe(outerPromise);
-                return { ok: true, json: async () => ({ sp_id: 'inner-promise' }) };
-            });
-            outerPromise = identity.hasSession();
-            const dummy = await outerPromise;
-            expect(dummy).toMatchObject({ sp_id: 'inner-promise' });
+            fetch.mockImplementationOnce(() => new Promise((resolve) => {
+                setTimeout(resolve({ ok: true, json: async () => ({ sp_id: 'yo' }) }), 1);
+            }));
+            const promise1 = identity.hasSession();
+            const promise2 = identity.hasSession(); // NOTE: no 'await' — we want the promise
+            expect(promise2).toBe(promise1);
+            const dummy = await promise1;
+            expect(dummy).toMatchObject({ sp_id: 'yo' });
         });
 
         test('should throw error if session-service returns error without 404', async () => {
