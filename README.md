@@ -105,6 +105,14 @@ you read this document in full. But ok, let's present some highlighted differenc
   endpoint accesses, there is a chance that you'll encounter problems. For instance, if you've set
   `NO ACCESS` on the `POST /signup` endpoint, **users will not be able to sign up to your site**
   using the new flows
+* If you use our session-service, there are certain changes in the response from the session endpoint.
+  * The `userStatus` field makes no sense in the session-service world, since it operates "per-site"
+    (there is one id.site.example domain for each site, so being logged in and connected for that
+    site means the same thing. Also, there is the `Identity.isConnected` function that's still kept
+    in case people prefer to keep the same logic with and without the session-service).
+  * The `id` field (the one returning a MongoDb identifier like `abcdef0123456789abcdd00d`) has
+    finally been removed. It's been deprecated for a long time. The numeric `userId` (legacy) and
+    `uuid` fields are still present.
 
 <a name="polyfills-yo"></a>
 
