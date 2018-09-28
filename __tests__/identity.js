@@ -367,7 +367,7 @@ describe('Identity', () => {
                 fetch,
                 defaultParams: { client_sdrn, redirect_uri: options.redirectUri },
             });
-            fetch.mockImplementationOnce(async () => ({ ok: false, status: 404, statusText: 'Not Found' }));
+            fetch.mockImplementationOnce(async () => ({ ok: false, status: 400, statusText: 'No cookie present' }));
             fetch.mockImplementationOnce(async () => ({ ok: true, json: async() => ({ error: { type: 'UserException' } }) }));
             await expect(identity.hasSession()).rejects.toMatchObject({ message: 'HasSession failed' });
             expect(fetch.mock.calls.length).toBe(2);
