@@ -8,6 +8,7 @@ jest.mock('../src/ItpModal');
 
 import Identity from '../identity';
 import ItpModal from '../src/ItpModal';
+import RESTClient from '../src/RESTClient';
 import { compareUrls } from './utils';
 import { URL } from 'url';
 import { URL as u } from 'whatwg-url';
@@ -357,6 +358,38 @@ describe('Identity', () => {
             });
         });
 
+        test('should go to session-service if defined', async () => {
+            const options = { clientId: 'foo', redirectUri: 'http://e.com', sessionDomain: 'http://id.e.com' };
+            const client_sdrn = `sdrn:schibsted:client:${options.clientId}`;
+            identity = new Identity(options);
+            identity._sessionService = new RESTClient({
+                serverUrl: options.sessionDomain,
+                fetch,
+                defaultParams: { client_sdrn, redirect_uri: options.redirectUri },
+            });
+            fetch.mockImplementationOnce(async () => ({ ok: false, status: 400, statusText: 'No cookie present' }));
+            fetch.mockImplementationOnce(async () => ({ ok: true, json: async() => ({ error: { type: 'UserException' } }) }));
+            await expect(identity.hasSession()).rejects.toMatchObject({ message: 'HasSession failed' });
+            expect(fetch.mock.calls.length).toBe(2);
+            expect(fetch.mock.calls[0][0]).toMatch(/^http:\/\/id.e.com\//);
+            expect(fetch.mock.calls[1][0]).toMatch(/^https:\/\/session.identity-pre.schibsted.com\/rpc\/hasSession.js/);
+        });
+
+        test('should terminate "chain" if session-service call succeeds', async () => {
+            const options = { clientId: 'foo', redirectUri: 'http://e.com', sessionDomain: 'http://id.e.com' };
+            const client_sdrn = `sdrn:schibsted:client:${options.clientId}`;
+            identity = new Identity(options);
+            identity._sessionService = new RESTClient({
+                serverUrl: options.sessionDomain,
+                fetch,
+                defaultParams: { client_sdrn, redirect_uri: options.redirectUri },
+            });
+            fetch.mockImplementationOnce(async () => ({ ok: true, json: async() => ({}) }));
+            await expect(identity.hasSession()).resolves.toMatchObject({});
+            expect(fetch.mock.calls.length).toBe(1);
+            expect(fetch.mock.calls[0][0]).toMatch(/^http:\/\/id.e.com\//);
+        });
+
         test('should never cache if caching is off', async () => {
             identity._enableSessionCaching = false;
             await identity.hasSession();
@@ -387,6 +420,32 @@ describe('Identity', () => {
             await identity.hasSession();
             await identity.hasSession();
             expect(spy).toHaveBeenCalledTimes(2);
+        });
+
+        test('should return the same promise if invoked multiple times', async () => {
+            fetch.mockImplementationOnce(() => new Promise((resolve) => {
+                setTimeout(resolve({ ok: true, json: async () => ({ sp_id: 'yo' }) }), 1);
+            }));
+            const promise1 = identity.hasSession();
+            const promise2 = identity.hasSession(); // NOTE: no 'await' — we want the promise
+            expect(promise2).toBe(promise1);
+            const dummy = await promise1;
+            expect(dummy).toMatchObject({ sp_id: 'yo' });
+        });
+
+        test('should throw error if session-service returns error without 404', async () => {
+            const options = { clientId: 'foo', redirectUri: 'http://e.com', sessionDomain: 'http://id.e.com' };
+            const client_sdrn = `sdrn:schibsted:client:${options.clientId}`;
+            identity = new Identity(options);
+            identity._sessionService = new RESTClient({
+                serverUrl: options.sessionDomain,
+                fetch,
+                defaultParams: { client_sdrn, redirect_uri: options.redirectUri },
+            });
+            fetch.mockImplementationOnce(async () => ({ ok: false, status: 401, statusText: 'Unauthorized' }));
+            await expect(identity.hasSession()).rejects.toMatchObject({ message: 'HasSession failed' });
+            expect(fetch.mock.calls.length).toBe(1);
+            expect(fetch.mock.calls[0][0]).toMatch(/^http:\/\/id.e.com\//);
         });
     });
 
@@ -654,6 +713,7 @@ describe('Identity', () => {
         const safari11 = "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_13_6) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/11.1.2 Safari/605.1.15";
         const safari12 = "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_13_6) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/12.1 Safari/605.1.15";
         const safari13 = "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_13_6) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/13.1 Safari/605.1.15";
+        const chrome = 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_14_0) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/69.0.3497.100 Safari/537.36';
 
         function setUserAgent(userAgent) {
             Object.defineProperty(window.navigator, "userAgent", { configurable: true });
@@ -694,6 +754,12 @@ describe('Identity', () => {
             it('should be false for Safari 11', () => {
                 const identity = new Identity({ clientId: 'foo', redirectUri: 'http://example.com' });
                 setUserAgent(safari11);
+                expect(identity._itpModalRequired()).toBe(false);
+            });
+
+            it('should be false for Chrome', () => {
+                const identity = new Identity({ clientId: 'foo', redirectUri: 'http://example.com' });
+                setUserAgent(chrome);
                 expect(identity._itpModalRequired()).toBe(false);
             });
         });
@@ -760,7 +826,6 @@ describe('Identity', () => {
                 await expect(identity.hasSession()).rejects.toMatchObject({ message: 'HasSession failed' });
                 expect(fetch.mock.calls.length).toBe(1);
                 expect(ItpModal.mock.calls.length).toBe(0);
-                expect(identity.cache.get(LOGIN_IN_PROGRESS_KEY)).toBe(null);
             });
         });
     });

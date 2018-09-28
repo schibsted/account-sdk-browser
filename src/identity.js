@@ -7,7 +7,7 @@
 import { assert, isStr, isNonEmptyString, isObject, isUrl, isStrIn } from './validate';
 import { cloneDeep } from './object';
 import { urlMapper } from './url';
-import { ENDPOINTS } from './config';
+import { ENDPOINTS, NAMESPACE } from './config';
 import EventEmitter from 'tiny-emitter';
 import JSONPClient from './JSONPClient';
 import Cache from './cache';
@@ -21,9 +21,10 @@ import * as spidTalk from './spidTalk';
  * @typedef {object} Identity#HasSessionSuccessResponse
  * @property {boolean} result - Is the user connected to the merchant? (it means that the merchant
  * id is in the list of merchants listed of this user in the database)? Example: false
- * @property {string} userStatus - Example: 'notConnected' or 'connected'
+ * @property {string} userStatus - Example: 'notConnected' or 'connected'. Deprecated, use
+ * `Identity.isConnected()`
  * @property {string} baseDomain - Example: 'localhost'
- * @property {string} id - Example: '58eca10fdbb9f6df72c3368f'
+ * @property {string} id - Example: '58eca10fdbb9f6df72c3368f'. Obsolete
  * @property {number} userId - Example: 37162
  * @property {string} uuid - Example: 'b3b23aa7-34f2-5d02-a10e-5a3455c6ab2c'
  * @property {string} sp_id - Example: 'eyJjbGllbnRfaWQ...'
@@ -86,12 +87,13 @@ export class Identity extends EventEmitter {
      * @param {object} options
      * @param {string} options.clientId - Example: "1234567890abcdef12345678"
      * @param {string} [options.redirectUri] - Example: "https://site.com"
+     * @param {string} [options.sessionDomain] - Example: "https://id.site.com"
      * @param {string} [options.env='PRE'] - Schibsted account environment: `PRE`, `PRO` or `PRO_NO`
      * @param {function} [options.log] - A function that receives debug log information. If not set,
      * no logging will be done
      * @throws {SDKError} - If any of options are invalid
      */
-    constructor({ clientId, redirectUri, env = 'PRE', log, window = globalWindow() }) {
+    constructor({ clientId, redirectUri, sessionDomain, env = 'PRE', log, window = globalWindow() }) {
         super();
         assert(isNonEmptyString(clientId), 'clientId parameter is required');
         assert(isObject(window), 'The reference to window is missing');
@@ -105,6 +107,11 @@ export class Identity extends EventEmitter {
         this.redirectUri = redirectUri;
         this.env = env;
         this.log = log;
+
+        if (sessionDomain) {
+            assert(isUrl(sessionDomain), 'sessionDomain parameter is not a valid URL');
+            this._setSessionServiceUrl(sessionDomain);
+        }
 
         // Internal hack: set to false to always refresh from hassession
         this._enableSessionCaching = true;
@@ -164,6 +171,22 @@ export class Identity extends EventEmitter {
             serverUrl: urlMapper(url, ENDPOINTS.BFF),
             log: this.log,
             defaultParams: { client_id: this.clientId, redirect_uri: this.redirectUri },
+        });
+    }
+
+    /**
+     * Set session-service domain
+     * @private
+     * @param {string} domain - real URL — (**not** 'PRE' style env key)
+     * @returns {void}
+     */
+    _setSessionServiceUrl(domain) {
+        assert(isStr(domain), `domain parameter is invalid: ${domain}`);
+        const client_sdrn = `sdrn:${NAMESPACE[this.env]}:client:${this.clientId}`;
+        this._sessionService = new RESTClient({
+            serverUrl: domain,
+            log: this.log,
+            defaultParams: { client_sdrn, redirect_uri: this.redirectUri },
         });
     }
 
@@ -366,62 +389,92 @@ export class Identity extends EventEmitter {
      * @fires Identity#sessionInit
      * @fires Identity#statusChange
      * @fires Identity#error
-     * @return {Identity#HasSessionSuccessResponse|Identity#HasSessionFailureResponse}
+     * @return {Promise<Identity#HasSessionSuccessResponse|Identity#HasSessionFailureResponse>}
      */
-    async hasSession(autologin = true) {
-        const loginInProgress = this.cache.get(LOGIN_IN_PROGRESS_KEY) !== null;
-        this.cache.delete(LOGIN_IN_PROGRESS_KEY);
+    hasSession(autologin = true) {
+        if (this._hasSessionInProgress) {
+            return this._hasSessionInProgress;
+        }
+        const promiseFn = async (resolve, reject) => {
+            const postProcess = (sessionData) => {
+                if (sessionData.error) {
+                    throw new SDKError('HasSession endpoint returned an error', sessionData.error);
+                }
+                this._maybeSetVarnishCookie(sessionData);
+                this._emitSessionEvent(this._session, sessionData);
+            };
 
-        const postProcess = (sessionData) => {
-            if (sessionData.error) {
-                throw new SDKError('HasSession endpoint returned an error', sessionData.error);
+            if (typeof autologin !== 'boolean') {
+                const [type, value] = inspect(autologin);
+                reject(new SDKError(`Parameter 'autologin' must be boolean, was: "${type}:${value}"`));
+                return;
             }
-            this._maybeSetVarnishCookie(sessionData);
-            this._emitSessionEvent(this._session, sessionData);
+
+            try {
+                if (this._enableSessionCaching) {
+                    // Try to resolve from cache (it has a TTL)
+                    const cachedData = this.cache.get(HAS_SESSION_CACHE_KEY);
+                    if (cachedData) {
+                        postProcess(cachedData);
+                        resolve(cachedData);
+                        return;
+                    }
+                }
+
+                let data = null;
+                if (this._sessionService) {
+                    try {
+                        data = await this._sessionService.get('/session');
+                    } catch (err) {
+                        // The session-service returns 400 if no session-cookie is sent in the
+                        // request. This will be the case if the user hasn't logged in since the
+                        // site switched to using the session-service. If the request contains a
+                        // session-cookie but no session is found (return code will be 404), then we
+                        // *should* throw an exception and *not* fall through to spid-hassession
+                        if (err.code !== 400) {
+                            throw err;
+                        }
+                        data = null;
+                    }
+                }
+                const autoLoginConverted = autologin ? 1 : 0;
+
+                if (!data && !this._itpMode) {
+                    data = await this._hasSession.get('rpc/hasSession.js', { autologin: autoLoginConverted });
+                }
+                if (this._itpMode || (isObject(data.error) && data.error.type === 'LoginException')) {
+                    data = await this._spid.get('ajax/hasSession.js', { autologin: autoLoginConverted });
+                }
+
+                const shouldShowItpModal = this._itpModalRequired() && !this._itpMode &&
+                    isObject(data.error) && data.error.type === 'UserException' &&
+                    this.cache.get(LOGIN_IN_PROGRESS_KEY) !== null;
+                if (shouldShowItpModal) {
+                    this.cache.delete(LOGIN_IN_PROGRESS_KEY);
+                    const modal = new ItpModal(this._spid, this.clientId, this.redirectUri, this.env);
+                    data = await modal.show();
+                }
+                if (this._enableSessionCaching) {
+                    const expiresIn = 1000 * (data.expiresIn || 300);
+                    this.cache.set(HAS_SESSION_CACHE_KEY, data, expiresIn);
+                }
+                postProcess(data);
+                this._session = data;
+                resolve(data);
+            } catch (err) {
+                this.emit('error', err);
+                reject(new SDKError('HasSession failed', err));
+            }
         };
-
-        if (typeof autologin !== 'boolean') {
-            const [type, value] = inspect(autologin);
-            throw new SDKError(`Parameter 'autologin' must be boolean, was: "${type}:${value}"`);
-        }
-        if (this._enableSessionCaching) {
-            // Try to resolve from cache (it has a TTL)
-            const cachedData = this.cache.get(HAS_SESSION_CACHE_KEY);
-            if (cachedData) {
-                postProcess(cachedData);
-                return cachedData;
-            }
-        }
-
-        try {
-            const autoLoginConverted = autologin ? 1 : 0;
-            let data = null;
-            if (!this._itpMode) {
-                data = await this._hasSession.get('rpc/hasSession.js', { autologin: autoLoginConverted });
-            }
-            if (this._itpMode || (isObject(data.error) && data.error.type === 'LoginException')) {
-                data = await this._spid.get('ajax/hasSession.js', { autologin: autoLoginConverted });
-            }
-
-            const shouldShowItpModal = this._itpModalRequired() && !this._itpMode &&
-                isObject(data.error) && data.error.type === 'UserException' &&
-                loginInProgress;
-            if (shouldShowItpModal) {
-                const modal = new ItpModal(this._spid, this.clientId, this.redirectUri, this.env);
-                data = await modal.show();
-            }
-
-            if (this._enableSessionCaching) {
-                const expiresIn = 1000 * (data.expiresIn || 300);
-                this.cache.set(HAS_SESSION_CACHE_KEY, data, expiresIn);
-            }
-            postProcess(data);
-            this._session = data;
-            return data;
-        } catch (err) {
-            this.emit('error', err);
-            throw new SDKError('HasSession failed', err);
-        }
+        const promise = new Promise(promiseFn);
+        this._hasSessionInProgress = promise.then(v => {
+            this._hasSessionInProgress = null;
+            return v;
+        }, e => {
+            this._hasSessionInProgress = null;
+            throw e;
+        });
+        return this._hasSessionInProgress;
     }
 
     /**
@@ -555,7 +608,7 @@ export class Identity extends EventEmitter {
      * @param {boolean} [options.preferPopup=false] - Should we try to open a popup window?
      * @param {boolean} [options.newFlow=true] - Should we try the new GDPR-safe flow or the
      * legacy/stable SPiD flow?
-     * @param {string} [options.Hint=''] - user email hint
+     * @param {string} [options.loginHint=''] - user email hint
      * @param {string} [options.tag=''] - Pulse tag
      * @param {string} [options.teaser=''] - Teaser slug. Teaser with given slug will be displayed
      * in place of default teaser
