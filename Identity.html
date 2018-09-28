@@ -70,7 +70,7 @@
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="identity.js.html">identity.js</a>, <a href="identity.js.html#line84">line 84</a>
+        <a href="identity.js.html">identity.js</a>, <a href="identity.js.html#line85">line 85</a>
     </li></ul></dd>
     
 
@@ -262,6 +262,43 @@
 
         <tr>
             
+                <td class="name"><code>sessionDomain</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">string</span>
+
+
+            
+            </td>
+
+            
+                <td class="attributes">
+                
+                    &lt;optional><br>
+                
+
+                
+
+                
+                </td>
+            
+
+            
+                <td class="default">
+                
+                </td>
+            
+
+            <td class="description last"><p>Example: &quot;https://id.site.com&quot;</p></td>
+        </tr>
+
+    
+
+        <tr>
+            
                 <td class="name"><code>env</code></td>
             
 
@@ -396,7 +433,7 @@ no logging will be done</p></td>
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="identity.js.html">identity.js</a>, <a href="identity.js.html#line272">line 272</a>
+        <a href="identity.js.html">identity.js</a>, <a href="identity.js.html#line295">line 295</a>
     </li></ul></dd>
     
 
@@ -557,7 +594,7 @@ expires. The default is to use the same time that hasSession responses are cache
 
     
 
-    <h4 class="name" id="hasSession"><span class="type-signature">(async) </span>hasSession<span class="signature">(autologin<span class="signature-attributes">opt</span>)</span><span class="type-signature"> &rarr; {<a href="Identity.html#HasSessionSuccessResponse">Identity#HasSessionSuccessResponse</a>|<a href="Identity.html#HasSessionFailureResponse">Identity#HasSessionFailureResponse</a>}</span></h4>
+    <h4 class="name" id="hasSession"><span class="type-signature"></span>hasSession<span class="signature">(autologin<span class="signature-attributes">opt</span>)</span><span class="type-signature"> &rarr; {Promise.&lt;(<a href="Identity.html#HasSessionSuccessResponse">Identity#HasSessionSuccessResponse</a>|<a href="Identity.html#HasSessionFailureResponse">Identity#HasSessionFailureResponse</a>)>}</span></h4>
 
     
     <p class="summary"><p>Queries the hassession endpoint and returns information about the status of the user</p></p>
@@ -571,7 +608,7 @@ expires. The default is to use the same time that hasSession responses are cache
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="identity.js.html">identity.js</a>, <a href="identity.js.html#line371">line 371</a>
+        <a href="identity.js.html">identity.js</a>, <a href="identity.js.html#line394">line 394</a>
     </li></ul></dd>
     
 
@@ -771,10 +808,7 @@ if, say, the user is not logged in)</li>
     </dt>
     <dd>
         
-<span class="param-type"><a href="Identity.html#HasSessionSuccessResponse">Identity#HasSessionSuccessResponse</a></span>
-|
-
-<span class="param-type"><a href="Identity.html#HasSessionFailureResponse">Identity#HasSessionFailureResponse</a></span>
+<span class="param-type">Promise.&lt;(<a href="Identity.html#HasSessionSuccessResponse">Identity#HasSessionSuccessResponse</a>|<a href="Identity.html#HasSessionFailureResponse">Identity#HasSessionFailureResponse</a>)></span>
 
 
     </dd>
@@ -802,7 +836,7 @@ if, say, the user is not logged in)</li>
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="identity.js.html">identity.js</a>, <a href="identity.js.html#line433">line 433</a>
+        <a href="identity.js.html">identity.js</a>, <a href="identity.js.html#line486">line 486</a>
     </li></ul></dd>
     
 
@@ -907,7 +941,7 @@ effect that it might perform an auto-login on the user</p>
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="identity.js.html">identity.js</a>, <a href="identity.js.html#line451">line 451</a>
+        <a href="identity.js.html">identity.js</a>, <a href="identity.js.html#line504">line 504</a>
     </li></ul></dd>
     
 
@@ -1012,7 +1046,7 @@ effect that it might perform an auto-login on the user</p>
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="identity.js.html">identity.js</a>, <a href="identity.js.html#line470">line 470</a>
+        <a href="identity.js.html">identity.js</a>, <a href="identity.js.html#line523">line 523</a>
     </li></ul></dd>
     
 
@@ -1178,7 +1212,7 @@ Schibsted components depending on the numeric <code>userId</code> — it would b
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="identity.js.html">identity.js</a>, <a href="identity.js.html#line490">line 490</a>
+        <a href="identity.js.html">identity.js</a>, <a href="identity.js.html#line543">line 543</a>
     </li></ul></dd>
     
 
@@ -1321,7 +1355,7 @@ Schibsted components depending on the numeric <code>userId</code> — it would b
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="identity.js.html">identity.js</a>, <a href="identity.js.html#line510">line 510</a>
+        <a href="identity.js.html">identity.js</a>, <a href="identity.js.html#line563">line 563</a>
     </li></ul></dd>
     
 
@@ -1459,7 +1493,7 @@ effect that it might perform an auto-login on the user</p>
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="identity.js.html">identity.js</a>, <a href="identity.js.html#line525">line 525</a>
+        <a href="identity.js.html">identity.js</a>, <a href="identity.js.html#line578">line 578</a>
     </li></ul></dd>
     
 
@@ -1580,7 +1614,7 @@ effect that it might perform an auto-login on the user</p>
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="identity.js.html">identity.js</a>, <a href="identity.js.html#line570">line 570</a>
+        <a href="identity.js.html">identity.js</a>, <a href="identity.js.html#line623">line 623</a>
     </li></ul></dd>
     
 
@@ -1954,7 +1988,7 @@ legacy/stable SPiD flow?</p></td>
 
         <tr>
             
-                <td class="name"><code>Hint</code></td>
+                <td class="name"><code>loginHint</code></td>
             
 
             <td class="type">
@@ -2225,7 +2259,7 @@ New flows supports nb_NO, fi_FI, sv_SE, en_US</p></td>
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="identity.js.html">identity.js</a>, <a href="identity.js.html#line607">line 607</a>
+        <a href="identity.js.html">identity.js</a>, <a href="identity.js.html#line660">line 660</a>
     </li></ul></dd>
     
 
@@ -2373,7 +2407,7 @@ account</p></td>
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="identity.js.html">identity.js</a>, <a href="identity.js.html#line640">line 640</a>
+        <a href="identity.js.html">identity.js</a>, <a href="identity.js.html#line693">line 693</a>
     </li></ul></dd>
     
 
@@ -2964,7 +2998,7 @@ New flows supports nb_NO, fi_FI, sv_SE, en_US</p></td>
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="identity.js.html">identity.js</a>, <a href="identity.js.html#line706">line 706</a>
+        <a href="identity.js.html">identity.js</a>, <a href="identity.js.html#line759">line 759</a>
     </li></ul></dd>
     
 
@@ -3139,7 +3173,7 @@ New flows supports nb_NO, fi_FI, sv_SE, en_US</p></td>
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="identity.js.html">identity.js</a>, <a href="identity.js.html#line720">line 720</a>
+        <a href="identity.js.html">identity.js</a>, <a href="identity.js.html#line773">line 773</a>
     </li></ul></dd>
     
 
@@ -3310,7 +3344,7 @@ New flows supports nb_NO, fi_FI, sv_SE, en_US</p></td>
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="identity.js.html">identity.js</a>, <a href="identity.js.html#line732">line 732</a>
+        <a href="identity.js.html">identity.js</a>, <a href="identity.js.html#line785">line 785</a>
     </li></ul></dd>
     
 
@@ -3481,7 +3515,7 @@ New flows supports nb_NO, fi_FI, sv_SE, en_US</p></td>
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="identity.js.html">identity.js</a>, <a href="identity.js.html#line745">line 745</a>
+        <a href="identity.js.html">identity.js</a>, <a href="identity.js.html#line798">line 798</a>
     </li></ul></dd>
     
 
@@ -3665,7 +3699,7 @@ New flows supports nb_NO, fi_FI, sv_SE, en_US</p></td>
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="identity.js.html">identity.js</a>, <a href="identity.js.html#line759">line 759</a>
+        <a href="identity.js.html">identity.js</a>, <a href="identity.js.html#line812">line 812</a>
     </li></ul></dd>
     
 
@@ -3849,7 +3883,7 @@ New flows supports nb_NO, fi_FI, sv_SE, en_US</p></td>
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="identity.js.html">identity.js</a>, <a href="identity.js.html#line773">line 773</a>
+        <a href="identity.js.html">identity.js</a>, <a href="identity.js.html#line826">line 826</a>
     </li></ul></dd>
     
 
@@ -4033,7 +4067,7 @@ New flows supports nb_NO, fi_FI, sv_SE, en_US</p></td>
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="identity.js.html">identity.js</a>, <a href="identity.js.html#line792">line 792</a>
+        <a href="identity.js.html">identity.js</a>, <a href="identity.js.html#line845">line 845</a>
     </li></ul></dd>
     
 
@@ -4140,7 +4174,7 @@ method.</p>
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="identity.js.html">identity.js</a>, <a href="identity.js.html#line808">line 808</a>
+        <a href="identity.js.html">identity.js</a>, <a href="identity.js.html#line861">line 861</a>
     </li></ul></dd>
     
 
@@ -4350,7 +4384,8 @@ id is in the list of merchants listed of this user in the database)? Example: fa
 
             
 
-            <td class="description last"><p>Example: 'notConnected' or 'connected'</p></td>
+            <td class="description last"><p>Example: 'notConnected' or 'connected'. Deprecated, use
+<code>Identity.isConnected()</code></p></td>
         </tr>
 
     
@@ -4396,7 +4431,7 @@ id is in the list of merchants listed of this user in the database)? Example: fa
 
             
 
-            <td class="description last"><p>Example: '58eca10fdbb9f6df72c3368f'</p></td>
+            <td class="description last"><p>Example: '58eca10fdbb9f6df72c3368f'. Obsolete</p></td>
         </tr>
 
     
@@ -4763,7 +4798,7 @@ http://techdocs.spid.no/sdks/js/response-signature-and-validation/</p></td>
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="identity.js.html">identity.js</a>, <a href="identity.js.html#line51">line 51</a>
+        <a href="identity.js.html">identity.js</a>, <a href="identity.js.html#line52">line 52</a>
     </li></ul></dd>
     
 
@@ -5128,7 +5163,7 @@ http://techdocs.spid.no/sdks/js/response-signature-and-validation/</p></td>
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="identity.js.html">identity.js</a>, <a href="identity.js.html#line46">line 46</a>
+        <a href="identity.js.html">identity.js</a>, <a href="identity.js.html#line47">line 47</a>
     </li></ul></dd>
     
 
@@ -5212,7 +5247,7 @@ http://techdocs.spid.no/sdks/js/response-signature-and-validation/</p></td>
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="identity.js.html">identity.js</a>, <a href="identity.js.html#line193">line 193</a>
+        <a href="identity.js.html">identity.js</a>, <a href="identity.js.html#line216">line 216</a>
     </li></ul></dd>
     
 
@@ -5297,7 +5332,7 @@ http://techdocs.spid.no/sdks/js/response-signature-and-validation/</p></td>
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="identity.js.html">identity.js</a>, <a href="identity.js.html#line201">line 201</a>
+        <a href="identity.js.html">identity.js</a>, <a href="identity.js.html#line224">line 224</a>
     </li></ul></dd>
     
 
@@ -5381,7 +5416,7 @@ http://techdocs.spid.no/sdks/js/response-signature-and-validation/</p></td>
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="identity.js.html">identity.js</a>, <a href="identity.js.html#line208">line 208</a>
+        <a href="identity.js.html">identity.js</a>, <a href="identity.js.html#line231">line 231</a>
     </li></ul></dd>
     
 
@@ -5467,7 +5502,7 @@ this invocation, and the userId has now changed</p>
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="identity.js.html">identity.js</a>, <a href="identity.js.html#line218">line 218</a>
+        <a href="identity.js.html">identity.js</a>, <a href="identity.js.html#line241">line 241</a>
     </li></ul></dd>
     
 
@@ -5553,7 +5588,7 @@ In practice, this means the event is emitted a lot</p>
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="identity.js.html">identity.js</a>, <a href="identity.js.html#line226">line 226</a>
+        <a href="identity.js.html">identity.js</a>, <a href="identity.js.html#line249">line 249</a>
     </li></ul></dd>
     
 
@@ -5638,7 +5673,7 @@ no logged-in user neither before nor after <a href="Identity.html#hasSession"><c
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="identity.js.html">identity.js</a>, <a href="identity.js.html#line233">line 233</a>
+        <a href="identity.js.html">identity.js</a>, <a href="identity.js.html#line256">line 256</a>
     </li></ul></dd>
     
 
@@ -5722,7 +5757,7 @@ no logged-in user neither before nor after <a href="Identity.html#hasSession"><c
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="identity.js.html">identity.js</a>, <a href="identity.js.html#line241">line 241</a>
+        <a href="identity.js.html">identity.js</a>, <a href="identity.js.html#line264">line 264</a>
     </li></ul></dd>
     
 
@@ -5804,7 +5839,7 @@ no logged-in user neither before nor after <a href="Identity.html#hasSession"><c
 <br class="clear">
 
 <footer>
-    Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.5.5</a> on Thu Sep 20 2018 10:44:35 GMT+0000 (UTC) using the <a href="https://github.com/clenemt/docdash">docdash</a> theme.
+    Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.5.5</a> on Fri Sep 28 2018 12:04:14 GMT+0000 (UTC) using the <a href="https://github.com/clenemt/docdash">docdash</a> theme.
 </footer>
 
 <script>prettyPrint();</script>

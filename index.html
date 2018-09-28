@@ -136,6 +136,16 @@ for some, it's quite important; If you have ever asked our support staff to disa
 endpoint accesses, there is a chance that you'll encounter problems. For instance, if you've set
 <code>NO ACCESS</code> on the <code>POST /signup</code> endpoint, <strong>users will not be able to sign up to your site</strong>
 using the new flows</li>
+<li>If you use our session-service, there are certain changes in the response from the session endpoint.<ul>
+<li>The <code>userStatus</code> field makes no sense in the session-service world, since it operates &quot;per-site&quot;
+(there is one id.site.example domain for each site, so being logged in and connected for that
+site means the same thing. Also, there is the <code>Identity.isConnected</code> function that's still kept
+in case people prefer to keep the same logic with and without the session-service).</li>
+<li>The <code>id</code> field (the one returning a MongoDb identifier like <code>abcdef0123456789abcdd00d</code>) has
+finally been removed. It's been deprecated for a long time. The numeric <code>userId</code> (legacy) and
+<code>uuid</code> fields are still present.</li>
+</ul>
+</li>
 </ul>
 <p><a name="polyfills-yo"></a></p>
 <h4>Polyfills required for older browsers</h4><p>This SDK uses modern JavaScript features. If you support older browsers, you should use a tool like
@@ -156,7 +166,47 @@ using <code>console.log</code> as a parameter to any SDK function that supports 
 to polyfill <code>console</code> and <code>console.log</code> (yeah, it's baffling, but a <a href="https://stackoverflow.com/questions/22315167/in-ie11-how-to-use-console-log">known
 issue</a> in IE). We added
 them from polyfill.io like this:</p>
-<pre class="prettyprint source"><code>&lt;script src=&quot;https://cdn.polyfill.io/v2/polyfill.js?features=Promise,URL,Object.entries,fetch,Number.isFinite,Number.isInteger,console,console.log&quot;>&lt;/script></code></pre><p><a name="example-project"></a></p>
+<pre class="prettyprint source"><code>&lt;script src=&quot;https://cdn.polyfill.io/v2/polyfill.js?features=Promise,URL,Object.entries,fetch,Number.isFinite,Number.isInteger,console,console.log&quot;>&lt;/script></code></pre><p><a name="itp-yo"></a></p>
+<h2>Notes on Apple Intelligent Tracking Prevention (ITP)</h2><h4>or.. how I learned to stop worrying and ❤️ the Schibsted account session service</h4><p>Right, as of Safari 12, we can't rely on making requests from a site domain to the Schibsted account
+domain. Safari 12 will possibly partition cookies in such requests in an attempt to protect the
+user's privacy. While this is good for end-users, it presented a real problem for Schibsted account,
+since our technique for deciding whether a user is logged in, is to send a request in precisely this
+manner.</p>
+<p>There are two ways to deal with this in Safari:</p>
+<ol>
+<li>You can continue with 3rd party requests, but this requires an iframe on that 3rd party domain
+and it also requires user input in said iframe</li>
+<li>You can re-design the system to not use 3rd party requests anymore</li>
+</ol>
+<p>We've tried to support both. For the 1st strategy, simply continue using the SDK like before. Be
+sure to call <code>Identity.login</code> when authenticating, and <code>Identity.hasSession</code> when coming back to
+your site from Schibsted account. This should pop up our so-called &quot;ITP Dialog&quot;. This is the iframe
+mentioned in point 1 above, and clicking the Continue button in that frame will ensure the
+<code>hasSession</code> call running inside the iframe is successful. The benefit of this strategy is it
+requires very little work from you. The drawback is that every time you come back from
+authentication, the user will have to see this &quot;ITP dialog&quot;.</p>
+<p>So to work with strategy 2, we have re-designed our platform and introduced what we call the
+session-service. If your site lives on site.example, you should assign a sub-domain for use with the
+session-service (we propose id.site.example for production and id-pre.site.example for staging —
+talk to our Customer Success team regarding how to get this set up). The goal is to have
+https://id.site.example be a DNS name resolving to our session-service, since this enables us to
+place a cookie on that domain that indicates that the user is logged in.</p>
+<p>When the domain is set up, your client needs to be modified by our Customer Success team to enable
+using this feature (this is done by them setting <code>session_service_domain = https://id.site.example</code>
+in SysAdmin).</p>
+<p>Finally, and this is where you, the user of account-sdk-browser need a change; When creating an
+instance of <code>Identity</code> or <code>Monetization</code>, include the property <code>sessionDomain:
+'https://id.site.example</code> in the constructor'.</p>
+<p>So to sum up:</p>
+<ol>
+<li>Prepare a subdomain id.site.example (optionally id-pre.site.example for staging)</li>
+<li>Enable the session-service for the client you use on your site</li>
+<li>Add the <code>sessionDomain</code> property to the <code>Identity</code> or <code>Monetization</code> constructors</li>
+</ol>
+<p>1 and 2 requires communication with us, and 3 is done by you at a time of your choosing. The benefit
+of this strategy is that we should never need to show any dialog or popup to the user, so it reduces
+friction. The drawback is the work mentioned above.</p>
+<p><a name="example-project"></a></p>
 <h2>Example project</h2><p>There is an example that demonstrates how the SDK can be used. The code is
 <a href="https://github.com/schibsted/sdk-example">here</a>, and you can see it live
 <a href="https://pro.sdk-example.com">here</a>. You have a use-case that we haven't thought of? Ask us to add
@@ -376,7 +426,7 @@ License.</p></article>
 <br class="clear">
 
 <footer>
-    Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.5.5</a> on Thu Sep 20 2018 10:44:35 GMT+0000 (UTC) using the <a href="https://github.com/clenemt/docdash">docdash</a> theme.
+    Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.5.5</a> on Fri Sep 28 2018 12:04:14 GMT+0000 (UTC) using the <a href="https://github.com/clenemt/docdash">docdash</a> theme.
 </footer>
 
 <script>prettyPrint();</script>

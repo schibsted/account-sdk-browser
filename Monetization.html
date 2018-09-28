@@ -70,7 +70,7 @@
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="monetization.js.html">monetization.js</a>, <a href="monetization.js.html#line21">line 21</a>
+        <a href="monetization.js.html">monetization.js</a>, <a href="monetization.js.html#line22">line 22</a>
     </li></ul></dd>
     
 
@@ -298,6 +298,43 @@
         </tr>
 
     
+
+        <tr>
+            
+                <td class="name"><code>sessionDomain</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">string</span>
+
+
+            
+            </td>
+
+            
+                <td class="attributes">
+                
+                    &lt;optional><br>
+                
+
+                
+
+                
+                </td>
+            
+
+            
+                <td class="default">
+                
+                </td>
+            
+
+            <td class="description last"><p>Example: &quot;https://id.site.com&quot;</p></td>
+        </tr>
+
+    
     </tbody>
 </table>
 
@@ -346,7 +383,7 @@
 
     
 
-    <h4 class="name" id="hasProduct"><span class="type-signature">(async) </span>hasProduct<span class="signature">(productId, spId)</span><span class="type-signature"> &rarr; {Object|null}</span></h4>
+    <h4 class="name" id="hasProduct"><span class="type-signature">(async) </span>hasProduct<span class="signature">(productId, spId<span class="signature-attributes">opt</span>)</span><span class="type-signature"> &rarr; {Object|null}</span></h4>
 
     
 
@@ -358,7 +395,7 @@
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="monetization.js.html">monetization.js</a>, <a href="monetization.js.html#line62">line 62</a>
+        <a href="monetization.js.html">monetization.js</a>, <a href="monetization.js.html#line88">line 88</a>
     </li></ul></dd>
     
 
@@ -424,6 +461,8 @@
         <th>Type</th>
 
         
+        <th>Attributes</th>
+        
 
         
 
@@ -449,6 +488,14 @@
             </td>
 
             
+                <td class="attributes">
+                
+
+                
+
+                
+                </td>
+            
 
             
 
@@ -472,10 +519,22 @@
             </td>
 
             
+                <td class="attributes">
+                
+                    &lt;optional><br>
+                
+
+                
+
+                
+                </td>
+            
 
             
 
-            <td class="description last"><p>The spId that was obtained from <a href="Identity.html#hasSession"><code>Identity#hasSession</code></a></p></td>
+            <td class="description last"><p>Only required if not using the session-service (i.e. only required
+if not setting <code>sessionDomain</code> in the constructor). The spId that was obtained from
+<a href="Identity.html#hasSession"><code>Identity#hasSession</code></a></p></td>
         </tr>
 
     
@@ -528,7 +587,7 @@ doesn't have access to the given product)</p>
 
     
 
-    <h4 class="name" id="hasSubscription"><span class="type-signature">(async) </span>hasSubscription<span class="signature">(subscriptionId, spId)</span><span class="type-signature"> &rarr; {Object|null}</span></h4>
+    <h4 class="name" id="hasSubscription"><span class="type-signature">(async) </span>hasSubscription<span class="signature">(subscriptionId, spId<span class="signature-attributes">opt</span>)</span><span class="type-signature"> &rarr; {Object|null}</span></h4>
 
     
 
@@ -540,7 +599,7 @@ doesn't have access to the given product)</p>
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="monetization.js.html">monetization.js</a>, <a href="monetization.js.html#line89">line 89</a>
+        <a href="monetization.js.html">monetization.js</a>, <a href="monetization.js.html#line123">line 123</a>
     </li></ul></dd>
     
 
@@ -606,6 +665,8 @@ doesn't have access to the given product)</p>
         <th>Type</th>
 
         
+        <th>Attributes</th>
+        
 
         
 
@@ -631,6 +692,14 @@ doesn't have access to the given product)</p>
             </td>
 
             
+                <td class="attributes">
+                
+
+                
+
+                
+                </td>
+            
 
             
 
@@ -654,10 +723,22 @@ doesn't have access to the given product)</p>
             </td>
 
             
+                <td class="attributes">
+                
+                    &lt;optional><br>
+                
+
+                
+
+                
+                </td>
+            
 
             
 
-            <td class="description last"><p>The spid that was obtained from <a href="Identity.html#hasSession"><code>Identity#hasSession</code></a></p></td>
+            <td class="description last"><p>Only required if not using the session-service (i.e. only required
+if not setting <code>sessionDomain</code> in the constructor). The spId that was obtained from
+<a href="Identity.html#hasSession"><code>Identity#hasSession</code></a></p></td>
         </tr>
 
     
@@ -722,7 +803,7 @@ doesn't have access to the given subscription)</p>
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="monetization.js.html">monetization.js</a>, <a href="monetization.js.html#line114">line 114</a>
+        <a href="monetization.js.html">monetization.js</a>, <a href="monetization.js.html#line154">line 154</a>
     </li></ul></dd>
     
 
@@ -899,7 +980,7 @@ doesn't have access to the given subscription)</p>
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="monetization.js.html">monetization.js</a>, <a href="monetization.js.html#line124">line 124</a>
+        <a href="monetization.js.html">monetization.js</a>, <a href="monetization.js.html#line164">line 164</a>
     </li></ul></dd>
     
 
@@ -1077,7 +1158,7 @@ doesn't have access to the given subscription)</p>
 <br class="clear">
 
 <footer>
-    Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.5.5</a> on Thu Sep 20 2018 10:44:35 GMT+0000 (UTC) using the <a href="https://github.com/clenemt/docdash">docdash</a> theme.
+    Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.5.5</a> on Fri Sep 28 2018 12:04:14 GMT+0000 (UTC) using the <a href="https://github.com/clenemt/docdash">docdash</a> theme.
 </footer>
 
 <script>prettyPrint();</script>
