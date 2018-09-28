@@ -1,5 +1,21 @@
 # Changelog
 
+## v3.0.0-rc.19 (2018-09-28)
+
+### Breaking changes
+
+* If you are using the session-service, calls to `Identity.hasSession` will not return the obsolete
+  `userStatus` or `id` fields (the numeric `userId` and the `uuid` fields are still returned).
+* Calling `Identity.hasSession` multiple times will now cause only one network call. While this call
+  is running, other calls to `Identity.hasSession` will simply wait for that call to complete, and
+  then they will all resolve to the same result
+
+### New features
+
+* We can communicate with the session-service instead of Schibsted account in `Identity.hasSession`,
+  `Monetization.hasProduct` and `Monetization.hasSubscription` (quick howto; to opt into this, add a
+  param `sessionDomain: 'https://id.site.example'` to the constructor for Identity and Monetization)
+
 ## v3.0.0-rc.18 (2018-09-18 — second one today, yay 🎉)
 
 ### Breaking changes
