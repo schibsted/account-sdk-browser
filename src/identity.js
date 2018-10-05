@@ -6,7 +6,7 @@
 
 import { assert, isStr, isNonEmptyString, isObject, isUrl, isStrIn } from './validate';
 import { cloneDeep } from './object';
-import { urlMapper } from './url';
+import { urlMapper, getTopDomain } from './url';
 import { ENDPOINTS, NAMESPACE } from './config';
 import EventEmitter from 'tiny-emitter';
 import JSONPClient from './JSONPClient';
@@ -321,7 +321,7 @@ export class Identity extends EventEmitter {
         // If the domain is missing or of the wrong type, we'll use document.domain
         const domain = (typeof sessionData.baseDomain === 'string')
             ? sessionData.baseDomain
-            : (document.domain || '');
+            : (getTopDomain(document.domain) || '');
         const cookie = [
             `SP_ID=${sessionData.sp_id}`,
             `expires=${date.toUTCString()}`,
@@ -350,7 +350,7 @@ export class Identity extends EventEmitter {
     _clearVarnishCookie() {
         const domain = (typeof this._session && this._session.baseDomain === 'string')
             ? this._session.baseDomain
-            : (document.domain || '');
+            : (getTopDomain(document.domain) || '');
         document.cookie = `SP_ID=nothing; expires=Thu, 01 Jan 1970 00:00:00 GMT; path=/; domain=.${domain}`;
     }
 
