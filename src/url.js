@@ -32,6 +32,6 @@ export function urlMapper(url, urlMap) {
  * @return {string} The top domain for ex. vg.no
  */
 export function getTopDomain(domain) {
-    assert(isNonEmptyString(domain), `"domain" param must be a non empty string: ${typeof domain}`);
+    if (!domain) return;
     return domain.split('.').slice(-2).join('.');
 }
