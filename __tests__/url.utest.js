@@ -30,7 +30,7 @@ describe('url', () => {
             })).toThrow(/Bad URL given: 'BAD_KEY'/);
         });
     });
-    
+
     describe('getTopDomain()', () => {
 
         test('remove www. from www.vg.no', () => {
@@ -49,12 +49,13 @@ describe('url', () => {
             expect(getTopDomain('vg.no')).toBe('vg.no');
         });
         
-        test('if domain param is empty string, return undefined', () => {
-            expect(getTopDomain('')).toBe(undefined);
-        });
-        
-        test('if domain param is undefined, return undefined', () => {
-            expect(getTopDomain(undefined)).toBe(undefined);
+        test('if domain param is falsy, return null', () => {
+            expect(getTopDomain('')).toBe(null);
+            expect(getTopDomain(undefined)).toBe(null);
+            expect(getTopDomain(false)).toBe(null);
+            expect(getTopDomain(0)).toBe(null);
+            expect(getTopDomain(null)).toBe(null);
+            expect(getTopDomain(NaN)).toBe(null);
         });
     });
 
