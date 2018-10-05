@@ -49,9 +49,12 @@ describe('url', () => {
             expect(getTopDomain('vg.no')).toBe('vg.no');
         });
         
-        test('if domain param is empty, fail', () => {
-            expect(getTopDomain('vg.no'))
-                .toThrow(/non empty string/);
+        test('if domain param is empty string, return undefined', () => {
+            expect(getTopDomain('')).toBe(undefined);
+        });
+        
+        test('if domain param is undefined, return undefined', () => {
+            expect(getTopDomain(undefined)).toBe(undefined);
         });
     });
 
