@@ -33,5 +33,5 @@ export function urlMapper(url, urlMap) {
  */
 export function getTopDomain(domain) {
     assert(isNonEmptyString(domain), `"domain" param must be a non empty string: ${typeof domain}`);
-    return domain.split(".").slice(-2).join(".");
+    return domain.split('.').slice(-2).join('.');
 }
