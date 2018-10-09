@@ -28,7 +28,6 @@ export function urlMapper(url, urlMap) {
  * A simple method to extract top domain from a domain string
  * @memberof core
  * @param {string} domain - A domain like www.vg.no
- * @throws {SDKError} - If the url is not a string or is an empty string
  * @return {string} The top domain, for ex. vg.no
  */
 export function getTopDomain(domain) {

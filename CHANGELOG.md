@@ -1,5 +1,13 @@
 # Changelog
 
+## v3.0.0-rc.20 (2018-10-09)
+
+### Fixes
+
+* Setting a Varnish cookie (the `SP_ID` cookie) will now be done with a top-level domain as the
+  domain value. So if done from some.sub.site.example, we will use `domain=site.example`. Thanks to
+  @olekenneth for fixing it
+
 ## v3.0.0-rc.19 (2018-09-28)
 
 ### Breaking changes
