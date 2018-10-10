@@ -80,16 +80,19 @@ export class Monetization extends EventEmitter {
     /**
      * Checks if the user has access to a particular product
      * @param {string} productId
-     * @param {string} [spId] - Only required if not using the session-service (i.e. only required
-     * if not setting `sessionDomain` in the constructor). The spId that was obtained from
-     * {@link Identity#hasSession}
+     * @param {string} [userIdentifier] - If you are using the session-service (i.e. setting
+     * `sessionDomain` in the constructor), you should pass the `uuid` here (i.e. the result of
+     * calling {@link Identity#getUserUuid}). The value will in this case be used as part of a cache
+     * key, meaning that if a user logs out, and another user logs in, we will correctly refresh the
+     * cached value. If not using the session-service, you **must** pass a value here, and that
+     * value should be the spId that was obtained from {@link Identity#hasSession}
      * @throws {SDKError} - If a network call fails in any way (this will happen if, say, the user
      * is not logged in)
      * @returns {Object|null} The data object returned from Schibsted account (or `null` if the user
      * doesn't have access to the given product)
      */
-    async hasProduct(productId, spId) {
-        const cacheKey = `prd_${productId}_${spId}`;
+    async hasProduct(productId, userIdentifier) {
+        const cacheKey = `prd_${productId}_${userIdentifier}`;
         let data = this.cache.get(cacheKey);
         if (!data && this._sessionService) {
             try {
@@ -108,8 +111,8 @@ export class Monetization extends EventEmitter {
         }
         if (!data) {
             const params = { product_id: productId }
-            if (spId) {
-                params.sp_id = spId;
+            if (userIdentifier) {
+                params.sp_id = userIdentifier;
             }
             data = await this._spid.get('ajax/hasproduct.js', params);
         }
@@ -125,16 +128,19 @@ export class Monetization extends EventEmitter {
     /**
      * Checks if the user has access to a particular subscription
      * @param {string} subscriptionId
-     * @param {string} [spId] - Only required if not using the session-service (i.e. only required
-     * if not setting `sessionDomain` in the constructor). The spId that was obtained from
-     * {@link Identity#hasSession}
+     * @param {string} [userIdentifier] - If you are using the session-service (i.e. setting
+     * `sessionDomain` in the constructor), you should pass the `uuid` here (i.e. the result of
+     * calling {@link Identity#getUserUuid}). The value will in this case be used as part of a cache
+     * key, meaning that if a user logs out, and another user logs in, we will correctly refresh the
+     * cached value. If not using the session-service, you **must** pass a value here, and that
+     * value should be the spId that was obtained from {@link Identity#hasSession}
      * @throws {SDKError} - If a network call fails in any way (this will happen if, say, the user
      * is not logged in)
      * @returns {Object|null} The data object returned from Schibsted account (or `null` if the user
      * doesn't have access to the given subscription)
      */
-    async hasSubscription(subscriptionId, spId) {
-        const cacheKey = `sub_${subscriptionId}_${spId}`;
+    async hasSubscription(subscriptionId, userIdentifier) {
+        const cacheKey = `sub_${subscriptionId}_${userIdentifier}`;
         let data = this.cache.get(cacheKey);
         if (!data && this._sessionService) {
             try {
@@ -153,8 +159,8 @@ export class Monetization extends EventEmitter {
         }
         if (!data) {
             const params = { product_id: subscriptionId }
-            if (spId) {
-                params.sp_id = spId;
+            if (userIdentifier) {
+                params.sp_id = userIdentifier;
             }
             data = await this._spid.get('ajax/hassubscription.js', params);
         }
