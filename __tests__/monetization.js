@@ -87,14 +87,14 @@ describe('Monetization', () => {
             expect(mon._spid.go.mock.calls.length).toBe(3);
         });
 
-        test(`should not use cache when products don't exist (really? is this correct?)`, async () => {
+        test(`should also use cache when products don't exist`, async () => {
             await mon.hasProduct('non_existing_1');
             await mon.hasProduct('non_existing_2');
             await mon.hasProduct('non_existing_2');
             await mon.hasProduct('non_existing_2');
 
             // we call it 4 times, but 2 unique products — but none of these products exist
-            expect(mon._spid.go.mock.calls.length).toBe(4);
+            expect(mon._spid.go.mock.calls.length).toBe(2);
         });
 
         test('should cache response for <default> time even if expiresIn missing', async () => {
@@ -116,6 +116,18 @@ describe('Monetization', () => {
             await mon.hasProduct('no-session-cookie');
             expect(mon._sessionService.go.mock.calls.length).toBe(1);
             expect(mon._spid.go.mock.calls.length).toBe(1);
+        });
+
+        test('should not fall back from session-service to spid if no session', async () => {
+            mon = new Monetization({ clientId: 'a', sessionDomain: 'https://session.example' });
+            try {
+                await mon.hasProduct('no-session');
+                throw new Error('Should not get here');
+            } catch (e) {
+                expect(e.message).toBe('No session');
+                expect(mon._sessionService.go.mock.calls.length).toBe(1);
+                expect(mon._spid.go.mock.calls.length).toBe(0);
+            }
         });
     });
 
@@ -171,14 +183,14 @@ describe('Monetization', () => {
             expect(mon._spid.go.mock.calls.length).toBe(3);
         });
 
-        test(`should not use cache when products don't exist (really? is this correct?)`, async () => {
+        test(`should also use cache when products don't exist`, async () => {
             await mon.hasSubscription('non_existing_1');
             await mon.hasSubscription('non_existing_2');
             await mon.hasSubscription('non_existing_2');
             await mon.hasSubscription('non_existing_2');
 
             // we call it 4 times, but 2 unique products — but none of these products exist
-            expect(mon._spid.go.mock.calls.length).toBe(4);
+            expect(mon._spid.go.mock.calls.length).toBe(2);
         });
 
         test('should cache response for <default> time even if expiresIn missing', async () => {
@@ -193,6 +205,25 @@ describe('Monetization', () => {
             await mon.hasSubscription('existing');
             expect(mon._sessionService.go.mock.calls.length).toBe(1);
             expect(mon._spid.go.mock.calls.length).toBe(0);
+        });
+
+        test('should fall back from session-service to spid if no session cookie', async () => {
+            mon = new Monetization({ clientId: 'a', sessionDomain: 'https://session.example' });
+            await mon.hasSubscription('no-session-cookie');
+            expect(mon._sessionService.go.mock.calls.length).toBe(1);
+            expect(mon._spid.go.mock.calls.length).toBe(1);
+        });
+
+        test('should not fall back from session-service to spid if no session', async () => {
+            mon = new Monetization({ clientId: 'a', sessionDomain: 'https://session.example' });
+            try {
+                await mon.hasSubscription('no-session');
+                throw new Error('Should not get here');
+            } catch (e) {
+                expect(e.message).toBe('No session');
+                expect(mon._sessionService.go.mock.calls.length).toBe(1);
+                expect(mon._spid.go.mock.calls.length).toBe(0);
+            }
         });
     });
 

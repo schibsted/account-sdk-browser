@@ -13,7 +13,8 @@ import RESTClient from './RESTClient';
 import Cache from './cache';
 import * as spidTalk from './spidTalk';
 
-const DEFAULT_CACHE_EXPIRES_IN = 30;
+const DEFAULT_CACHE_NO_ACCESS = 10; // 10 seconds
+const DEFAULT_CACHE_HAS_ACCESS = 1 * 60 * 60; // 1 hour
 const globalWindow = () => window;
 
 /**
@@ -82,17 +83,15 @@ export class Monetization extends EventEmitter {
      * @param {string} [spId] - Only required if not using the session-service (i.e. only required
      * if not setting `sessionDomain` in the constructor). The spId that was obtained from
      * {@link Identity#hasSession}
+     * @throws {SDKError} - If a network call fails in any way (this will happen if, say, the user
+     * is not logged in)
      * @returns {Object|null} The data object returned from Schibsted account (or `null` if the user
      * doesn't have access to the given product)
      */
     async hasProduct(productId, spId) {
         const cacheKey = `prd_${productId}_${spId}`;
-        const cachedVal = this.cache.get(cacheKey);
-        if (cachedVal) {
-            return cachedVal;
-        }
-        let data = null;
-        if (this._sessionService) {
+        let data = this.cache.get(cacheKey);
+        if (!data && this._sessionService) {
             try {
                 data = await this._sessionService.get(`/hasProduct/${productId}`);
             } catch (err) {
@@ -114,11 +113,11 @@ export class Monetization extends EventEmitter {
             }
             data = await this._spid.get('ajax/hasproduct.js', params);
         }
+        const expiresSeconds = data.result ? DEFAULT_CACHE_HAS_ACCESS : DEFAULT_CACHE_NO_ACCESS
+        this.cache.set(cacheKey, data, expiresSeconds * 1000);
         if (!data.result) {
             return null;
         }
-        const expiresIn = (data.expiresIn || DEFAULT_CACHE_EXPIRES_IN) * 1000;
-        this.cache.set(cacheKey, data, expiresIn);
         this.emit('hasProduct', { productId, data });
         return data;
     }
@@ -129,17 +128,15 @@ export class Monetization extends EventEmitter {
      * @param {string} [spId] - Only required if not using the session-service (i.e. only required
      * if not setting `sessionDomain` in the constructor). The spId that was obtained from
      * {@link Identity#hasSession}
+     * @throws {SDKError} - If a network call fails in any way (this will happen if, say, the user
+     * is not logged in)
      * @returns {Object|null} The data object returned from Schibsted account (or `null` if the user
      * doesn't have access to the given subscription)
      */
     async hasSubscription(subscriptionId, spId) {
         const cacheKey = `sub_${subscriptionId}_${spId}`;
-        const cachedVal = this.cache.get(cacheKey);
-        if (cachedVal) {
-            return cachedVal;
-        }
-        let data = null;
-        if (this._sessionService) {
+        let data = this.cache.get(cacheKey);
+        if (!data && this._sessionService) {
             try {
                 data = await this._sessionService.get(`/hasSubscription/${subscriptionId}`);
             } catch (err) {
@@ -161,11 +158,11 @@ export class Monetization extends EventEmitter {
             }
             data = await this._spid.get('ajax/hassubscription.js', params);
         }
+        const expiresSeconds = data.result ? DEFAULT_CACHE_HAS_ACCESS : DEFAULT_CACHE_NO_ACCESS
+        this.cache.set(cacheKey, data, expiresSeconds * 1000);
         if (!data.result) {
             return null;
         }
-        const expiresIn = (data.expiresIn || DEFAULT_CACHE_EXPIRES_IN) * 1000;
-        this.cache.set(cacheKey, data, expiresIn);
         this.emit('hasSubscription', { subscriptionId, data });
         return data;
     }

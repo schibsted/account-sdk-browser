@@ -11,11 +11,17 @@ const goFn = () => jest.fn().mockImplementation(async ({ pathname, data = {} }) 
             return Fixtures.spidProduct;
         } else if (pathname.endsWith('no-session-cookie')) {
             throw new SDKError('Session cookie (schacc-session) missing', { code: 400 });
+        } else if (pathname.endsWith('no-session')) {
+            throw new SDKError('No session', { code: 401 });
         }
     }
     if (pathname.startsWith('/hasSubscription/')) {
         if (pathname.endsWith('/existing')) {
             return Fixtures.spidProduct;
+        } else if (pathname.endsWith('no-session-cookie')) {
+            throw new SDKError('Session cookie (schacc-session) missing', { code: 400 });
+        } else if (pathname.endsWith('no-session')) {
+            throw new SDKError('No session', { code: 401 });
         }
     }
     if (pathname === 'ajax/hasproduct.js') {
