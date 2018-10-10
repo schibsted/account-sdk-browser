@@ -2,12 +2,15 @@ import { URLSearchParams, URL } from 'url';
 import { urlMapper } from '../url';
 import { cloneDefined } from '../object';
 import { Fixtures } from '../../__tests__/utils';
+import SDKError from '../../src/SDKError';
 
 const goFn = () => jest.fn().mockImplementation(async ({ pathname, data = {} }) => {
     const search = new URLSearchParams(data);
     if (pathname.startsWith('/hasProduct/')) {
         if (pathname.endsWith('/existing')) {
             return Fixtures.spidProduct;
+        } else if (pathname.endsWith('no-session-cookie')) {
+            throw new SDKError('Session cookie (schacc-session) missing', { code: 400 });
         }
     }
     if (pathname.startsWith('/hasSubscription/')) {

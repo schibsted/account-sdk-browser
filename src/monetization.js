@@ -93,7 +93,19 @@ export class Monetization extends EventEmitter {
         }
         let data = null;
         if (this._sessionService) {
-            data = await this._sessionService.get(`/hasProduct/${productId}`);
+            try {
+                data = await this._sessionService.get(`/hasProduct/${productId}`);
+            } catch (err) {
+                // The session-service returns 400 if no session-cookie is sent in the request. This
+                // will be the case if the user hasn't logged in since the site switched to using
+                // the session-service. If the request contains a session-cookie but an error is
+                // still thrown, then we *should* throw an exception and *not* fall through to
+                // spid
+                if (err.code !== 400) {
+                    throw err;
+                }
+                data = null;
+            }
         }
         if (!data) {
             const params = { product_id: productId }
@@ -128,7 +140,19 @@ export class Monetization extends EventEmitter {
         }
         let data = null;
         if (this._sessionService) {
-            data = await this._sessionService.get(`/hasSubscription/${subscriptionId}`);
+            try {
+                data = await this._sessionService.get(`/hasSubscription/${subscriptionId}`);
+            } catch (err) {
+                // The session-service returns 400 if no session-cookie is sent in the request. This
+                // will be the case if the user hasn't logged in since the site switched to using
+                // the session-service. If the request contains a session-cookie but an error is
+                // still thrown, then we *should* throw an exception and *not* fall through to
+                // spid
+                if (err.code !== 400) {
+                    throw err;
+                }
+                data = null;
+            }
         }
         if (!data) {
             const params = { product_id: subscriptionId }
