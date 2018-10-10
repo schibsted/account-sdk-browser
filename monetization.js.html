@@ -53,7 +53,8 @@ import RESTClient from './RESTClient';
 import Cache from './cache';
 import * as spidTalk from './spidTalk';
 
-const DEFAULT_CACHE_EXPIRES_IN = 30;
+const DEFAULT_CACHE_NO_ACCESS = 10; // 10 seconds
+const DEFAULT_CACHE_HAS_ACCESS = 1 * 60 * 60; // 1 hour
 const globalWindow = () => window;
 
 /**
@@ -119,21 +120,30 @@ export class Monetization extends EventEmitter {
     /**
      * Checks if the user has access to a particular product
      * @param {string} productId
-     * @param {string} [spId] - Only required if not using the session-service (i.e. only required
-     * if not setting `sessionDomain` in the constructor). The spId that was obtained from
-     * {@link Identity#hasSession}
+     * @param {string} spId - The spId that was obtained from {@link Identity#getSpId}
+     * @throws {SDKError} - If a network call fails in any way (this will happen if, say, the user
+     * is not logged in)
      * @returns {Object|null} The data object returned from Schibsted account (or `null` if the user
      * doesn't have access to the given product)
      */
     async hasProduct(productId, spId) {
         const cacheKey = `prd_${productId}_${spId}`;
-        const cachedVal = this.cache.get(cacheKey);
-        if (cachedVal) {
-            return cachedVal;
-        }
-        let data = null;
-        if (this._sessionService) {
-            data = await this._sessionService.get(`/hasProduct/${productId}`);
+        let data = this.cache.get(cacheKey);
+        const shouldCache = !data;
+        if (!data &amp;&amp; this._sessionService) {
+            try {
+                data = await this._sessionService.get(`/hasProduct/${productId}`);
+            } catch (err) {
+                // The session-service returns 400 if no session-cookie is sent in the request. This
+                // will be the case if the user hasn't logged in since the site switched to using
+                // the session-service. If the request contains a session-cookie but an error is
+                // still thrown, then we *should* throw an exception and *not* fall through to
+                // spid
+                if (err.code !== 400) {
+                    throw err;
+                }
+                data = null;
+            }
         }
         if (!data) {
             const params = { product_id: productId }
@@ -142,11 +152,13 @@ export class Monetization extends EventEmitter {
             }
             data = await this._spid.get('ajax/hasproduct.js', params);
         }
+        if (shouldCache) {
+            const expiresSeconds = data.result ? DEFAULT_CACHE_HAS_ACCESS : DEFAULT_CACHE_NO_ACCESS;
+            this.cache.set(cacheKey, data, expiresSeconds * 1000);
+        }
         if (!data.result) {
             return null;
         }
-        const expiresIn = (data.expiresIn || DEFAULT_CACHE_EXPIRES_IN) * 1000;
-        this.cache.set(cacheKey, data, expiresIn);
         this.emit('hasProduct', { productId, data });
         return data;
     }
@@ -154,21 +166,30 @@ export class Monetization extends EventEmitter {
     /**
      * Checks if the user has access to a particular subscription
      * @param {string} subscriptionId
-     * @param {string} [spId] - Only required if not using the session-service (i.e. only required
-     * if not setting `sessionDomain` in the constructor). The spId that was obtained from
-     * {@link Identity#hasSession}
+     * @param {string} spId - The spId that was obtained from {@link Identity#getSpId}
+     * @throws {SDKError} - If a network call fails in any way (this will happen if, say, the user
+     * is not logged in)
      * @returns {Object|null} The data object returned from Schibsted account (or `null` if the user
      * doesn't have access to the given subscription)
      */
     async hasSubscription(subscriptionId, spId) {
         const cacheKey = `sub_${subscriptionId}_${spId}`;
-        const cachedVal = this.cache.get(cacheKey);
-        if (cachedVal) {
-            return cachedVal;
-        }
-        let data = null;
-        if (this._sessionService) {
-            data = await this._sessionService.get(`/hasSubscription/${subscriptionId}`);
+        let data = this.cache.get(cacheKey);
+        const shouldCache = !data;
+        if (!data &amp;&amp; this._sessionService) {
+            try {
+                data = await this._sessionService.get(`/hasSubscription/${subscriptionId}`);
+            } catch (err) {
+                // The session-service returns 400 if no session-cookie is sent in the request. This
+                // will be the case if the user hasn't logged in since the site switched to using
+                // the session-service. If the request contains a session-cookie but an error is
+                // still thrown, then we *should* throw an exception and *not* fall through to
+                // spid
+                if (err.code !== 400) {
+                    throw err;
+                }
+                data = null;
+            }
         }
         if (!data) {
             const params = { product_id: subscriptionId }
@@ -177,11 +198,13 @@ export class Monetization extends EventEmitter {
             }
             data = await this._spid.get('ajax/hassubscription.js', params);
         }
+        if (shouldCache) {
+            const expiresSeconds = data.result ? DEFAULT_CACHE_HAS_ACCESS : DEFAULT_CACHE_NO_ACCESS;
+            this.cache.set(cacheKey, data, expiresSeconds * 1000);
+        }
         if (!data.result) {
             return null;
         }
-        const expiresIn = (data.expiresIn || DEFAULT_CACHE_EXPIRES_IN) * 1000;
-        this.cache.set(cacheKey, data, expiresIn);
         this.emit('hasSubscription', { subscriptionId, data });
         return data;
     }
@@ -220,7 +243,7 @@ export default Monetization;
 <br class="clear">
 
 <footer>
-    Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.5.5</a> on Tue Oct 09 2018 21:50:58 GMT+0000 (UTC) using the <a href="https://github.com/clenemt/docdash">docdash</a> theme.
+    Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.5.5</a> on Wed Oct 10 2018 12:56:16 GMT+0000 (UTC) using the <a href="https://github.com/clenemt/docdash">docdash</a> theme.
 </footer>
 
 <script>prettyPrint();</script>
