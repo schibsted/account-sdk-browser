@@ -80,7 +80,7 @@ export class Monetization extends EventEmitter {
     /**
      * Checks if the user has access to a particular product
      * @param {string} productId
-     * @param {string} spId - The spId that was obtained from {@link Identity#hasSession}
+     * @param {string} spId - The spId that was obtained from {@link Identity#getSpId}
      * @throws {SDKError} - If a network call fails in any way (this will happen if, say, the user
      * is not logged in)
      * @returns {Object|null} The data object returned from Schibsted account (or `null` if the user
@@ -123,7 +123,7 @@ export class Monetization extends EventEmitter {
     /**
      * Checks if the user has access to a particular subscription
      * @param {string} subscriptionId
-     * @param {string} spId - The spId that was obtained from {@link Identity#hasSession}
+     * @param {string} spId - The spId that was obtained from {@link Identity#getSpId}
      * @throws {SDKError} - If a network call fails in any way (this will happen if, say, the user
      * is not logged in)
      * @returns {Object|null} The data object returned from Schibsted account (or `null` if the user
