@@ -1,5 +1,25 @@
 # Changelog
 
+## v3.0.0-rc.21 (2018-10-10)
+
+## Semi-breaking ish changes
+
+* Monetization functions `hasProduct` and `hasSubscription` didn't list `@throws` in the docs, even
+  though there was always a chance of those functions throwing SDKError if anything went wrong
+  during a network call. Also, the `spId` parameter is back to being a required parameter, since
+  it's used when caching results (and without it, cache data could in theory span different users)
+
+## Fixes
+
+* Monetization functions `hasProduct` and `hasSubscription` now fall back to calling the Schibsted
+  account backend if a call to the session-service fails with a 400 error (meaning a session-cookie
+  is not present).
+
+## Changes
+
+* Monetization functions `hasProducts` and `hasSubscription` now caches both failures (for 10
+  seconds) and successes (for 1 hour)
+
 ## v3.0.0-rc.20 (2018-10-09)
 
 ### Fixes
