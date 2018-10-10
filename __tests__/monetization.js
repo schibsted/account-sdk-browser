@@ -110,6 +110,13 @@ describe('Monetization', () => {
             expect(mon._sessionService.go.mock.calls.length).toBe(1);
             expect(mon._spid.go.mock.calls.length).toBe(0);
         });
+
+        test('should fall back from session-service to spid if no session cookie', async () => {
+            mon = new Monetization({ clientId: 'a', sessionDomain: 'https://session.example' });
+            await mon.hasProduct('no-session-cookie');
+            expect(mon._sessionService.go.mock.calls.length).toBe(1);
+            expect(mon._spid.go.mock.calls.length).toBe(1);
+        });
     });
 
     describe('hasSubscription()', () => {
