@@ -89,6 +89,7 @@ export class Monetization extends EventEmitter {
     async hasProduct(productId, spId) {
         const cacheKey = `prd_${productId}_${spId}`;
         let data = this.cache.get(cacheKey);
+        const shouldCache = !data;
         if (!data && this._sessionService) {
             try {
                 data = await this._sessionService.get(`/hasProduct/${productId}`);
@@ -111,8 +112,10 @@ export class Monetization extends EventEmitter {
             }
             data = await this._spid.get('ajax/hasproduct.js', params);
         }
-        const expiresSeconds = data.result ? DEFAULT_CACHE_HAS_ACCESS : DEFAULT_CACHE_NO_ACCESS
-        this.cache.set(cacheKey, data, expiresSeconds * 1000);
+        if (shouldCache) {
+            const expiresSeconds = data.result ? DEFAULT_CACHE_HAS_ACCESS : DEFAULT_CACHE_NO_ACCESS;
+            this.cache.set(cacheKey, data, expiresSeconds * 1000);
+        }
         if (!data.result) {
             return null;
         }
@@ -132,6 +135,7 @@ export class Monetization extends EventEmitter {
     async hasSubscription(subscriptionId, spId) {
         const cacheKey = `sub_${subscriptionId}_${spId}`;
         let data = this.cache.get(cacheKey);
+        const shouldCache = !data;
         if (!data && this._sessionService) {
             try {
                 data = await this._sessionService.get(`/hasSubscription/${subscriptionId}`);
@@ -154,8 +158,10 @@ export class Monetization extends EventEmitter {
             }
             data = await this._spid.get('ajax/hassubscription.js', params);
         }
-        const expiresSeconds = data.result ? DEFAULT_CACHE_HAS_ACCESS : DEFAULT_CACHE_NO_ACCESS
-        this.cache.set(cacheKey, data, expiresSeconds * 1000);
+        if (shouldCache) {
+            const expiresSeconds = data.result ? DEFAULT_CACHE_HAS_ACCESS : DEFAULT_CACHE_NO_ACCESS;
+            this.cache.set(cacheKey, data, expiresSeconds * 1000);
+        }
         if (!data.result) {
             return null;
         }
