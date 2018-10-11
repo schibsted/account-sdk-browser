@@ -348,7 +348,7 @@ export class Identity extends EventEmitter {
      * @returns {void}
      */
     _clearVarnishCookie() {
-        const domain = (typeof this._session && this._session.baseDomain === 'string')
+        const domain = (this._session && typeof this._session.baseDomain === 'string')
             ? this._session.baseDomain
             : (getTopDomain(document.domain) || '');
         document.cookie = `SP_ID=nothing; expires=Thu, 01 Jan 1970 00:00:00 GMT; path=/; domain=.${domain}`;
