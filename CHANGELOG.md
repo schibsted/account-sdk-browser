@@ -1,5 +1,13 @@
 # Changelog
 
+## v3.0.0 (2018-10-15)
+
+## Removed rc
+
+## Fixes
+
+* fix typeof in clearVarnishCookie
+
 ## v3.0.0-rc.21 (2018-10-10)
 
 ## Semi-breaking ish changes
