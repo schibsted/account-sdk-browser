@@ -69,7 +69,7 @@ const config = {
     },
     JSONP: { TIMEOUT: 7000 }, // ms
     NAMESPACE: {
-        LOCAL: 'schibsted.com',
+        LOCAL: 'id.localhost',
         DEV: 'schibsted.com',
         PRE: 'schibsted.com',
         PRO: 'schibsted.com',
