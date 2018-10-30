@@ -2,6 +2,12 @@
 
 ## v3.0.0 (2018-10-15)
 
+## Fixes
+
+* Fix LOCAL SDRN namespace 
+
+## v3.0.0 (2018-10-15)
+
 ## Removed rc
 
 ## Fixes
