@@ -23,16 +23,3 @@ export function urlMapper(url, urlMap) {
     assert(isUrl(url, 'hostname'), `Bad URL given: '${url}'`);
     return url;
 }
-
-/**
- * A simple method to extract top domain from a domain string
- * @memberof core
- * @param {string} domain - A domain like www.vg.no
- * @return {string} The top domain, for ex. vg.no
- */
-export function getTopDomain(domain) {
-    if (!domain) {
-        return null;
-    }
-    return domain.split('.').slice(-2).join('.');
-}

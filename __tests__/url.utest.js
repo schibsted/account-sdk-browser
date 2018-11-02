@@ -5,7 +5,7 @@
 'use strict';
 
 import { URL } from 'whatwg-url';
-import { urlMapper, getTopDomain } from '../src/url';
+import { urlMapper } from '../src/url';
 import RESTClient from '../src/RESTClient';
 
 describe('url', () => {
@@ -28,34 +28,6 @@ describe('url', () => {
             expect(() => urlMapper('BAD_KEY', {
                 'GOOD_KEY': 'http://shorthand1.local'
             })).toThrow(/Bad URL given: 'BAD_KEY'/);
-        });
-    });
-
-    describe('getTopDomain()', () => {
-
-        test('remove www. from www.vg.no', () => {
-            expect(getTopDomain('www.vg.no')).toBe('vg.no');
-        });
-
-        test('remove support.pluss. from support.pluss.vg.no', () => {
-            expect(getTopDomain('support.pluss.vg.no')).toBe('vg.no');
-        });
-
-        test('vg.no to be vg.no', () => {
-            expect(getTopDomain('vg.no')).toBe('vg.no');
-        });
-
-        test('.vg.no to be vg.no', () => {
-            expect(getTopDomain('vg.no')).toBe('vg.no');
-        });
-        
-        test('if domain param is falsy, return null', () => {
-            expect(getTopDomain('')).toBe(null);
-            expect(getTopDomain(undefined)).toBe(null);
-            expect(getTopDomain(false)).toBe(null);
-            expect(getTopDomain(0)).toBe(null);
-            expect(getTopDomain(null)).toBe(null);
-            expect(getTopDomain(NaN)).toBe(null);
         });
     });
 

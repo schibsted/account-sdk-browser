@@ -6,7 +6,7 @@
 
 import { assert, isStr, isNonEmptyString, isObject, isUrl, isStrIn } from './validate';
 import { cloneDeep } from './object';
-import { urlMapper, getTopDomain } from './url';
+import { urlMapper } from './url';
 import { ENDPOINTS, NAMESPACE } from './config';
 import EventEmitter from 'tiny-emitter';
 import JSONPClient from './JSONPClient';
@@ -288,15 +288,27 @@ export class Identity extends EventEmitter {
     /**
      * Set the Varnish cookie (`SP_ID`) when hasSession() is called. Note that most browsers require
      * that you are on a "real domain" for this to work — so, **not** `localhost`
-     * @param {number} [expiresIn] Override this to set number of seconds before the varnish cookie
-     * expires. The default is to use the same time that hasSession responses are cached for
+     * @param {object} [options]
+     * @param {number} [options.expiresIn] Override this to set number of seconds before the varnish
+     * cookie expires. The default is to use the same time that hasSession responses are cached for
+     * @param {boolean} [options.domain] Override cookie domain. E.g. «vg.no» instead of «www.vg.no»
      * @returns {void}
      */
-    enableVarnishCookie(expiresIn = 0) {
+    enableVarnishCookie(options) {
+        let expiresIn = 0;
+        let domain;
+        if (Number.isInteger(options)) {
+            expiresIn = options;
+        }
+        else if (typeof options == 'object') {
+            ({ expiresIn = expiresIn, domain = domain } = options);
+        }
+
         assert(Number.isInteger(expiresIn), `'expiresIn' must be an integer`);
         assert(expiresIn >= 0, `'expiresIn' cannot be negative`);
         this.setVarnishCookie = true;
         this.varnishExpiresIn = expiresIn;
+        this.varnishCookieDomain = domain;
     }
 
     /**
@@ -318,10 +330,14 @@ export class Identity extends EventEmitter {
         } else {
             date.setTime(0);
         }
+
         // If the domain is missing or of the wrong type, we'll use document.domain
-        const domain = (typeof sessionData.baseDomain === 'string')
-            ? sessionData.baseDomain
-            : (getTopDomain(document.domain) || '');
+        let domain = this.varnishCookieDomain ||
+            (typeof sessionData.baseDomain === 'string'
+                ? sessionData.baseDomain
+                : document.domain) ||
+            '';
+
         const cookie = [
             `SP_ID=${sessionData.sp_id}`,
             `expires=${date.toUTCString()}`,
@@ -348,9 +364,12 @@ export class Identity extends EventEmitter {
      * @returns {void}
      */
     _clearVarnishCookie() {
-        const domain = (this._session && typeof this._session.baseDomain === 'string')
-            ? this._session.baseDomain
-            : (getTopDomain(document.domain) || '');
+        let domain = this.varnishCookieDomain ||
+            ((this._session && typeof this._session.baseDomain === 'string')
+                ? this._session.baseDomain
+                : document.domain) ||
+            '';
+
         document.cookie = `SP_ID=nothing; expires=Thu, 01 Jan 1970 00:00:00 GMT; path=/; domain=.${domain}`;
     }
 

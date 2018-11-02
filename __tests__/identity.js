@@ -358,6 +358,17 @@ describe('Identity', () => {
             });
         });
 
+        describe(`enableVarnishCookie domain`, () => {
+            test('works', async () => {
+                identity.enableVarnishCookie({ domain: 'spid.no' });
+                expect(identity.varnishCookieDomain).toBe('spid.no');
+                const session1 = { result: true, sp_id: 'abc', expiresIn: 3600, baseDomain: 'tv.spid.no' };
+                fetch.mockImplementationOnce(async () => ({ ok: true, json: async() => session1 }));
+                await identity.hasSession();
+                expect(document.cookie).toBe('SP_ID=abc');
+            });
+        });
+
         test('should go to session-service if defined', async () => {
             const options = { clientId: 'foo', redirectUri: 'http://e.com', sessionDomain: 'http://id.e.com' };
             const client_sdrn = `sdrn:schibsted:client:${options.clientId}`;
