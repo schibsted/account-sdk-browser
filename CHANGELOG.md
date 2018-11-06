@@ -1,5 +1,13 @@
 # Changelog
 
+## v3.0.1 (2018-11-06)
+
+## Fixes
+
+* Fix LOCAL SDRN namespace
+* Silent error on Object.assign in SDKError for ios 9
+* Update jest
+
 ## v3.0.0 (2018-10-15)
 
 ## Fixes
