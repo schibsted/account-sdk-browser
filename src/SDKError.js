@@ -30,8 +30,12 @@ export default class SDKError extends Error {
         super(message);
         this.name = 'SDKError';
         if (typeof errorObject === 'object') {
-            // At this point it doesn't matter if errorObject === null
-            Object.assign(this, errorObject);
+            try {
+                // At this point it doesn't matter if errorObject === null
+                Object.assign(this, errorObject);
+            } catch(err) {
+                // silent
+            }
         }
     }
 
