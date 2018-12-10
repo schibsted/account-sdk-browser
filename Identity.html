@@ -421,7 +421,7 @@ no logging will be done</p></td>
 
     
 
-    <h4 class="name" id="enableVarnishCookie"><span class="type-signature"></span>enableVarnishCookie<span class="signature">(expiresIn<span class="signature-attributes">opt</span>)</span><span class="type-signature"> &rarr; {void}</span></h4>
+    <h4 class="name" id="enableVarnishCookie"><span class="type-signature"></span>enableVarnishCookie<span class="signature">(options<span class="signature-attributes">opt</span>)</span><span class="type-signature"> &rarr; {void}</span></h4>
 
     
 
@@ -433,7 +433,7 @@ no logging will be done</p></td>
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="identity.js.html">identity.js</a>, <a href="identity.js.html#line295">line 295</a>
+        <a href="identity.js.html">identity.js</a>, <a href="identity.js.html#line297">line 297</a>
     </li></ul></dd>
     
 
@@ -504,7 +504,59 @@ that you are on a &quot;real domain&quot; for this to work — so, <strong>not</
         
 
         
-        <th>Default</th>
+
+        <th class="last">Description</th>
+    </tr>
+    </thead>
+
+    <tbody>
+    
+
+        <tr>
+            
+                <td class="name"><code>options</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">object</span>
+
+
+            
+            </td>
+
+            
+                <td class="attributes">
+                
+                    &lt;optional><br>
+                
+
+                
+
+                
+                </td>
+            
+
+            
+
+            <td class="description last">
+                <h6>Properties</h6>
+                
+
+<table class="params">
+    <thead>
+    <tr>
+        
+        <th>Name</th>
+        
+
+        <th>Type</th>
+
+        
+        <th>Attributes</th>
+        
+
         
 
         <th class="last">Description</th>
@@ -541,15 +593,49 @@ that you are on a &quot;real domain&quot; for this to work — so, <strong>not</
             
 
             
-                <td class="default">
+
+            <td class="description last"><p>Override this to set number of seconds before the varnish
+cookie expires. The default is to use the same time that hasSession responses are cached for</p></td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>domain</code></td>
+            
+
+            <td class="type">
+            
                 
-                    <code>0</code>
+<span class="param-type">boolean</span>
+
+
+            
+            </td>
+
+            
+                <td class="attributes">
+                
+                    &lt;optional><br>
+                
+
+                
+
                 
                 </td>
             
 
-            <td class="description last"><p>Override this to set number of seconds before the varnish cookie
-expires. The default is to use the same time that hasSession responses are cached for</p></td>
+            
+
+            <td class="description last"><p>Override cookie domain. E.g. «vg.no» instead of «<a href="http://www.vg.no»">www.vg.no»</a></p></td>
+        </tr>
+
+    
+    </tbody>
+</table>
+
+            </td>
         </tr>
 
     
@@ -608,7 +694,7 @@ expires. The default is to use the same time that hasSession responses are cache
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="identity.js.html">identity.js</a>, <a href="identity.js.html#line394">line 394</a>
+        <a href="identity.js.html">identity.js</a>, <a href="identity.js.html#line413">line 413</a>
     </li></ul></dd>
     
 
@@ -836,7 +922,7 @@ if, say, the user is not logged in)</li>
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="identity.js.html">identity.js</a>, <a href="identity.js.html#line486">line 486</a>
+        <a href="identity.js.html">identity.js</a>, <a href="identity.js.html#line505">line 505</a>
     </li></ul></dd>
     
 
@@ -941,7 +1027,7 @@ effect that it might perform an auto-login on the user</p>
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="identity.js.html">identity.js</a>, <a href="identity.js.html#line504">line 504</a>
+        <a href="identity.js.html">identity.js</a>, <a href="identity.js.html#line523">line 523</a>
     </li></ul></dd>
     
 
@@ -1046,7 +1132,7 @@ effect that it might perform an auto-login on the user</p>
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="identity.js.html">identity.js</a>, <a href="identity.js.html#line523">line 523</a>
+        <a href="identity.js.html">identity.js</a>, <a href="identity.js.html#line542">line 542</a>
     </li></ul></dd>
     
 
@@ -1212,7 +1298,7 @@ Schibsted components depending on the numeric <code>userId</code> — it would b
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="identity.js.html">identity.js</a>, <a href="identity.js.html#line543">line 543</a>
+        <a href="identity.js.html">identity.js</a>, <a href="identity.js.html#line562">line 562</a>
     </li></ul></dd>
     
 
@@ -1355,7 +1441,7 @@ Schibsted components depending on the numeric <code>userId</code> — it would b
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="identity.js.html">identity.js</a>, <a href="identity.js.html#line563">line 563</a>
+        <a href="identity.js.html">identity.js</a>, <a href="identity.js.html#line582">line 582</a>
     </li></ul></dd>
     
 
@@ -1493,7 +1579,7 @@ effect that it might perform an auto-login on the user</p>
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="identity.js.html">identity.js</a>, <a href="identity.js.html#line578">line 578</a>
+        <a href="identity.js.html">identity.js</a>, <a href="identity.js.html#line597">line 597</a>
     </li></ul></dd>
     
 
@@ -1614,7 +1700,7 @@ effect that it might perform an auto-login on the user</p>
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="identity.js.html">identity.js</a>, <a href="identity.js.html#line623">line 623</a>
+        <a href="identity.js.html">identity.js</a>, <a href="identity.js.html#line642">line 642</a>
     </li></ul></dd>
     
 
@@ -2259,7 +2345,7 @@ New flows supports nb_NO, fi_FI, sv_SE, en_US</p></td>
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="identity.js.html">identity.js</a>, <a href="identity.js.html#line660">line 660</a>
+        <a href="identity.js.html">identity.js</a>, <a href="identity.js.html#line679">line 679</a>
     </li></ul></dd>
     
 
@@ -2407,7 +2493,7 @@ account</p></td>
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="identity.js.html">identity.js</a>, <a href="identity.js.html#line693">line 693</a>
+        <a href="identity.js.html">identity.js</a>, <a href="identity.js.html#line712">line 712</a>
     </li></ul></dd>
     
 
@@ -2998,7 +3084,7 @@ New flows supports nb_NO, fi_FI, sv_SE, en_US</p></td>
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="identity.js.html">identity.js</a>, <a href="identity.js.html#line759">line 759</a>
+        <a href="identity.js.html">identity.js</a>, <a href="identity.js.html#line778">line 778</a>
     </li></ul></dd>
     
 
@@ -3173,7 +3259,7 @@ New flows supports nb_NO, fi_FI, sv_SE, en_US</p></td>
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="identity.js.html">identity.js</a>, <a href="identity.js.html#line773">line 773</a>
+        <a href="identity.js.html">identity.js</a>, <a href="identity.js.html#line792">line 792</a>
     </li></ul></dd>
     
 
@@ -3344,7 +3430,7 @@ New flows supports nb_NO, fi_FI, sv_SE, en_US</p></td>
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="identity.js.html">identity.js</a>, <a href="identity.js.html#line785">line 785</a>
+        <a href="identity.js.html">identity.js</a>, <a href="identity.js.html#line804">line 804</a>
     </li></ul></dd>
     
 
@@ -3515,7 +3601,7 @@ New flows supports nb_NO, fi_FI, sv_SE, en_US</p></td>
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="identity.js.html">identity.js</a>, <a href="identity.js.html#line798">line 798</a>
+        <a href="identity.js.html">identity.js</a>, <a href="identity.js.html#line817">line 817</a>
     </li></ul></dd>
     
 
@@ -3699,7 +3785,7 @@ New flows supports nb_NO, fi_FI, sv_SE, en_US</p></td>
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="identity.js.html">identity.js</a>, <a href="identity.js.html#line812">line 812</a>
+        <a href="identity.js.html">identity.js</a>, <a href="identity.js.html#line831">line 831</a>
     </li></ul></dd>
     
 
@@ -3883,7 +3969,7 @@ New flows supports nb_NO, fi_FI, sv_SE, en_US</p></td>
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="identity.js.html">identity.js</a>, <a href="identity.js.html#line826">line 826</a>
+        <a href="identity.js.html">identity.js</a>, <a href="identity.js.html#line845">line 845</a>
     </li></ul></dd>
     
 
@@ -4067,7 +4153,7 @@ New flows supports nb_NO, fi_FI, sv_SE, en_US</p></td>
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="identity.js.html">identity.js</a>, <a href="identity.js.html#line845">line 845</a>
+        <a href="identity.js.html">identity.js</a>, <a href="identity.js.html#line864">line 864</a>
     </li></ul></dd>
     
 
@@ -4174,7 +4260,7 @@ method.</p>
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="identity.js.html">identity.js</a>, <a href="identity.js.html#line861">line 861</a>
+        <a href="identity.js.html">identity.js</a>, <a href="identity.js.html#line880">line 880</a>
     </li></ul></dd>
     
 
@@ -5839,7 +5925,7 @@ no logged-in user neither before nor after <a href="Identity.html#hasSession"><c
 <br class="clear">
 
 <footer>
-    Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.5.5</a> on Tue Nov 06 2018 14:06:18 GMT+0000 (UTC) using the <a href="https://github.com/clenemt/docdash">docdash</a> theme.
+    Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.5.5</a> on Mon Dec 10 2018 09:22:36 GMT+0000 (UTC) using the <a href="https://github.com/clenemt/docdash">docdash</a> theme.
 </footer>
 
 <script>prettyPrint();</script>
