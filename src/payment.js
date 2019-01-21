@@ -23,15 +23,17 @@ export class Payment {
      * @param {string} options.clientId - Mandatory client id
      * @param {string} [options.redirectUri] - Redirect uri
      * @param {string} [options.env=PRE] - Schibsted account environment: `PRE`, `PRO` or `PRO_NO`
+     * @param {string} [options.publisher] - ZUORA publisher
      * @throws {SDKError} - If any of options are invalid
      */
-    constructor({ clientId, redirectUri, env = 'PRE', window = globalWindow() }) {
+    constructor({ clientId, redirectUri, env = 'PRE', publisher, window = globalWindow() }) {
         spidTalk.emulate(window);
         assert(isNonEmptyString(clientId), 'clientId parameter is required');
 
         this.clientId = clientId;
         this.redirectUri = redirectUri;
         this.window = window;
+        this.publisher = publisher;
         this._setSpidServerUrl(env);
         this._setBffServerUrl(env);
     }
@@ -141,7 +143,6 @@ export class Payment {
 
     /**
      * Get the url for flow to purchase a product
-     * @todo Check working-ness for BFF + SPiD
      * @param {string} productId
      * @param {string} [redirectUri=this.redirectUri]
      * @return {string} - The url to the products review page
@@ -176,6 +177,26 @@ export class Payment {
             campaign_id: campaignId,
             product_id: productId,
             voucher_code: voucherCode,
+            redirect_uri: redirectUri
+        });
+    }
+
+    /**
+     * Get the url for flow to purchase a promo code product with ZUORA
+     * @param {string} code - promocode product code
+     * @param {string} [state=''] - An opaque value used by the client to maintain state between
+     * the request and callback. It's also recommended to prevent CSRF
+     * @param {string} [redirectUri=this.redirectUri]
+     * @return {string} - The url to the buy promo code product flow
+     */
+    purchasePromoCodeProductFlowUrl(code, state = '', redirectUri = this.redirectUri) {
+        assert(isUrl(redirectUri), `purchasePromoCodeProductFlowUrl(): redirectUri is invalid`);
+        assert(isNonEmptyString(code), `purchasePromoCodeProductFlowUrl(): code is required`);
+        assert(isNonEmptyString(this.publisher), `purchasePromoCodeProductFlowUrl(): publisher is required in the constructor`);
+        return this._bff.makeUrl('payment/purchase/code', {
+            code: code,
+            publisher: this.publisher,
+            state,
             redirect_uri: redirectUri
         });
     }
