@@ -194,7 +194,7 @@ export class Payment {
         assert(isNonEmptyString(code), `purchasePromoCodeProductFlowUrl(): code is required`);
         assert(isNonEmptyString(this.publisher), `purchasePromoCodeProductFlowUrl(): publisher is required in the constructor`);
         return this._bff.makeUrl('payment/purchase/code', {
-            code: code,
+            code,
             publisher: this.publisher,
             state,
             redirect_uri: redirectUri
