@@ -207,7 +207,7 @@ describe('Payment', () => {
         });
     });
 
-    describe.only('purchasePromoCodeProductFlowUrl', () => {
+    describe('purchasePromoCodeProductFlowUrl', () => {
         let payment;
         const open = (url, windowName, features) => ({ url, windowName, features });
         const window = { location: {}, screen: {}, open };
