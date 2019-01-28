@@ -1,5 +1,12 @@
 # Changelog
 
+## v3.0.3 (2019-01-28)
+
+## Changes
+
+* Add `oneStepLogin` option to `login` function. If set to `true` username and password will be display on one page
+* Introduce `purchasePromoCodeProductFlowUrl`- function returns url for zuora subscription flow
+
 ## v3.0.2 (2018-12-11)
 
 ## Changes
