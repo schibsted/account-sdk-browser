@@ -637,6 +637,7 @@ export class Identity extends EventEmitter {
      * spec section 3.1.2.1 for more information
      * @param {string} [options.locale=''] - Optional parameter to overwrite client locale setting.
      * New flows supports nb_NO, fi_FI, sv_SE, en_US
+     * @param {boolean} [options.oneStepLogin=false] - display username and password on one screen
      * @return {Window|null} - Reference to popup window if created (or `null` otherwise)
      */
     login({
@@ -650,12 +651,13 @@ export class Identity extends EventEmitter {
         tag = '',
         teaser = '',
         maxAge = '',
-        locale = ''
+        locale = '',
+        oneStepLogin = false
     }) {
         this._closePopup();
         this.cache.delete(HAS_SESSION_CACHE_KEY);
         const url = this.loginUrl({ state, acrValues, scope, redirectUri, newFlow, loginHint, tag,
-            teaser, maxAge, locale });
+            teaser, maxAge, locale, oneStepLogin });
 
         this.showItpModalUponReturning();
 
@@ -707,6 +709,7 @@ export class Identity extends EventEmitter {
      * spec section 3.1.2.1 for more information
      * @param {string} [options.locale=''] - Optional parameter to overwrite client locale setting.
      * New flows supports nb_NO, fi_FI, sv_SE, en_US
+     * @param {boolean} [options.oneStepLogin=false] - display username and password on one screen
      * @return {string} - The url
      */
     loginUrl({
@@ -719,7 +722,8 @@ export class Identity extends EventEmitter {
         tag = '',
         teaser = '',
         maxAge = '',
-        locale = ''
+        locale = '',
+        oneStepLogin = false
     }) {
         if (typeof arguments[0] !== 'object') {
             // backward compatibility
@@ -753,7 +757,8 @@ export class Identity extends EventEmitter {
                 tag,
                 teaser,
                 max_age: maxAge,
-                locale
+                locale,
+                one_step_login: oneStepLogin || ''
             });
         } else {
             // acrValues do not work with the old flows
