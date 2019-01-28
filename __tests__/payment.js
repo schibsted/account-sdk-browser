@@ -5,6 +5,7 @@
 'use strict';
 
 import { Payment } from '../payment';
+import { compareUrls } from './utils';
 
 describe('Payment', () => {
 
@@ -203,6 +204,44 @@ describe('Payment', () => {
 
         test('should fail without campaign id', () => {
             expect(() => payment.purchaseCampaignFlowUrl()).toThrowError(/campaignId is required/);
+        });
+    });
+
+    describe('purchasePromoCodeProductFlowUrl', () => {
+        let payment;
+        const open = (url, windowName, features) => ({ url, windowName, features });
+        const window = { location: {}, screen: {}, open };
+
+        beforeEach(() => {
+            payment = new Payment({ clientId: 'a', redirectUri: 'http://redirect.foo', window, publisher: 'vkse' });
+        });
+
+        test('should work with implicit redirectUri', () => {
+            compareUrls(
+                payment.purchasePromoCodeProductFlowUrl('12'),
+                'https://identity-pre.schibsted.com/authn/payment/purchase/code?client_id=a&redirect_uri=http%3A%2F%2Fredirect.foo&code=12&publisher=vkse'
+            );
+        });
+
+        test('should fail without redirectUri', () => {
+            payment = new Payment({ clientId: 'a', window });
+            expect(() => payment.purchasePromoCodeProductFlowUrl('abc')).toThrowError(/redirectUri is invalid/);
+        });
+
+        test('should fail without publisher', () => {
+            payment = new Payment({ clientId: 'a', window, redirectUri: 'http://redirect.foo' });
+            expect(() => payment.purchasePromoCodeProductFlowUrl('abc')).toThrowError(/publisher is required in the constructor/);
+        });
+
+        test('should fail without code', () => {
+            expect(() => payment.purchasePromoCodeProductFlowUrl()).toThrowError(/code is required/);
+        });
+
+        test('should build uri with code and state', () => {
+            compareUrls(
+                payment.purchasePromoCodeProductFlowUrl('12', '20032'),
+                'https://identity-pre.schibsted.com/authn/payment/purchase/code?client_id=a&redirect_uri=http%3A%2F%2Fredirect.foo&code=12&publisher=vkse&state=20032'
+            );
         });
     });
 });
