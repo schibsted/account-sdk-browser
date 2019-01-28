@@ -161,8 +161,9 @@ describe('Identity', () => {
                 tag: 'sample-tag',
                 teaser: 'sample-teaser-slug',
                 maxAge: 0,
-                locale: 'en_US'
-            }), 'https://login.schibsted.com/oauth/authorize?new-flow=true&redirect_uri=http%3A%2F%2Fexample.com&client_id=foo&state=dummy-state&response_type=code&scope=openid&login_hint=dev@spid.no&max_age=0&tag=sample-tag&teaser=sample-teaser-slug&locale=en_US');
+                locale: 'en_US',
+                oneStepLogin: true
+            }), 'https://login.schibsted.com/oauth/authorize?new-flow=true&redirect_uri=http%3A%2F%2Fexample.com&client_id=foo&state=dummy-state&response_type=code&scope=openid&login_hint=dev@spid.no&max_age=0&tag=sample-tag&teaser=sample-teaser-slug&locale=en_US&one_step_login=true');
         });
 
         test('returns the expected endpoint for new flows with default params', () => {
