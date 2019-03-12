@@ -417,7 +417,8 @@ export class Identity extends EventEmitter {
         const promiseFn = async (resolve, reject) => {
             const postProcess = (sessionData) => {
                 if (sessionData.error) {
-                    throw new SDKError('HasSession endpoint returned an error', sessionData.error);
+                    this.emit('error', sessionData.error);
+                    reject(new SDKError('HasSession failed', sessionData.error));
                 }
                 this._maybeSetVarnishCookie(sessionData);
                 this._emitSessionEvent(this._session, sessionData);
