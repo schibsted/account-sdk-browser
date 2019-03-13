@@ -417,7 +417,8 @@ export class Identity extends EventEmitter {
         const promiseFn = async (resolve, reject) => {
             const postProcess = (sessionData) => {
                 if (sessionData.error) {
-                    throw new SDKError('HasSession endpoint returned an error', sessionData.error);
+                    this.emit('error', sessionData.error);
+                    return reject(new SDKError('HasSession failed', sessionData.error));
                 }
                 this._maybeSetVarnishCookie(sessionData);
                 this._emitSessionEvent(this._session, sessionData);
@@ -425,8 +426,7 @@ export class Identity extends EventEmitter {
 
             if (typeof autologin !== 'boolean') {
                 const [type, value] = inspect(autologin);
-                reject(new SDKError(`Parameter 'autologin' must be boolean, was: "${type}:${value}"`));
-                return;
+                return reject(new SDKError(`Parameter 'autologin' must be boolean, was: "${type}:${value}"`));
             }
 
             try {
@@ -435,8 +435,7 @@ export class Identity extends EventEmitter {
                     const cachedData = this.cache.get(HAS_SESSION_CACHE_KEY);
                     if (cachedData) {
                         postProcess(cachedData);
-                        resolve(cachedData);
-                        return;
+                        return resolve(cachedData);
                     }
                 }
 
@@ -451,7 +450,8 @@ export class Identity extends EventEmitter {
                         // session-cookie but no session is found (return code will be 404), then we
                         // *should* throw an exception and *not* fall through to spid-hassession
                         if (err.code !== 400) {
-                            throw err;
+                            this.emit('error', err);
+                            return reject(new SDKError('HasSession failed', err));
                         }
                         data = null;
                     }
