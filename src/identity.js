@@ -418,7 +418,7 @@ export class Identity extends EventEmitter {
             const postProcess = (sessionData) => {
                 if (sessionData.error) {
                     this.emit('error', sessionData.error);
-                    reject(new SDKError('HasSession failed', sessionData.error));
+                    return reject(new SDKError('HasSession failed', sessionData.error));
                 }
                 this._maybeSetVarnishCookie(sessionData);
                 this._emitSessionEvent(this._session, sessionData);
@@ -426,8 +426,7 @@ export class Identity extends EventEmitter {
 
             if (typeof autologin !== 'boolean') {
                 const [type, value] = inspect(autologin);
-                reject(new SDKError(`Parameter 'autologin' must be boolean, was: "${type}:${value}"`));
-                return;
+                return reject(new SDKError(`Parameter 'autologin' must be boolean, was: "${type}:${value}"`));
             }
 
             try {
@@ -436,8 +435,7 @@ export class Identity extends EventEmitter {
                     const cachedData = this.cache.get(HAS_SESSION_CACHE_KEY);
                     if (cachedData) {
                         postProcess(cachedData);
-                        resolve(cachedData);
-                        return;
+                        return resolve(cachedData);
                     }
                 }
 
@@ -453,8 +451,7 @@ export class Identity extends EventEmitter {
                         // *should* throw an exception and *not* fall through to spid-hassession
                         if (err.code !== 400) {
                             this.emit('error', err);
-                            reject(new SDKError('HasSession failed', err));
-                            return;
+                            return reject(new SDKError('HasSession failed', err));
                         }
                         data = null;
                     }
