@@ -452,7 +452,9 @@ export class Identity extends EventEmitter {
                         // session-cookie but no session is found (return code will be 404), then we
                         // *should* throw an exception and *not* fall through to spid-hassession
                         if (err.code !== 400) {
-                            throw err;
+                            this.emit('error', err);
+                            reject(new SDKError('HasSession failed', err));
+                            return;
                         }
                         data = null;
                     }
