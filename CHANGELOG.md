@@ -1,5 +1,11 @@
 # Changelog
 
+## v3.0.4 (2019-03-14)
+
+### Fixes
+
+* Use `reject` in hasSession `promiseFn`
+
 ## v3.0.3 (2019-01-28)
 
 ## Changes
