@@ -97,6 +97,13 @@ describe('Identity', () => {
 
             expect(window.location.href).toBe('https://identity-pre.schibsted.com/logout?client_id=foo&redirect_uri=http%3A%2F%2Ffoo.com&response_type=code');
         });
+        test('Should redirect to session-service for site-specific logout if sessionDomain is configured', async () => {
+            const window = { location: {} };
+            const identity = new Identity({ clientId: 'foo', redirectUri: 'http://foo.com', sessionDomain: 'http://id.foo.com', window});
+            identity.logout();
+
+            expect(window.location.href).toBe('http://id.foo.com/logout?client_sdrn=sdrn%3Aschibsted.com%3Aclient%3Afoo&redirect_uri=http%3A%2F%2Ffoo.com');
+        });
         test('Should clear cache when logging out', async () => {
             const webStorageMock = () => {
                 const mock = {

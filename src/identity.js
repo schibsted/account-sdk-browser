@@ -782,10 +782,12 @@ export class Identity extends EventEmitter {
      */
     logoutUrl(redirectUri = this.redirectUri) {
         assert(isUrl(redirectUri), `logoutUrl(): redirectUri is invalid`);
-        return this._spid.makeUrl('logout', {
-            response_type: 'code',
-            redirect_uri: redirectUri
-        });
+        const params = { redirect_uri: redirectUri };
+        if (this._sessionService) {
+            return this._sessionService.makeUrl('logout', params);
+        } else {
+            return this._spid.makeUrl('logout', Object.assign({ response_type: 'code' }, params));
+        }
     }
 
 
