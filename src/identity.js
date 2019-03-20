@@ -441,20 +441,7 @@ export class Identity extends EventEmitter {
 
                 let data = null;
                 if (this._sessionService) {
-                    try {
-                        data = await this._sessionService.get('/session');
-                    } catch (err) {
-                        // The session-service returns 400 if no session-cookie is sent in the
-                        // request. This will be the case if the user hasn't logged in since the
-                        // site switched to using the session-service. If the request contains a
-                        // session-cookie but no session is found (return code will be 404), then we
-                        // *should* throw an exception and *not* fall through to spid-hassession
-                        if (err.code !== 400) {
-                            this.emit('error', err);
-                            return reject(new SDKError('HasSession failed', err));
-                        }
-                        data = null;
-                    }
+                    data = await this._sessionService.get('/session');
                 }
                 const autoLoginConverted = autologin ? 1 : 0;
 

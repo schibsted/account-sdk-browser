@@ -387,11 +387,9 @@ describe('Identity', () => {
                 defaultParams: { client_sdrn, redirect_uri: options.redirectUri },
             });
             fetch.mockImplementationOnce(async () => ({ ok: false, status: 400, statusText: 'No cookie present' }));
-            fetch.mockImplementationOnce(async () => ({ ok: true, json: async() => ({ error: { type: 'UserException' } }) }));
             await expect(identity.hasSession()).rejects.toMatchObject({ message: 'HasSession failed' });
-            expect(fetch.mock.calls.length).toBe(2);
+            expect(fetch.mock.calls.length).toBe(1);
             expect(fetch.mock.calls[0][0]).toMatch(/^http:\/\/id.e.com\//);
-            expect(fetch.mock.calls[1][0]).toMatch(/^https:\/\/session.identity-pre.schibsted.com\/rpc\/hasSession.js/);
         });
 
         test('should terminate "chain" if session-service call succeeds', async () => {
