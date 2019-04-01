@@ -379,7 +379,7 @@ export class Identity extends EventEmitter {
      * @returns {boolean}
      */
     _itpModalRequired() {
-        if (!document.requestStorageAccess) {
+        if (!document.requestStorageAccess || this._sessionService) {
             return false;
         }
 
