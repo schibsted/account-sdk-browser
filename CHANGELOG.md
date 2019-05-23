@@ -1,5 +1,12 @@
 # Changelog
 
+## v3.0.5 (2019-05-23)
+
+### Fixes
+
+* Do not display ITP dialog when session service is enabled
+* Mark purchasePaylinkUrl as depracated
+
 ## v3.0.4 (2019-03-14)
 
 ### Fixes
