@@ -40,6 +40,12 @@
  * @prop {string} ENDPOINTS.BFF.PRE - Staging environment
  * @prop {string} ENDPOINTS.BFF.PRO - Production environment Sweden
  * @prop {string} ENDPOINTS.BFF.PRO_NO - Production environment Norway
+ * @prop {object} ENDPOINTS.SESSION_SERVICE - Endpoints to check global user session data
+ * @prop {string} ENDPOINTS.SESSION_SERVICE.LOCAL - Local endpoint (for Identity team)
+ * @prop {string} ENDPOINTS.SESSION_SERVICE.DEV - Dev environment (for Identity team)
+ * @prop {string} ENDPOINTS.SESSION_SERVICE.PRE - Staging environment
+ * @prop {string} ENDPOINTS.SESSION_SERVICE.PRO - Production environment Sweden
+ * @prop {string} ENDPOINTS.SESSION_SERVICE.PRO_NO - Production environment Norway
  * @prop {object} JSONP
  * @prop {Number} JSONP.TIMEOUT=7000 - Timeout in milliseconds
  */
@@ -65,6 +71,13 @@ const config = {
             PRE: 'https://identity-pre.schibsted.com/authn/',
             PRO: 'https://login.schibsted.com/authn/',
             PRO_NO: 'https://payment.schibsted.no/authn/',
+        },
+        SESSION_SERVICE: {
+            LOCAL: 'http://session-service.id.localhost',
+            DEV: 'https://session-service.identity-dev.schibsted.com',
+            PRE: 'https://session-service.identity-pre.schibsted.com',
+            PRO: 'https://session-service.login.schibsted.com',
+            PRO_NO: 'https://session-service.payment.schibsted.no',
         },
     },
     JSONP: { TIMEOUT: 7000 }, // ms
