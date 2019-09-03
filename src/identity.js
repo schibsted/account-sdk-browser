@@ -64,7 +64,7 @@ import * as spidTalk from './spidTalk';
 
 /**
  * @typedef {object} Identity#PublicUserData
- * @property {string} email
+ * @property {string} identifier
  */
 
 const HAS_SESSION_CACHE_KEY = 'hasSession-cache';

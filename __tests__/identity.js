@@ -556,7 +556,7 @@ describe('Identity', () => {
         });
 
         test('should work when we get a result from session-service', async () => {
-            const expectedData = { email: 'test@example.com' }
+            const expectedData = { identifier: 'test@example.com' }
             identity._globalSessionService.fetch = jest.fn(() => ({ ok: true, json: () => expectedData }));
             const userData = await identity.getUserContextData();
             expect(userData).toMatchObject(expectedData);
