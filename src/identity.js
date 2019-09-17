@@ -89,12 +89,12 @@ export class Identity extends EventEmitter {
      * @param {string} [options.redirectUri] - Example: "https://site.com"
      * @param {string} [options.sessionDomain] - Example: "https://id.site.com"
      * @param {string} [options.env='PRE'] - Schibsted account environment: `PRE`, `PRO` or `PRO_NO`
-     * @param {boolean} [options.singleSiteLogout] - Whether site-specific logout should be used
+     * @param {boolean} [options.siteSpecificLogout] - Whether site-specific logout should be used
      * @param {function} [options.log] - A function that receives debug log information. If not set,
      * no logging will be done
      * @throws {SDKError} - If any of options are invalid
      */
-    constructor({ clientId, redirectUri, sessionDomain, env = 'PRE', singleSiteLogout = false, log, window = globalWindow() }) {
+    constructor({ clientId, redirectUri, sessionDomain, env = 'PRE', siteSpecificLogout = false, log, window = globalWindow() }) {
         super();
         assert(isNonEmptyString(clientId), 'clientId parameter is required');
         assert(isObject(window), 'The reference to window is missing');
@@ -107,7 +107,7 @@ export class Identity extends EventEmitter {
         this.cache = new Cache(() => this.window && this.window.localStorage);
         this.redirectUri = redirectUri;
         this.env = env;
-        this.singleSiteLogout = singleSiteLogout;
+        this.siteSpecificLogout = siteSpecificLogout;
         this.log = log;
 
         if (sessionDomain) {
@@ -446,7 +446,7 @@ export class Identity extends EventEmitter {
                     try {
                         data = await this._sessionService.get('/session');
                     } catch (err) {	
-                        if (this.singleSiteLogout) {
+                        if (this.siteSpecificLogout) {
                             // Don't fallback to other sources for user session lookup
                             throw err;
                         }
@@ -790,7 +790,7 @@ export class Identity extends EventEmitter {
     logoutUrl(redirectUri = this.redirectUri) {
         assert(isUrl(redirectUri), `logoutUrl(): redirectUri is invalid`);
         const params = { redirect_uri: redirectUri };
-        if (this._sessionService && this.singleSiteLogout) {
+        if (this._sessionService && this.siteSpecificLogout) {
             return this._sessionService.makeUrl('logout', params);
         }
         return this._spid.makeUrl('logout', Object.assign({ response_type: 'code' }, params));
