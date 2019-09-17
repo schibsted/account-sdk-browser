@@ -548,6 +548,27 @@ describe('Identity', () => {
         });
     });
 
+    describe('getUserContextData', () => {
+        let identity;
+
+        beforeEach(() => {
+            identity = new Identity({ clientId: 'foo', redirectUri: 'http://example.com' });
+        });
+
+        test('should work when we get a result from session-service', async () => {
+            const expectedData = { identifier: 'test@example.com' }
+            identity._globalSessionService.fetch = jest.fn(() => ({ ok: true, json: () => expectedData }));
+            const userData = await identity.getUserContextData();
+            expect(userData).toMatchObject(expectedData);
+        });
+
+        test('should return null on failure from session-service', async () => {
+            identity._globalSessionService.fetch = jest.fn(() => ({ ok: false }));
+            const userData = await identity.getUserContextData();
+            expect(userData).toBeNull();
+        });
+    });
+
     describe('_emitSessionEvent', () => {
         const fetch = require('fetch-jsonp');
         let identity;

@@ -62,6 +62,11 @@ import * as spidTalk from './spidTalk';
  * @property {number} response.serverTime - Server time in seconds since the Unix Epoch. Example: 1506287788
  */
 
+/**
+ * @typedef {object} Identity#PublicUserData
+ * @property {string} identifier
+ */
+
 const HAS_SESSION_CACHE_KEY = 'hasSession-cache';
 const LOGIN_IN_PROGRESS_KEY = 'loginInProgress-cache';
 const globalWindow = () => window;
@@ -127,6 +132,7 @@ export class Identity extends EventEmitter {
         this._setBffServerUrl(env);
         this._setOauthServerUrl(env);
         this._setHasSessionServerUrl(env);
+        this._setGlobalSessionServiceUrl(env);
     }
 
     /**
@@ -160,9 +166,9 @@ export class Identity extends EventEmitter {
     }
 
     /**
-     * Set BFF server URL - real URL or 'PRE' style key
+     * Set BFF server URL
      * @private
-     * @param {string} url
+     * @param {string} url  - real URL or 'PRE' style key
      * @returns {void}
      */
     _setBffServerUrl(url) {
@@ -175,7 +181,7 @@ export class Identity extends EventEmitter {
     }
 
     /**
-     * Set session-service domain
+     * Set site-specific session-service domain
      * @private
      * @param {string} domain - real URL — (**not** 'PRE' style env key)
      * @returns {void}
@@ -187,6 +193,22 @@ export class Identity extends EventEmitter {
             serverUrl: domain,
             log: this.log,
             defaultParams: { client_sdrn, redirect_uri: this.redirectUri },
+        });
+    }
+
+    /**
+     * Set global session-service server URL
+     * @private
+     * @param {string} url - real URL or 'PRE' style key
+     * @returns {void}
+     */
+    _setGlobalSessionServiceUrl(url) {
+        assert(isStr(url), `url parameter is invalid: ${url}`);
+        const client_sdrn = `sdrn:${NAMESPACE[this.env]}:client:${this.clientId}`;
+        this._globalSessionService = new RESTClient({
+            serverUrl: urlMapper(url, ENDPOINTS.SESSION_SERVICE),
+            log: this.log,
+            defaultParams: { client_sdrn },
         });
     }
 
@@ -585,6 +607,23 @@ export class Identity extends EventEmitter {
             return user.uuid;
         }
         throw new SDKError('The user is not connected to this merchant');
+    }
+
+    /**
+     * @summary Get basic information about any user currently logged-in to their Schibsted account
+     * in this browser. Can be used to provide context in a continue-as prompt.
+     * @description This function relies on the global Schibsted account user session cookie, which
+     * is a third-party cookie and hence might be blocked by the browser (for example due to ITP in
+     * Safari). So there's no guarantee any data is returned, even though a user is logged-in in
+     * the current browser.
+     * @return {Identity#PublicUserData|null}
+     */
+    async getUserContextData() {
+        try {
+            return await this._globalSessionService.get('/user-context');
+        } catch (_) {
+            return null;
+        }
     }
 
     /**
