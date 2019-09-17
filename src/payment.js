@@ -126,6 +126,8 @@ export class Payment {
     }
 
     /**
+     * @deprecated https://github.com/schibsted/account-sdk-browser/issues/94
+     *
      * Get the url for the paylink purchase
      * @todo Check working-ness for BFF + SPiD
      * @param {string} paylinkId
