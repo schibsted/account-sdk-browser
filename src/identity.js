@@ -89,11 +89,12 @@ export class Identity extends EventEmitter {
      * @param {string} [options.redirectUri] - Example: "https://site.com"
      * @param {string} [options.sessionDomain] - Example: "https://id.site.com"
      * @param {string} [options.env='PRE'] - Schibsted account environment: `PRE`, `PRO` or `PRO_NO`
+     * @param {boolean} [options.singleSiteLogout] - Whether site-specific logout should be used
      * @param {function} [options.log] - A function that receives debug log information. If not set,
      * no logging will be done
      * @throws {SDKError} - If any of options are invalid
      */
-    constructor({ clientId, redirectUri, sessionDomain, env = 'PRE', log, window = globalWindow() }) {
+    constructor({ clientId, redirectUri, sessionDomain, env = 'PRE', singleSiteLogout = false, log, window = globalWindow() }) {
         super();
         assert(isNonEmptyString(clientId), 'clientId parameter is required');
         assert(isObject(window), 'The reference to window is missing');
@@ -106,6 +107,7 @@ export class Identity extends EventEmitter {
         this.cache = new Cache(() => this.window && this.window.localStorage);
         this.redirectUri = redirectUri;
         this.env = env;
+        this.singleSiteLogout = singleSiteLogout;
         this.log = log;
 
         if (sessionDomain) {
@@ -441,7 +443,25 @@ export class Identity extends EventEmitter {
 
                 let data = null;
                 if (this._sessionService) {
-                    data = await this._sessionService.get('/session');
+                    try {
+                        data = await this._sessionService.get('/session');
+                    } catch (err) {	
+                        if (this.singleSiteLogout) {
+                            // Don't fallback to other sources for user session lookup
+                            throw err;
+                        }
+
+                        // The session-service returns 400 if no session-cookie is sent in the	
+                        // request. This will be the case if the user hasn't logged in since the	
+                        // site switched to using the session-service. If the request contains a	
+                        // session-cookie but no session is found (return code will be 404), then we	
+                        // *should* throw an exception and *not* fall through to spid-hassession	
+                        if (err.code !== 400) {	
+                            this.emit('error', err);	
+                            return reject(new SDKError('HasSession failed', err));	
+                        }	
+                        data = null;	
+                    }
                 }
                 const autoLoginConverted = autologin ? 1 : 0;
 
@@ -770,11 +790,10 @@ export class Identity extends EventEmitter {
     logoutUrl(redirectUri = this.redirectUri) {
         assert(isUrl(redirectUri), `logoutUrl(): redirectUri is invalid`);
         const params = { redirect_uri: redirectUri };
-        if (this._sessionService) {
+        if (this._sessionService && this.singleSiteLogout) {
             return this._sessionService.makeUrl('logout', params);
-        } else {
-            return this._spid.makeUrl('logout', Object.assign({ response_type: 'code' }, params));
         }
+        return this._spid.makeUrl('logout', Object.assign({ response_type: 'code' }, params));
     }
 
 

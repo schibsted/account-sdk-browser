@@ -97,9 +97,9 @@ describe('Identity', () => {
 
             expect(window.location.href).toBe('https://identity-pre.schibsted.com/logout?client_id=foo&redirect_uri=http%3A%2F%2Ffoo.com&response_type=code');
         });
-        test('Should redirect to session-service for site-specific logout if sessionDomain is configured', async () => {
+        test('Should redirect to session-service for site-specific logout if configured', async () => {
             const window = { location: {} };
-            const identity = new Identity({ clientId: 'foo', redirectUri: 'http://foo.com', sessionDomain: 'http://id.foo.com', window});
+            const identity = new Identity({ clientId: 'foo', redirectUri: 'http://foo.com', sessionDomain: 'http://id.foo.com', singleSiteLogout: true, window});
             identity.logout();
 
             expect(window.location.href).toBe('http://id.foo.com/logout?client_sdrn=sdrn%3Aschibsted.com%3Aclient%3Afoo&redirect_uri=http%3A%2F%2Ffoo.com');
@@ -377,8 +377,8 @@ describe('Identity', () => {
             });
         });
 
-        test('should go to session-service if defined', async () => {
-            const options = { clientId: 'foo', redirectUri: 'http://e.com', sessionDomain: 'http://id.e.com' };
+        test('should only go to session-service if singleSiteLogout', async () => {
+            const options = { clientId: 'foo', redirectUri: 'http://e.com', sessionDomain: 'http://id.e.com', singleSiteLogout: true };
             const client_sdrn = `sdrn:schibsted:client:${options.clientId}`;
             identity = new Identity(options);
             identity._sessionService = new RESTClient({
