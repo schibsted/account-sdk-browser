@@ -1,6 +1,6 @@
 # Changelog
 
-## v3.0.5 (2019-05-23)
+## v3.0.6 (2019-09-18)
 
 ### New features
 * New method getUserContextData
