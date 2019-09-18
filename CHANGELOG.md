@@ -2,6 +2,12 @@
 
 ## v3.0.5 (2019-05-23)
 
+### New features
+* New method getUserContextData
+* siteSpecificLogout flag (default false). When enabled, logout will logout user from local session-service, but not from Schibsted Account
+
+## v3.0.5 (2019-05-23)
+
 ### Fixes
 
 * Do not display ITP dialog when session service is enabled
