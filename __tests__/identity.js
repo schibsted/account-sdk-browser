@@ -97,6 +97,13 @@ describe('Identity', () => {
 
             expect(window.location.href).toBe('https://identity-pre.schibsted.com/logout?client_id=foo&redirect_uri=http%3A%2F%2Ffoo.com&response_type=code');
         });
+        test('Should redirect to session-service for site-specific logout if configured', async () => {
+            const window = { location: {} };
+            const identity = new Identity({ clientId: 'foo', redirectUri: 'http://foo.com', sessionDomain: 'http://id.foo.com', siteSpecificLogout: true, window});
+            identity.logout();
+
+            expect(window.location.href).toBe('http://id.foo.com/logout?client_sdrn=sdrn%3Aschibsted.com%3Aclient%3Afoo&redirect_uri=http%3A%2F%2Ffoo.com');
+        });
         test('Should clear cache when logging out', async () => {
             const webStorageMock = () => {
                 const mock = {
@@ -370,8 +377,8 @@ describe('Identity', () => {
             });
         });
 
-        test('should go to session-service if defined', async () => {
-            const options = { clientId: 'foo', redirectUri: 'http://e.com', sessionDomain: 'http://id.e.com' };
+        test('should only go to session-service if siteSpecificLogout=true', async () => {
+            const options = { clientId: 'foo', redirectUri: 'http://e.com', sessionDomain: 'http://id.e.com', siteSpecificLogout: true };
             const client_sdrn = `sdrn:schibsted:client:${options.clientId}`;
             identity = new Identity(options);
             identity._sessionService = new RESTClient({
@@ -380,11 +387,9 @@ describe('Identity', () => {
                 defaultParams: { client_sdrn, redirect_uri: options.redirectUri },
             });
             fetch.mockImplementationOnce(async () => ({ ok: false, status: 400, statusText: 'No cookie present' }));
-            fetch.mockImplementationOnce(async () => ({ ok: true, json: async() => ({ error: { type: 'UserException' } }) }));
             await expect(identity.hasSession()).rejects.toMatchObject({ message: 'HasSession failed' });
-            expect(fetch.mock.calls.length).toBe(2);
+            expect(fetch.mock.calls.length).toBe(1);
             expect(fetch.mock.calls[0][0]).toMatch(/^http:\/\/id.e.com\//);
-            expect(fetch.mock.calls[1][0]).toMatch(/^https:\/\/session.identity-pre.schibsted.com\/rpc\/hasSession.js/);
         });
 
         test('should terminate "chain" if session-service call succeeds', async () => {
