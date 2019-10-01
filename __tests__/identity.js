@@ -56,7 +56,7 @@ describe('Identity', () => {
             const identity = new Identity({ clientId: 'foo', redirectUri: 'http://foo.com', window });
             identity.login({ state: 'foo' });
             expect(window).toHaveProperty('location.href',
-                'https://identity-pre.schibsted.com/oauth/authorize?client_id=foo&redirect_uri=http%3A%2F%2Ffoo.com&response_type=code&new-flow=true&scope=openid&state=foo');
+                'https://identity-pre.schibsted.com/oauth/authorize?client_id=foo&redirect_uri=http%3A%2F%2Ffoo.com&response_type=code&new-flow=true&scope=openid&state=foo&prompt=select_account');
         });
         test('Should open popup if "preferPopup" is true', () => {
             const window = { screen: {}, open: () => ({ fakePopup: 'yup' }) };
@@ -69,7 +69,7 @@ describe('Identity', () => {
             const identity = new Identity({ clientId: 'foo', redirectUri: 'http://foo.com', window });
             identity.login({ state: 'foo', preferPopup: true });
             expect(window).toHaveProperty('location.href',
-                'https://identity-pre.schibsted.com/oauth/authorize?client_id=foo&redirect_uri=http%3A%2F%2Ffoo.com&response_type=code&new-flow=true&scope=openid&state=foo');
+                'https://identity-pre.schibsted.com/oauth/authorize?client_id=foo&redirect_uri=http%3A%2F%2Ffoo.com&response_type=code&new-flow=true&scope=openid&state=foo&prompt=select_account');
         });
         test('Should close previous popup if it exists (and is open)', () => {
             const window = { screen: {}, open: () => ({ fakePopup: 'yup' }) };
@@ -170,7 +170,7 @@ describe('Identity', () => {
                 maxAge: 0,
                 locale: 'en_US',
                 oneStepLogin: true
-            }), 'https://login.schibsted.com/oauth/authorize?new-flow=true&redirect_uri=http%3A%2F%2Fexample.com&client_id=foo&state=dummy-state&response_type=code&scope=openid&login_hint=dev@spid.no&max_age=0&tag=sample-tag&teaser=sample-teaser-slug&locale=en_US&one_step_login=true');
+            }), 'https://login.schibsted.com/oauth/authorize?new-flow=true&redirect_uri=http%3A%2F%2Fexample.com&client_id=foo&state=dummy-state&response_type=code&scope=openid&login_hint=dev@spid.no&max_age=0&tag=sample-tag&teaser=sample-teaser-slug&locale=en_US&one_step_login=true&prompt=select_account');
         });
 
         test('returns the expected endpoint for new flows with default params', () => {
@@ -182,7 +182,7 @@ describe('Identity', () => {
             });
             compareUrls(identity.loginUrl({
                 state: 'dummy-state',
-            }), 'https://login.schibsted.com/oauth/authorize?new-flow=true&redirect_uri=http%3A%2F%2Fexample.com&client_id=foo&state=dummy-state&response_type=code&scope=openid');
+            }), 'https://login.schibsted.com/oauth/authorize?new-flow=true&redirect_uri=http%3A%2F%2Fexample.com&client_id=foo&state=dummy-state&response_type=code&scope=openid&prompt=select_account');
         });
     });
 
@@ -223,7 +223,7 @@ describe('Identity', () => {
                 'sample-tag',
                 'sample-teaser-slug',
                 0
-            ), 'https://login.schibsted.com/oauth/authorize?new-flow=true&redirect_uri=http%3A%2F%2Fexample.com&client_id=foo&state=dummy-state&response_type=code&scope=openid&login_hint=dev@spid.no&max_age=0&tag=sample-tag&teaser=sample-teaser-slug');
+            ), 'https://login.schibsted.com/oauth/authorize?new-flow=true&redirect_uri=http%3A%2F%2Fexample.com&client_id=foo&state=dummy-state&response_type=code&scope=openid&login_hint=dev@spid.no&max_age=0&tag=sample-tag&teaser=sample-teaser-slug&prompt=select_account');
         });
 
         test('returns the expected endpoint for new flows with default params', () => {
@@ -238,7 +238,7 @@ describe('Identity', () => {
                 undefined,
                 undefined,
                 undefined,
-            ), 'https://login.schibsted.com/oauth/authorize?new-flow=true&redirect_uri=http%3A%2F%2Fexample.com&client_id=foo&state=dummy-state&response_type=code&scope=openid');
+            ), 'https://login.schibsted.com/oauth/authorize?new-flow=true&redirect_uri=http%3A%2F%2Fexample.com&client_id=foo&state=dummy-state&response_type=code&scope=openid&prompt=select_account');
         });
     });
 

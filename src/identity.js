@@ -804,7 +804,8 @@ export class Identity extends EventEmitter {
                 teaser,
                 max_age: maxAge,
                 locale,
-                one_step_login: oneStepLogin || ''
+                one_step_login: oneStepLogin || '',
+                prompt: 'select_account'
             });
         } else {
             // acrValues do not work with the old flows
