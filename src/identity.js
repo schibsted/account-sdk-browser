@@ -64,7 +64,8 @@ import * as spidTalk from './spidTalk';
 
 /**
  * @typedef {object} Identity#PublicUserData
- * @property {string} identifier
+ * @property {string} identifier - User UUID, to be be used as `loginHint` for {@link Identity#login}
+ * @property {string} display_text - Human-readable user identifier
  */
 
 const HAS_SESSION_CACHE_KEY = 'hasSession-cache';
@@ -673,7 +674,7 @@ export class Identity extends EventEmitter {
      * @param {boolean} [options.preferPopup=false] - Should we try to open a popup window?
      * @param {boolean} [options.newFlow=true] - Should we try the new GDPR-safe flow or the
      * legacy/stable SPiD flow?
-     * @param {string} [options.loginHint=''] - user email hint
+     * @param {string} [options.loginHint=''] - user email or UUID hint
      * @param {string} [options.tag=''] - Pulse tag
      * @param {string} [options.teaser=''] - Teaser slug. Teaser with given slug will be displayed
      * in place of default teaser
@@ -745,7 +746,7 @@ export class Identity extends EventEmitter {
      * @param {string} [options.redirectUri=this.redirectUri]
      * @param {boolean} [options.newFlow=true] - Should we try the new flow or the old Schibsted account
      * login? If this parameter is set to false, the `acrValues` parameter doesn't have any effect
-     * @param {string} [options.loginHint=''] - user email hint
+     * @param {string} [options.loginHint=''] - user email or UUID hint
      * @param {string} [options.tag=''] - Pulse tag
      * @param {string} [options.teaser=''] - Teaser slug. Teaser with given slug will be displayed
      * in place of default teaser
