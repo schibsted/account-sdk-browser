@@ -240,6 +240,22 @@ describe('Identity', () => {
                 undefined,
             ), 'https://login.schibsted.com/oauth/authorize?new-flow=true&redirect_uri=http%3A%2F%2Fexample.com&client_id=foo&state=dummy-state&response_type=code&scope=openid&prompt=select_account');
         });
+
+        test('returns the expected endpoint for new flows with siteSpecificLogout=false', () => {
+            const identity = new Identity({
+                env: 'PRO',
+                clientId: 'foo',
+                redirectUri: 'http://example.com',
+                window: {},
+                siteSpecificLogout: false,
+            });
+            compareUrls(identity.loginUrl(
+                'dummy-state',
+                undefined,
+                undefined,
+                undefined,
+            ), 'https://login.schibsted.com/oauth/authorize?new-flow=true&redirect_uri=http%3A%2F%2Fexample.com&client_id=foo&state=dummy-state&response_type=code&scope=openid');
+        });
     });
 
     describe('hasSession', () => {
