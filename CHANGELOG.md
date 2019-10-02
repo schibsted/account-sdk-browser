@@ -1,5 +1,13 @@
 # Changelog
 
+## v3.1.0-rc (2019-10-02)
+
+### Semi-breaking ish changes
+* Enable site specific logout by default- it is experimental feature for now
+
+### Fixes
+* Update PublicUserData type description
+
 ## v3.0.6 (2019-09-18)
 
 ### New features
