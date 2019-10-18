@@ -498,13 +498,17 @@ export class Identity extends EventEmitter {
                 return sessionData;
             };
             this._hasSessionInProgress = _getSession()
-                .catch(err => {
-                    this.emit('error', err);
-                    throw new SDKError('HasSession failed', err);
-                })
-                .finally(() => {
-                    this._hasSessionInProgress = false;
-                });
+                .then(
+                    sessionData => {
+                        this._hasSessionInProgress = false;
+                        return sessionData;
+                    },
+                    err => {
+                        this.emit('error', err);
+                        this._hasSessionInProgress = false;
+                        throw new SDKError('HasSession failed', err);
+                    }
+                );
         }
 
         return this._hasSessionInProgress;
