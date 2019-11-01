@@ -436,80 +436,81 @@ export class Identity extends EventEmitter {
      * @return {Promise<Identity#HasSessionSuccessResponse|Identity#HasSessionFailureResponse>}
      */
     hasSession(autologin = true) {
-        if (!this._hasSessionInProgress) {
-            if (typeof autologin !== 'boolean') {
-                const [type, value] = inspect(autologin);
-                return Promise.reject(new SDKError(`Parameter 'autologin' must be boolean, was: "${type}:${value}"`));
-            }
-            const _postProcess = (sessionData) => {
-                if (sessionData.error) {
-                    throw new SDKError('HasSession failed', sessionData.error);
-                }
-                this._maybeSetVarnishCookie(sessionData);
-                this._emitSessionEvent(this._session, sessionData);
-            };
-            const _getSession = async () => {
-                let sessionData = null;
-                if (this._enableSessionCaching) {
-                    // Try to resolve from cache (it has a TTL)
-                    sessionData = this.cache.get(HAS_SESSION_CACHE_KEY);
-                }
-                if (!sessionData && this._sessionService) {
-                    try {
-                        sessionData = await this._sessionService.get('/session');
-                    } catch (err) {
-                        if (this.siteSpecificLogout) {
-                            // Don't fallback to other sources for user session lookup
-                            throw err;
-                        }
-
-                        // The session-service returns 400 if no session-cookie is sent in the
-                        // request. This will be the case if the user hasn't logged in since the
-                        // site switched to using the session-service. If the request contains a
-                        // session-cookie but no session is found (return code will be 404), then we
-                        // *should* throw an exception and *not* fall through to spid-hassession
-                        if (err.code !== 400) {
-                            throw err;
-                        }
-                    }
-                }
-
-                const autoLoginConverted = autologin ? 1 : 0;
-                if (!sessionData && !this._itpMode) {
-                    sessionData = await this._hasSession.get('rpc/hasSession.js', { autologin: autoLoginConverted });
-                }
-                if (this._itpMode || (sessionData && isObject(sessionData.error) && sessionData.error.type === 'LoginException')) {
-                    sessionData = await this._spid.get('ajax/hasSession.js', { autologin: autoLoginConverted });
-                }
-
-                const shouldShowItpModal = this._itpModalRequired() && !this._itpMode && sessionData && isObject(sessionData.error)
-                    && sessionData.error.type === 'UserException' && this.cache.get(LOGIN_IN_PROGRESS_KEY) !== null;
-                if (shouldShowItpModal) {
-                    this.cache.delete(LOGIN_IN_PROGRESS_KEY);
-                    const modal = new ItpModal(this._spid, this.clientId, this.redirectUri, this.env);
-                    sessionData = await modal.show()
-                }
-                if (sessionData && this._enableSessionCaching) {
-                    const expiresIn = 1000 * (sessionData.expiresIn || 300);
-                    this.cache.set(HAS_SESSION_CACHE_KEY, sessionData, expiresIn);
-                }
-                _postProcess(sessionData);
-                this._session = sessionData;
-                return sessionData;
-            };
-            this._hasSessionInProgress = _getSession()
-                .then(
-                    sessionData => {
-                        this._hasSessionInProgress = false;
-                        return sessionData;
-                    },
-                    err => {
-                        this.emit('error', err);
-                        this._hasSessionInProgress = false;
-                        throw new SDKError('HasSession failed', err);
-                    }
-                );
+        if (this._hasSessionInProgress) {
+            return this._hasSessionInProgress;
         }
+        if (typeof autologin !== 'boolean') {
+            const [type, value] = inspect(autologin);
+            return Promise.reject(new SDKError(`Parameter 'autologin' must be boolean, was: "${type}:${value}"`));
+        }
+        const _postProcess = (sessionData) => {
+            if (sessionData.error) {
+                throw new SDKError('HasSession failed', sessionData.error);
+            }
+            this._maybeSetVarnishCookie(sessionData);
+            this._emitSessionEvent(this._session, sessionData);
+        };
+        const _getSession = async () => {
+            let sessionData = null;
+            if (this._enableSessionCaching) {
+                // Try to resolve from cache (it has a TTL)
+                sessionData = this.cache.get(HAS_SESSION_CACHE_KEY);
+            }
+            if (!sessionData && this._sessionService) {
+                try {
+                    sessionData = await this._sessionService.get('/session');
+                } catch (err) {
+                    if (this.siteSpecificLogout) {
+                        // Don't fallback to other sources for user session lookup
+                        throw err;
+                    }
+
+                    // The session-service returns 400 if no session-cookie is sent in the
+                    // request. This will be the case if the user hasn't logged in since the
+                    // site switched to using the session-service. If the request contains a
+                    // session-cookie but no session is found (return code will be 404), then we
+                    // *should* throw an exception and *not* fall through to spid-hassession
+                    if (err.code !== 400) {
+                        throw err;
+                    }
+                }
+            }
+
+            const autoLoginConverted = autologin ? 1 : 0;
+            if (!sessionData && !this._itpMode) {
+                sessionData = await this._hasSession.get('rpc/hasSession.js', { autologin: autoLoginConverted });
+            }
+            if (this._itpMode || (sessionData && isObject(sessionData.error) && sessionData.error.type === 'LoginException')) {
+                sessionData = await this._spid.get('ajax/hasSession.js', { autologin: autoLoginConverted });
+            }
+
+            const shouldShowItpModal = this._itpModalRequired() && !this._itpMode && sessionData && isObject(sessionData.error)
+                && sessionData.error.type === 'UserException' && this.cache.get(LOGIN_IN_PROGRESS_KEY) !== null;
+            if (shouldShowItpModal) {
+                this.cache.delete(LOGIN_IN_PROGRESS_KEY);
+                const modal = new ItpModal(this._spid, this.clientId, this.redirectUri, this.env);
+                sessionData = await modal.show()
+            }
+            if (sessionData && this._enableSessionCaching) {
+                const expiresIn = 1000 * (sessionData.expiresIn || 300);
+                this.cache.set(HAS_SESSION_CACHE_KEY, sessionData, expiresIn);
+            }
+            _postProcess(sessionData);
+            this._session = sessionData;
+            return sessionData;
+        };
+        this._hasSessionInProgress = _getSession()
+            .then(
+                sessionData => {
+                    this._hasSessionInProgress = false;
+                    return sessionData;
+                },
+                err => {
+                    this.emit('error', err);
+                    this._hasSessionInProgress = false;
+                    throw new SDKError('HasSession failed', err);
+                }
+            );
 
         return this._hasSessionInProgress;
     }
