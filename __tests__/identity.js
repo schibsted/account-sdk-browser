@@ -408,6 +408,21 @@ describe('Identity', () => {
             expect(fetch.mock.calls[0][0]).toMatch(/^http:\/\/id.e.com\//);
         });
 
+        test('should fail `hasSession` if session cookie is present but no session is found', async () => {
+            const options = { clientId: 'foo', redirectUri: 'http://e.com', sessionDomain: 'http://id.e.com' };
+            const client_sdrn = `sdrn:schibsted:client:${options.clientId}`;
+            identity = new Identity(options);
+            identity._sessionService = new RESTClient({
+                serverUrl: options.sessionDomain,
+                fetch,
+                defaultParams: { client_sdrn, redirect_uri: options.redirectUri },
+            });
+            fetch.mockImplementationOnce(async () => ({ ok: false, status: 404, statusText: 'No session found' }));
+            await expect(identity.hasSession()).rejects.toMatchObject({ message: 'HasSession failed' });
+            expect(fetch.mock.calls.length).toBe(1);
+            expect(fetch.mock.calls[0][0]).toMatch(/^http:\/\/id.e.com\//);
+        });
+
         test('should terminate "chain" if session-service call succeeds', async () => {
             const options = { clientId: 'foo', redirectUri: 'http://e.com', sessionDomain: 'http://id.e.com' };
             const client_sdrn = `sdrn:schibsted:client:${options.clientId}`;
