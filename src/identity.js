@@ -449,14 +449,19 @@ export class Identity extends EventEmitter {
             }
             this._maybeSetVarnishCookie(sessionData);
             this._emitSessionEvent(this._session, sessionData);
+            this._session = sessionData;
+            return sessionData;
         };
         const _getSession = async () => {
-            let sessionData = null;
             if (this._enableSessionCaching) {
                 // Try to resolve from cache (it has a TTL)
-                sessionData = this.cache.get(HAS_SESSION_CACHE_KEY);
+                let cachedSession = this.cache.get(HAS_SESSION_CACHE_KEY);
+                if (cachedSession) {
+                    return _postProcess(cachedSession);
+                }
             }
-            if (!sessionData && this._sessionService) {
+            let sessionData = null;
+            if (this._sessionService) {
                 try {
                     sessionData = await this._sessionService.get('/session');
                 } catch (err) {
@@ -495,9 +500,7 @@ export class Identity extends EventEmitter {
                 const expiresIn = 1000 * (sessionData.expiresIn || 300);
                 this.cache.set(HAS_SESSION_CACHE_KEY, sessionData, expiresIn);
             }
-            _postProcess(sessionData);
-            this._session = sessionData;
-            return sessionData;
+            return _postProcess(sessionData);
         };
         this._hasSessionInProgress = _getSession()
             .then(
