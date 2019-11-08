@@ -423,30 +423,6 @@ describe('Identity', () => {
             expect(fetch.mock.calls[0][0]).toMatch(/^http:\/\/id.e.com\//);
         });
 
-        test('should never cache if caching is off', async () => {
-            identity._enableSessionCaching = false;
-            await identity.hasSession();
-            await identity.hasSession();
-
-            // two calls per hasSession() invocation, since our mock is set up this way
-            expect(fetch.mock.calls.length).toBe(4);
-        });
-
-        test('should use cached value on subsequent calls by default', async () => {
-            await identity.hasSession();
-            await identity.hasSession();
-
-            // two calls per hasSession() invocation, since our mock is set up this way
-            expect(fetch.mock.calls.length).toBe(2);
-        });
-
-        test('should cache value even when an error is returned', async () => {
-            await expect(identity.hasSession(false)).rejects.toMatchObject({ type: 'UserException' });
-            await expect(identity.hasSession(false)).rejects.toMatchObject({ type: 'UserException' });
-
-            expect(fetch).toHaveProperty('mock.calls.length', 1);
-        });
-
         test('should emit event both when "real" and "cached" values are used', async () => {
             const spy = jest.fn();
             identity.on('login', spy);
@@ -479,6 +455,49 @@ describe('Identity', () => {
             await expect(identity.hasSession()).rejects.toMatchObject({ message: 'HasSession failed' });
             expect(fetch.mock.calls.length).toBe(1);
             expect(fetch.mock.calls[0][0]).toMatch(/^http:\/\/id.e.com\//);
+        });
+
+        describe('cache', () => {
+            test('should never cache if caching is off', async () => {
+                identity._enableSessionCaching = false;
+                await identity.hasSession();
+                await identity.hasSession();
+
+                // two calls per hasSession() invocation, since our mock is set up this way
+                expect(fetch.mock.calls.length).toBe(4);
+            });
+
+            test('should use cached value on subsequent calls by default', async () => {
+                await identity.hasSession();
+                await identity.hasSession();
+
+                // two calls per hasSession() invocation, since our mock is set up this way
+                expect(fetch.mock.calls.length).toBe(2);
+            });
+
+            test('should cache value even when an error is returned', async () => {
+                await expect(identity.hasSession(false)).rejects.toMatchObject({ type: 'UserException' });
+                await expect(identity.hasSession(false)).rejects.toMatchObject({ type: 'UserException' });
+
+                expect(fetch).toHaveProperty('mock.calls.length', 1);
+            });
+
+            test('cache shouldn\'t be updated when hasSession returns data from cache, but should be if cache expired', async () => {
+                const getExpiresOn = () => JSON.parse(identity.cache.cache.get('hasSession-cache')).expiresOn;
+                jest.spyOn(Date, 'now')
+                    .mockReturnValue(new Date("2019-11-09T10:00:00").getTime());
+                await identity.hasSession();
+                const cacheExpires = getExpiresOn();
+                jest.spyOn(Date, 'now')
+                    .mockReturnValue(new Date("2019-11-09T10:02:00").getTime());
+                await identity.hasSession();
+                expect(getExpiresOn()).toBe(cacheExpires); // expiresOn shouldn't change on call less than 5m
+                jest.spyOn(Date, 'now')
+                    .mockReturnValue(new Date("2019-11-09T11:05:00").getTime());
+                await identity.hasSession();
+                // expiresOn should change after 1h
+                expect(getExpiresOn()).not.toBe(cacheExpires);
+            });
         });
     });
 
