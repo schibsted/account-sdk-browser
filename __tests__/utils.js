@@ -78,7 +78,7 @@ const hasSessionUserException = {
 const spidOk = {
     result: true,
     serverTime: 1520610964,
-    expiresIn: 2592000,
+    expiresIn: 300,
     id: '59e9eaaaacb3ad0aaaedaaaa',
     userId: 12345,
     uuid: 'aaaaaaaa-de42-5c4b-80ee-eeeeeeeeeeee',
