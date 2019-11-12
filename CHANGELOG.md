@@ -1,5 +1,10 @@
 # Changelog
 
+## v3.0.7 (2019-11-12)
+
+### Fixes
+* Refactor hasSession to fix ie11 bug
+
 ## v3.1.0-rc (2019-10-02)
 
 ### Semi-breaking ish changes
