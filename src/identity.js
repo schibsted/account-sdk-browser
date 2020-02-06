@@ -95,12 +95,12 @@ export class Identity extends EventEmitter {
      * @param {string} [options.redirectUri] - Example: "https://site.com"
      * @param {string} [options.sessionDomain] - Example: "https://id.site.com"
      * @param {string} [options.env='PRE'] - Schibsted account environment: `PRE`, `PRO` or `PRO_NO`
-     * @param {boolean} [options.siteSpecificLogout] - Whether site-specific logout should be used
+     * @param {boolean} [options.siteSpecificLogout=true] - Whether site-specific logout should be used
      * @param {function} [options.log] - A function that receives debug log information. If not set,
      * no logging will be done
      * @throws {SDKError} - If any of options are invalid
      */
-    constructor({ clientId, redirectUri, sessionDomain, env = 'PRE', siteSpecificLogout = false, log, window = globalWindow() }) {
+    constructor({ clientId, redirectUri, sessionDomain, env = 'PRE', siteSpecificLogout = true, log, window = globalWindow() }) {
         super();
         assert(isNonEmptyString(clientId), 'clientId parameter is required');
         assert(isObject(window), 'The reference to window is missing');
