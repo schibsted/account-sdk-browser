@@ -1,5 +1,10 @@
 # Changelog
 
+## v3.1.0 (2020-02-06)
+
+## Changes
+* Enable siteSpecificLogout by default
+
 ## v3.0.7 (2019-11-12)
 
 ### Fixes
