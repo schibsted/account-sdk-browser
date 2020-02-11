@@ -127,7 +127,7 @@ describe('Identity', () => {
                 };
                 return mock;
             };
-            const window = { localStorage: webStorageMock(), location: {} };
+            const window = { sessionStorage: webStorageMock(), location: {} };
             const identity = new Identity({ clientId: 'foo', redirectUri: 'http://foo.com', window });
             const fakeFetch = jest.fn();
             const sessionResponse = { ok: true, json: async () => ({ result: true })};
