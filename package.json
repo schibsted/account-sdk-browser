@@ -21,15 +21,18 @@
     "tiny-emitter": "^2.1.0"
   },
   "devDependencies": {
-    "babel-core": "^6.26.3",
-    "babel-loader": "^7.1.4",
-    "babel-preset-env": "^1.7.0",
+    "@babel/core": "^7.8.4",
+    "@babel/plugin-transform-runtime": "^7.8.3",
+    "@babel/preset-env": "^7.8.4",
+    "@babel/runtime-corejs3": "^7.8.4",
+    "babel-loader": "^8.0.6",
     "codecov": "^3.6.5",
+    "core-js": "^3.6.4",
     "docdash": "git+https://github.com/torarvid/docdash.git#v0.5.0",
     "eslint": "^6.8.0",
     "eslint-plugin-import": "^2.20.1",
-    "jest": "^23.6.0",
-    "jest-junit": "^5.2.0",
+    "jest": "^25.1.0",
+    "jest-junit": "^10.0.0",
     "jsdoc": "^3.6.3",
     "node-fetch": "^2.6.0",
     "regenerator-runtime": "^0.13.3",
@@ -44,7 +47,7 @@
   "babel": {
     "presets": [
       [
-        "env",
+        "@babel/preset-env",
         {
           "targets": {
             "browsers": [
@@ -57,7 +60,17 @@
               "last 2 ie major versions",
               "last 5 edge major versions"
             ]
-          }
+          },
+          "useBuiltIns": "usage",
+          "corejs": "3"
+        }
+      ]
+    ],
+    "plugins": [
+      [
+        "@babel/plugin-transform-runtime",
+        {
+          "corejs": "3"
         }
       ]
     ]
