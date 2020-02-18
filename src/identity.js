@@ -110,7 +110,7 @@ export class Identity extends EventEmitter {
         this._sessionInitiatedSent = false;
         this.window = window;
         this.clientId = clientId;
-        this.cache = new Cache(() => this.window && this.window.localStorage);
+        this.cache = new Cache(() => this.window && this.window.sessionStorage);
         this.redirectUri = redirectUri;
         this.env = env;
         this.siteSpecificLogout = siteSpecificLogout;
