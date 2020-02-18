@@ -40,14 +40,14 @@ describe('cache', () => {
             expect(throwingStorageMock.spy).toHaveBeenCalledTimes(1);
             expect(throwingStorageMock.spy.mock.calls[0][1]).toBe('TEST-VALUE');
         });
-        test('Falls back to object literal storage if fetching localStorage throws exception', () => {
+        test('Falls back to object literal storage if fetching sessionStorage throws exception', () => {
             const spy = jest.fn().mockImplementation(() => {
                 throw Error('Private mode, yo');
             });
             const throwingWindowInstance = {
-                get localStorage() { return spy(); }
+                get sessionStorage() { return spy(); }
             };
-            const cache = new Cache(() => throwingWindowInstance.localStorage);
+            const cache = new Cache(() => throwingWindowInstance.sessionStorage);
             expect(cache.type).toBe('ObjectLiteralStorage');
             expect(spy).toHaveBeenCalledTimes(1);
         });
