@@ -1,5 +1,10 @@
 # Changelog
 
+## v3.1.1 (2020-02-20)
+
+## Changes
+* Use sessionStorage as identity cache instead of localStorage
+
 ## v3.1.0 (2020-02-06)
 
 ## Changes
