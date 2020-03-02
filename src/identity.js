@@ -63,9 +63,10 @@ import * as spidTalk from './spidTalk';
  */
 
 /**
- * @typedef {object} Identity#PublicUserData
- * @property {string} identifier - User UUID, to be be used as `loginHint` for {@link Identity#login}
+ * @typedef {object} Identity#SimplifiedLoginData
+ * @property {string} identifier - Deprecated: User UUID, to be be used as `loginHint` for {@link Identity#login}
  * @property {string} display_text - Human-readable user identifier
+ * @property {string} client_name - Client name
  */
 
 const HAS_SESSION_CACHE_KEY = 'hasSession-cache';
@@ -616,7 +617,7 @@ export class Identity extends EventEmitter {
      * is a third-party cookie and hence might be blocked by the browser (for example due to ITP in
      * Safari). So there's no guarantee any data is returned, even though a user is logged-in in
      * the current browser.
-     * @return {Identity#PublicUserData|null}
+     * @return {Identity#SimplifiedLoginData|null}
      */
     async getUserContextData() {
         try {
