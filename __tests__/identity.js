@@ -4,6 +4,8 @@
 
 'use strict';
 
+import SDKError from "../src/SDKError";
+
 jest.mock('../src/ItpModal');
 
 import Identity from '../identity';
@@ -949,6 +951,49 @@ describe('Identity', () => {
                 expect(fetch.mock.calls.length).toBe(1);
                 expect(ItpModal.mock.calls.length).toBe(0);
             });
+        });
+    });
+
+    describe('Simplified login widget', () => {
+        let identity;
+
+        beforeEach(() => {
+            identity = new Identity({ clientId: 'foo', redirectUri: 'http://example.com' });
+        });
+
+        test('Should throw SDKError if could not get user context data', async () => {
+            identity._globalSessionService.fetch = jest.fn(() => ({ ok: false }));
+            try {
+                await identity.showSimplifiedLoginWidget({});
+            } catch (e) {
+                expect(e).toEqual(new SDKError('Missing user data'));
+            }
+        });
+
+        test('Should throw SDKError if could not load simplified login widget script', async () => {
+            const expectedData = { identifier: 'test@example.com', display_text: 'test' };
+            identity._globalSessionService.fetch = jest.fn(() => ({ ok: true, json: () => expectedData }));
+            document.getElementsByTagName('body')[0].appendChild = jest.fn((el) => {
+                el.onerror();
+            });
+
+            try {
+                await identity.showSimplifiedLoginWidget({});
+            } catch (e) {
+                expect(e).toEqual(new SDKError('Error when loading simplified login widget content'));
+            }
+        });
+
+        test('Should return true if simplified login widget was successfully loaded', async () => {
+            const expectedData = { identifier: 'test@example.com', display_text: 'test' };
+            identity._globalSessionService.fetch = jest.fn(() => ({ ok: true, json: () => expectedData }));
+            document.getElementsByTagName('body')[0].appendChild = jest.fn((el) => {
+                el.onload();
+            });
+            window.openSimplifiedLoginWidget = jest.fn(() => true);
+
+            const simplifiedLoginResult = await identity.showSimplifiedLoginWidget({});
+            expect(simplifiedLoginResult).toEqual(true);
         });
     });
 });
