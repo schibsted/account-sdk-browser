@@ -949,9 +949,9 @@ export class Identity extends EventEmitter {
                 }
 
                 const initialParams = {
-                    display_text: userData.display_text,
+                    displayText: userData.display_text,
                     env: this.env,
-                    client_name: userData.client_name,
+                    clientName: userData.client_name,
                     clientId: this.clientId,
                     windowWidth: () => window.innerWidth,
                     windowOnResize: (f) => {
