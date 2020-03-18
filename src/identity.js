@@ -938,9 +938,9 @@ export class Identity extends EventEmitter {
      * @return {Promise<boolean|SDKError>} - will resolve to true if widget will be display. Otherwise will throw SDKError
      */
     async showSimplifiedLoginWidget(loginParams) {
-        // getUserContextData doenst throw exception
+        // getUserContextData doens't throw exception
         const userData = await this.getUserContextData();
-        const widgetUrl = '//localhost:8080/main.js'; // this._bffService.makeUrl('simplified-login-widget', { client_id: this.clientId }, false);
+        const widgetUrl = this._bffService.makeUrl('simplified-login-widget', { client_id: this.clientId }, false);
 
         return new Promise(
             (resolve, reject) => {
