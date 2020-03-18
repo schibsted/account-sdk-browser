@@ -956,9 +956,15 @@ describe('Identity', () => {
 
     describe('Simplified login widget', () => {
         let identity;
+        const expectedData = { identifier: 'test-uuid', display_text: 'test' };
+        const state = 'sample-state';
 
         beforeEach(() => {
             identity = new Identity({ clientId: 'foo', redirectUri: 'http://example.com' });
+        });
+
+        afterEach(() => {
+            jest.resetAllMocks();
         });
 
         test('Should throw SDKError if could not get user context data', async () => {
@@ -971,7 +977,6 @@ describe('Identity', () => {
         });
 
         test('Should throw SDKError if could not load simplified login widget script', async () => {
-            const expectedData = { identifier: 'test@example.com', display_text: 'test' };
             identity._globalSessionService.fetch = jest.fn(() => ({ ok: true, json: () => expectedData }));
             document.getElementsByTagName('body')[0].appendChild = jest.fn((el) => {
                 el.onerror();
@@ -984,33 +989,36 @@ describe('Identity', () => {
             }
         });
 
-        test('Should return true if simplified login widget was successfully loaded', async () => {
-            const expectedData = { identifier: 'test-uuid', display_text: 'test' };
-            const state = 'sample-state';
-
+        test('Should return true if simplified login widget was successfully loaded and display. Should load widget script only once', async () => {
             identity._globalSessionService.fetch = jest.fn(() => ({ ok: true, json: () => expectedData }));
             identity.login = jest.fn();
             document.getElementsByTagName('body')[0].appendChild = jest.fn((el) => {
-                el.onload();
-            });
-            window.openSimplifiedLoginWidget = jest.fn((initialParams, loginHandler) => {
-                const onWidnowResize = jest.fn();
+                window.openSimplifiedLoginWidget = jest.fn((initialParams, loginHandler) => {
+                    const onWidnowResize = jest.fn();
 
-                expect(initialParams.windowWidth()).toEqual(window.innerWidth);
-                initialParams.windowOnResize(onWidnowResize);
-                expect(window.onresize).toEqual(onWidnowResize);
+                    expect(initialParams.windowWidth()).toEqual(window.innerWidth);
+                    initialParams.windowOnResize(onWidnowResize);
+                    expect(window.onresize).toEqual(onWidnowResize);
 
-                loginHandler();
-                expect(identity.login).toHaveBeenCalledWith({
-                    state,
-                    loginHint: expectedData.identifier
+                    loginHandler();
+                    expect(identity.login).toHaveBeenCalledWith({
+                        state,
+                        loginHint: expectedData.identifier
+                    });
+
+                    return true;
                 });
 
-                return true;
+                el.onload();
             });
 
-            const simplifiedLoginResult = await identity.showSimplifiedLoginWidget({ state });
-            expect(simplifiedLoginResult).toEqual(true);
+            expect(await identity.showSimplifiedLoginWidget({ state })).toEqual(true);
+            expect(document.getElementsByTagName('body')[0].appendChild).toHaveBeenCalledTimes(1);
+            expect(window.openSimplifiedLoginWidget).toHaveBeenCalledTimes(1);
+
+            expect(await identity.showSimplifiedLoginWidget({ state })).toEqual(true);
+            expect(document.getElementsByTagName('body')[0].appendChild).toHaveBeenCalledTimes(1);
+            expect(window.openSimplifiedLoginWidget).toHaveBeenCalledTimes(2);
         });
     });
 });
