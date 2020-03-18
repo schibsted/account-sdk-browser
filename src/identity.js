@@ -963,6 +963,11 @@ export class Identity extends EventEmitter {
                     this.login(Object.assign(loginParams, {loginHint: userData.identifier}));
                 };
 
+                if (window.openSimplifiedLoginWidget) {
+                    window.openSimplifiedLoginWidget(initialParams, loginHandler);
+                    return resolve(true);
+                }
+
                 const simplifiedLoginWidget = document.createElement("script");
                 simplifiedLoginWidget.type = "text/javascript";
                 simplifiedLoginWidget.src = widgetUrl;
