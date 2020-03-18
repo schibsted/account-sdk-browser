@@ -985,14 +985,31 @@ describe('Identity', () => {
         });
 
         test('Should return true if simplified login widget was successfully loaded', async () => {
-            const expectedData = { identifier: 'test@example.com', display_text: 'test' };
+            const expectedData = { identifier: 'test-uuid', display_text: 'test' };
+            const state = 'sample-state';
+
             identity._globalSessionService.fetch = jest.fn(() => ({ ok: true, json: () => expectedData }));
+            identity.login = jest.fn();
             document.getElementsByTagName('body')[0].appendChild = jest.fn((el) => {
                 el.onload();
             });
-            window.openSimplifiedLoginWidget = jest.fn(() => true);
+            window.openSimplifiedLoginWidget = jest.fn((initialParams, loginHandler) => {
+                const onWidnowResize = jest.fn();
 
-            const simplifiedLoginResult = await identity.showSimplifiedLoginWidget({});
+                expect(initialParams.windowWidth()).toEqual(window.innerWidth);
+                initialParams.windowOnResize(onWidnowResize);
+                expect(window.onresize).toEqual(onWidnowResize);
+
+                loginHandler();
+                expect(identity.login).toHaveBeenCalledWith({
+                    state,
+                    loginHint: expectedData.identifier
+                });
+
+                return true;
+            });
+
+            const simplifiedLoginResult = await identity.showSimplifiedLoginWidget({ state });
             expect(simplifiedLoginResult).toEqual(true);
         });
     });
