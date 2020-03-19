@@ -467,6 +467,10 @@ export class Identity extends EventEmitter {
                     sessionData = await this._sessionService.get('/session');
                 } catch (err) {
                     if (this.siteSpecificLogout) {
+                        if (err && err.code === 400 && this._enableSessionCaching) {
+                            const expiresIn = 1000 * (err.expiresIn || 300);
+                            this.cache.set(HAS_SESSION_CACHE_KEY, { error: err }, expiresIn);
+                        }
                         // Don't fallback to other sources for user session lookup
                         throw err;
                     }
