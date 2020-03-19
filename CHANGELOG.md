@@ -1,5 +1,13 @@
 # Changelog
 
+## v3.2.0 (2020-03-19)
+
+## Fixes
+* Cache 400 http responses from session service
+
+## New features
+* showSimplifiedLoginWidget - function that loads and displays simplified login widget
+
 ## v3.1.1 (2020-02-20)
 
 ## Changes
