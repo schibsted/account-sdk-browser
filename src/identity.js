@@ -927,6 +927,60 @@ export class Identity extends EventEmitter {
     suppressItpModal() {
         this.cache.delete(LOGIN_IN_PROGRESS_KEY);
     }
+
+    /**
+     * Function responsible for loading and displaying simplified login widget. How often
+     * widget will be display is up to you. Preferred way would be to show it once per user,
+     * and store that info in localStorage. Widget will be display only if user is logged in to SSO.
+     *
+     * @param {object} loginParams - the same as `options` param for login function. Login will be called on user
+     * continue action
+     * @return {Promise<boolean|SDKError>} - will resolve to true if widget will be display. Otherwise will throw SDKError
+     */
+    async showSimplifiedLoginWidget(loginParams) {
+        // getUserContextData doens't throw exception
+        const userData = await this.getUserContextData();
+        const widgetUrl = this._bffService.makeUrl('simplified-login-widget', { client_id: this.clientId }, false);
+
+        return new Promise(
+            (resolve, reject) => {
+                if (!userData || !userData.display_text || !userData.identifier) {
+                    return reject(new SDKError('Missing user data'));
+                }
+
+                const initialParams = {
+                    displayText: userData.display_text,
+                    env: this.env,
+                    clientName: userData.client_name,
+                    clientId: this.clientId,
+                    windowWidth: () => window.innerWidth,
+                    windowOnResize: (f) => {
+                        window.onresize = f;
+                    },
+                };
+
+                const loginHandler = () => {
+                    this.login(Object.assign(loginParams, {loginHint: userData.identifier}));
+                };
+
+                if (window.openSimplifiedLoginWidget) {
+                    window.openSimplifiedLoginWidget(initialParams, loginHandler);
+                    return resolve(true);
+                }
+
+                const simplifiedLoginWidget = document.createElement("script");
+                simplifiedLoginWidget.type = "text/javascript";
+                simplifiedLoginWidget.src = widgetUrl;
+                simplifiedLoginWidget.onload = () => {
+                    window.openSimplifiedLoginWidget(initialParams, loginHandler);
+                    resolve(true);
+                };
+                simplifiedLoginWidget.onerror = () => {
+                    reject(new SDKError('Error when loading simplified login widget content'));
+                };
+                document.getElementsByTagName('body')[0].appendChild(simplifiedLoginWidget);
+            });
+    }
 }
 
 export default Identity;
