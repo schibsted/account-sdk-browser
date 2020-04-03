@@ -251,6 +251,19 @@ describe('Monetization', () => {
 
             expect(mon._sessionService.go.mock.calls.length).toBe(1);
         });
+
+        test('should return null for missing userId', async () => {
+            const response = await mon.hasAccess(['existing', 'non_existing']);
+
+            expect(response).toBeNull();
+        });
+
+        test('should return null if not using session-service', async () => {
+            const mon = new Monetization({clientId: 'a'});
+            const response = await mon.hasAccess(['existing'], 12345);
+
+            expect(response).toBeNull();
+        });
     });
 
     describe('productsUrl', () => {
