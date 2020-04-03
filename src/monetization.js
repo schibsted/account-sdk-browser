@@ -172,7 +172,7 @@ export class Monetization extends EventEmitter {
     /**
      * Checks if the user has access to a set of products or features.
      * @param {array} pids - which products/features to check
-     * @param {array} userId - id of currently logged in user
+     * @param {number} userId - id of currently logged in user
      * @throws {SDKError} - If a network call fails in any way (this will happen if, say, the user
      * is not logged in)
      * @returns {Object|null} The data object returned from Schibsted account (or `null` if the user
