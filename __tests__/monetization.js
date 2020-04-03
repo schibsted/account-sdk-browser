@@ -227,6 +227,32 @@ describe('Monetization', () => {
         });
     });
 
+    describe('hasAccess()', () => {
+        let mon;
+
+        beforeEach(() => {
+            mon = new Monetization({clientId: 'a', sessionDomain: 'https://session.example'});
+        });
+
+        test('should get response for existing product', async () => {
+            const response = await mon.hasAccess(['existing'], 12345);
+            expect(response).not.toBeNull();
+            expect(response).toBeDefined();
+        });
+
+        test('should get null for non-existing product', async () => {
+            const response = await mon.hasAccess(['non_existing'], 12345);
+            expect(response).toBeNull();
+        });
+
+        test('should cache response with requested pids sorted', async () => {
+            await mon.hasAccess(['existing', 'non_existing'], 12345);
+            await mon.hasAccess(['non_existing', 'existing'], 12345);
+
+            expect(mon._sessionService.go.mock.calls.length).toBe(1);
+        });
+    });
+
     describe('productsUrl', () => {
         test('should complain with no redirect_uri', () => {
             const mon = new Monetization({ clientId: 'a' });

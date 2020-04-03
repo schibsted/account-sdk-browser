@@ -24,6 +24,15 @@ const goFn = () => jest.fn().mockImplementation(async ({ pathname, data = {} }) 
             throw new SDKError('No session', { code: 401 });
         }
     }
+    if (pathname.startsWith('/hasAccess/')) {
+        if (pathname.endsWith('/existing')) {
+            return Fixtures.sessionServiceAccess;
+        } else if (pathname.endsWith('/non_existing')) {
+            return Fixtures.sessionServiceNoAccess;
+        } else if (pathname.endsWith('/existing,non_existing')) {
+            return Fixtures.sessionServiceAccess;
+        }
+    }
     if (pathname === 'ajax/hasproduct.js') {
         const productId = search.get('product_id');
         const spId = search.get('sp_id');

@@ -170,6 +170,35 @@ export class Monetization extends EventEmitter {
     }
 
     /**
+     * Checks if the user has access to a set of products or features.
+     * @param {array} pids - which products/features to check
+     * @param {array} userId - id of currently logged in user
+     * @throws {SDKError} - If a network call fails in any way (this will happen if, say, the user
+     * is not logged in)
+     * @returns {Object|null} The data object returned from Schibsted account (or `null` if the user
+     * doesn't have access to any of the given products/features)
+     */
+    async hasAccess(pids, userId) {
+        if (!this._sessionService || !userId) {
+            return null;
+        }
+        const sortedIds = pids.sort();
+        const cacheKey = `prd_${sortedIds}_${userId}`;
+        let data = this.cache.get(cacheKey);
+        if (!data) {
+            data = await this._sessionService.get(`/hasAccess/${sortedIds.join(',')}`);
+            const expiresSeconds = data.ttl;
+            this.cache.set(cacheKey, data, expiresSeconds * 1000);
+        }
+
+        if (!data.entitled) {
+            return null;
+        }
+        this.emit('hasAccess', { ids: sortedIds, data });
+        return data;
+    }
+
+    /**
      * Get the url for the end user to review the subscriptions
      * @param {string} [redirectUri=this.redirectUri]
      * @return {string} - The url to the subscriptions review page
