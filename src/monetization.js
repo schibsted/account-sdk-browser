@@ -179,7 +179,7 @@ export class Monetization extends EventEmitter {
      * doesn't have access to any of the given products/features)
      */
     async hasAccess(pids, userId) {
-        if (!this._sessionService || !userId) {
+        if (!this._sessionService || !userId || !Array.isArray(pids)) {
             return null;
         }
         const sortedIds = pids.sort();

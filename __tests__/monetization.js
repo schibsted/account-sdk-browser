@@ -264,6 +264,12 @@ describe('Monetization', () => {
 
             expect(response).toBeNull();
         });
+
+        test('should return null if pids is not array', async () => {
+            const response = await mon.hasAccess(12345, 12345);
+
+            expect(response).toBeNull();
+        });
     });
 
     describe('productsUrl', () => {
