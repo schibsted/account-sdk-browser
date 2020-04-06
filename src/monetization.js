@@ -12,6 +12,7 @@ import JSONPClient from './JSONPClient';
 import RESTClient from './RESTClient';
 import Cache from './cache';
 import * as spidTalk from './spidTalk';
+import SDKError from './SDKError';
 
 const DEFAULT_CACHE_NO_ACCESS = 10; // 10 seconds
 const DEFAULT_CACHE_HAS_ACCESS = 1 * 60 * 60; // 1 hour
@@ -179,9 +180,14 @@ export class Monetization extends EventEmitter {
      * doesn't have access to any of the given products/features)
      */
     async hasAccess(pids, userId) {
-        if (!this._sessionService || !userId || !Array.isArray(pids)) {
-            return null;
+        if (!this._sessionService) {
+            throw new SDKError("hasAccess can only be called if 'sessionDomain' is configured");
+        } else if (!userId) {
+            throw new SDKError("'userId' must be specified");
+        } else if (!Array.isArray(pids)) {
+            throw new SDKError("'pids' must be an array");
         }
+
         const sortedIds = pids.sort();
         const cacheKey = `prd_${sortedIds}_${userId}`;
         let data = this.cache.get(cacheKey);

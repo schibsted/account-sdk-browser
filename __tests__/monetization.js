@@ -252,23 +252,32 @@ describe('Monetization', () => {
             expect(mon._sessionService.go.mock.calls.length).toBe(1);
         });
 
-        test('should return null for missing userId', async () => {
-            const response = await mon.hasAccess(['existing', 'non_existing']);
-
-            expect(response).toBeNull();
+        test('should throw error for missing userId', async () => {
+            await expect(mon.hasAccess(['existing', 'non_existing']))
+                .rejects
+                .toMatchObject({
+                    name: 'SDKError',
+                    message: "'userId' must be specified",
+                });
         });
 
-        test('should return null if not using session-service', async () => {
+        test('should throw error if not using session-service', async () => {
             const mon = new Monetization({clientId: 'a'});
-            const response = await mon.hasAccess(['existing'], 12345);
-
-            expect(response).toBeNull();
+            await expect(mon.hasAccess(['existing'], 12345))
+                .rejects
+                .toMatchObject({
+                    name: 'SDKError',
+                    message: "hasAccess can only be called if 'sessionDomain' is configured",
+                });
         });
 
-        test('should return null if pids is not array', async () => {
-            const response = await mon.hasAccess(12345, 12345);
-
-            expect(response).toBeNull();
+        test('should throw error if pids is not array', async () => {
+            await expect(mon.hasAccess(12345, 12345))
+                .rejects
+                .toMatchObject({
+                    name: 'SDKError',
+                    message: "'pids' must be an array",
+                });
         });
     });
 
