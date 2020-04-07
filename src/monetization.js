@@ -12,6 +12,7 @@ import JSONPClient from './JSONPClient';
 import RESTClient from './RESTClient';
 import Cache from './cache';
 import * as spidTalk from './spidTalk';
+import SDKError from './SDKError';
 
 const DEFAULT_CACHE_NO_ACCESS = 10; // 10 seconds
 const DEFAULT_CACHE_HAS_ACCESS = 1 * 60 * 60; // 1 hour
@@ -166,6 +167,42 @@ export class Monetization extends EventEmitter {
             return null;
         }
         this.emit('hasSubscription', { subscriptionId, data });
+        return data;
+    }
+
+    /**
+     * Checks if the user has access to a set of products or features.
+     * @param {array} productIds - which products/features to check
+     * @param {number} userId - id of currently logged in user
+     * @throws {SDKError} - If the input is incorrect, or a network call fails in any way
+     * (this will happen if, say, the user is not logged in)
+     * @returns {Object|null} The data object returned from Schibsted account (or `null` if the user
+     * doesn't have access to any of the given products/features)
+     */
+    async hasAccess(productIds, userId) {
+        if (!this._sessionService) {
+            throw new SDKError(`hasAccess can only be called if 'sessionDomain' is configured`);
+        }
+        if (!userId) {
+            throw new SDKError(`'userId' must be specified`);
+        }
+        if (!Array.isArray(productIds)) {
+            throw new SDKError(`'productIds' must be an array`);
+        }
+
+        const sortedIds = productIds.sort();
+        const cacheKey = `prd_${sortedIds}_${userId}`;
+        let data = this.cache.get(cacheKey);
+        if (!data) {
+            data = await this._sessionService.get(`/hasAccess/${sortedIds.join(',')}`);
+            const expiresSeconds = data.ttl;
+            this.cache.set(cacheKey, data, expiresSeconds * 1000);
+        }
+
+        if (!data.entitled) {
+            return null;
+        }
+        this.emit('hasAccess', { ids: sortedIds, data });
         return data;
     }
 
