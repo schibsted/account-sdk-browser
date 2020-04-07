@@ -257,7 +257,7 @@ describe('Monetization', () => {
                 .rejects
                 .toMatchObject({
                     name: 'SDKError',
-                    message: "'userId' must be specified",
+                    message: `'userId' must be specified`,
                 });
         });
 
@@ -267,7 +267,7 @@ describe('Monetization', () => {
                 .rejects
                 .toMatchObject({
                     name: 'SDKError',
-                    message: "hasAccess can only be called if 'sessionDomain' is configured",
+                    message: `hasAccess can only be called if 'sessionDomain' is configured`,
                 });
         });
 
@@ -276,7 +276,7 @@ describe('Monetization', () => {
                 .rejects
                 .toMatchObject({
                     name: 'SDKError',
-                    message: "'productIds' must be an array",
+                    message: `'productIds' must be an array`,
                 });
         });
     });
