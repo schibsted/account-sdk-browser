@@ -276,7 +276,7 @@ describe('Monetization', () => {
                 .rejects
                 .toMatchObject({
                     name: 'SDKError',
-                    message: "'pids' must be an array",
+                    message: "'productIds' must be an array",
                 });
         });
     });

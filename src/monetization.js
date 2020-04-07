@@ -172,23 +172,25 @@ export class Monetization extends EventEmitter {
 
     /**
      * Checks if the user has access to a set of products or features.
-     * @param {array} pids - which products/features to check
+     * @param {array} productIds - which products/features to check
      * @param {number} userId - id of currently logged in user
      * @throws {SDKError} - If a network call fails in any way (this will happen if, say, the user
      * is not logged in)
      * @returns {Object|null} The data object returned from Schibsted account (or `null` if the user
      * doesn't have access to any of the given products/features)
      */
-    async hasAccess(pids, userId) {
+    async hasAccess(productIds, userId) {
         if (!this._sessionService) {
-            throw new SDKError("hasAccess can only be called if 'sessionDomain' is configured");
-        } else if (!userId) {
-            throw new SDKError("'userId' must be specified");
-        } else if (!Array.isArray(pids)) {
-            throw new SDKError("'pids' must be an array");
+            throw new SDKError(`hasAccess can only be called if 'sessionDomain' is configured`);
+        }
+        if (!userId) {
+            throw new SDKError(`'userId' must be specified`);
+        }
+        if (!Array.isArray(productIds)) {
+            throw new SDKError(`'productIds' must be an array`);
         }
 
-        const sortedIds = pids.sort();
+        const sortedIds = productIds.sort();
         const cacheKey = `prd_${sortedIds}_${userId}`;
         let data = this.cache.get(cacheKey);
         if (!data) {
