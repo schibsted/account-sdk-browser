@@ -354,7 +354,33 @@ a token is compromised and you don't want them to be usable in the future.*
 
 ## Monetization
 
-This class has two important endpoints:
+The preferred method for checking whether a user has access to a product/subscription is
+[Monetization#hasAccess](https://schibsted.github.io/account-sdk-browser/Monetization.html#hasAccess).
+It requires using session-service, and supports both Schibsted account productId's and Zuora
+feature id's.
+
+#### Example
+```javascript
+import { Monetization } from '@schibsted/account-sdk-browser'
+
+const monetization = new Monetization({
+    clientId: '56e9a5d1eee0000000000000',
+    redirectUri: 'https://awesomenews.site', // ensure it's listed in selfservice
+    sessionDomain: 'https://id.aweseome.site', // client-configured session-service domain
+    env: 'PRE', // Schibsted account env. A url or a special key: 'PRE', 'PRO' or 'PRO_NO'
+});
+
+try {
+    // Check if the user has access to a a particular product
+    const userId = await identity.getUserId();
+    const data = await monetization.hasAccess([productId], userId);
+    alert(`User has access to ${productId}? ${data.entitled}`)
+} catch (err) {
+    alert(`Could not query if the user has access to ${productId} because ${err}`)
+}
+```
+
+### Legacy methods
 
 * [Monetization#hasProduct](https://schibsted.github.io/account-sdk-browser/Monetization.html#hasProduct)
   for checking if the user has access to a particular product
