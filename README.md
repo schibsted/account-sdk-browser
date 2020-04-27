@@ -198,7 +198,7 @@ Implementing this functionality requires that your brand uses session service. W
 1. Ensure that your site has no site specific terms and conditions in the Schibsted account login flow. 
 2. Define rules for when and how often the simplified login prompt should be shown to unique users on your site. How you do this is up to you, but we recommend starting with showing the prompt once per user before potentially increasing this frequency over time.
 3. Set up a function to check if users landing on your domain [is logged in](https://schibsted.github.io/account-sdk-browser/Identity.html#isLoggedIn) to your site. 
-4. If the user is not logged-in to your site, call the [showSimplifiedLoginWidget](https://schibsted.github.io/account-sdk-browser/Identity.html#showSimplifiedLoginWidget) function. The `showSimplifiedLoginWidget` accepts the same params as login function (`state` is required). If the simplified login prompt is to be loaded, `showSimplifiedLoginWidget` will return `true`.
+4. If the user is not logged-in to your site, call the [showSimplifiedLoginWidget](https://schibsted.github.io/account-sdk-browser/Identity.html#showSimplifiedLoginWidget) function. The `showSimplifiedLoginWidget` accepts the same params as login function (`state` is required, it might be string or async function). If the simplified login prompt is to be loaded, `showSimplifiedLoginWidget` will return `true`.
 5. Set up a way to store information about which users have been shown the simplified login prompt. How you do this is up to you, but one way is to use localStorage. Use this information to execute on the rules defined in #2. 
 
 ## Example project

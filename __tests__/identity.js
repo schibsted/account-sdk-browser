@@ -1020,5 +1020,36 @@ describe('Identity', () => {
             expect(document.getElementsByTagName('body')[0].appendChild).toHaveBeenCalledTimes(1);
             expect(window.openSimplifiedLoginWidget).toHaveBeenCalledTimes(2);
         });
+
+        test('Should call state function on login action', async () => {
+            const stateFn = jest.fn(async () => { return state; });
+            identity._globalSessionService.fetch = jest.fn(() => ({ ok: true, json: () => expectedData }));
+            identity.login = jest.fn();
+            document.getElementsByTagName('body')[0].appendChild = jest.fn((el) => {
+                window.openSimplifiedLoginWidget = jest.fn(async (initialParams, loginHandler) => {
+                    const onWidnowResize = jest.fn();
+
+                    expect(initialParams.windowWidth()).toEqual(window.innerWidth);
+                    initialParams.windowOnResize(onWidnowResize);
+                    expect(window.onresize).toEqual(onWidnowResize);
+
+                    expect(stateFn).not.toHaveBeenCalled();
+                    await loginHandler();
+                    expect(stateFn).toHaveBeenCalledOnce();
+                    expect(identity.login).toHaveBeenCalledWith({
+                        state,
+                        loginHint: expectedData.identifier
+                    });
+
+                    return true;
+                });
+
+                el.onload();
+            });
+
+            expect(await identity.showSimplifiedLoginWidget({ state: stateFn })).toEqual(true);
+            expect(document.getElementsByTagName('body')[0].appendChild).toHaveBeenCalledTimes(1);
+            expect(window.openSimplifiedLoginWidget).toHaveBeenCalledTimes(1);
+        });
     });
 });
