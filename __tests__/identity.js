@@ -965,6 +965,7 @@ describe('Identity', () => {
 
         afterEach(() => {
             jest.resetAllMocks();
+            window.openSimplifiedLoginWidget = undefined;
         });
 
         test('Should throw SDKError if could not get user context data', async () => {
@@ -993,14 +994,14 @@ describe('Identity', () => {
             identity._globalSessionService.fetch = jest.fn(() => ({ ok: true, json: () => expectedData }));
             identity.login = jest.fn();
             document.getElementsByTagName('body')[0].appendChild = jest.fn((el) => {
-                window.openSimplifiedLoginWidget = jest.fn((initialParams, loginHandler) => {
+                window.openSimplifiedLoginWidget = jest.fn(async (initialParams, loginHandler) => {
                     const onWidnowResize = jest.fn();
 
                     expect(initialParams.windowWidth()).toEqual(window.innerWidth);
                     initialParams.windowOnResize(onWidnowResize);
                     expect(window.onresize).toEqual(onWidnowResize);
 
-                    loginHandler();
+                    await loginHandler();
                     expect(identity.login).toHaveBeenCalledWith({
                         state,
                         loginHint: expectedData.identifier
