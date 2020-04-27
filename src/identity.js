@@ -957,6 +957,7 @@ export class Identity extends EventEmitter {
                     env: this.env,
                     clientName: userData.client_name,
                     clientId: this.clientId,
+                    providerId: userData.provider_id,
                     windowWidth: () => window.innerWidth,
                     windowOnResize: (f) => {
                         window.onresize = f;
