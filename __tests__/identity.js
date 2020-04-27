@@ -995,11 +995,11 @@ describe('Identity', () => {
             identity.login = jest.fn();
             document.getElementsByTagName('body')[0].appendChild = jest.fn((el) => {
                 window.openSimplifiedLoginWidget = jest.fn(async (initialParams, loginHandler) => {
-                    const onWidnowResize = jest.fn();
+                    const onWindowResize = jest.fn();
 
                     expect(initialParams.windowWidth()).toEqual(window.innerWidth);
-                    initialParams.windowOnResize(onWidnowResize);
-                    expect(window.onresize).toEqual(onWidnowResize);
+                    initialParams.windowOnResize(onWindowResize);
+                    expect(window.onresize).toEqual(onWindowResize);
 
                     await loginHandler();
                     expect(identity.login).toHaveBeenCalledWith({
@@ -1028,11 +1028,11 @@ describe('Identity', () => {
             identity.login = jest.fn();
             document.getElementsByTagName('body')[0].appendChild = jest.fn((el) => {
                 window.openSimplifiedLoginWidget = jest.fn(async (initialParams, loginHandler) => {
-                    const onWidnowResize = jest.fn();
+                    const onWindowResize = jest.fn();
 
                     expect(initialParams.windowWidth()).toEqual(window.innerWidth);
-                    initialParams.windowOnResize(onWidnowResize);
-                    expect(window.onresize).toEqual(onWidnowResize);
+                    initialParams.windowOnResize(onWindowResize);
+                    expect(window.onresize).toEqual(onWindowResize);
 
                     expect(stateFn).not.toHaveBeenCalled();
                     await loginHandler();
