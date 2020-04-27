@@ -938,7 +938,7 @@ export class Identity extends EventEmitter {
      * and store that info in localStorage. Widget will be display only if user is logged in to SSO.
      *
      * @param {object} loginParams - the same as `options` param for login function. Login will be called on user
-     * continue action
+     * continue action. `state` might be string or async function.
      * @return {Promise<boolean|SDKError>} - will resolve to true if widget will be display. Otherwise will throw SDKError
      */
     async showSimplifiedLoginWidget(loginParams) {
@@ -964,7 +964,10 @@ export class Identity extends EventEmitter {
                     },
                 };
 
-                const loginHandler = () => {
+                const loginHandler = async () => {
+                    if (typeof loginParams.state === 'function') {
+                        loginParams.state = await loginParams.state();
+                    }
                     this.login(Object.assign(loginParams, {loginHint: userData.identifier}));
                 };
 
