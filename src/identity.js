@@ -539,6 +539,14 @@ export class Identity extends EventEmitter {
     }
 
     /**
+     * Removes the cached user session.
+     * @returns {void}
+     */
+    clearCachedUserSession() {
+        this.cache.delete(HAS_SESSION_CACHE_KEY);
+    }
+
+    /**
      * @summary Allows the caller to check if the current user is connected to the client_id in
      * Schibsted account. Being connected means that the user has agreed for their account to be
      * used by your web app and have accepted the required terms

@@ -549,6 +549,16 @@ describe('Identity', () => {
                 // expiresOn should change after 1h
                 expect(getExpiresOn()).not.toBe(cacheExpires);
             });
+
+            test('should clear cache when explicitly called', async () => {
+                await identity.hasSession();
+                await identity.clearCachedUserSession();
+                // the cached data should be removed so the second call should result in a new request
+                await identity.hasSession();
+
+                // two calls per hasSession() invocation, since our mock is set up this way
+                expect(fetch.mock.calls.length).toBe(4);
+            });
         });
     });
 
