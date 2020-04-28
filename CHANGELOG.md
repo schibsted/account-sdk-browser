@@ -1,5 +1,15 @@
 # Changelog
 
+## v3.4.0 (2020-04-28)
+
+## Changes
+* showSimplifiedLoginWidget accepts async function as state param - will be called only if user click log in
+* Support for pulse providerId in simplified login widget
+
+## New features
+* Added `clearCachedAccessResult` and `clearCachedUserSession` methods
+
+
 ## v3.3.0 (2020-04-07)
 
 ## New features
