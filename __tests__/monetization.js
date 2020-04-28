@@ -279,6 +279,20 @@ describe('Monetization', () => {
                     message: `'productIds' must be an array`,
                 });
         });
+
+        test('should clear cache when explicitly called', async () => {
+            const productIds = ['existing', 'non_existing'];
+            await mon.hasAccess(productIds, 12345);
+
+            // clear cache with same keys, but different order
+            // (the product ids should be sorted before being used as cache key)
+            await mon.clearCachedAccessResult(productIds.reverse(), 12345);
+
+            // the cached data should be removed so the second call should result in a new request
+            await mon.hasAccess(productIds, 12345);
+
+            expect(mon._sessionService.go.mock.calls.length).toBe(2);
+        });
     });
 
     describe('productsUrl', () => {
