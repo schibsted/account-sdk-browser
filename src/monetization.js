@@ -191,7 +191,7 @@ export class Monetization extends EventEmitter {
         }
 
         const sortedIds = productIds.sort();
-        const cacheKey = `prd_${sortedIds}_${userId}`;
+        const cacheKey = this._accessCacheKey(productIds, userId);
         let data = this.cache.get(cacheKey);
         if (!data) {
             data = await this._sessionService.get(`/hasAccess/${sortedIds.join(',')}`);
@@ -204,6 +204,27 @@ export class Monetization extends EventEmitter {
         }
         this.emit('hasAccess', { ids: sortedIds, data });
         return data;
+    }
+
+    /**
+     * Removes the cached access result.
+     * @param {array} productIds - which products/features to check
+     * @param {number} userId - id of currently logged in user
+     * @returns {void}
+     */
+    clearCachedAccessResult(productIds, userId) {
+        this.cache.delete(this._accessCacheKey(productIds, userId));
+    }
+
+    /**
+     * Compute "has access" cache key for the given product ids and user id.
+     * @param {array} productIds - which products/features to check
+     * @param {number} userId - id of currently logged in user
+     * @returns {string}
+     * @private
+     */
+    _accessCacheKey(productIds, userId) {
+        return `prd_${productIds.sort()}_${userId}`;
     }
 
     /**
