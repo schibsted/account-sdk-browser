@@ -539,6 +539,14 @@ export class Identity extends EventEmitter {
     }
 
     /**
+     * Removes the cached user session.
+     * @returns {void}
+     */
+    clearCachedUserSession() {
+        this.cache.delete(HAS_SESSION_CACHE_KEY);
+    }
+
+    /**
      * @summary Allows the caller to check if the current user is connected to the client_id in
      * Schibsted account. Being connected means that the user has agreed for their account to be
      * used by your web app and have accepted the required terms
@@ -938,7 +946,7 @@ export class Identity extends EventEmitter {
      * and store that info in localStorage. Widget will be display only if user is logged in to SSO.
      *
      * @param {object} loginParams - the same as `options` param for login function. Login will be called on user
-     * continue action
+     * continue action. `state` might be string or async function.
      * @return {Promise<boolean|SDKError>} - will resolve to true if widget will be display. Otherwise will throw SDKError
      */
     async showSimplifiedLoginWidget(loginParams) {
@@ -957,13 +965,17 @@ export class Identity extends EventEmitter {
                     env: this.env,
                     clientName: userData.client_name,
                     clientId: this.clientId,
+                    providerId: userData.provider_id,
                     windowWidth: () => window.innerWidth,
                     windowOnResize: (f) => {
                         window.onresize = f;
                     },
                 };
 
-                const loginHandler = () => {
+                const loginHandler = async () => {
+                    if (typeof loginParams.state === 'function') {
+                        loginParams.state = await loginParams.state();
+                    }
                     this.login(Object.assign(loginParams, {loginHint: userData.identifier}));
                 };
 

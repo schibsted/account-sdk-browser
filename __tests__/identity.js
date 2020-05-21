@@ -549,6 +549,16 @@ describe('Identity', () => {
                 // expiresOn should change after 1h
                 expect(getExpiresOn()).not.toBe(cacheExpires);
             });
+
+            test('should clear cache when explicitly called', async () => {
+                await identity.hasSession();
+                await identity.clearCachedUserSession();
+                // the cached data should be removed so the second call should result in a new request
+                await identity.hasSession();
+
+                // two calls per hasSession() invocation, since our mock is set up this way
+                expect(fetch.mock.calls.length).toBe(4);
+            });
         });
     });
 
@@ -965,6 +975,7 @@ describe('Identity', () => {
 
         afterEach(() => {
             jest.resetAllMocks();
+            window.openSimplifiedLoginWidget = undefined;
         });
 
         test('Should throw SDKError if could not get user context data', async () => {
@@ -993,14 +1004,14 @@ describe('Identity', () => {
             identity._globalSessionService.fetch = jest.fn(() => ({ ok: true, json: () => expectedData }));
             identity.login = jest.fn();
             document.getElementsByTagName('body')[0].appendChild = jest.fn((el) => {
-                window.openSimplifiedLoginWidget = jest.fn((initialParams, loginHandler) => {
-                    const onWidnowResize = jest.fn();
+                window.openSimplifiedLoginWidget = jest.fn(async (initialParams, loginHandler) => {
+                    const onWindowResize = jest.fn();
 
                     expect(initialParams.windowWidth()).toEqual(window.innerWidth);
-                    initialParams.windowOnResize(onWidnowResize);
-                    expect(window.onresize).toEqual(onWidnowResize);
+                    initialParams.windowOnResize(onWindowResize);
+                    expect(window.onresize).toEqual(onWindowResize);
 
-                    loginHandler();
+                    await loginHandler();
                     expect(identity.login).toHaveBeenCalledWith({
                         state,
                         loginHint: expectedData.identifier
@@ -1019,6 +1030,37 @@ describe('Identity', () => {
             expect(await identity.showSimplifiedLoginWidget({ state })).toEqual(true);
             expect(document.getElementsByTagName('body')[0].appendChild).toHaveBeenCalledTimes(1);
             expect(window.openSimplifiedLoginWidget).toHaveBeenCalledTimes(2);
+        });
+
+        test('Should call state function on login action', async () => {
+            const stateFn = jest.fn(async () => { return state; });
+            identity._globalSessionService.fetch = jest.fn(() => ({ ok: true, json: () => expectedData }));
+            identity.login = jest.fn();
+            document.getElementsByTagName('body')[0].appendChild = jest.fn((el) => {
+                window.openSimplifiedLoginWidget = jest.fn(async (initialParams, loginHandler) => {
+                    const onWindowResize = jest.fn();
+
+                    expect(initialParams.windowWidth()).toEqual(window.innerWidth);
+                    initialParams.windowOnResize(onWindowResize);
+                    expect(window.onresize).toEqual(onWindowResize);
+
+                    expect(stateFn).not.toHaveBeenCalled();
+                    await loginHandler();
+                    expect(stateFn).toHaveBeenCalledOnce();
+                    expect(identity.login).toHaveBeenCalledWith({
+                        state,
+                        loginHint: expectedData.identifier
+                    });
+
+                    return true;
+                });
+
+                el.onload();
+            });
+
+            expect(await identity.showSimplifiedLoginWidget({ state: stateFn })).toEqual(true);
+            expect(document.getElementsByTagName('body')[0].appendChild).toHaveBeenCalledTimes(1);
+            expect(window.openSimplifiedLoginWidget).toHaveBeenCalledTimes(1);
         });
     });
 });
