@@ -785,9 +785,6 @@ describe('Identity', () => {
                 ['accountUrl', '/account/summary'],
                 ['phonesUrl', '/account/phones'],
                 ['logoutUrl', '/logout'],
-                ['authFlowUrl', '/flow/auth'],
-                ['signupFlowUrl', '/flow/signup'],
-                ['signinFlowUrl', '/flow/signin'],
             ];
             test.each(urlFunctions)('%s -> %s', (func, pathname) => {
                 const identity = new Identity({ clientId: 'foo', redirectUri: 'http://example.com' });

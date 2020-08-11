@@ -844,48 +844,6 @@ export class Identity extends EventEmitter {
     }
 
     /**
-     * Url to render either signup or login
-     * @see https://techdocs.spid.no/flows/auth-flow/
-     * @param {string} [redirectUri=this.redirectUri]
-     * @return {string} - the url to the authentication page
-     */
-    authFlowUrl(redirectUri = this.redirectUri) {
-        assert(isUrl(redirectUri), `authFlowUrl(): redirectUri is invalid`);
-        return this._spid.makeUrl('flow/auth', {
-            response_type: 'code',
-            redirect_uri: redirectUri
-        });
-    }
-
-    /**
-     * Url to render a signup view and let the user login with credentials
-     * @see https://techdocs.spid.no/flows/auth-flow/
-     * @param {string} [redirectUri=this.redirectUri]
-     * @return {string} - the url to the signup page
-     */
-    signupFlowUrl(redirectUri = this.redirectUri) {
-        assert(isUrl(redirectUri), `signupFlowUrl(): redirectUri is invalid`);
-        return this._spid.makeUrl('flow/signup', {
-            response_type: 'code',
-            redirect_uri: redirectUri
-        });
-    }
-
-    /**
-     * To render a signin view and let the user login without credentials
-     * @see https://techdocs.spid.no/flows/auth-flow/
-     * @param {string} [redirectUri=this.redirectUri]
-     * @return {string} - the url to the signin page
-     */
-    signinFlowUrl(redirectUri = this.redirectUri) {
-        assert(isUrl(redirectUri), `signinFlowUrl(): redirectUri is invalid`);
-        return this._spid.makeUrl('flow/signin', {
-            response_type: 'code',
-            redirect_uri: redirectUri
-        });
-    }
-
-    /**
      * Call this method immediately before sending a user to a Schibsted account flow if you
      * want to enable showing of the ITP modal upon returning to your site. You should
      * send the user to a Schibsted account flow immediately after calling this method without
