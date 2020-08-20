@@ -13,6 +13,7 @@ import RESTClient from './RESTClient';
 import Cache from './cache';
 import * as spidTalk from './spidTalk';
 import SDKError from './SDKError';
+import { version } from '../package.json';
 
 const DEFAULT_CACHE_NO_ACCESS = 10; // 10 seconds
 const DEFAULT_CACHE_HAS_ACCESS = 1 * 60 * 60; // 1 hour
@@ -93,7 +94,7 @@ export class Monetization extends EventEmitter {
         const shouldCache = !data;
         if (!data && this._sessionService) {
             try {
-                data = await this._sessionService.get(`/hasProduct/${productId}`);
+                data = await this._sessionService.get(`/hasProduct/${productId}`, { version });
             } catch (err) {
                 // The session-service returns 400 if no session-cookie is sent in the request. This
                 // will be the case if the user hasn't logged in since the site switched to using
