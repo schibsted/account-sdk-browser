@@ -16,6 +16,7 @@ import ItpModal from './ItpModal';
 import RESTClient from './RESTClient';
 import SDKError from './SDKError';
 import * as spidTalk from './spidTalk';
+import { version } from '../package.json';
 
 /**
  * @typedef {object} Identity#HasSessionSuccessResponse
@@ -417,6 +418,28 @@ export class Identity extends EventEmitter {
     }
 
     /**
+     * Log current using version of sdk
+     * @return {void}
+     */
+    version() {
+        this.log(`Current version of Schibsted Acccount javascript SDK: ${version}`);
+    }
+
+    /**
+     * Log used settings
+     * @return {void}
+     */
+    settings() {
+        const settings = {
+            clientId: this.clientId,
+            redirectUri: this.redirectUri,
+            siteSpecificLogout: this.siteSpecificLogout
+        }
+
+        this.log(`Settings: ${settings}`);
+    }
+
+    /**
      * @summary Queries the hassession endpoint and returns information about the status of the user
      * @description When we send a request to this endpoint, cookies sent along with the request
      * determines the status of the user. If the user is not currently logged in, but has a cookie
@@ -464,7 +487,7 @@ export class Identity extends EventEmitter {
             let sessionData = null;
             if (this._sessionService) {
                 try {
-                    sessionData = await this._sessionService.get('/session');
+                    sessionData = await this._sessionService.get('/session', { version });
                 } catch (err) {
                     if (this.siteSpecificLogout) {
                         if (err && err.code === 400 && this._enableSessionCaching) {
