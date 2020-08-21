@@ -6,6 +6,8 @@ export class Identity {
         redirectUri?: string | null })
 
     hasSession(): Promise<any>
+    printVersion(): void
+    printSettings(): void
     _enableSessionCaching: boolean;
     _itpMode: boolean;
 }
