@@ -419,24 +419,33 @@ export class Identity extends EventEmitter {
 
     /**
      * Log current using version of sdk
+     * @throws {SDKError} - If log method is not provided
      * @return {void}
      */
-    version() {
-        this.log(`Current version of Schibsted Acccount javascript SDK: ${version}`);
+    printVersion() {
+        if (!this.log) {
+            throw new SDKError('You have to provide log method in constructor');
+        }
+
+        this.log(`Schibsted account SDK for browsers version: ${version}`);
     }
 
     /**
      * Log used settings
+     * @throws {SDKError} - If log method is not provided
      * @return {void}
      */
-    settings() {
+    printSettings() {
+        if (!this.log) {
+            throw new SDKError('You have to provide log method in constructor');
+        }
+
         const settings = {
             clientId: this.clientId,
             redirectUri: this.redirectUri,
-            siteSpecificLogout: this.siteSpecificLogout
         }
 
-        this.log(`Settings: ${settings}`);
+        this.log(`Schibsted account SDK for browsers version: \n${JSON.stringify(settings, null, 2)}`);
     }
 
     /**
