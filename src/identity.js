@@ -781,7 +781,7 @@ export class Identity extends EventEmitter {
             teaser = arguments[6] || teaser;
             maxAge = isNaN(arguments[7]) ? maxAge : arguments[7];
         }
-        assert(!acrValues || isStrIn(acrValues, ['', 'otp-email', 'otp-sms'], true),
+        assert(!acrValues || isStrIn(acrValues, ['', 'otp-email', 'otp-sms', 'mfa', 'otp', 'sms', 'otp sms'], true),
             `The acrValues parameter is not acceptable: ${acrValues}`);
         assert(isUrl(redirectUri),
             `loginUrl(): redirectUri must be a valid url but is ${redirectUri}`);

@@ -307,13 +307,21 @@ mentioning that your end users have a few ways to log in:
   they can use to log in
 * Passwordless - SMS (BETA): similar to the previous method but instead of an email address, they receive
   the code on their phone as an SMS
+* Multifactor authentication: first client indicates which methods should be preferred, later these 
+  will be included (if fulfilled) in `AMR` claim of IDToken  
 
 IMPORTANT: Passwordless using SMS is still in BETA. It's only recommended to use it for testing and
 experimental purposes for now. Please let us know before using this in production.
 
 The default is username & password. If you wish to use one of the passwordless login methods, the
-`login()` function takes an optional parameter called `acrValues` (yeah, it's an OAuth specific
-name). Please set this parameter to either `otp-email` or `otp-sms`.
+`login()` function takes an optional parameter called `acrValues` (Authentication Context Class Reference).
+The `acrValues` parameter with multifactor authentication can take following values: 
+ - `otp-email` - passwordless authentication using code sent to registered email
+ - `otp-sms` - passwordless authentication using code sent to registered phone number
+ - `otp` - authentication using registered one time code generator (https://tools.ietf.org/html/rfc6238)
+ - `sms` - authentication using SMS code sent to phone number
+ - `mfa` - multifactor authentication, any of `otp`, `sms` can be completed by user 
+ - `otp sms` - multifactor authentication with both `otp` and `sms` methods
 
 The classic way to authenticate a user, is to send them from your site to the Schibsted account
 domain, let the user authenticate there, and then have us redirect them back to your site. If you
