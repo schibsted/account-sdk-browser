@@ -677,8 +677,6 @@ export class Identity extends EventEmitter {
      * @param {string} [options.redirectUri=this.redirectUri] - Redirect uri that will receive the
      * code. Must exactly match a redirectUri from your client in self-service
      * @param {boolean} [options.preferPopup=false] - Should we try to open a popup window?
-     * @param {boolean} [options.newFlow=true] - Should we try the new GDPR-safe flow or the
-     * legacy/stable SPiD flow?
      * @param {string} [options.loginHint=''] - user email or UUID hint
      * @param {string} [options.tag=''] - Pulse tag
      * @param {string} [options.teaser=''] - Teaser slug. Teaser with given slug will be displayed
@@ -698,7 +696,6 @@ export class Identity extends EventEmitter {
         scope = 'openid',
         redirectUri = this.redirectUri,
         preferPopup = false,
-        newFlow = true,
         loginHint = '',
         tag = '',
         teaser = '',
@@ -708,7 +705,7 @@ export class Identity extends EventEmitter {
     }) {
         this._closePopup();
         this.cache.delete(HAS_SESSION_CACHE_KEY);
-        const url = this.loginUrl({ state, acrValues, scope, redirectUri, newFlow, loginHint, tag,
+        const url = this.loginUrl({ state, acrValues, scope, redirectUri, loginHint, tag,
             teaser, maxAge, locale, oneStepLogin });
 
         this.showItpModalUponReturning();
@@ -745,12 +742,9 @@ export class Identity extends EventEmitter {
      * @see https://tools.ietf.org/html/rfc6749#section-10.12
      * @param {string} [options.acrValues] - Authentication method. If omitted, user authenticates with
      * username+password. If set to `'otp-email'`, then  passwordless login using email is used. If
-     * `'otp-sms'`, then passwordless login using sms is used. Please note that this parameter has
-     * no effect if `newFlow` is false
+     * `'otp-sms'`, then passwordless login using sms is used.
      * @param {string} [options.scope='openid']
      * @param {string} [options.redirectUri=this.redirectUri]
-     * @param {boolean} [options.newFlow=true] - Should we try the new flow or the old Schibsted account
-     * login? If this parameter is set to false, the `acrValues` parameter doesn't have any effect
      * @param {string} [options.loginHint=''] - user email or UUID hint
      * @param {string} [options.tag=''] - Pulse tag
      * @param {string} [options.teaser=''] - Teaser slug. Teaser with given slug will be displayed
@@ -769,7 +763,6 @@ export class Identity extends EventEmitter {
         acrValues,
         scope = 'openid',
         redirectUri = this.redirectUri,
-        newFlow = true,
         loginHint = '',
         tag = '',
         teaser = '',
@@ -783,49 +776,33 @@ export class Identity extends EventEmitter {
             acrValues = arguments[1];
             scope = arguments[2] || scope;
             redirectUri = arguments[3] || redirectUri;
-            newFlow = typeof arguments[4] === 'boolean' ? arguments[4] : newFlow;
-            loginHint = arguments[5] || loginHint;
-            tag = arguments[6] || tag;
-            teaser = arguments[7] || teaser;
-            maxAge = isNaN(arguments[8]) ? maxAge : arguments[8];
+            loginHint = arguments[4] || loginHint;
+            tag = arguments[5] || tag;
+            teaser = arguments[6] || teaser;
+            maxAge = isNaN(arguments[7]) ? maxAge : arguments[7];
         }
-        assert(!acrValues || isStrIn(acrValues, ['', 'otp-email', 'otp-sms'], true),
+        const isValidAcrValue = (acrValue) => isStrIn(acrValue, ['password', 'otp', 'sms'], true);
+        assert(!acrValues || isStrIn(acrValues, ['', 'otp-email', 'otp-sms'], true) || acrValues.split(' ').every(isValidAcrValue),
             `The acrValues parameter is not acceptable: ${acrValues}`);
         assert(isUrl(redirectUri),
             `loginUrl(): redirectUri must be a valid url but is ${redirectUri}`);
         assert(isNonEmptyString(state),
             `the state parameter should be a non empty string but it is ${state}`);
 
-
-        if (newFlow) {
-            return this._oauthService.makeUrl('oauth/authorize', {
-                response_type: 'code',
-                'new-flow': true,
-                redirect_uri: redirectUri,
-                scope,
-                state,
-                acr_values: acrValues,
-                login_hint: loginHint,
-                tag,
-                teaser,
-                max_age: maxAge,
-                locale,
-                one_step_login: oneStepLogin || '',
-                prompt: this.siteSpecificLogout ? 'select_account' : ''
-            });
-        } else {
-            // acrValues do not work with the old flows
-            return this._spid.makeUrl('flow/login', {
-                response_type: 'code',
-                redirect_uri: redirectUri,
-                scope,
-                state,
-                email: loginHint,
-                tag,
-                teaser,
-                locale
-            });
-        }
+        return this._oauthService.makeUrl('oauth/authorize', {
+            response_type: 'code',
+            redirect_uri: redirectUri,
+            scope,
+            state,
+            acr_values: acrValues,
+            login_hint: loginHint,
+            tag,
+            teaser,
+            max_age: maxAge,
+            locale,
+            one_step_login: oneStepLogin || '',
+            prompt: this.siteSpecificLogout ? 'select_account' : ''
+        });
     }
 
     /**
@@ -862,48 +839,6 @@ export class Identity extends EventEmitter {
      */
     phonesUrl(redirectUri = this.redirectUri) {
         return this._spid.makeUrl('account/phones', {
-            response_type: 'code',
-            redirect_uri: redirectUri
-        });
-    }
-
-    /**
-     * Url to render either signup or login
-     * @see https://techdocs.spid.no/flows/auth-flow/
-     * @param {string} [redirectUri=this.redirectUri]
-     * @return {string} - the url to the authentication page
-     */
-    authFlowUrl(redirectUri = this.redirectUri) {
-        assert(isUrl(redirectUri), `authFlowUrl(): redirectUri is invalid`);
-        return this._spid.makeUrl('flow/auth', {
-            response_type: 'code',
-            redirect_uri: redirectUri
-        });
-    }
-
-    /**
-     * Url to render a signup view and let the user login with credentials
-     * @see https://techdocs.spid.no/flows/auth-flow/
-     * @param {string} [redirectUri=this.redirectUri]
-     * @return {string} - the url to the signup page
-     */
-    signupFlowUrl(redirectUri = this.redirectUri) {
-        assert(isUrl(redirectUri), `signupFlowUrl(): redirectUri is invalid`);
-        return this._spid.makeUrl('flow/signup', {
-            response_type: 'code',
-            redirect_uri: redirectUri
-        });
-    }
-
-    /**
-     * To render a signin view and let the user login without credentials
-     * @see https://techdocs.spid.no/flows/auth-flow/
-     * @param {string} [redirectUri=this.redirectUri]
-     * @return {string} - the url to the signin page
-     */
-    signinFlowUrl(redirectUri = this.redirectUri) {
-        assert(isUrl(redirectUri), `signinFlowUrl(): redirectUri is invalid`);
-        return this._spid.makeUrl('flow/signin', {
             response_type: 'code',
             redirect_uri: redirectUri
         });
