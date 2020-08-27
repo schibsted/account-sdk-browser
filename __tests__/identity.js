@@ -1061,4 +1061,47 @@ describe('Identity', () => {
             expect(window.openSimplifiedLoginWidget).toHaveBeenCalledTimes(1);
         });
     });
+
+    describe('assertAuthorizationMethod', () => {
+        const window = { location: {} };
+        const identity = new Identity({ env: 'PRO', clientId: 'foo', redirectUri: 'http://example.com', window });
+
+        test('should allow sms, otp, password acrValues', () => {
+            identity.assertAuthorizationMethod({
+                state: 'dummy-state',
+                acrValues: 'otp sms password',
+            });
+
+            compareUrls(
+                window.location.href,
+                'https://login.schibsted.com/oauth/authorize?client_id=foo&redirect_uri=http%3A%2F%2Fexample.com&response_type=code&scope=openid&state=dummy-state&acr_values=otp+sms+password&prompt=select_account'
+            );
+
+            identity.assertAuthorizationMethod({
+                state: 'dummy-state',
+                acrValues: 'sms password',
+            });
+
+            compareUrls(
+                window.location.href,
+                'https://login.schibsted.com/oauth/authorize?client_id=foo&redirect_uri=http%3A%2F%2Fexample.com&response_type=code&scope=openid&state=dummy-state&acr_values=sms+password&prompt=select_account'
+            );
+        });
+
+        test('should throw exception on not supported acrValues', () => {
+            expect(() => {
+                identity.assertAuthorizationMethod({
+                    state: 'dummy-state',
+                    acrValues: 'otp-email',
+                });
+            }).toThrowError(new SDKError('The acrValues parameter is not acceptable: otp-email'));
+
+            expect(() => {
+                identity.assertAuthorizationMethod({
+                    state: 'dummy-state',
+                    acrValues: 'sms otp-email',
+                });
+            }).toThrowError(new SDKError('The acrValues parameter is not acceptable: sms otp-email'));
+        });
+    });
 });

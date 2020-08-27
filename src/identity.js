@@ -87,6 +87,15 @@ function inspect(thing) {
 }
 
 /**
+ * Checks if given acrValue is valid
+ * @param acrValue
+ * @returns {boolean}
+ */
+function isValidAcrValue(acrValue) {
+    return isStrIn(acrValue, ['password', 'otp', 'sms'], true);
+}
+
+/**
  * Provides Identity functionalty to a web page
  */
 export class Identity extends EventEmitter {
@@ -721,6 +730,46 @@ export class Identity extends EventEmitter {
         return null;
     }
 
+
+    /**
+     * Starts sms/otp/password login flow for logged in users. Flow results with user access
+     * token with intended methods in amr field (make sure to verify token amr).
+     * @summary Triggers sms/otp/password authentication
+     * @see https://tools.ietf.org/html/rfc6749#section-4.1.1
+     * @param {object} options
+     * @param {string} [options.acrValues] - Authentication Context Class Reference Values. If
+     * omitted, the user will be asked to authenticate using username+password. 'otp-email' means
+     * one time password using email. 'otp-sms' means one time password using sms
+     * @param {string} options.state - An opaque value used by the client to maintain state between
+     * the request and callback. It's also recommended to prevent CSRF
+     * @see https://tools.ietf.org/html/rfc6749#section-10.12
+     * @param {string} [options.scope='openid'] - The OAuth scopes for the tokens. This is a list of
+     * scopes, separated by space. If the list of scopes contains `openid`, the generated tokens
+     * includes the id token which can be useful for getting information about the user. Omitting
+     * scope is allowed, while `invalid_scope` is returned when the client asks for a scope you
+     * aren’t allowed to request.
+     * @see https://tools.ietf.org/html/rfc6749#section-3.3
+     * @param {string} [options.redirectUri=this.redirectUri] - Redirect uri that will receive the
+     * code. Must exactly match a redirectUri from your client in self-service
+     * @param {string} [options.tag=''] - Pulse tag
+     * @param {string} [options.locale=''] - Optional parameter to overwrite client locale setting.
+     * New flows supports nb_NO, fi_FI, sv_SE, en_US
+     */
+    assertAuthorizationMethod({
+              acrValues,
+              state,
+              scope = 'openid',
+              redirectUri = this.redirectUri,
+              tag = '',
+              locale = '',
+          }) {
+        assert(acrValues && acrValues.split(' ').every(isValidAcrValue),
+            `The acrValues parameter is not acceptable: ${acrValues}`);
+        const url = this.loginUrl({ state, acrValues, scope, redirectUri, tag, locale });
+        this.window.location.href = url;
+        return null;
+    }
+
     /**
      * @summary Logs the user out from the Identity platform
      * @param {string} redirectUri - Where to redirect the browser after logging out of Schibsted
@@ -781,7 +830,6 @@ export class Identity extends EventEmitter {
             teaser = arguments[6] || teaser;
             maxAge = isNaN(arguments[7]) ? maxAge : arguments[7];
         }
-        const isValidAcrValue = (acrValue) => isStrIn(acrValue, ['password', 'otp', 'sms'], true);
         assert(!acrValues || isStrIn(acrValues, ['', 'otp-email', 'otp-sms'], true) || acrValues.split(' ').every(isValidAcrValue),
             `The acrValues parameter is not acceptable: ${acrValues}`);
         assert(isUrl(redirectUri),
