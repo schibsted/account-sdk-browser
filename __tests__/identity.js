@@ -1074,7 +1074,7 @@ describe('Identity', () => {
 
             compareUrls(
                 window.location.href,
-                'https://login.schibsted.com/oauth/authorize?client_id=foo&redirect_uri=http%3A%2F%2Fexample.com&response_type=code&scope=openid&state=dummy-state&acr_values=otp+sms+password&prompt=select_account'
+                'https://login.schibsted.com/oauth/authorize?client_id=foo&redirect_uri=http%3A%2F%2Fexample.com&response_type=code&scope=openid&state=dummy-state&acr_values=otp+sms+password'
             );
 
             identity.assertAuthorizationMethod({
@@ -1084,7 +1084,7 @@ describe('Identity', () => {
 
             compareUrls(
                 window.location.href,
-                'https://login.schibsted.com/oauth/authorize?client_id=foo&redirect_uri=http%3A%2F%2Fexample.com&response_type=code&scope=openid&state=dummy-state&acr_values=sms+password&prompt=select_account'
+                'https://login.schibsted.com/oauth/authorize?client_id=foo&redirect_uri=http%3A%2F%2Fexample.com&response_type=code&scope=openid&state=dummy-state&acr_values=sms+password'
             );
         });
 

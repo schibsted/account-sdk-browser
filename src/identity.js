@@ -765,7 +765,7 @@ export class Identity extends EventEmitter {
           }) {
         assert(acrValues && acrValues.split(' ').every(isValidAcrValue),
             `The acrValues parameter is not acceptable: ${acrValues}`);
-        const url = this.loginUrl({ state, acrValues, scope, redirectUri, tag, locale });
+        const url = this.loginUrl({ state, acrValues, scope, redirectUri, tag, locale, promptWithSelectAccount: false });
         this.window.location.href = url;
         return null;
     }
@@ -817,6 +817,7 @@ export class Identity extends EventEmitter {
         teaser = '',
         maxAge = '',
         locale = '',
+        promptWithSelectAccount = true,
         oneStepLogin = false
     }) {
         if (typeof arguments[0] !== 'object') {
@@ -849,7 +850,7 @@ export class Identity extends EventEmitter {
             max_age: maxAge,
             locale,
             one_step_login: oneStepLogin || '',
-            prompt: this.siteSpecificLogout ? 'select_account' : ''
+            prompt: this.siteSpecificLogout && promptWithSelectAccount ? 'select_account' : ''
         });
     }
 
