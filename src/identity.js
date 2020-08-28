@@ -737,9 +737,8 @@ export class Identity extends EventEmitter {
      * @summary Triggers sms/otp/password authentication
      * @see https://tools.ietf.org/html/rfc6749#section-4.1.1
      * @param {object} options
-     * @param {string} [options.acrValues] - Authentication Context Class Reference Values. If
-     * omitted, the user will be asked to authenticate using username+password. 'otp-email' means
-     * one time password using email. 'otp-sms' means one time password using sms
+     * @param {string} [options.acrValues] - Authentication Context Class Reference Values. Possible
+     * values are `sms`, `otp`, `password`. Might be combined and separate by space.
      * @param {string} options.state - An opaque value used by the client to maintain state between
      * the request and callback. It's also recommended to prevent CSRF
      * @see https://tools.ietf.org/html/rfc6749#section-10.12
@@ -756,13 +755,13 @@ export class Identity extends EventEmitter {
      * New flows supports nb_NO, fi_FI, sv_SE, en_US
      */
     assertAuthorizationMethod({
-              acrValues,
-              state,
-              scope = 'openid',
-              redirectUri = this.redirectUri,
-              tag = '',
-              locale = '',
-          }) {
+        acrValues,
+        state,
+        scope = 'openid',
+        redirectUri = this.redirectUri,
+        tag = '',
+        locale = '',
+    }) {
         assert(acrValues && acrValues.split(' ').every(isValidAcrValue),
             `The acrValues parameter is not acceptable: ${acrValues}`);
         const url = this.loginUrl({ state, acrValues, scope, redirectUri, tag, locale, promptWithSelectAccount: false });
