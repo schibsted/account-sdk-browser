@@ -398,39 +398,6 @@ try {
 }
 ```
 
-### Legacy methods
-
-* [Monetization#hasProduct](https://schibsted.github.io/account-sdk-browser/Monetization.html#hasProduct)
-  for checking if the user has access to a particular product
-* [Monetization#hasSubscription](https://schibsted.github.io/account-sdk-browser/Monetization.html#hasSubscription)
-  for checking if the user has access to a particular subscription
-
-These two functions require a parameter `sp_id` that is obtained from
-[Identity#getSpId](https://schibsted.github.io/account-sdk-browser/Identity.html#getSpId)
-asynchronously.
-
-#### Example
-
-```javascript
-import { Monetization } from '@schibsted/account-sdk-browser'
-
-const monetization = new Monetization({
-    clientId: '56e9a5d1eee0000000000000',
-    redirectUri: 'https://awesomenews.site', // ensure it's listed in selfservice
-    env: 'PRE', // Schibsted account env. A url or a special key: 'PRE', 'PRO' or 'PRO_NO'
-})
-
-try {
-    // Check if the user has access to a a particular product
-    // You need the sp_id parameter that is obtained from an Identity instance
-    const sp_id = await identity.getSpId()
-    const data = await monetization.hasProduct(productId, sp_id)
-    alert(`User has access to ${productId}? ${data.result}`)
-} catch (err) {
-    alert(`Could not query if the user has access to ${productId} because ${err}`)
-}
-```
-
 <a name="payment"></a>
 
 ## Payment
