@@ -62,15 +62,6 @@ describe('Identity', () => {
                 'https://identity-pre.schibsted.com/oauth/authorize?client_id=foo&redirect_uri=http%3A%2F%2Ffoo.com&response_type=code&scope=openid&state=foo&prompt=select_account'
             );
         });
-        test('Should work with only "state" param for site specific logout', () => {
-            const window = { location: {} };
-            const identity = new Identity({ clientId: 'foo', redirectUri: 'http://foo.com', window });
-            identity.login({ state: 'foo' });
-            compareUrls(
-                window.location.href,
-                'https://identity-pre.schibsted.com/oauth/authorize?client_id=foo&redirect_uri=http%3A%2F%2Ffoo.com&response_type=code&scope=openid&state=foo&prompt=select_account'
-            );
-        });
         test('Should open popup if "preferPopup" is true', () => {
             const window = { screen: {}, open: () => ({ fakePopup: 'yup' }) };
             const identity = new Identity({ clientId: 'foo', redirectUri: 'http://foo.com', window });
