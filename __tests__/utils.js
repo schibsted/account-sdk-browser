@@ -94,47 +94,6 @@ const spidOk = {
     sp_id: 'some-jwt-token',
     sig: 'some-encrypted-value'
 };
-const spidProduct = {
-    result: true,
-    serverTime: 1520610964,
-    expiresIn: 2592000,
-    id: '59e9eaaaacb3ad0aaaedaaaa',
-    userId: 12345,
-    uuid: 'aaaaaaaa-de42-5c4b-80ee-eeeeeeeeeeee',
-    displayName: 'bruce_wayne',
-    givenName: 'Bruce',
-    familyName: 'Wayne',
-    gender: 'withheld',
-    photo: 'https://secure.gravatar.com/avatar/1234?s=200',
-    tracking: true,
-    userStatus: 'connected',
-    clientAgreementAccepted: true,
-    defaultAgreementAccepted: true,
-    sp_id: 'some-jwt-token',
-    sig: 'some-encrypted-value'
-};
-const spidProductNoExpires = {
-    result: true,
-    serverTime: 1520610964,
-    id: '59e9eaaaacb3ad0aaaedaaaa',
-    userId: 12345,
-    uuid: 'aaaaaaaa-de42-5c4b-80ee-eeeeeeeeeeee',
-    displayName: 'bruce_wayne',
-    givenName: 'Bruce',
-    familyName: 'Wayne',
-    gender: 'withheld',
-    photo: 'https://secure.gravatar.com/avatar/1234?s=200',
-    tracking: true,
-    userStatus: 'connected',
-    clientAgreementAccepted: true,
-    defaultAgreementAccepted: true,
-    sp_id: 'some-jwt-token',
-    sig: 'some-encrypted-value'
-};
-const spidProductMissing = {
-    result: false
-};
-
 const sessionServiceAccess = {
     entitled: true,
     allowedFeatures: ["existing"],
@@ -157,9 +116,6 @@ export const Fixtures = {
     hasSessionLoginRequired,
     hasSessionUserException,
     spidOk,
-    spidProduct,
-    spidProductNoExpires,
-    spidProductMissing,
     sessionServiceAccess,
     sessionServiceNoAccess,
 };
