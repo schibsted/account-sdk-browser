@@ -40,8 +40,6 @@
  * @prop {string} ENDPOINTS.SESSION_SERVICE.PRE - Staging environment
  * @prop {string} ENDPOINTS.SESSION_SERVICE.PRO - Production environment Sweden
  * @prop {string} ENDPOINTS.SESSION_SERVICE.PRO_NO - Production environment Norway
- * @prop {object} JSONP
- * @prop {Number} JSONP.TIMEOUT=7000 - Timeout in milliseconds
  */
 const config = {
     ENDPOINTS: {
@@ -67,7 +65,6 @@ const config = {
             PRO_NO: 'https://session-service.payment.schibsted.no',
         },
     },
-    JSONP: { TIMEOUT: 7000 }, // ms
     NAMESPACE: {
         LOCAL: 'id.localhost',
         DEV: 'schibsted.com',
@@ -75,9 +72,8 @@ const config = {
         PRO: 'schibsted.com',
         PRO_NO: 'spid.no',
     }
-}
+};
 
 export default config;
 export const ENDPOINTS = config.ENDPOINTS;
-export const JSONP = config.JSONP;
 export const NAMESPACE = config.NAMESPACE;
