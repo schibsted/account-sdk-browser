@@ -801,7 +801,7 @@ export class Identity extends EventEmitter {
             max_age: maxAge,
             locale,
             one_step_login: oneStepLogin || '',
-            prompt: this.siteSpecificLogout ? 'select_account' : ''
+            prompt: this.siteSpecificLogout && !acrValues ? 'select_account' : ''
         });
     }
 
