@@ -28,12 +28,6 @@
  * @prop {string} ENDPOINTS.SPiD.PRE - Staging environment
  * @prop {string} ENDPOINTS.SPiD.PRO - Production environment Sweden
  * @prop {string} ENDPOINTS.SPiD.PRO_NO - Production environment Norway
- * @prop {object} ENDPOINTS.HAS_SESSION - Endpoints to check whether a user has a valid session
- * @prop {string} ENDPOINTS.HAS_SESSION.LOCAL - Local endpoint (for Identity team)
- * @prop {string} ENDPOINTS.HAS_SESSION.DEV - Dev environment (for Identity team)
- * @prop {string} ENDPOINTS.HAS_SESSION.PRE - Staging environment
- * @prop {string} ENDPOINTS.HAS_SESSION.PRO - Production environment Sweden
- * @prop {string} ENDPOINTS.HAS_SESSION.PRO_NO - Production environment Norway
  * @prop {object} ENDPOINTS.BFF - Endpoints used with new GDPR-compliant web flows
  * @prop {string} ENDPOINTS.BFF.LOCAL - Local endpoint (for Identity team)
  * @prop {string} ENDPOINTS.BFF.DEV - Dev environment (for Identity team)
@@ -57,13 +51,6 @@ const config = {
             PRE: 'https://identity-pre.schibsted.com',
             PRO: 'https://login.schibsted.com',
             PRO_NO: 'https://payment.schibsted.no'
-        },
-        HAS_SESSION: {
-            LOCAL: 'http://session.id.localhost',
-            DEV: 'https://session.identity-dev.schibsted.com',
-            PRE: 'https://session.identity-pre.schibsted.com',
-            PRO: 'https://session.login.schibsted.com',
-            PRO_NO: 'https://session.payment.schibsted.no'
         },
         BFF: {
             LOCAL: 'http://id.localhost/authn/',

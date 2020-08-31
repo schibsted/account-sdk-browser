@@ -72,19 +72,6 @@ const HAS_SESSION_CACHE_KEY = 'hasSession-cache';
 const globalWindow = () => window;
 
 /**
- * Get type and value of something
- * @private
- * @param {string} thing
- * @returns {Array} Tuple of [type, value]
- */
-function inspect(thing) {
-    if (thing === null) {
-        return [typeof thing, `${thing}`];
-    }
-    return [thing.constructor.name, thing.valueOf()];
-}
-
-/**
  * Provides Identity functionalty to a web page
  */
 export class Identity extends EventEmitter {
@@ -117,10 +104,6 @@ export class Identity extends EventEmitter {
         // Internal hack: set to false to always refresh from hassession
         this._enableSessionCaching = true;
 
-        // Internal hack: set to true if the SDK is being used inside the ITP iframe to
-        // avoid using the hasSession service and to prevent infinite iframe recursion
-        this._itpMode = false;
-
         // Old session
         this._session = {};
 
@@ -128,7 +111,6 @@ export class Identity extends EventEmitter {
         this._setSpidServerUrl(env);
         this._setBffServerUrl(env);
         this._setOauthServerUrl(env);
-        this._setHasSessionServerUrl(env);
         this._setGlobalSessionServiceUrl(env);
     }
 
@@ -206,21 +188,6 @@ export class Identity extends EventEmitter {
             serverUrl: urlMapper(url, ENDPOINTS.SESSION_SERVICE),
             log: this.log,
             defaultParams: { client_sdrn },
-        });
-    }
-
-    /**
-     * Set HasSession server URL - real URL or 'PRE' style key
-     * @private
-     * @param {string} url
-     * @returns {void}
-     */
-    _setHasSessionServerUrl(url) {
-        assert(isStr(url), `url parameter is invalid: ${url}`);
-        this._hasSession = new JSONPClient({
-            serverUrl: urlMapper(url, ENDPOINTS.HAS_SESSION),
-            log: this.log,
-            defaultParams: { client_id: this.clientId, redirect_uri: this.redirectUri },
         });
     }
 
@@ -395,11 +362,7 @@ export class Identity extends EventEmitter {
     /**
      * @summary Queries the hassession endpoint and returns information about the status of the user
      * @description When we send a request to this endpoint, cookies sent along with the request
-     * determines the status of the user. If the user is not currently logged in, but has a cookie
-     * with the "Remember me" flag switched on, calling this function will attempt to automatically
-     * perform a login on the user
-     * @param {boolean} [autologin=true] - Set this to `false` if you do **not** want the auto-login
-     * to happen
+     * determines the status of the user.
      * @throws {SDKError} - If the call to the hasSession service fails in any way (this will happen
      * if, say, the user is not logged in)
      * @fires Identity#login
@@ -412,13 +375,9 @@ export class Identity extends EventEmitter {
      * @fires Identity#error
      * @return {Promise<Identity#HasSessionSuccessResponse|Identity#HasSessionFailureResponse>}
      */
-    hasSession(autologin = true) {
+    hasSession() {
         if (this._hasSessionInProgress) {
             return this._hasSessionInProgress;
-        }
-        if (typeof autologin !== 'boolean') {
-            const [type, value] = inspect(autologin);
-            return Promise.reject(new SDKError(`Parameter 'autologin' must be boolean, was: "${type}:${value}"`));
         }
         const _postProcess = (sessionData) => {
             if (sessionData.error) {
@@ -445,16 +404,7 @@ export class Identity extends EventEmitter {
                     const expiresIn = 1000 * (err.expiresIn || 300);
                     this.cache.set(HAS_SESSION_CACHE_KEY, { error: err }, expiresIn);
                 }
-                // Don't fallback to other sources for user session lookup
                 throw err;
-            }
-
-            const autoLoginConverted = autologin ? 1 : 0;
-            if (!sessionData && !this._itpMode) {
-                sessionData = await this._hasSession.get('rpc/hasSession.js', { autologin: autoLoginConverted });
-            }
-            if (this._itpMode || (sessionData && isObject(sessionData.error) && sessionData.error.type === 'LoginException')) {
-                sessionData = await this._spid.get('ajax/hasSession.js', { autologin: autoLoginConverted });
             }
 
             if (sessionData && this._enableSessionCaching) {
