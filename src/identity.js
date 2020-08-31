@@ -105,6 +105,7 @@ export class Identity extends EventEmitter {
         assert(isNonEmptyString(clientId), 'clientId parameter is required');
         assert(isObject(window), 'The reference to window is missing');
         assert(!redirectUri || isUrl(redirectUri), 'redirectUri parameter is invalid');
+        assert(sessionDomain && isUrl(sessionDomain), 'sessionDomain parameter is not a valid URL');
 
         spidTalk.emulate(window);
         this._sessionInitiatedSent = false;
@@ -114,11 +115,6 @@ export class Identity extends EventEmitter {
         this.redirectUri = redirectUri;
         this.env = env;
         this.log = log;
-
-        if (sessionDomain) {
-            assert(isUrl(sessionDomain), 'sessionDomain parameter is not a valid URL');
-            this._setSessionServiceUrl(sessionDomain);
-        }
 
         // Internal hack: set to false to always refresh from hassession
         this._enableSessionCaching = true;
@@ -130,6 +126,7 @@ export class Identity extends EventEmitter {
         // Old session
         this._session = {};
 
+        this._setSessionServiceUrl(sessionDomain);
         this._setSpidServerUrl(env);
         this._setBffServerUrl(env);
         this._setOauthServerUrl(env);
@@ -460,17 +457,15 @@ export class Identity extends EventEmitter {
                 }
             }
             let sessionData = null;
-            if (this._sessionService) {
-                try {
-                    sessionData = await this._sessionService.get('/session');
-                } catch (err) {
-                    if (err && err.code === 400 && this._enableSessionCaching) {
-                        const expiresIn = 1000 * (err.expiresIn || 300);
-                        this.cache.set(HAS_SESSION_CACHE_KEY, { error: err }, expiresIn);
-                    }
-                    // Don't fallback to other sources for user session lookup
-                    throw err;
+            try {
+                sessionData = await this._sessionService.get('/session');
+            } catch (err) {
+                if (err && err.code === 400 && this._enableSessionCaching) {
+                    const expiresIn = 1000 * (err.expiresIn || 300);
+                    this.cache.set(HAS_SESSION_CACHE_KEY, { error: err }, expiresIn);
                 }
+                // Don't fallback to other sources for user session lookup
+                throw err;
             }
 
             const autoLoginConverted = autologin ? 1 : 0;

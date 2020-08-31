@@ -11,11 +11,16 @@ jest.mock('../src/ItpModal');
 import Identity from '../identity';
 import ItpModal from '../src/ItpModal';
 import RESTClient from '../src/RESTClient';
-import { compareUrls } from './utils';
+import { compareUrls, Fixtures } from './utils';
 import { URL } from 'url';
 import { URL as u } from 'whatwg-url';
 
 describe('Identity', () => {
+    const defaultOptions = {
+        clientId: 'foo',
+        redirectUri: 'http://foo.com',
+        sessionDomain: 'http://id.foo.com',
+    };
 
     beforeAll(() => {
         global.URL = u;
@@ -27,35 +32,53 @@ describe('Identity', () => {
         });
 
         test('throws if window is missing or has wrong type', () => {
-            expect(() => new Identity({ window: 123, clientId: 'xxxx', redirectUri: true }))
+            expect(() => new Identity({ window: 123, clientId: 'xxxx', redirectUri: true, sessionDomain: 'http://id.foo.com' }))
                 .toThrowError(/The reference to window is missing/);
-            expect(() => new Identity({ window: {}, clientId: 'xxxx', redirectUri: true }))
+            expect(() => new Identity({ window: {}, clientId: 'xxxx', redirectUri: true , sessionDomain: 'http://id.foo.com'}))
                 .not.toThrowError(/The reference to window is missing/);
         });
 
         test('throws if the redirectUri is missing or has wrong type', () => {
-            expect(() => new Identity({ window: {}, clientId: 'xxxx' }))
+            expect(() => new Identity({ window: {}, clientId: 'xxxx', sessionDomain: 'http://id.foo.com' }))
                 .not.toThrowError(/redirectUri parameter is invalid/);
-            expect(() => new Identity({ window: {}, clientId: 'xxxx', redirectUri: true }))
+            expect(() => new Identity({ window: {}, clientId: 'xxxx', redirectUri: true, sessionDomain: 'http://id.foo.com' }))
                 .toThrowError(/redirectUri parameter is invalid/);
-            expect(() => new Identity({ window: {}, clientId: 'xxxx', redirectUri: 'http://foo.com' }))
+            expect(() => new Identity({ window: {}, clientId: 'xxxx', redirectUri: 'http://foo.com', sessionDomain: 'http://id.foo.com' }))
                 .not.toThrowError(/redirectUri parameter is invalid/);
         });
 
         test('throws if the client_id setting is missing or has wrong type', () => {
             expect(() => new Identity({ window: {} }))
                 .toThrowError(/clientId parameter is required/);
-            expect(() => new Identity({ window: {}, clientId: true }))
+            expect(() => new Identity({ window: {}, clientId: true , sessionDomain: 'http://id.foo.com'}))
                 .toThrowError(/clientId parameter is required/);
-            expect(() => new Identity({ window: {}, clientId: 'xxxx' }))
+            expect(() => new Identity({ window: {}, clientId: 'xxxx', sessionDomain: 'http://id.foo.com'}))
                 .not.toThrowError(/clientId parameter is required/);
+        });
+
+        test('throws if the sessionDomain is missing or has wrong type', () => {
+            expect(() => new Identity({ window: {}, clientId: 'xxxx' }))
+                .toThrowError(/sessionDomain parameter is not a valid URL/);
+            expect(() => new Identity({ window: {}, clientId: 'xxxx', sessionDomain: 'not-a-url' }))
+                .toThrowError(/sessionDomain parameter is not a valid URL/);
+            expect(() => new Identity({ window: {}, clientId: 'xxxx', sessionDomain: 'http://id.foo.com' }))
+                .not.toThrowError(/sessionDomain parameter is not a valid URL/);
         });
     });
 
     describe('login()', () => {
         test('Should work with only "state" param', () => {
             const window = { location: {} };
-            const identity = new Identity({ clientId: 'foo', redirectUri: 'http://foo.com', window });
+            const identity = new Identity(Object.assign({}, defaultOptions, { window }));
+            identity.login({ state: 'foo' });
+            compareUrls(
+                window.location.href,
+                'https://identity-pre.schibsted.com/oauth/authorize?client_id=foo&redirect_uri=http%3A%2F%2Ffoo.com&response_type=code&scope=openid&state=foo&prompt=select_account'
+            );
+        });
+        test('Should work with only "state" param for site specific logout', () => {
+            const window = { location: {} };
+            const identity = new Identity(Object.assign({}, defaultOptions, { window }));
             identity.login({ state: 'foo' });
             compareUrls(
                 window.location.href,
@@ -64,13 +87,13 @@ describe('Identity', () => {
         });
         test('Should open popup if "preferPopup" is true', () => {
             const window = { screen: {}, open: () => ({ fakePopup: 'yup' }) };
-            const identity = new Identity({ clientId: 'foo', redirectUri: 'http://foo.com', window });
+            const identity = new Identity(Object.assign({}, defaultOptions, { window }));
             const popup = identity.login({ state: 'foo', preferPopup: true });
             expect(popup).toHaveProperty('fakePopup', 'yup');
         });
         test('Should fall back to redirecting if popup fails', () => {
             const window = { location: {}, screen: {}, open: () => {} };
-            const identity = new Identity({ clientId: 'foo', redirectUri: 'http://foo.com', window });
+            const identity = new Identity(Object.assign({}, defaultOptions, { window }));
             identity.login({ state: 'foo', preferPopup: true });
             compareUrls(
                 window.location.href,
@@ -79,7 +102,7 @@ describe('Identity', () => {
         });
         test('Should close previous popup if it exists (and is open)', () => {
             const window = { screen: {}, open: () => ({ fakePopup: 'yup' }) };
-            const identity = new Identity({ clientId: 'foo', redirectUri: 'http://foo.com', window });
+            const identity = new Identity(Object.assign({}, defaultOptions, { window }));
             const oldPopup = identity.popup = { close: jest.fn() };
             const popup = identity.login({ state: 'foo', preferPopup: true });
             expect(popup).toHaveProperty('fakePopup', 'yup');
@@ -87,7 +110,7 @@ describe('Identity', () => {
         });
         test('Should not try to close existing popup if already close', () => {
             const window = { screen: {}, open: () => ({ fakePopup: 'yup' }) };
-            const identity = new Identity({ clientId: 'foo', redirectUri: 'http://foo.com', window });
+            const identity = new Identity(Object.assign({}, defaultOptions, { window }));
             const oldPopup = identity.popup = { close: jest.fn(), closed: true };
             const popup = identity.login({ state: 'foo', preferPopup: true });
             expect(popup).toHaveProperty('fakePopup', 'yup');
@@ -98,14 +121,15 @@ describe('Identity', () => {
     describe('logout()', () => {
         test('Should be able to log out from Schibsted account', async () => {
             const window = { location: {} };
-            const identity = new Identity({ clientId: 'foo', redirectUri: 'http://foo.com', window});
+            const identity = new Identity(Object.assign({}, defaultOptions, { window }));
             identity.logout();
 
-            expect(window.location.href).toBe('https://identity-pre.schibsted.com/logout?client_id=foo&redirect_uri=http%3A%2F%2Ffoo.com&response_type=code');
+            const clientSdrn = `sdrn%3Aschibsted.com%3Aclient%3A${defaultOptions.clientId}`;
+            expect(window.location.href).toBe(`${defaultOptions.sessionDomain}/logout?client_sdrn=${clientSdrn}&redirect_uri=http%3A%2F%2Ffoo.com`);
         });
         test('Should redirect to session-service for site-specific logout if configured', async () => {
             const window = { location: {} };
-            const identity = new Identity({ clientId: 'foo', redirectUri: 'http://foo.com', sessionDomain: 'http://id.foo.com', window});
+            const identity = new Identity(Object.assign({}, defaultOptions, { window }));
             identity.logout();
 
             expect(window.location.href).toBe('http://id.foo.com/logout?client_sdrn=sdrn%3Aschibsted.com%3Aclient%3Afoo&redirect_uri=http%3A%2F%2Ffoo.com');
@@ -121,21 +145,22 @@ describe('Identity', () => {
                 return mock;
             };
             const window = { sessionStorage: webStorageMock(), location: {} };
-            const identity = new Identity({ clientId: 'foo', redirectUri: 'http://foo.com', window });
+            const identity = new Identity(Object.assign({}, defaultOptions, { window }));
             const fakeFetch = jest.fn();
             const sessionResponse = { ok: true, json: async () => ({ result: true })};
             fakeFetch.mockImplementationOnce(async () => sessionResponse);
-            identity._spid.fetch = fakeFetch;
+            identity._sessionService.fetch = fakeFetch;
             await identity.hasSession();
             expect(fakeFetch).toHaveBeenCalledTimes(1);
+
             const fakeFetch2 = jest.fn();
             fakeFetch2.mockImplementationOnce(async () => ({ ok: true, json: async () => ({})}));
-            identity._spid.fetch = fakeFetch2;
+            identity._sessionService.fetch = fakeFetch2;
             identity._bffService.fetch = fakeFetch2;
             identity.logout();
 
             fakeFetch.mockImplementationOnce(async () => sessionResponse);
-            identity._spid.fetch = fakeFetch;
+            identity._sessionService.fetch = fakeFetch;
             await identity.hasSession();
             expect(fakeFetch).toHaveBeenCalledTimes(2); // now it should have been called again, so 2
         });
@@ -143,12 +168,7 @@ describe('Identity', () => {
 
     describe('loginUrl() with options object', () => {
         test('returns the expected endpoint for new flows', () => {
-            const identity = new Identity({
-                env: 'PRO',
-                clientId: 'foo',
-                redirectUri: 'http://example.com',
-                window: {},
-            });
+            const identity = new Identity(Object.assign({}, defaultOptions, { env: 'PRO' }));
             compareUrls(identity.loginUrl({
                 state: 'dummy-state',
                 loginHint: 'dev@spid.no',
@@ -157,28 +177,18 @@ describe('Identity', () => {
                 maxAge: 0,
                 locale: 'en_US',
                 oneStepLogin: true
-            }), 'https://login.schibsted.com/oauth/authorize?redirect_uri=http%3A%2F%2Fexample.com&client_id=foo&state=dummy-state&response_type=code&scope=openid&login_hint=dev@spid.no&max_age=0&tag=sample-tag&teaser=sample-teaser-slug&locale=en_US&one_step_login=true&prompt=select_account');
+            }), 'https://login.schibsted.com/oauth/authorize?redirect_uri=http%3A%2F%2Ffoo.com&client_id=foo&state=dummy-state&response_type=code&scope=openid&login_hint=dev@spid.no&max_age=0&tag=sample-tag&teaser=sample-teaser-slug&locale=en_US&one_step_login=true&prompt=select_account');
         });
 
         test('returns the expected endpoint for new flows with default params', () => {
-            const identity = new Identity({
-                env: 'PRO',
-                clientId: 'foo',
-                redirectUri: 'http://example.com',
-                window: {},
-            });
+            const identity = new Identity(Object.assign({}, defaultOptions, { env: 'PRO' }));
             compareUrls(identity.loginUrl({
                 state: 'dummy-state',
-            }), 'https://login.schibsted.com/oauth/authorize?redirect_uri=http%3A%2F%2Fexample.com&client_id=foo&state=dummy-state&response_type=code&scope=openid&prompt=select_account');
+            }), 'https://login.schibsted.com/oauth/authorize?redirect_uri=http%3A%2F%2Ffoo.com&client_id=foo&state=dummy-state&response_type=code&scope=openid&prompt=select_account');
         });
 
         test('should throw error on wrong acrValues', () => {
-            const identity = new Identity({
-                env: 'PRO',
-                clientId: 'foo',
-                redirectUri: 'http://example.com',
-                window: {},
-            });
+            const identity = new Identity(Object.assign({}, defaultOptions, { env: 'PRO' }));
 
             expect(() => {
                 identity.loginUrl({state: 'dummy-state', acrValues: 'myOwnAcrValue'})
@@ -190,38 +200,28 @@ describe('Identity', () => {
         });
 
         test('should accept variations of sms, otp, password acrValues. Url shouldn\'t contain prompt=select_account', () => {
-            const identity = new Identity({
-                env: 'PRO',
-                clientId: 'foo',
-                redirectUri: 'http://example.com',
-                window: {},
-            });
+            const identity = new Identity(Object.assign({}, defaultOptions, { env: 'PRO' }));
 
             compareUrls(identity.loginUrl({
                 state: 'dummy-state',
                 acrValues: 'sms',
-            }), 'https://login.schibsted.com/oauth/authorize?redirect_uri=http%3A%2F%2Fexample.com&client_id=foo&state=dummy-state&response_type=code&scope=openid&acr_values=sms');
+            }), 'https://login.schibsted.com/oauth/authorize?redirect_uri=http%3A%2F%2Ffoo.com&client_id=foo&state=dummy-state&response_type=code&scope=openid&acr_values=sms');
 
             compareUrls(identity.loginUrl({
                 state: 'dummy-state',
                 acrValues: 'sms otp',
-            }), 'https://login.schibsted.com/oauth/authorize?redirect_uri=http%3A%2F%2Fexample.com&client_id=foo&state=dummy-state&response_type=code&scope=openid&acr_values=sms+otp');
+            }), 'https://login.schibsted.com/oauth/authorize?redirect_uri=http%3A%2F%2Ffoo.com&client_id=foo&state=dummy-state&response_type=code&scope=openid&acr_values=sms+otp');
 
             compareUrls(identity.loginUrl({
                 state: 'dummy-state',
                 acrValues: 'sms otp password',
-            }), 'https://login.schibsted.com/oauth/authorize?redirect_uri=http%3A%2F%2Fexample.com&client_id=foo&state=dummy-state&response_type=code&scope=openid&acr_values=sms+otp+password');
+            }), 'https://login.schibsted.com/oauth/authorize?redirect_uri=http%3A%2F%2Ffoo.com&client_id=foo&state=dummy-state&response_type=code&scope=openid&acr_values=sms+otp+password');
         });
     });
 
     describe('loginUrl() with arguments', () => {
         test('returns the expected endpoint for new flows', () => {
-            const identity = new Identity({
-                env: 'PRO',
-                clientId: 'foo',
-                redirectUri: 'http://example.com',
-                window: {},
-            });
+            const identity = new Identity(Object.assign({}, defaultOptions, { env: 'PRO' }));
             compareUrls(identity.loginUrl(
                 'dummy-state',
                 undefined,
@@ -231,22 +231,17 @@ describe('Identity', () => {
                 'sample-tag',
                 'sample-teaser-slug',
                 0
-            ), 'https://login.schibsted.com/oauth/authorize?redirect_uri=http%3A%2F%2Fexample.com&client_id=foo&state=dummy-state&response_type=code&scope=openid&login_hint=dev@spid.no&max_age=0&tag=sample-tag&teaser=sample-teaser-slug&prompt=select_account');
+            ), 'https://login.schibsted.com/oauth/authorize?redirect_uri=http%3A%2F%2Ffoo.com&client_id=foo&state=dummy-state&response_type=code&scope=openid&login_hint=dev@spid.no&max_age=0&tag=sample-tag&teaser=sample-teaser-slug&prompt=select_account');
         });
 
         test('returns the expected endpoint for new flows with default params', () => {
-            const identity = new Identity({
-                env: 'PRO',
-                clientId: 'foo',
-                redirectUri: 'http://example.com',
-                window: {},
-            });
+            const identity = new Identity(Object.assign({}, defaultOptions, { env: 'PRO' }));
             compareUrls(identity.loginUrl(
                 'dummy-state',
                 undefined,
                 undefined,
                 undefined,
-            ), 'https://login.schibsted.com/oauth/authorize?redirect_uri=http%3A%2F%2Fexample.com&client_id=foo&state=dummy-state&response_type=code&scope=openid&prompt=select_account');
+            ), 'https://login.schibsted.com/oauth/authorize?redirect_uri=http%3A%2F%2Ffoo.com&client_id=foo&state=dummy-state&response_type=code&scope=openid&prompt=select_account');
         });
     });
 
@@ -256,7 +251,8 @@ describe('Identity', () => {
 
         beforeEach(() => {
             fetch.mockClear();
-            identity = new Identity({ clientId: 'foo', redirectUri: 'http://example.com' });
+            identity = new Identity(defaultOptions);
+            identity._sessionService.fetch = jest.fn((() => ({ ok: true, json: () => {} })));
             identity._clearVarnishCookie();
         });
 
@@ -386,18 +382,12 @@ describe('Identity', () => {
         });
 
         test('should only go to session-service for site specific logout', async () => {
-            const options = { clientId: 'foo', redirectUri: 'http://e.com', sessionDomain: 'http://id.e.com' };
-            const client_sdrn = `sdrn:schibsted:client:${options.clientId}`;
-            identity = new Identity(options);
-            identity._sessionService = new RESTClient({
-                serverUrl: options.sessionDomain,
-                fetch,
-                defaultParams: { client_sdrn, redirect_uri: options.redirectUri },
-            });
-            fetch.mockImplementationOnce(async () => ({ ok: false, status: 400, statusText: 'No cookie present' }));
+            identity = new Identity(defaultOptions);
+            const fetch = jest.fn((() => ({ ok: false, status: 400, statusText: 'No cookie present' })));
+            identity._sessionService.fetch = fetch;
             await expect(identity.hasSession()).rejects.toMatchObject({ message: 'HasSession failed' });
             expect(fetch.mock.calls.length).toBe(1);
-            expect(fetch.mock.calls[0][0]).toMatch(/^http:\/\/id.e.com\//);
+            expect(fetch.mock.calls[0][0]).toMatch(/^http:\/\/id.foo.com\/session/);
         });
 
         test('should fail `hasSession` if session cookie is present but no session is found and site does not have specific logout', async () => {
@@ -524,23 +514,25 @@ describe('Identity', () => {
 
         beforeEach(() => {
             fetch.mockClear();
-            identity = new Identity({ clientId: 'foo', redirectUri: 'http://example.com' });
+            identity = new Identity(defaultOptions);
+            identity._sessionService.fetch = jest.fn((() => ({ ok: true, json: () => Fixtures.sessionResponse })));
         });
 
         test('should work when we get a `result` from hasSession', async () => {
-            fetch.mockImplementationOnce(() => ({ ok: true, json: async () => ({ result: true }) }));
             const v = await identity.isLoggedIn();
             expect(v).toBe(true);
         });
 
         test(`should fail when we don't get a 'result' from hasSession`, async () => {
-            fetch.mockImplementationOnce(() => ({ ok: true, json: async () => ({}) }));
+            identity = new Identity(defaultOptions);
+            identity._sessionService.fetch = jest.fn((() => ({ ok: true, json: () => ({}) })));
             const v = await identity.isLoggedIn();
             expect(v).toBe(false);
         });
 
         test(`should handle hasSession failure without throwing`, async () => {
-            fetch.mockImplementationOnce(() => ({ ok: false, statusText: 'Blah!' }));
+            identity = new Identity(defaultOptions);
+            identity._sessionService.fetch = jest.fn((() => ({ ok: false, statusText: 'Blah!' })));
             const v = await identity.isLoggedIn();
             expect(v).toBe(false);
         });
@@ -552,23 +544,25 @@ describe('Identity', () => {
 
         beforeEach(() => {
             fetch.mockClear();
-            identity = new Identity({ clientId: 'foo', redirectUri: 'http://example.com' });
+            identity = new Identity(defaultOptions);
+            identity._sessionService.fetch = jest.fn((() => ({ ok: true, json: async () => Fixtures.sessionResponse })));
         });
 
         test('should work when `!!result` from hasSession', async () => {
-            fetch.mockImplementationOnce(() => ({ ok: true, json: async () => ({ result: true }) }));
             const v = await identity.isConnected();
             expect(v).toBe(true);
         });
 
         test(`should fail when '!result' from hasSession`, async () => {
-            fetch.mockImplementationOnce(() => ({ ok: true, json: async () => ({}) }));
+            identity = new Identity(defaultOptions);
+            identity._sessionService.fetch = jest.fn((() => ({ ok: true, json: async () => ({}) })));
             const v = await identity.isConnected();
             expect(v).toBe(false);
         });
 
         test(`should handle hasSession failure without throwing`, async () => {
-            fetch.mockImplementationOnce(() => ({ ok: false, statusText: 'Blah!' }));
+            identity = new Identity(defaultOptions);
+            identity._sessionService.fetch = jest.fn((() => ({ ok: false, statusText: 'Blah!' })));
             const v = await identity.isConnected();
             expect(v).toBe(false);
         });
@@ -580,7 +574,8 @@ describe('Identity', () => {
 
         beforeEach(() => {
             fetch.mockClear();
-            identity = new Identity({ clientId: 'foo', redirectUri: 'http://example.com' });
+            identity = new Identity({ clientId: 'foo', redirectUri: 'http://example.com', sessionDomain: 'http://id.example.com' });
+            identity._sessionService.fetch = jest.fn((() => ({ ok: true, json: () => Fixtures.sessionResponse })));
         });
 
         test('should work when we get a `result` from hasSession', async () => {
@@ -591,14 +586,15 @@ describe('Identity', () => {
         });
 
         test(`should fail when 'result' is false from hasSession`, async () => {
-            fetch.mockImplementationOnce(() => ({ ok: true, json: async () => ({}) }));
+            identity._sessionService.fetch = jest.fn((() => ({ ok: true, json: async () => ({ result: false }) })));
             await expect(identity.getUser()).rejects.toMatchObject({
                 message: 'The user is not connected to this merchant'
             });
         });
 
         test(`should propagate errors from HasSession call (why, though?)`, async () => {
-            fetch.mockImplementationOnce(() => ({ ok: false, statusText: 'Blah!' }));
+            identity = new Identity(defaultOptions);
+            identity._sessionService.fetch = jest.fn((() => ({ ok: false, statusText: 'Blah!' })));
             await expect(identity.getUser()).rejects.toMatchObject({
                 message: 'HasSession failed'
             });
@@ -609,7 +605,7 @@ describe('Identity', () => {
         let identity;
 
         beforeEach(() => {
-            identity = new Identity({ clientId: 'foo', redirectUri: 'http://example.com' });
+            identity = new Identity(defaultOptions);
         });
 
         test('should work when we get a result from session-service', async () => {
@@ -632,7 +628,8 @@ describe('Identity', () => {
 
         beforeEach(() => {
             fetch.mockClear();
-            identity = new Identity({ clientId: 'foo', redirectUri: 'http://example.com', window: { location: {} } });
+            identity = new Identity(Object.assign({}, defaultOptions, { window: { location: {} } }));
+            identity._sessionService.fetch = jest.fn((() => ({ ok: true, json: () => Fixtures.sessionResponse })));
         });
 
         test(`spy notices a 'login' event`, async () => {
@@ -647,9 +644,9 @@ describe('Identity', () => {
             await identity.hasSession(); // initialize with a session
             identity.logout(); // then log out
 
-            fetch.mockImplementationOnce(() => ({ ok: true, json: async () => ({}) }));
             const spy = jest.spyOn(identity, 'emit');
 
+            identity._sessionService.fetch = jest.fn((() => ({ ok: true, json: () => ({ result: false }) })));
             await identity.hasSession(); // then call hassession again, now with logged out user
 
             expect(spy).toHaveProperty('mock.calls.length');
@@ -662,9 +659,9 @@ describe('Identity', () => {
             identity.logout(); // then log out
 
             const newUser = { result: true, userId: 99999 };
-            fetch.mockImplementationOnce(() => ({ ok: true, json: async () => (newUser) }));
             const spy = jest.spyOn(identity, 'emit');
 
+            identity._sessionService.fetch = jest.fn((() => ({ ok: true, json: () => newUser })));
             await identity.hasSession(); // then call hassession again, now with user=newUser
 
             expect(spy).toHaveProperty('mock.calls.length');
@@ -679,7 +676,8 @@ describe('Identity', () => {
 
         beforeEach(() => {
             fetch.mockClear();
-            identity = new Identity({ clientId: 'foo', redirectUri: 'http://example.com' });
+            identity = new Identity(defaultOptions);
+            identity._sessionService.fetch = jest.fn((() => ({ ok: true, json: () => {} })));
         });
 
         test(`should fail when we don't get a 'userId' from hasSession`, async () => {
@@ -717,7 +715,8 @@ describe('Identity', () => {
 
         beforeEach(() => {
             fetch.mockClear();
-            identity = new Identity({ clientId: 'foo', redirectUri: 'http://example.com' });
+            identity = new Identity(defaultOptions);
+            identity._sessionService.fetch = jest.fn((() => ({ ok: true, json: () => {} })));
         });
 
         test(`should fail when we don't get a 'uuid' from hasSession`, async () => {
@@ -755,7 +754,8 @@ describe('Identity', () => {
 
         beforeEach(() => {
             fetch.mockClear();
-            identity = new Identity({ clientId: 'foo', redirectUri: 'http://example.com' });
+            identity = new Identity(defaultOptions);
+            identity._sessionService.fetch = jest.fn((() => ({ ok: true, json: () => {} })));
         });
 
         test(`should fail when we don't get a 'spId' from hasSession`, async () => {
@@ -780,10 +780,9 @@ describe('Identity', () => {
             const urlFunctions = [
                 ['accountUrl', '/account/summary'],
                 ['phonesUrl', '/account/phones'],
-                ['logoutUrl', '/logout'],
             ];
             test.each(urlFunctions)('%s -> %s', (func, pathname) => {
-                const identity = new Identity({ clientId: 'foo', redirectUri: 'http://example.com' });
+                const identity = new Identity(defaultOptions);
                 const url = new URL(identity[func](redirect));
                 expect(url.origin).toBe('https://identity-pre.schibsted.com');
                 expect(url.pathname).toBe(pathname);
@@ -791,6 +790,15 @@ describe('Identity', () => {
                 expect(url.searchParams.get('response_type')).toBe('code');
                 expect(url.searchParams.get('redirect_uri')).toBe(redirect || identity.redirectUri);
             });
+        });
+
+        describe.each(redirects)(`logoutUrl: redirect='%s'`, (redirect) => {
+            const identity = new Identity(defaultOptions);
+            const url = new URL(identity.logoutUrl(redirect));
+            expect(url.origin).toBe(defaultOptions.sessionDomain);
+            expect(url.pathname).toBe('/logout');
+            expect(url.searchParams.get('client_sdrn')).toBe('sdrn:schibsted.com:client:foo');
+            expect(url.searchParams.get('redirect_uri')).toBe(redirect || identity.redirectUri);
         });
     });
 
@@ -827,32 +835,32 @@ describe('Identity', () => {
 
         describe('_itpModalRequired', () => {
             it('should be true for Safari 12', () => {
-                const identity = new Identity({ clientId: 'foo', redirectUri: 'http://example.com' });
+                const identity = new Identity(defaultOptions);
                 setUserAgent(safari12);
                 expect(identity._itpModalRequired()).toBe(true);
             });
 
             it('should be true for Safari 13', () => {
-                const identity = new Identity({ clientId: 'foo', redirectUri: 'http://example.com' });
+                const identity = new Identity(defaultOptions);
                 setUserAgent(safari13);
                 expect(identity._itpModalRequired()).toBe(true);
             });
 
             it('should be false for Safari 11', () => {
-                const identity = new Identity({ clientId: 'foo', redirectUri: 'http://example.com' });
+                const identity = new Identity(defaultOptions);
                 setUserAgent(safari11);
                 expect(identity._itpModalRequired()).toBe(false);
             });
 
             it('should be false for Chrome', () => {
-                const identity = new Identity({ clientId: 'foo', redirectUri: 'http://example.com' });
+                const identity = new Identity(defaultOptions);
                 setUserAgent(chrome);
                 expect(identity._itpModalRequired()).toBe(false);
             });
         });
 
         it('should detect login-in-progress after showItpModalUponReturning', () => {
-            const identity = new Identity({ clientId: 'foo', redirectUri: 'http://example.com' });
+            const identity = new Identity(defaultOptions);
             setUserAgent(safari12);
             expect(identity._itpModalRequired()).toBe(true);
             identity.showItpModalUponReturning();
@@ -923,7 +931,7 @@ describe('Identity', () => {
         const state = 'sample-state';
 
         beforeEach(() => {
-            identity = new Identity({ clientId: 'foo', redirectUri: 'http://example.com' });
+            identity = new Identity({ clientId: 'foo', redirectUri: 'http://example.com', sessionDomain: 'http://id.example.com' });
         });
 
         afterEach(() => {

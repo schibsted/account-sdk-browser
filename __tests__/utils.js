@@ -75,7 +75,7 @@ const hasSessionUserException = {
         baseDomain: 'localhost',
     }
 };
-const spidOk = {
+const sessionResponse = {
     result: true,
     serverTime: 1520610964,
     expiresIn: 300,
@@ -115,7 +115,7 @@ const sessionServiceNoAccess = {
 export const Fixtures = {
     hasSessionLoginRequired,
     hasSessionUserException,
-    spidOk,
+    sessionResponse,
     sessionServiceAccess,
     sessionServiceNoAccess,
 };
