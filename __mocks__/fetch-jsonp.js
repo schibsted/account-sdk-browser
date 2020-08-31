@@ -18,34 +18,6 @@ const mock = async (url) => {
     }
     if (pathname === '/ajax/hasSession.js') { // SPiD
         return { ok: true, json: async () => Fixtures.spidOk };
-    } else if (pathname === '/ajax/hasproduct.js') {
-        const productId = search.get('product_id');
-        const spId = search.get('sp_id');
-        switch (productId) {
-        case 'existing':
-            return { ok: true, json: async () => Fixtures.spidProduct };
-        case 'existing_no_expires':
-            return { ok: true, json: async () => Fixtures.spidProductNoExpires };
-        case 'existing_for_john':
-            if (spId === 'john') {
-                return { ok: true, json: async () => Fixtures.spidProduct };
-            }
-        }
-        return { ok: true, json: async () => Fixtures.spidProductMissing };
-    } else if (pathname === '/ajax/hassubscription.js') {
-        const subscriptionId = search.get('product_id');
-        const spId = search.get('sp_id');
-        switch (subscriptionId) {
-        case 'existing':
-            return { ok: true, json: async () => Fixtures.spidProduct };
-        case 'existing_no_expires':
-            return { ok: true, json: async () => Fixtures.spidProductNoExpires };
-        case 'existing_for_john':
-            if (spId === 'john') {
-                return { ok: true, json: async () => Fixtures.spidProduct };
-            }
-        }
-        return { ok: true, json: async () => Fixtures.spidProductMissing };
     } else if (pathname === '/ajax/logout.js') {
         return { ok: true, json: async () => {} };
     }
