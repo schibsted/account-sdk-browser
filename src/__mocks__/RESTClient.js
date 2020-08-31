@@ -1,29 +1,9 @@
-import { URLSearchParams, URL } from 'url';
+import { URL } from 'url';
 import { urlMapper } from '../url';
 import { cloneDefined } from '../object';
 import { Fixtures } from '../../__tests__/utils';
-import SDKError from '../../src/SDKError';
 
-const goFn = () => jest.fn().mockImplementation(async ({ pathname, data = {} }) => {
-    const search = new URLSearchParams(data);
-    if (pathname.startsWith('/hasProduct/')) {
-        if (pathname.endsWith('/existing')) {
-            return Fixtures.spidProduct;
-        } else if (pathname.endsWith('no-session-cookie')) {
-            throw new SDKError('Session cookie (schacc-session) missing', { code: 400 });
-        } else if (pathname.endsWith('no-session')) {
-            throw new SDKError('No session', { code: 401 });
-        }
-    }
-    if (pathname.startsWith('/hasSubscription/')) {
-        if (pathname.endsWith('/existing')) {
-            return Fixtures.spidProduct;
-        } else if (pathname.endsWith('no-session-cookie')) {
-            throw new SDKError('Session cookie (schacc-session) missing', { code: 400 });
-        } else if (pathname.endsWith('no-session')) {
-            throw new SDKError('No session', { code: 401 });
-        }
-    }
+const goFn = () => jest.fn().mockImplementation(async ({ pathname }) => {
     if (pathname.startsWith('/hasAccess/')) {
         if (pathname.endsWith('/existing')) {
             return Fixtures.sessionServiceAccess;
@@ -32,36 +12,6 @@ const goFn = () => jest.fn().mockImplementation(async ({ pathname, data = {} }) 
         } else if (pathname.endsWith('/existing,non_existing')) {
             return Fixtures.sessionServiceAccess;
         }
-    }
-    if (pathname === 'ajax/hasproduct.js') {
-        const productId = search.get('product_id');
-        const spId = search.get('sp_id');
-        switch (productId) {
-        case 'existing':
-            return Fixtures.spidProduct;
-        case 'existing_no_expires':
-            return Fixtures.spidProductNoExpires;
-        case 'existing_for_john':
-            if (spId === 'john') {
-                return Fixtures.spidProduct;
-            }
-        }
-        return Fixtures.spidProductMissing;
-    }
-    if (pathname === 'ajax/hassubscription.js') {
-        const subscriptionId = search.get('product_id');
-        const spId = search.get('sp_id');
-        switch (subscriptionId) {
-        case 'existing':
-            return Fixtures.spidProduct;
-        case 'existing_no_expires':
-            return Fixtures.spidProductNoExpires;
-        case 'existing_for_john':
-            if (spId === 'john') {
-                return Fixtures.spidProduct;
-            }
-        }
-        return Fixtures.spidProductMissing;
     }
     throw new Error(`Unimplemented mock response for url: '${pathname}'`);
 });
