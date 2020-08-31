@@ -12,7 +12,6 @@ import EventEmitter from 'tiny-emitter';
 import JSONPClient from './JSONPClient';
 import Cache from './cache';
 import * as popup from './popup';
-import ItpModal from './ItpModal';
 import RESTClient from './RESTClient';
 import SDKError from './SDKError';
 import * as spidTalk from './spidTalk';
@@ -70,7 +69,6 @@ import * as spidTalk from './spidTalk';
  */
 
 const HAS_SESSION_CACHE_KEY = 'hasSession-cache';
-const LOGIN_IN_PROGRESS_KEY = 'loginInProgress-cache';
 const globalWindow = () => window;
 
 /**
@@ -395,23 +393,6 @@ export class Identity extends EventEmitter {
     }
 
     /**
-     * Check if we need to use the ITP workaround for Safari versions >= 12
-     * @private
-     * @returns {boolean}
-     */
-    _itpModalRequired() {
-        if (!document.requestStorageAccess || this._sessionService) {
-            return false;
-        }
-
-        const safariVersion = navigator.userAgent.match(/Version\/(\d+)\./);
-        if (!safariVersion || safariVersion.length < 2) {
-            return false;
-        }
-        return parseInt(safariVersion[1], 10) >= 12;
-    }
-
-    /**
      * @summary Queries the hassession endpoint and returns information about the status of the user
      * @description When we send a request to this endpoint, cookies sent along with the request
      * determines the status of the user. If the user is not currently logged in, but has a cookie
@@ -476,13 +457,6 @@ export class Identity extends EventEmitter {
                 sessionData = await this._spid.get('ajax/hasSession.js', { autologin: autoLoginConverted });
             }
 
-            const shouldShowItpModal = this._itpModalRequired() && !this._itpMode && sessionData && isObject(sessionData.error)
-                && sessionData.error.type === 'UserException' && this.cache.get(LOGIN_IN_PROGRESS_KEY) !== null;
-            if (shouldShowItpModal) {
-                this.cache.delete(LOGIN_IN_PROGRESS_KEY);
-                const modal = new ItpModal(this._spid, this.clientId, this.redirectUri, this.env);
-                sessionData = await modal.show()
-            }
             if (sessionData && this._enableSessionCaching) {
                 const expiresIn = 1000 * (sessionData.expiresIn || 300);
                 this.cache.set(HAS_SESSION_CACHE_KEY, sessionData, expiresIn);
@@ -690,8 +664,6 @@ export class Identity extends EventEmitter {
         const url = this.loginUrl({ state, acrValues, scope, redirectUri, loginHint, tag,
             teaser, maxAge, locale, oneStepLogin });
 
-        this.showItpModalUponReturning();
-
         if (preferPopup) {
             this.popup =
                 popup.open(this.window, url, 'Schibsted account', { width: 360, height: 570 });
@@ -824,37 +796,6 @@ export class Identity extends EventEmitter {
             response_type: 'code',
             redirect_uri: redirectUri
         });
-    }
-
-    /**
-     * Call this method immediately before sending a user to a Schibsted account flow if you
-     * want to enable showing of the ITP modal upon returning to your site. You should
-     * send the user to a Schibsted account flow immediately after calling this method without
-     * invoking hasSession() again.
-     *
-     * Calling this is not required if you send the user to Schibsted account via the login()
-     * method.
-     *
-     * @return {void}
-     */
-    showItpModalUponReturning() {
-        // for safari, remember that we've got a login in progress so we can
-        // work around some ITP issues when we come back from Schibsted Account
-        if (this._itpModalRequired()) {
-            this.cache.set(LOGIN_IN_PROGRESS_KEY, {}, 1000 * 60 * 15);
-        }
-    }
-
-    /**
-     * When returning after performing a flow, this method can be called prior to calling
-     * hasSession() if you're certain that the user did not successfully log in. This will
-     * prevent the ITP modal from showing up erroneously. If you're unsure, don't call this
-     * method.
-     *
-     * @return {void}
-     */
-    suppressItpModal() {
-        this.cache.delete(LOGIN_IN_PROGRESS_KEY);
     }
 
     /**
