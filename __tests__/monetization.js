@@ -10,6 +10,10 @@ import Monetization from '../monetization';
 
 describe('Monetization', () => {
 
+    beforeEach(() => {
+        window.sessionStorage.clear();
+    });
+    
     describe('constructor()', () => {
         test('throws if the options object is not passed to the constructor', () => {
             expect(() => new Monetization())
