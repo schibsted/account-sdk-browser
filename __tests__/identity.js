@@ -62,15 +62,6 @@ describe('Identity', () => {
                 'https://identity-pre.schibsted.com/oauth/authorize?client_id=foo&redirect_uri=http%3A%2F%2Ffoo.com&response_type=code&scope=openid&state=foo&prompt=select_account'
             );
         });
-        test('Should work with only "state" param for site specific logout', () => {
-            const window = { location: {} };
-            const identity = new Identity({ clientId: 'foo', redirectUri: 'http://foo.com', window, siteSpecificLogout: true });
-            identity.login({ state: 'foo' });
-            compareUrls(
-                window.location.href,
-                'https://identity-pre.schibsted.com/oauth/authorize?client_id=foo&redirect_uri=http%3A%2F%2Ffoo.com&response_type=code&scope=openid&state=foo&prompt=select_account'
-            );
-        });
         test('Should open popup if "preferPopup" is true', () => {
             const window = { screen: {}, open: () => ({ fakePopup: 'yup' }) };
             const identity = new Identity({ clientId: 'foo', redirectUri: 'http://foo.com', window });
@@ -114,7 +105,7 @@ describe('Identity', () => {
         });
         test('Should redirect to session-service for site-specific logout if configured', async () => {
             const window = { location: {} };
-            const identity = new Identity({ clientId: 'foo', redirectUri: 'http://foo.com', sessionDomain: 'http://id.foo.com', window, siteSpecificLogout: true});
+            const identity = new Identity({ clientId: 'foo', redirectUri: 'http://foo.com', sessionDomain: 'http://id.foo.com', window});
             identity.logout();
 
             expect(window.location.href).toBe('http://id.foo.com/logout?client_sdrn=sdrn%3Aschibsted.com%3Aclient%3Afoo&redirect_uri=http%3A%2F%2Ffoo.com');
@@ -157,25 +148,6 @@ describe('Identity', () => {
                 clientId: 'foo',
                 redirectUri: 'http://example.com',
                 window: {},
-            });
-            compareUrls(identity.loginUrl({
-                state: 'dummy-state',
-                loginHint: 'dev@spid.no',
-                tag: 'sample-tag',
-                teaser: 'sample-teaser-slug',
-                maxAge: 0,
-                locale: 'en_US',
-                oneStepLogin: true
-            }), 'https://login.schibsted.com/oauth/authorize?redirect_uri=http%3A%2F%2Fexample.com&client_id=foo&state=dummy-state&response_type=code&scope=openid&login_hint=dev@spid.no&max_age=0&tag=sample-tag&teaser=sample-teaser-slug&locale=en_US&one_step_login=true&prompt=select_account');
-        });
-
-        test('returns the expected endpoint for new flows, with siteSpecificLogout', () => {
-            const identity = new Identity({
-                env: 'PRO',
-                clientId: 'foo',
-                redirectUri: 'http://example.com',
-                window: {},
-                siteSpecificLogout: true,
             });
             compareUrls(identity.loginUrl({
                 state: 'dummy-state',
@@ -249,7 +221,6 @@ describe('Identity', () => {
                 clientId: 'foo',
                 redirectUri: 'http://example.com',
                 window: {},
-                siteSpecificLogout: true
             });
             compareUrls(identity.loginUrl(
                 'dummy-state',
@@ -269,22 +240,6 @@ describe('Identity', () => {
                 clientId: 'foo',
                 redirectUri: 'http://example.com',
                 window: {},
-            });
-            compareUrls(identity.loginUrl(
-                'dummy-state',
-                undefined,
-                undefined,
-                undefined,
-            ), 'https://login.schibsted.com/oauth/authorize?redirect_uri=http%3A%2F%2Fexample.com&client_id=foo&state=dummy-state&response_type=code&scope=openid&prompt=select_account');
-        });
-
-        test('returns the expected endpoint for new flows with siteSpecificLogout=true', () => {
-            const identity = new Identity({
-                env: 'PRO',
-                clientId: 'foo',
-                redirectUri: 'http://example.com',
-                window: {},
-                siteSpecificLogout: true,
             });
             compareUrls(identity.loginUrl(
                 'dummy-state',
@@ -431,7 +386,7 @@ describe('Identity', () => {
         });
 
         test('should only go to session-service for site specific logout', async () => {
-            const options = { clientId: 'foo', redirectUri: 'http://e.com', sessionDomain: 'http://id.e.com', siteSpecificLogout: true };
+            const options = { clientId: 'foo', redirectUri: 'http://e.com', sessionDomain: 'http://id.e.com' };
             const client_sdrn = `sdrn:schibsted:client:${options.clientId}`;
             identity = new Identity(options);
             identity._sessionService = new RESTClient({
@@ -446,7 +401,7 @@ describe('Identity', () => {
         });
 
         test('should fail `hasSession` if session cookie is present but no session is found and site does not have specific logout', async () => {
-            const options = { clientId: 'foo', redirectUri: 'http://e.com', sessionDomain: 'http://id.e.com', siteSpecificLogout: false };
+            const options = { clientId: 'foo', redirectUri: 'http://e.com', sessionDomain: 'http://id.e.com' };
             const client_sdrn = `sdrn:schibsted:client:${options.clientId}`;
             identity = new Identity(options);
             identity._sessionService = new RESTClient({
