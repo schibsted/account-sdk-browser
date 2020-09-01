@@ -189,7 +189,7 @@ describe('Identity', () => {
             }).toThrowError(new SDKError('The acrValues parameter is not acceptable: sms otp password youShallNoTPass'));
         });
 
-        test('should accept variations of sms, otp, password acrValues', () => {
+        test('should accept variations of sms, otp, password acrValues. Url shouldn\'t contain prompt=select_account', () => {
             const identity = new Identity({
                 env: 'PRO',
                 clientId: 'foo',
@@ -200,17 +200,17 @@ describe('Identity', () => {
             compareUrls(identity.loginUrl({
                 state: 'dummy-state',
                 acrValues: 'sms',
-            }), 'https://login.schibsted.com/oauth/authorize?redirect_uri=http%3A%2F%2Fexample.com&client_id=foo&state=dummy-state&response_type=code&scope=openid&prompt=select_account&acr_values=sms');
+            }), 'https://login.schibsted.com/oauth/authorize?redirect_uri=http%3A%2F%2Fexample.com&client_id=foo&state=dummy-state&response_type=code&scope=openid&acr_values=sms');
 
             compareUrls(identity.loginUrl({
                 state: 'dummy-state',
                 acrValues: 'sms otp',
-            }), 'https://login.schibsted.com/oauth/authorize?redirect_uri=http%3A%2F%2Fexample.com&client_id=foo&state=dummy-state&response_type=code&scope=openid&prompt=select_account&acr_values=sms+otp');
+            }), 'https://login.schibsted.com/oauth/authorize?redirect_uri=http%3A%2F%2Fexample.com&client_id=foo&state=dummy-state&response_type=code&scope=openid&acr_values=sms+otp');
 
             compareUrls(identity.loginUrl({
                 state: 'dummy-state',
                 acrValues: 'sms otp password',
-            }), 'https://login.schibsted.com/oauth/authorize?redirect_uri=http%3A%2F%2Fexample.com&client_id=foo&state=dummy-state&response_type=code&scope=openid&prompt=select_account&acr_values=sms+otp+password');
+            }), 'https://login.schibsted.com/oauth/authorize?redirect_uri=http%3A%2F%2Fexample.com&client_id=foo&state=dummy-state&response_type=code&scope=openid&acr_values=sms+otp+password');
         });
     });
 
