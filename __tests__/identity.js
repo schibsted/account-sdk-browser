@@ -143,19 +143,19 @@ describe('Identity', () => {
             const window = { sessionStorage: webStorageMock(), location: {} };
             const identity = new Identity(Object.assign({}, defaultOptions, { window }));
             const fakeFetch = jest.fn();
-            const sessionResponse = { ok: true, json: async () => ({ result: true })};
-            fakeFetch.mockImplementationOnce(async () => sessionResponse);
+            const sessionResponse = { ok: true, json: () => ({ result: true })};
+            fakeFetch.mockImplementationOnce(() => sessionResponse);
             identity._sessionService.fetch = fakeFetch;
             await identity.hasSession();
             expect(fakeFetch).toHaveBeenCalledTimes(1);
 
             const fakeFetch2 = jest.fn();
-            fakeFetch2.mockImplementationOnce(async () => ({ ok: true, json: async () => ({})}));
+            fakeFetch2.mockImplementationOnce(() => ({ ok: true, json: () => ({}) }));
             identity._sessionService.fetch = fakeFetch2;
             identity._bffService.fetch = fakeFetch2;
             identity.logout();
 
-            fakeFetch.mockImplementationOnce(async () => sessionResponse);
+            fakeFetch.mockImplementationOnce(() => sessionResponse);
             identity._sessionService.fetch = fakeFetch;
             await identity.hasSession();
             expect(fakeFetch).toHaveBeenCalledTimes(2); // now it should have been called again, so 2
@@ -246,7 +246,7 @@ describe('Identity', () => {
 
         beforeEach(() => {
             identity = new Identity(defaultOptions);
-            identity._sessionService.fetch = jest.fn((() => ({ ok: true, json: () => Fixtures.sessionResponse })));
+            identity._sessionService.fetch = jest.fn(() => ({ ok: true, json: () => Fixtures.sessionResponse }));
             identity._clearVarnishCookie();
         });
 
@@ -260,8 +260,7 @@ describe('Identity', () => {
 
         test('should not set varnish cookie if session has no `expiresIn`', async () => {
             identity.enableVarnishCookie();
-            const func = async () => ({ ok: true, json: async() => ({ result: true, sp_id: 'abc' }) });
-            identity._sessionService.fetch.mockImplementationOnce(func);
+            identity._sessionService.fetch.mockImplementationOnce(() => ({ ok: true, json: () => ({ result: true, sp_id: 'abc' }) }));
             await identity.hasSession();
             expect(document.cookie).toBe('');
         });
@@ -269,7 +268,7 @@ describe('Identity', () => {
         test('should set varnish cookie also when reading from cache', async () => {
             identity.enableVarnishCookie();
             const session = { result: true, sp_id: 'should_not_expire', expiresIn: 2 };
-            identity._sessionService.fetch.mockImplementationOnce(() => ({ ok: true, json: async() => session }));
+            identity._sessionService.fetch.mockImplementationOnce(() => ({ ok: true, json: () => session }));
             await identity.hasSession();
             expect(document.cookie).toBe('SP_ID=should_not_expire');
 
@@ -290,7 +289,7 @@ describe('Identity', () => {
         test('should work to set varnish cache expiration', async () => {
             identity.enableVarnishCookie(3);
             const session = { result: true, sp_id: 'should_remain_after_one_sec', expiresIn: 1 };
-            identity._sessionService.fetch.mockImplementationOnce(async () => ({ ok: true, json: async() => session }));
+            identity._sessionService.fetch.mockImplementationOnce(() => ({ ok: true, json: () => session }));
             await identity.hasSession();
             await new Promise((resolve) => setTimeout(resolve, 1010));
             expect(document.cookie).toBe('SP_ID=should_remain_after_one_sec');
@@ -299,7 +298,7 @@ describe('Identity', () => {
         test('should work to clear varnish cookie', async () => {
             identity.enableVarnishCookie(3);
             const session = { result: true, sp_id: 'should_be_cleared', expiresIn: 1 };
-            identity._sessionService.fetch.mockImplementationOnce(async () => ({ ok: true, json: async() => session }));
+            identity._sessionService.fetch.mockImplementationOnce(() => ({ ok: true, json: () => session }));
             await identity.hasSession();
             expect(document.cookie).toBe('SP_ID=should_be_cleared');
             identity._maybeClearVarnishCookie();
@@ -310,7 +309,7 @@ describe('Identity', () => {
             test('should respect `baseDomain` from session', async () => {
                 identity.enableVarnishCookie();
                 const session1 = { result: true, sp_id: 'abc', expiresIn: 3600, baseDomain: 'foo.com' };
-                identity._sessionService.fetch.mockImplementationOnce(async () => ({ ok: true, json: async() => session1 }));
+                identity._sessionService.fetch.mockImplementationOnce(() => ({ ok: true, json: () => session1 }));
                 await identity.hasSession();
                 expect(document.cookie).toBe('');
             });
@@ -318,7 +317,7 @@ describe('Identity', () => {
             test('should respect `baseDomain` from session', async () => {
                 identity.enableVarnishCookie();
                 const session2 = { result: true, sp_id: 'abc', expiresIn: 3600 };
-                identity._sessionService.fetch.mockImplementationOnce(async () => ({ ok: true, json: async() => session2 }));
+                identity._sessionService.fetch.mockImplementationOnce(() => ({ ok: true, json: () => session2 }));
                 await identity.hasSession();
                 expect(document.cookie).toBe('SP_ID=abc');
             });
@@ -329,29 +328,28 @@ describe('Identity', () => {
                 identity.enableVarnishCookie({ domain: 'spid.no' });
                 expect(identity.varnishCookieDomain).toBe('spid.no');
                 const session1 = { result: true, sp_id: 'abc', expiresIn: 3600, baseDomain: 'tv.spid.no' };
-                identity._sessionService.fetch.mockImplementationOnce(async () => ({ ok: true, json: async() => session1 }));
+                identity._sessionService.fetch.mockImplementationOnce(() => ({ ok: true, json: () => session1 }));
                 await identity.hasSession();
                 expect(document.cookie).toBe('SP_ID=abc');
             });
         });
 
         test('should only go to session-service for site specific logout', async () => {
-            const fetch = () => ({ ok: false, status: 400, statusText: 'No cookie present' });
-            identity._sessionService.fetch.mockImplementationOnce(fetch);
+            identity._sessionService.fetch.mockImplementationOnce(() => ({ ok: false, status: 400, statusText: 'No cookie present' }));
             await expect(identity.hasSession()).rejects.toMatchObject({ message: 'HasSession failed' });
             expect(identity._sessionService.fetch.mock.calls.length).toBe(1);
             expect(identity._sessionService.fetch.mock.calls[0][0]).toMatch(/^http:\/\/id.foo.com\/session/);
         });
 
         test('should fail `hasSession` if session cookie is present but no session is found and site does not have specific logout', async () => {
-            identity._sessionService.fetch.mockImplementationOnce(async () => ({ ok: false, status: 404, statusText: 'No session found' }));
+            identity._sessionService.fetch.mockImplementationOnce(() => ({ ok: false, status: 404, statusText: 'No session found' }));
             await expect(identity.hasSession()).rejects.toMatchObject({ message: 'HasSession failed' });
             expect(identity._sessionService.fetch.mock.calls.length).toBe(1);
             expect(identity._sessionService.fetch.mock.calls[0][0]).toMatch(/^http:\/\/id.foo.com\/session/);
         });
 
         test('should terminate "chain" if session-service call succeeds', async () => {
-            identity._sessionService.fetch.mockImplementationOnce(async () => ({ ok: true, json: async() => ({}) }));
+            identity._sessionService.fetch.mockImplementationOnce(() => ({ ok: true, json: () => ({}) }));
             await expect(identity.hasSession()).resolves.toMatchObject({});
             expect(identity._sessionService.fetch.mock.calls.length).toBe(1);
             expect(identity._sessionService.fetch.mock.calls[0][0]).toMatch(/^http:\/\/id.foo.com\/session/);
@@ -367,7 +365,7 @@ describe('Identity', () => {
 
         test('should return the same promise if invoked multiple times', async () => {
             identity._sessionService.fetch.mockImplementationOnce(() => new Promise((resolve) => {
-                setTimeout(resolve({ ok: true, json: async () => ({ sp_id: 'yo' }) }), 1);
+                setTimeout(resolve({ ok: true, json: () => ({ sp_id: 'yo' }) }), 1);
             }));
             const promise1 = identity.hasSession();
             const promise2 = identity.hasSession(); // NOTE: no 'await' — we want the promise
@@ -377,7 +375,7 @@ describe('Identity', () => {
         });
 
         test('should throw error if session-service returns error without 404', async () => {
-            identity._sessionService.fetch.mockImplementationOnce(async () => ({ ok: false, status: 401, statusText: 'Unauthorized' }));
+            identity._sessionService.fetch.mockImplementationOnce(() => ({ ok: false, status: 401, statusText: 'Unauthorized' }));
             await expect(identity.hasSession()).rejects.toMatchObject({ message: 'HasSession failed' });
             expect(identity._sessionService.fetch.mock.calls.length).toBe(1);
             expect(identity._sessionService.fetch.mock.calls[0][0]).toMatch(/^http:\/\/id.foo.com\/session/);
@@ -432,7 +430,7 @@ describe('Identity', () => {
 
         beforeEach(() => {
             identity = new Identity(defaultOptions);
-            identity._sessionService.fetch = jest.fn((() => ({ ok: true, json: () => (Fixtures.sessionResponse) })));
+            identity._sessionService.fetch = jest.fn(() => ({ ok: true, json: () => Fixtures.sessionResponse }));
         });
 
         test('should work when we get a `result` from hasSession', async () => {
@@ -458,7 +456,7 @@ describe('Identity', () => {
 
         beforeEach(() => {
             identity = new Identity(defaultOptions);
-            identity._sessionService.fetch = jest.fn((() => ({ ok: true, json: async () => (Fixtures.sessionResponse) })));
+            identity._sessionService.fetch = jest.fn(() => ({ ok: true, json: () => Fixtures.sessionResponse }));
         });
 
         test('should work when `!!result` from hasSession', async () => {
@@ -467,7 +465,7 @@ describe('Identity', () => {
         });
 
         test(`should fail when '!result' from hasSession`, async () => {
-            identity._sessionService.fetch.mockImplementationOnce(() => ({ ok: true, json: async () => ({}) }));
+            identity._sessionService.fetch.mockImplementationOnce(() => ({ ok: true, json: () => ({}) }));
             const v = await identity.isConnected();
             expect(v).toBe(false);
         });
@@ -495,7 +493,7 @@ describe('Identity', () => {
         });
 
         test(`should fail when 'result' is false from hasSession`, async () => {
-            identity._sessionService.fetch.mockImplementationOnce(() => ({ ok: true, json: async () => ({ result: false }) }));
+            identity._sessionService.fetch.mockImplementationOnce(() => ({ ok: true, json: () => ({ result: false }) }));
             await expect(identity.getUser()).rejects.toMatchObject({
                 message: 'The user is not connected to this merchant'
             });
@@ -517,7 +515,7 @@ describe('Identity', () => {
         });
 
         test('should work when we get a result from session-service', async () => {
-            const expectedData = { identifier: 'test@example.com' }
+            const expectedData = { identifier: 'test@example.com' };
             identity._globalSessionService.fetch = jest.fn(() => ({ ok: true, json: () => expectedData }));
             const userData = await identity.getUserContextData();
             expect(userData).toMatchObject(expectedData);
@@ -535,7 +533,7 @@ describe('Identity', () => {
 
         beforeEach(() => {
             identity = new Identity(Object.assign({}, defaultOptions, { window: { location: {} } }));
-            identity._sessionService.fetch = jest.fn((() => ({ ok: true, json: () => Fixtures.sessionResponse })));
+            identity._sessionService.fetch = jest.fn(() => ({ ok: true, json: () => Fixtures.sessionResponse }));
         });
 
         test(`spy notices a 'login' event`, async () => {
@@ -581,11 +579,11 @@ describe('Identity', () => {
 
         beforeEach(() => {
             identity = new Identity(defaultOptions);
-            identity._sessionService.fetch = jest.fn((() => ({ ok: true, json: () => {} })));
+            identity._sessionService.fetch = jest.fn(() => ({ ok: true, json: () => Fixtures.sessionResponse }));
         });
 
         test(`should fail when we don't get a 'userId' from hasSession`, async () => {
-            identity._sessionService.fetch.mockImplementationOnce(() => ({ ok: true, json: async () => ({}) }));
+            identity._sessionService.fetch.mockImplementationOnce(() => ({ ok: true, json: () => ({}) }));
             await expect(identity.getUserId()).rejects.toMatchObject({
                 message: 'The user is not connected to this merchant'
             });
@@ -593,7 +591,7 @@ describe('Identity', () => {
 
         test(`should fail when we get a 'userId' from hasSession but result is false`, async () => {
             const result = { result: false, userId: '123' };
-            identity._sessionService.fetch.mockImplementationOnce(() => ({ ok: true, json: async () => (result) }));
+            identity._sessionService.fetch.mockImplementationOnce(() => ({ ok: true, json: () => result }));
             await expect(identity.getUserId()).rejects.toMatchObject({
                 message: 'The user is not connected to this merchant'
             });
@@ -601,7 +599,7 @@ describe('Identity', () => {
 
         test(`should work when we get a 'userId' from hasSession`, async () => {
             const result = { result: true, userId: '123' };
-            identity._sessionService.fetch.mockImplementationOnce(() => ({ ok: true, json: async () => (result) }));
+            identity._sessionService.fetch.mockImplementationOnce(() => ({ ok: true, json: () => result }));
             await expect(identity.getUserId()).resolves.toBe('123');
         });
 
@@ -618,10 +616,11 @@ describe('Identity', () => {
 
         beforeEach(() => {
             identity = new Identity(defaultOptions);
-            identity._sessionService.fetch = jest.fn((() => ({ ok: true, json: () => ({}) })));
+            identity._sessionService.fetch = jest.fn(() => ({ ok: true, json: () => Fixtures.sessionResponse }));
         });
 
         test(`should fail when we don't get a 'uuid' from hasSession`, async () => {
+            identity._sessionService.fetch.mockImplementationOnce(() => ({ ok: true, json: () => ({}) }));
             await expect(identity.getUserUuid()).rejects.toMatchObject({
                 message: 'The user is not connected to this merchant'
             });
@@ -629,7 +628,7 @@ describe('Identity', () => {
 
         test(`should fail when we get a 'uuid' from hasSession but result is false`, async () => {
             const result = { result: false, uuid: '123' };
-            identity._sessionService.fetch.mockImplementationOnce(() => ({ ok: true, json: async () => (result) }));
+            identity._sessionService.fetch.mockImplementationOnce(() => ({ ok: true, json: () => result }));
             await expect(identity.getUserUuid()).rejects.toMatchObject({
                 message: 'The user is not connected to this merchant'
             });
@@ -637,7 +636,7 @@ describe('Identity', () => {
 
         test(`should work when we get a 'uuid' from hasSession`, async () => {
             const result = { result: true, uuid: '123' };
-            identity._sessionService.fetch.mockImplementationOnce(() => ({ ok: true, json: async () => (result) }));
+            identity._sessionService.fetch.mockImplementationOnce(() => ({ ok: true, json: () => result }));
             await expect(identity.getUserUuid()).resolves.toBe('123');
         });
 
@@ -654,16 +653,16 @@ describe('Identity', () => {
 
         beforeEach(() => {
             identity = new Identity(defaultOptions);
-            identity._sessionService.fetch = jest.fn((() => ({ ok: true, json: () => {} })));
+            identity._sessionService.fetch = jest.fn(() => ({ ok: true, json: () => Fixtures.sessionResponse }));
         });
 
         test(`should fail when we don't get a 'spId' from hasSession`, async () => {
-            identity._sessionService.fetch.mockImplementationOnce(() => ({ ok: true, json: async () => ({}) }));
+            identity._sessionService.fetch.mockImplementationOnce(() => ({ ok: true, json: () => ({}) }));
             await expect(identity.getSpId()).resolves.toBeNull();
         });
 
         test(`should work when we get a 'spId' from hasSession`, async () => {
-            identity._sessionService.fetch.mockImplementationOnce(() => ({ ok: true, json: async () => ({ sp_id: '123' }) }));
+            identity._sessionService.fetch.mockImplementationOnce(() => ({ ok: true, json: () => ({ sp_id: '123' }) }));
             await expect(identity.getSpId()).resolves.toBe('123');
         });
 
@@ -770,7 +769,7 @@ describe('Identity', () => {
         });
 
         test('Should call state function on login action', async () => {
-            const stateFn = jest.fn(async () => { return state; });
+            const stateFn = jest.fn(() => state);
             identity._globalSessionService.fetch = jest.fn(() => ({ ok: true, json: () => expectedData }));
             identity.login = jest.fn();
             document.getElementsByTagName('body')[0].appendChild = jest.fn((el) => {
