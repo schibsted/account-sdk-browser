@@ -172,7 +172,7 @@ So to sum up:
 2. Enable the session-service for the client you use on your site
 3. Add the `sessionDomain` property to the `Identity` or `Monetization` constructors
 
-1 and 2 requires communication with us, and 3 is done by you at a time of your choosing.
+1 and 2 requires [communication with us](mailto:schibstedaccount@schibsted.com), and 3 is done by you at a time of your choosing.
 
 <a name="example-project"></a>
 

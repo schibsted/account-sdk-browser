@@ -77,8 +77,8 @@ export class Identity extends EventEmitter {
     /**
      * @param {object} options
      * @param {string} options.clientId - Example: "1234567890abcdef12345678"
+     * @param {string} options.sessionDomain - Example: "https://id.site.com"
      * @param {string} [options.redirectUri] - Example: "https://site.com"
-     * @param {string} [options.sessionDomain] - Example: "https://id.site.com"
      * @param {string} [options.env='PRE'] - Schibsted account environment: `PRE`, `PRO` or `PRO_NO`
      * @param {function} [options.log] - A function that receives debug log information. If not set,
      * no logging will be done

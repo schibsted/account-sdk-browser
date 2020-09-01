@@ -49,32 +49,6 @@ export function compareUrlsStrict(first, second) {
     expect(firstUrl.search).toBe(secondUrl.search);
 }
 
-const hasSessionLoginRequired = {
-    error: {
-        code: 401,
-        type: 'LoginException',
-        description: 'Autologin required'
-    },
-    response: {
-        result: false,
-        serverTime: 1520599943,
-        expiresIn: null,
-        baseDomain: 'localhost',
-    }
-};
-const hasSessionUserException = {
-    error: {
-        code: 401,
-        type: 'UserException',
-        description: 'No session found'
-    },
-    response: {
-        result: false,
-        serverTime: 1520599943,
-        expiresIn: null,
-        baseDomain: 'localhost',
-    }
-};
 const sessionResponse = {
     result: true,
     serverTime: 1520610964,
@@ -113,8 +87,6 @@ const sessionServiceNoAccess = {
 };
 
 export const Fixtures = {
-    hasSessionLoginRequired,
-    hasSessionUserException,
     sessionResponse,
     sessionServiceAccess,
     sessionServiceNoAccess,
