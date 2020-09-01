@@ -22,6 +22,10 @@ describe('Identity', () => {
         global.URL = u;
     });
 
+    beforeEach(() => {
+        window.sessionStorage.clear();
+    });
+
     describe('constructor()', () => {
         test('throws if the options object is not passed to the constructor', () => {
             expect(() => new Identity()).toThrowError(/Cannot read property 'clientId' of undefined/);
