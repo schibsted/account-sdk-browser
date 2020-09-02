@@ -37,18 +37,6 @@ export function compareUrls(first, second) {
     return [firstUrl, secondUrl];
 }
 
-/**
- * Same as {@link compareUrls}  but expects the searchParams in the exact same order
- * @param {string} first - the first url
- * @param {string} second - the second url
- * @return {void}
- */
-export function compareUrlsStrict(first, second) {
-    const [firstUrl, secondUrl] = compareUrls(first, second);
-    expect(firstUrl.href).toBe(secondUrl.href);
-    expect(firstUrl.search).toBe(secondUrl.search);
-}
-
 const sessionResponse = {
     result: true,
     serverTime: 1520610964,
