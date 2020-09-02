@@ -417,25 +417,13 @@ export class Identity extends EventEmitter {
         return parseInt(safariVersion[1], 10) >= 12;
     }
 
+
     /**
-     * Log current using version of sdk
+     * Log used settings and version
      * @throws {SDKError} - If log method is not provided
      * @return {void}
      */
-    printVersion() {
-        if (!this.log) {
-            throw new SDKError('You have to provide log method in constructor');
-        }
-
-        this.log(`Schibsted account SDK for browsers version: ${version}`);
-    }
-
-    /**
-     * Log used settings
-     * @throws {SDKError} - If log method is not provided
-     * @return {void}
-     */
-    printSettings() {
+    logSettings() {
         if (!this.log) {
             throw new SDKError('You have to provide log method in constructor');
         }
@@ -443,9 +431,12 @@ export class Identity extends EventEmitter {
         const settings = {
             clientId: this.clientId,
             redirectUri: this.redirectUri,
+            env: this.env,
+            siteSpecificLogout: this.siteSpecificLogout,
         }
 
         this.log(`Schibsted account SDK for browsers version: \n${JSON.stringify(settings, null, 2)}`);
+        this.log(`Schibsted account SDK for browsers version: ${version}`);
     }
 
     /**
