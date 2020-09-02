@@ -307,13 +307,21 @@ mentioning that your end users have a few ways to log in:
   they can use to log in
 * Passwordless - SMS (BETA): similar to the previous method but instead of an email address, they receive
   the code on their phone as an SMS
+* Multifactor authentication: first client indicates which methods should be preferred, later these 
+  will be included (if fulfilled) in `AMR` claim of IDToken  
 
 IMPORTANT: Passwordless using SMS is still in BETA. It's only recommended to use it for testing and
 experimental purposes for now. Please let us know before using this in production.
 
 The default is username & password. If you wish to use one of the passwordless login methods, the
-`login()` function takes an optional parameter called `acrValues` (yeah, it's an OAuth specific
-name). Please set this parameter to either `otp-email` or `otp-sms`.
+`login()` function takes an optional parameter called `acrValues` (Authentication Context Class Reference).
+The `acrValues` parameter with multifactor authentication can take following values: 
+ - `otp-email` - passwordless authentication using code sent to registered email
+ - `otp-sms` - passwordless authentication using code sent to registered phone number
+ - `password` - force password authentication (even if user is already logged in)
+ - `otp` - authentication using registered one time code generator (https://tools.ietf.org/html/rfc6238)
+ - `sms` - authentication using SMS code sent to phone number 
+ - `password otp sms` - those authentication methods might be combined
 
 The classic way to authenticate a user, is to send them from your site to the Schibsted account
 domain, let the user authenticate there, and then have us redirect them back to your site. If you
@@ -385,39 +393,6 @@ try {
     const userId = await identity.getUserId();
     const data = await monetization.hasAccess([productId], userId);
     alert(`User has access to ${productId}? ${data.entitled}`)
-} catch (err) {
-    alert(`Could not query if the user has access to ${productId} because ${err}`)
-}
-```
-
-### Legacy methods
-
-* [Monetization#hasProduct](https://schibsted.github.io/account-sdk-browser/Monetization.html#hasProduct)
-  for checking if the user has access to a particular product
-* [Monetization#hasSubscription](https://schibsted.github.io/account-sdk-browser/Monetization.html#hasSubscription)
-  for checking if the user has access to a particular subscription
-
-These two functions require a parameter `sp_id` that is obtained from
-[Identity#getSpId](https://schibsted.github.io/account-sdk-browser/Identity.html#getSpId)
-asynchronously.
-
-#### Example
-
-```javascript
-import { Monetization } from '@schibsted/account-sdk-browser'
-
-const monetization = new Monetization({
-    clientId: '56e9a5d1eee0000000000000',
-    redirectUri: 'https://awesomenews.site', // ensure it's listed in selfservice
-    env: 'PRE', // Schibsted account env. A url or a special key: 'PRE', 'PRO' or 'PRO_NO'
-})
-
-try {
-    // Check if the user has access to a a particular product
-    // You need the sp_id parameter that is obtained from an Identity instance
-    const sp_id = await identity.getSpId()
-    const data = await monetization.hasProduct(productId, sp_id)
-    alert(`User has access to ${productId}? ${data.result}`)
 } catch (err) {
     alert(`Could not query if the user has access to ${productId} because ${err}`)
 }

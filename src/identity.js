@@ -97,12 +97,11 @@ export class Identity extends EventEmitter {
      * @param {string} [options.redirectUri] - Example: "https://site.com"
      * @param {string} [options.sessionDomain] - Example: "https://id.site.com"
      * @param {string} [options.env='PRE'] - Schibsted account environment: `PRE`, `PRO` or `PRO_NO`
-     * @param {boolean} [options.siteSpecificLogout=true] - Whether site-specific logout should be used
      * @param {function} [options.log] - A function that receives debug log information. If not set,
      * no logging will be done
      * @throws {SDKError} - If any of options are invalid
      */
-    constructor({ clientId, redirectUri, sessionDomain, env = 'PRE', siteSpecificLogout = true, log, window = globalWindow() }) {
+    constructor({ clientId, redirectUri, sessionDomain, env = 'PRE', log, window = globalWindow() }) {
         super();
         assert(isNonEmptyString(clientId), 'clientId parameter is required');
         assert(isObject(window), 'The reference to window is missing');
@@ -115,7 +114,6 @@ export class Identity extends EventEmitter {
         this.cache = new Cache(() => this.window && this.window.sessionStorage);
         this.redirectUri = redirectUri;
         this.env = env;
-        this.siteSpecificLogout = siteSpecificLogout;
         this.log = log;
 
         if (sessionDomain) {
@@ -489,23 +487,12 @@ export class Identity extends EventEmitter {
                 try {
                     sessionData = await this._sessionService.get('/session');
                 } catch (err) {
-                    if (this.siteSpecificLogout) {
-                        if (err && err.code === 400 && this._enableSessionCaching) {
-                            const expiresIn = 1000 * (err.expiresIn || 300);
-                            this.cache.set(HAS_SESSION_CACHE_KEY, { error: err }, expiresIn);
-                        }
-                        // Don't fallback to other sources for user session lookup
-                        throw err;
+                    if (err && err.code === 400 && this._enableSessionCaching) {
+                        const expiresIn = 1000 * (err.expiresIn || 300);
+                        this.cache.set(HAS_SESSION_CACHE_KEY, { error: err }, expiresIn);
                     }
-
-                    // The session-service returns 400 if no session-cookie is sent in the
-                    // request. This will be the case if the user hasn't logged in since the
-                    // site switched to using the session-service. If the request contains a
-                    // session-cookie but no session is found (return code will be 404), then we
-                    // *should* throw an exception and *not* fall through to spid-hassession
-                    if (err.code !== 400) {
-                        throw err;
-                    }
+                    // Don't fallback to other sources for user session lookup
+                    throw err;
                 }
             }
 
@@ -804,7 +791,8 @@ export class Identity extends EventEmitter {
             teaser = arguments[6] || teaser;
             maxAge = isNaN(arguments[7]) ? maxAge : arguments[7];
         }
-        assert(!acrValues || isStrIn(acrValues, ['', 'otp-email', 'otp-sms'], true),
+        const isValidAcrValue = (acrValue) => isStrIn(acrValue, ['password', 'otp', 'sms'], true);
+        assert(!acrValues || isStrIn(acrValues, ['', 'otp-email', 'otp-sms'], true) || acrValues.split(' ').every(isValidAcrValue),
             `The acrValues parameter is not acceptable: ${acrValues}`);
         assert(isUrl(redirectUri),
             `loginUrl(): redirectUri must be a valid url but is ${redirectUri}`);
@@ -823,7 +811,7 @@ export class Identity extends EventEmitter {
             max_age: maxAge,
             locale,
             one_step_login: oneStepLogin || '',
-            prompt: this.siteSpecificLogout ? 'select_account' : ''
+            prompt: !acrValues ? 'select_account' : ''
         });
     }
 
@@ -835,7 +823,7 @@ export class Identity extends EventEmitter {
     logoutUrl(redirectUri = this.redirectUri) {
         assert(isUrl(redirectUri), `logoutUrl(): redirectUri is invalid`);
         const params = { redirect_uri: redirectUri };
-        if (this._sessionService && this.siteSpecificLogout) {
+        if (this._sessionService) {
             return this._sessionService.makeUrl('logout', params);
         }
         return this._spid.makeUrl('logout', Object.assign({ response_type: 'code' }, params));
