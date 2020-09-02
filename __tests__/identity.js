@@ -842,6 +842,7 @@ describe('Identity', () => {
         })
 
         test('should throw error when log and console.log do not exist', () => {
+            const console = window.console;
             window.console = undefined;
             const windowObj = { location: {} };
             const identity = new Identity(Object.assign({}, defaultOptions, { window: windowObj }));
@@ -849,6 +850,8 @@ describe('Identity', () => {
             expect(() => {
                 identity.logSettings()
             }).toThrowError(new SDKError('You have to provide log method in constructor'));
+
+            window.console = console;
         })
     })
 });
