@@ -12,6 +12,7 @@ import RESTClient from './RESTClient';
 import Cache from './cache';
 import * as spidTalk from './spidTalk';
 import SDKError from './SDKError';
+import { version } from '../package.json';
 
 const globalWindow = () => window;
 
@@ -71,7 +72,7 @@ export class Monetization extends EventEmitter {
         this._sessionService = new RESTClient({
             serverUrl: domain,
             log: this.log,
-            defaultParams: { client_sdrn, redirect_uri: this.redirectUri },
+            defaultParams: { client_sdrn, redirect_uri: this.redirectUri, sdk_version: version  },
         });
     }
 

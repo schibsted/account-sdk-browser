@@ -1,5 +1,6 @@
 .DS_Store
 .cache
+.idea
 /es5
 coverage
 docs/

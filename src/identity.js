@@ -14,6 +14,7 @@ import * as popup from './popup';
 import RESTClient from './RESTClient';
 import SDKError from './SDKError';
 import * as spidTalk from './spidTalk';
+import { version } from '../package.json';
 
 /**
  * @typedef {object} Identity#HasSessionSuccessResponse
@@ -99,6 +100,7 @@ export class Identity extends EventEmitter {
         this.redirectUri = redirectUri;
         this.env = env;
         this.log = log;
+        this._sessionDomain = sessionDomain;
 
         // Internal hack: set to false to always refresh from hassession
         this._enableSessionCaching = true;
@@ -170,7 +172,7 @@ export class Identity extends EventEmitter {
         this._sessionService = new RESTClient({
             serverUrl: domain,
             log: this.log,
-            defaultParams: { client_sdrn, redirect_uri: this.redirectUri },
+            defaultParams: { client_sdrn, redirect_uri: this.redirectUri, sdk_version: version },
         });
     }
 
@@ -186,7 +188,7 @@ export class Identity extends EventEmitter {
         this._globalSessionService = new RESTClient({
             serverUrl: urlMapper(url, ENDPOINTS.SESSION_SERVICE),
             log: this.log,
-            defaultParams: { client_sdrn },
+            defaultParams: { client_sdrn, sdk_version: version },
         });
     }
 
@@ -356,6 +358,29 @@ export class Identity extends EventEmitter {
             '';
 
         document.cookie = `SP_ID=nothing; expires=Thu, 01 Jan 1970 00:00:00 GMT; path=/; domain=.${domain}`;
+    }
+
+    /**
+     * Log used settings and version
+     * @throws {SDKError} - If log method is not provided
+     * @return {void}
+     */
+    logSettings() {
+        if (!this.log && !window.console) {
+            throw new SDKError('You have to provide log method in constructor');
+        }
+
+        const log = this.log || console.log;
+
+        const settings = {
+            clientId: this.clientId,
+            redirectUri: this.redirectUri,
+            env: this.env,
+            sessionDomain: this._sessionDomain,
+            sdkVersion: version
+        }
+
+        log(`Schibsted account SDK for browsers settings: \n${JSON.stringify(settings, null, 2)}`);
     }
 
     /**
