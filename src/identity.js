@@ -9,10 +9,8 @@ import { cloneDeep } from './object';
 import { urlMapper } from './url';
 import { ENDPOINTS, NAMESPACE } from './config';
 import EventEmitter from 'tiny-emitter';
-import JSONPClient from './JSONPClient';
 import Cache from './cache';
 import * as popup from './popup';
-import ItpModal from './ItpModal';
 import RESTClient from './RESTClient';
 import SDKError from './SDKError';
 import * as spidTalk from './spidTalk';
@@ -70,21 +68,7 @@ import * as spidTalk from './spidTalk';
  */
 
 const HAS_SESSION_CACHE_KEY = 'hasSession-cache';
-const LOGIN_IN_PROGRESS_KEY = 'loginInProgress-cache';
 const globalWindow = () => window;
-
-/**
- * Get type and value of something
- * @private
- * @param {string} thing
- * @returns {Array} Tuple of [type, value]
- */
-function inspect(thing) {
-    if (thing === null) {
-        return [typeof thing, `${thing}`];
-    }
-    return [thing.constructor.name, thing.valueOf()];
-}
 
 /**
  * Provides Identity functionalty to a web page
@@ -93,8 +77,8 @@ export class Identity extends EventEmitter {
     /**
      * @param {object} options
      * @param {string} options.clientId - Example: "1234567890abcdef12345678"
+     * @param {string} options.sessionDomain - Example: "https://id.site.com"
      * @param {string} [options.redirectUri] - Example: "https://site.com"
-     * @param {string} [options.sessionDomain] - Example: "https://id.site.com"
      * @param {string} [options.env='PRE'] - Schibsted account environment: `PRE`, `PRO` or `PRO_NO`
      * @param {function} [options.log] - A function that receives debug log information. If not set,
      * no logging will be done
@@ -105,6 +89,7 @@ export class Identity extends EventEmitter {
         assert(isNonEmptyString(clientId), 'clientId parameter is required');
         assert(isObject(window), 'The reference to window is missing');
         assert(!redirectUri || isUrl(redirectUri), 'redirectUri parameter is invalid');
+        assert(sessionDomain && isUrl(sessionDomain), 'sessionDomain parameter is not a valid URL');
 
         spidTalk.emulate(window);
         this._sessionInitiatedSent = false;
@@ -115,25 +100,16 @@ export class Identity extends EventEmitter {
         this.env = env;
         this.log = log;
 
-        if (sessionDomain) {
-            assert(isUrl(sessionDomain), 'sessionDomain parameter is not a valid URL');
-            this._setSessionServiceUrl(sessionDomain);
-        }
-
         // Internal hack: set to false to always refresh from hassession
         this._enableSessionCaching = true;
-
-        // Internal hack: set to true if the SDK is being used inside the ITP iframe to
-        // avoid using the hasSession service and to prevent infinite iframe recursion
-        this._itpMode = false;
 
         // Old session
         this._session = {};
 
+        this._setSessionServiceUrl(sessionDomain);
         this._setSpidServerUrl(env);
         this._setBffServerUrl(env);
         this._setOauthServerUrl(env);
-        this._setHasSessionServerUrl(env);
         this._setGlobalSessionServiceUrl(env);
     }
 
@@ -145,7 +121,7 @@ export class Identity extends EventEmitter {
      */
     _setSpidServerUrl(url) {
         assert(isStr(url), `url parameter is invalid: ${url}`);
-        this._spid = new JSONPClient({
+        this._spid = new RESTClient({
             serverUrl: urlMapper(url, ENDPOINTS.SPiD),
             log: this.log,
             defaultParams: { client_id: this.clientId, redirect_uri: this.redirectUri },
@@ -211,21 +187,6 @@ export class Identity extends EventEmitter {
             serverUrl: urlMapper(url, ENDPOINTS.SESSION_SERVICE),
             log: this.log,
             defaultParams: { client_sdrn },
-        });
-    }
-
-    /**
-     * Set HasSession server URL - real URL or 'PRE' style key
-     * @private
-     * @param {string} url
-     * @returns {void}
-     */
-    _setHasSessionServerUrl(url) {
-        assert(isStr(url), `url parameter is invalid: ${url}`);
-        this._hasSession = new JSONPClient({
-            serverUrl: urlMapper(url, ENDPOINTS.HAS_SESSION),
-            log: this.log,
-            defaultParams: { client_id: this.clientId, redirect_uri: this.redirectUri },
         });
     }
 
@@ -398,30 +359,9 @@ export class Identity extends EventEmitter {
     }
 
     /**
-     * Check if we need to use the ITP workaround for Safari versions >= 12
-     * @private
-     * @returns {boolean}
-     */
-    _itpModalRequired() {
-        if (!document.requestStorageAccess || this._sessionService) {
-            return false;
-        }
-
-        const safariVersion = navigator.userAgent.match(/Version\/(\d+)\./);
-        if (!safariVersion || safariVersion.length < 2) {
-            return false;
-        }
-        return parseInt(safariVersion[1], 10) >= 12;
-    }
-
-    /**
      * @summary Queries the hassession endpoint and returns information about the status of the user
      * @description When we send a request to this endpoint, cookies sent along with the request
-     * determines the status of the user. If the user is not currently logged in, but has a cookie
-     * with the "Remember me" flag switched on, calling this function will attempt to automatically
-     * perform a login on the user
-     * @param {boolean} [autologin=true] - Set this to `false` if you do **not** want the auto-login
-     * to happen
+     * determines the status of the user.
      * @throws {SDKError} - If the call to the hasSession service fails in any way (this will happen
      * if, say, the user is not logged in)
      * @fires Identity#login
@@ -434,13 +374,9 @@ export class Identity extends EventEmitter {
      * @fires Identity#error
      * @return {Promise<Identity#HasSessionSuccessResponse|Identity#HasSessionFailureResponse>}
      */
-    hasSession(autologin = true) {
+    hasSession() {
         if (this._hasSessionInProgress) {
             return this._hasSessionInProgress;
-        }
-        if (typeof autologin !== 'boolean') {
-            const [type, value] = inspect(autologin);
-            return Promise.reject(new SDKError(`Parameter 'autologin' must be boolean, was: "${type}:${value}"`));
         }
         const _postProcess = (sessionData) => {
             if (sessionData.error) {
@@ -460,34 +396,16 @@ export class Identity extends EventEmitter {
                 }
             }
             let sessionData = null;
-            if (this._sessionService) {
-                try {
-                    sessionData = await this._sessionService.get('/session');
-                } catch (err) {
-                    if (err && err.code === 400 && this._enableSessionCaching) {
-                        const expiresIn = 1000 * (err.expiresIn || 300);
-                        this.cache.set(HAS_SESSION_CACHE_KEY, { error: err }, expiresIn);
-                    }
-                    // Don't fallback to other sources for user session lookup
-                    throw err;
+            try {
+                sessionData = await this._sessionService.get('/session');
+            } catch (err) {
+                if (err && err.code === 400 && this._enableSessionCaching) {
+                    const expiresIn = 1000 * (err.expiresIn || 300);
+                    this.cache.set(HAS_SESSION_CACHE_KEY, { error: err }, expiresIn);
                 }
+                throw err;
             }
 
-            const autoLoginConverted = autologin ? 1 : 0;
-            if (!sessionData && !this._itpMode) {
-                sessionData = await this._hasSession.get('rpc/hasSession.js', { autologin: autoLoginConverted });
-            }
-            if (this._itpMode || (sessionData && isObject(sessionData.error) && sessionData.error.type === 'LoginException')) {
-                sessionData = await this._spid.get('ajax/hasSession.js', { autologin: autoLoginConverted });
-            }
-
-            const shouldShowItpModal = this._itpModalRequired() && !this._itpMode && sessionData && isObject(sessionData.error)
-                && sessionData.error.type === 'UserException' && this.cache.get(LOGIN_IN_PROGRESS_KEY) !== null;
-            if (shouldShowItpModal) {
-                this.cache.delete(LOGIN_IN_PROGRESS_KEY);
-                const modal = new ItpModal(this._spid, this.clientId, this.redirectUri, this.env);
-                sessionData = await modal.show()
-            }
             if (sessionData && this._enableSessionCaching) {
                 const expiresIn = 1000 * (sessionData.expiresIn || 300);
                 this.cache.set(HAS_SESSION_CACHE_KEY, sessionData, expiresIn);
@@ -695,8 +613,6 @@ export class Identity extends EventEmitter {
         const url = this.loginUrl({ state, acrValues, scope, redirectUri, loginHint, tag,
             teaser, maxAge, locale, oneStepLogin });
 
-        this.showItpModalUponReturning();
-
         if (preferPopup) {
             this.popup =
                 popup.open(this.window, url, 'Schibsted account', { width: 360, height: 570 });
@@ -800,12 +716,8 @@ export class Identity extends EventEmitter {
     logoutUrl(redirectUri = this.redirectUri) {
         assert(isUrl(redirectUri), `logoutUrl(): redirectUri is invalid`);
         const params = { redirect_uri: redirectUri };
-        if (this._sessionService) {
-            return this._sessionService.makeUrl('logout', params);
-        }
-        return this._spid.makeUrl('logout', Object.assign({ response_type: 'code' }, params));
+        return this._sessionService.makeUrl('logout', params);
     }
-
 
     /**
      * The account summary page url
@@ -829,37 +741,6 @@ export class Identity extends EventEmitter {
             response_type: 'code',
             redirect_uri: redirectUri
         });
-    }
-
-    /**
-     * Call this method immediately before sending a user to a Schibsted account flow if you
-     * want to enable showing of the ITP modal upon returning to your site. You should
-     * send the user to a Schibsted account flow immediately after calling this method without
-     * invoking hasSession() again.
-     *
-     * Calling this is not required if you send the user to Schibsted account via the login()
-     * method.
-     *
-     * @return {void}
-     */
-    showItpModalUponReturning() {
-        // for safari, remember that we've got a login in progress so we can
-        // work around some ITP issues when we come back from Schibsted Account
-        if (this._itpModalRequired()) {
-            this.cache.set(LOGIN_IN_PROGRESS_KEY, {}, 1000 * 60 * 15);
-        }
-    }
-
-    /**
-     * When returning after performing a flow, this method can be called prior to calling
-     * hasSession() if you're certain that the user did not successfully log in. This will
-     * prevent the ITP modal from showing up erroneously. If you're unsure, don't call this
-     * method.
-     *
-     * @return {void}
-     */
-    suppressItpModal() {
-        this.cache.delete(LOGIN_IN_PROGRESS_KEY);
     }
 
     /**

@@ -28,12 +28,6 @@
  * @prop {string} ENDPOINTS.SPiD.PRE - Staging environment
  * @prop {string} ENDPOINTS.SPiD.PRO - Production environment Sweden
  * @prop {string} ENDPOINTS.SPiD.PRO_NO - Production environment Norway
- * @prop {object} ENDPOINTS.HAS_SESSION - Endpoints to check whether a user has a valid session
- * @prop {string} ENDPOINTS.HAS_SESSION.LOCAL - Local endpoint (for Identity team)
- * @prop {string} ENDPOINTS.HAS_SESSION.DEV - Dev environment (for Identity team)
- * @prop {string} ENDPOINTS.HAS_SESSION.PRE - Staging environment
- * @prop {string} ENDPOINTS.HAS_SESSION.PRO - Production environment Sweden
- * @prop {string} ENDPOINTS.HAS_SESSION.PRO_NO - Production environment Norway
  * @prop {object} ENDPOINTS.BFF - Endpoints used with new GDPR-compliant web flows
  * @prop {string} ENDPOINTS.BFF.LOCAL - Local endpoint (for Identity team)
  * @prop {string} ENDPOINTS.BFF.DEV - Dev environment (for Identity team)
@@ -46,8 +40,6 @@
  * @prop {string} ENDPOINTS.SESSION_SERVICE.PRE - Staging environment
  * @prop {string} ENDPOINTS.SESSION_SERVICE.PRO - Production environment Sweden
  * @prop {string} ENDPOINTS.SESSION_SERVICE.PRO_NO - Production environment Norway
- * @prop {object} JSONP
- * @prop {Number} JSONP.TIMEOUT=7000 - Timeout in milliseconds
  */
 const config = {
     ENDPOINTS: {
@@ -57,13 +49,6 @@ const config = {
             PRE: 'https://identity-pre.schibsted.com',
             PRO: 'https://login.schibsted.com',
             PRO_NO: 'https://payment.schibsted.no'
-        },
-        HAS_SESSION: {
-            LOCAL: 'http://session.id.localhost',
-            DEV: 'https://session.identity-dev.schibsted.com',
-            PRE: 'https://session.identity-pre.schibsted.com',
-            PRO: 'https://session.login.schibsted.com',
-            PRO_NO: 'https://session.payment.schibsted.no'
         },
         BFF: {
             LOCAL: 'http://id.localhost/authn/',
@@ -80,7 +65,6 @@ const config = {
             PRO_NO: 'https://session-service.payment.schibsted.no',
         },
     },
-    JSONP: { TIMEOUT: 7000 }, // ms
     NAMESPACE: {
         LOCAL: 'id.localhost',
         DEV: 'schibsted.com',
@@ -88,9 +72,8 @@ const config = {
         PRO: 'schibsted.com',
         PRO_NO: 'spid.no',
     }
-}
+};
 
 export default config;
 export const ENDPOINTS = config.ENDPOINTS;
-export const JSONP = config.JSONP;
 export const NAMESPACE = config.NAMESPACE;

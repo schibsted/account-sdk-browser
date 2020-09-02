@@ -7,7 +7,6 @@
 import { assert, isNonEmptyString, isUrl, isStr } from './validate';
 import { urlMapper } from './url';
 import { ENDPOINTS } from './config';
-import JSONPClient from './JSONPClient';
 import * as popup from './popup';
 import RESTClient from './RESTClient';
 import * as spidTalk from './spidTalk';
@@ -46,7 +45,7 @@ export class Payment {
      */
     _setSpidServerUrl(url) {
         assert(isStr(url), `url parameter is invalid: ${url}`);
-        this._spid = new JSONPClient({
+        this._spid = new RESTClient({
             serverUrl: urlMapper(url, ENDPOINTS.SPiD),
             defaultParams: { client_id: this.clientId, redirect_uri: this.redirectUri },
         });

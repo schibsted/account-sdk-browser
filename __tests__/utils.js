@@ -37,45 +37,7 @@ export function compareUrls(first, second) {
     return [firstUrl, secondUrl];
 }
 
-/**
- * Same as {@link compareUrls}  but expects the searchParams in the exact same order
- * @param {string} first - the first url
- * @param {string} second - the second url
- * @return {void}
- */
-export function compareUrlsStrict(first, second) {
-    const [firstUrl, secondUrl] = compareUrls(first, second);
-    expect(firstUrl.href).toBe(secondUrl.href);
-    expect(firstUrl.search).toBe(secondUrl.search);
-}
-
-const hasSessionLoginRequired = {
-    error: {
-        code: 401,
-        type: 'LoginException',
-        description: 'Autologin required'
-    },
-    response: {
-        result: false,
-        serverTime: 1520599943,
-        expiresIn: null,
-        baseDomain: 'localhost',
-    }
-};
-const hasSessionUserException = {
-    error: {
-        code: 401,
-        type: 'UserException',
-        description: 'No session found'
-    },
-    response: {
-        result: false,
-        serverTime: 1520599943,
-        expiresIn: null,
-        baseDomain: 'localhost',
-    }
-};
-const spidOk = {
+const sessionResponse = {
     result: true,
     serverTime: 1520610964,
     expiresIn: 300,
@@ -113,9 +75,7 @@ const sessionServiceNoAccess = {
 };
 
 export const Fixtures = {
-    hasSessionLoginRequired,
-    hasSessionUserException,
-    spidOk,
+    sessionResponse,
     sessionServiceAccess,
     sessionServiceNoAccess,
 };
