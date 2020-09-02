@@ -6,6 +6,7 @@ export class Identity {
         redirectUri?: string | null })
 
     hasSession(): Promise<any>
+    logSettings(): void
     _enableSessionCaching: boolean;
     _itpMode: boolean;
 }

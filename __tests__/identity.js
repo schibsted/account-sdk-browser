@@ -10,6 +10,7 @@ import Identity from '../identity';
 import { compareUrls, Fixtures } from './utils';
 import { URL } from 'url';
 import { URL as u } from 'whatwg-url';
+import {version} from "../package.json";
 
 describe('Identity', () => {
     const defaultOptions = {
@@ -125,14 +126,14 @@ describe('Identity', () => {
             identity.logout();
 
             const clientSdrn = `sdrn%3Aschibsted.com%3Aclient%3A${defaultOptions.clientId}`;
-            expect(window.location.href).toBe(`${defaultOptions.sessionDomain}/logout?client_sdrn=${clientSdrn}&redirect_uri=http%3A%2F%2Ffoo.com`);
+            expect(window.location.href).toBe(`${defaultOptions.sessionDomain}/logout?client_sdrn=${clientSdrn}&redirect_uri=http%3A%2F%2Ffoo.com&sdk_version=${version}`);
         });
         test('Should redirect to session-service for site-specific logout if configured', async () => {
             const window = { location: {} };
             const identity = new Identity(Object.assign({}, defaultOptions, { window }));
             identity.logout();
 
-            expect(window.location.href).toBe('http://id.foo.com/logout?client_sdrn=sdrn%3Aschibsted.com%3Aclient%3Afoo&redirect_uri=http%3A%2F%2Ffoo.com');
+            expect(window.location.href).toBe(`http://id.foo.com/logout?client_sdrn=sdrn%3Aschibsted.com%3Aclient%3Afoo&redirect_uri=http%3A%2F%2Ffoo.com&sdk_version=${version}`);
         });
         test('Should clear cache when logging out', async () => {
             const webStorageMock = () => {
@@ -803,4 +804,54 @@ describe('Identity', () => {
             expect(window.openSimplifiedLoginWidget).toHaveBeenCalledTimes(1);
         });
     });
+
+    describe('logSettings', () => {
+        test('should print settings and version', () => {
+            const window = { location: {} };
+            const log = jest.fn();
+            const settings = {
+                clientId: defaultOptions.clientId,
+                redirectUri: defaultOptions.redirectUri,
+                env: 'PRE',
+                sessionDomain: defaultOptions.sessionDomain,
+                sdkVersion: version
+            }
+
+            const identity = new Identity(Object.assign({}, defaultOptions, { window, log }));
+            identity.logSettings();
+
+            expect(log).toHaveBeenCalledWith(`Schibsted account SDK for browsers settings: \n${JSON.stringify(settings, null, 2)}`);
+        })
+
+        test('should use console.log when exist and log do not exist', () => {
+            jest.spyOn(console, 'log').mockImplementation(jest.fn());
+
+            const window = { location: {}};
+            const settings = {
+                clientId: defaultOptions.clientId,
+                redirectUri: defaultOptions.redirectUri,
+                env: 'PRE',
+                sessionDomain: defaultOptions.sessionDomain,
+                sdkVersion: version
+            }
+
+            const identity = new Identity(Object.assign({}, defaultOptions, { window }));
+            identity.logSettings();
+
+            expect(console.log).toHaveBeenCalledWith(`Schibsted account SDK for browsers settings: \n${JSON.stringify(settings, null, 2)}`);
+        })
+
+        test('should throw error when log and console.log do not exist', () => {
+            const console = window.console;
+            window.console = undefined;
+            const windowObj = { location: {} };
+            const identity = new Identity(Object.assign({}, defaultOptions, { window: windowObj }));
+
+            expect(() => {
+                identity.logSettings()
+            }).toThrowError(new SDKError('You have to provide log method in constructor'));
+
+            window.console = console;
+        })
+    })
 });
