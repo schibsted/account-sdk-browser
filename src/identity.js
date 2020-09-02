@@ -593,13 +593,14 @@ export class Identity extends EventEmitter {
      * @see https://tools.ietf.org/html/rfc6749#section-4.1.1
      * @param {object} options
      * @param {string} [options.acrValues] - Authentication Context Class Reference Values. If
-     * omitted, the user will be asked to authenticate using username+password. 'otp-email' means
-     * one time password using email. 'otp-sms' means one time password using sms.
+     * omitted, the user will be asked to authenticate using username+password.
      * For 2FA (Two-Factor Authentication) possible values are `sms`, `otp` (one time password) and
-     * `password` (will force password login, even if user is already logged in). Those values might
+     * `password` (will force password confirmation, even if user is already logged in). Those values might
      * be mixed as space-separated string. To make sure that user has authenticated with 2FA you need
-     * to verify AMR (Authentication Methods References) claim in user token.
-     * Might be use also to ensure additional acr (sms, otp) for already logged in users.
+     * to verify AMR (Authentication Methods References) claim in ID token.
+     * Might also be used to ensure additional acr (sms, otp) for already logged in users.
+     * Supported values are also 'otp-email' means one time password using email, and 'otp-sms' means
+     * one time password using sms.
      * @param {string} options.state - An opaque value used by the client to maintain state between
      * the request and callback. It's also recommended to prevent CSRF
      * @see https://tools.ietf.org/html/rfc6749#section-10.12
