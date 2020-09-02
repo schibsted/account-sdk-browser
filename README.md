@@ -150,21 +150,8 @@ user's privacy. While this is good for end-users, it presented a real problem fo
 since our technique for deciding whether a user is logged in, is to send a request in precisely this
 manner.
 
-There are two ways to deal with this in Safari:
-
-1. You can continue with 3rd party requests, but this requires an iframe on that 3rd party domain
-   and it also requires user input in said iframe
-2. You can re-design the system to not use 3rd party requests anymore
-
-We've tried to support both. For the 1st strategy, simply continue using the SDK like before. Be
-sure to call `Identity.login` when authenticating, and `Identity.hasSession` when coming back to
-your site from Schibsted account. This should pop up our so-called "ITP Dialog". This is the iframe
-mentioned in point 1 above, and clicking the Continue button in that frame will ensure the
-`hasSession` call running inside the iframe is successful. The benefit of this strategy is it
-requires very little work from you. The drawback is that every time you come back from
-authentication, the user will have to see this "ITP dialog".
-
-So to work with strategy 2, we have re-designed our platform and introduced what we call the
+To ensure consistent user sessions despite these restrictions, we have re-designed our platform and
+introduced what we call the
 session-service. If your site lives on site.example, you should assign a sub-domain for use with the
 session-service (we propose id.site.example for production and id-pre.site.example for staging —
 talk to our Customer Success team regarding how to get this set up). The goal is to have
@@ -185,9 +172,7 @@ So to sum up:
 2. Enable the session-service for the client you use on your site
 3. Add the `sessionDomain` property to the `Identity` or `Monetization` constructors
 
-1 and 2 requires communication with us, and 3 is done by you at a time of your choosing. The benefit
-of this strategy is that we should never need to show any dialog or popup to the user, so it reduces
-friction. The drawback is the work mentioned above.
+1 and 2 requires [communication with us](mailto:schibstedaccount@schibsted.com), and 3 is done by you at a time of your choosing.
 
 <a name="example-project"></a>
 

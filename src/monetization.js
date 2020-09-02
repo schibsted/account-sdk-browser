@@ -8,7 +8,6 @@ import { assert, isStr, isNonEmptyString, isUrl } from './validate';
 import { urlMapper } from './url';
 import { ENDPOINTS, NAMESPACE } from './config';
 import EventEmitter from 'tiny-emitter';
-import JSONPClient from './JSONPClient';
 import RESTClient from './RESTClient';
 import Cache from './cache';
 import * as spidTalk from './spidTalk';
@@ -55,7 +54,7 @@ export class Monetization extends EventEmitter {
      */
     _setSpidServerUrl(url) {
         assert(isStr(url), `url parameter is invalid: ${url}`);
-        this._spid = new JSONPClient({
+        this._spid = new RESTClient({
             serverUrl: urlMapper(url, ENDPOINTS.SPiD),
             defaultParams: { client_id: this.clientId, redirect_uri: this.redirectUri },
         });
