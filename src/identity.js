@@ -197,7 +197,7 @@ export class Identity extends EventEmitter {
         this._sessionService = new RESTClient({
             serverUrl: domain,
             log: this.log,
-            defaultParams: { client_sdrn, redirect_uri: this.redirectUri },
+            defaultParams: { client_sdrn, redirect_uri: this.redirectUri, sdkVersion: version },
         });
     }
 
@@ -213,7 +213,7 @@ export class Identity extends EventEmitter {
         this._globalSessionService = new RESTClient({
             serverUrl: urlMapper(url, ENDPOINTS.SESSION_SERVICE),
             log: this.log,
-            defaultParams: { client_sdrn },
+            defaultParams: { client_sdrn, sdkVersion: version },
         });
     }
 
@@ -487,7 +487,7 @@ export class Identity extends EventEmitter {
             let sessionData = null;
             if (this._sessionService) {
                 try {
-                    sessionData = await this._sessionService.get('/session', { version });
+                    sessionData = await this._sessionService.get('/session');
                 } catch (err) {
                     if (this.siteSpecificLogout) {
                         if (err && err.code === 400 && this._enableSessionCaching) {

@@ -75,7 +75,7 @@ export class Monetization extends EventEmitter {
         this._sessionService = new RESTClient({
             serverUrl: domain,
             log: this.log,
-            defaultParams: { client_sdrn, redirect_uri: this.redirectUri },
+            defaultParams: { client_sdrn, redirect_uri: this.redirectUri, sdkVersion: version  },
         });
     }
 
@@ -94,7 +94,7 @@ export class Monetization extends EventEmitter {
         const shouldCache = !data;
         if (!data && this._sessionService) {
             try {
-                data = await this._sessionService.get(`/hasProduct/${productId}`, { version });
+                data = await this._sessionService.get(`/hasProduct/${productId}`);
             } catch (err) {
                 // The session-service returns 400 if no session-cookie is sent in the request. This
                 // will be the case if the user hasn't logged in since the site switched to using
