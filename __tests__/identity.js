@@ -125,14 +125,14 @@ describe('Identity', () => {
             identity.logout();
 
             const clientSdrn = `sdrn%3Aschibsted.com%3Aclient%3A${defaultOptions.clientId}`;
-            expect(window.location.href).toBe(`${defaultOptions.sessionDomain}/logout?client_sdrn=${clientSdrn}&redirect_uri=http%3A%2F%2Ffoo.com`);
+            expect(window.location.href).toBe(`${defaultOptions.sessionDomain}/logout?client_sdrn=${clientSdrn}&redirect_uri=http%3A%2F%2Ffoo.com&sdk_version=3.4.0`);
         });
         test('Should redirect to session-service for site-specific logout if configured', async () => {
             const window = { location: {} };
             const identity = new Identity(Object.assign({}, defaultOptions, { window }));
             identity.logout();
 
-            expect(window.location.href).toBe('http://id.foo.com/logout?client_sdrn=sdrn%3Aschibsted.com%3Aclient%3Afoo&redirect_uri=http%3A%2F%2Ffoo.com');
+            expect(window.location.href).toBe('http://id.foo.com/logout?client_sdrn=sdrn%3Aschibsted.com%3Aclient%3Afoo&redirect_uri=http%3A%2F%2Ffoo.com&sdk_version=3.4.0');
         });
         test('Should clear cache when logging out', async () => {
             const webStorageMock = () => {
