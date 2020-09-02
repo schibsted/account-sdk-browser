@@ -115,6 +115,7 @@ export class Identity extends EventEmitter {
         this.redirectUri = redirectUri;
         this.env = env;
         this.log = log;
+        this._sessionDomain = sessionDomain;
 
         if (sessionDomain) {
             assert(isUrl(sessionDomain), 'sessionDomain parameter is not a valid URL');
@@ -195,7 +196,7 @@ export class Identity extends EventEmitter {
         this._sessionService = new RESTClient({
             serverUrl: domain,
             log: this.log,
-            defaultParams: { client_sdrn, redirect_uri: this.redirectUri, sdkVersion: version },
+            defaultParams: { client_sdrn, redirect_uri: this.redirectUri, sdk_version: version },
         });
     }
 
@@ -211,7 +212,7 @@ export class Identity extends EventEmitter {
         this._globalSessionService = new RESTClient({
             serverUrl: urlMapper(url, ENDPOINTS.SESSION_SERVICE),
             log: this.log,
-            defaultParams: { client_sdrn, sdkVersion: version },
+            defaultParams: { client_sdrn, sdk_version: version },
         });
     }
 
@@ -422,19 +423,21 @@ export class Identity extends EventEmitter {
      * @return {void}
      */
     logSettings() {
-        if (!this.log) {
+        if (!this.log && !window.console) {
             throw new SDKError('You have to provide log method in constructor');
         }
+
+        const log = this.log || console.log;
 
         const settings = {
             clientId: this.clientId,
             redirectUri: this.redirectUri,
             env: this.env,
-            siteSpecificLogout: this.siteSpecificLogout,
+            sessionDomain: this._sessionDomain,
+            sdkVersion: version
         }
 
-        this.log(`Schibsted account SDK for browsers version: \n${JSON.stringify(settings, null, 2)}`);
-        this.log(`Schibsted account SDK for browsers version: ${version}`);
+        log(`Schibsted account SDK for browsers settings: \n${JSON.stringify(settings, null, 2)}`);
     }
 
     /**

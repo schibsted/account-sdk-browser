@@ -73,7 +73,7 @@ export class Monetization extends EventEmitter {
         this._sessionService = new RESTClient({
             serverUrl: domain,
             log: this.log,
-            defaultParams: { client_sdrn, redirect_uri: this.redirectUri, sdkVersion: version  },
+            defaultParams: { client_sdrn, redirect_uri: this.redirectUri, sdk_version: version  },
         });
     }
 
