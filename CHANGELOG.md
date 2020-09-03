@@ -1,5 +1,19 @@
 # Changelog
 
+## v4.0.0 (2020-09-03)
+
+## Breaking changes
+* `sessionDomain` is required
+* Removed `siteSpecificLogout` param- there is no option to disable site specific logout
+* Drop `hasProduct` and `hasSubscription` functions- replaced by `hasAccess`
+
+## New features
+* Add 2FA Support- new `acrValues`: `sms`, `otp`, `password`
+* `logSettings` function
+
+## Changes
+* babel has been updated to `^7.11`
+
 ## v3.4.0 (2020-04-28)
 
 ## Changes
