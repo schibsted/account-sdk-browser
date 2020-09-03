@@ -5,6 +5,7 @@
 ## Breaking changes
 * `sessionDomain` is required
 * Removed `siteSpecificLogout` param- there is no option to disable site specific logout
+* `hasSession` does not accept `autologin` param anymore
 * Drop `hasProduct` and `hasSubscription` functions- replaced by `hasAccess`
 
 ## New features
