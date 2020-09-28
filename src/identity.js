@@ -7,6 +7,7 @@
 import { assert, isStr, isNonEmptyString, isObject, isUrl, isStrIn } from './validate';
 import { cloneDeep } from './object';
 import { urlMapper } from './url';
+import { isReferredFromAccountPages } from './util';
 import { ENDPOINTS, NAMESPACE } from './config';
 import EventEmitter from 'tiny-emitter';
 import Cache from './cache';
@@ -113,6 +114,9 @@ export class Identity extends EventEmitter {
         this._setBffServerUrl(env);
         this._setOauthServerUrl(env);
         this._setGlobalSessionServiceUrl(env);
+        if (isReferredFromAccountPages(window.location && window.location.referer, env)) {
+            this.cache.delete(HAS_SESSION_CACHE_KEY);
+        }
     }
 
     /**

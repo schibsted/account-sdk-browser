@@ -7,6 +7,7 @@
 import { assert, isStr, isNonEmptyString, isUrl } from './validate';
 import { urlMapper } from './url';
 import { ENDPOINTS, NAMESPACE } from './config';
+import { isReferredFromAccountPages } from './util';
 import EventEmitter from 'tiny-emitter';
 import RESTClient from './RESTClient';
 import Cache from './cache';
@@ -36,6 +37,7 @@ export class Monetization extends EventEmitter {
 
         this.cache = new Cache(() => window && window.sessionStorage);
         this.clientId = clientId;
+        this.window = window;
         this.env = env;
         this.redirectUri = redirectUri;
         this._setSpidServerUrl(env);
@@ -44,6 +46,8 @@ export class Monetization extends EventEmitter {
             assert(isUrl(sessionDomain), 'sessionDomain parameter is not a valid URL');
             this._setSessionServiceUrl(sessionDomain);
         }
+
+        this._clearedCaches = {};
     }
 
     /**
@@ -98,6 +102,11 @@ export class Monetization extends EventEmitter {
 
         const sortedIds = productIds.sort();
         const cacheKey = this._accessCacheKey(productIds, userId);
+        const referrer = this.window && this.window.location && this.window.location.referer;
+        if (isReferredFromAccountPages(referrer, this.env) && !this._clearedCaches[cacheKey]) {
+            this.clearCachedAccessResult(productIds, userId);
+            this._clearedCaches[cacheKey] = true;
+        }
         let data = this.cache.get(cacheKey);
         if (!data) {
             data = await this._sessionService.get(`/hasAccess/${sortedIds.join(',')}`);
