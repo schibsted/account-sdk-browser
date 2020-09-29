@@ -15,6 +15,15 @@ products and subscriptions, etc.
 
 ## Getting started
 
+You can do local development using our `dev` or `pre` environment.
+
+Since browsers started to blocking Third-Party Cookies, your top domain from local machine needs to
+match yours session service top domain. Otherwise session service cookie will be Third-Party Cookie,
+and will not be send with XHR request.
+
+For example if your `pre` domain is pre.sdk-example.com, and it uses id.pre.sdk-example.com session
+service domain, your local domain should be local.sdk-example.com.
+
 1. Do `npm install --save @schibsted/account-sdk-browser`
 1. Use this library as you would any other npm module: `import { Identity, Monetization, Payment }
    from '@schibsted/account-sdk-browser'`
