@@ -17,9 +17,9 @@ products and subscriptions, etc.
 
 You can do local development using our `dev` or `pre` environment.
 
-Since browsers started to blocking Third-Party Cookies, your top domain from local machine needs to
-match yours session service top domain. Otherwise session service cookie will be Third-Party Cookie,
-and will not be send with XHR request.
+Since browsers started to block Third-Party Cookies, your top domain from local machine needs to
+match your session service top domain. Otherwise session service cookie will be Third-Party Cookie,
+and will not be sent with XHR request.
 
 For example if your `pre` domain is pre.sdk-example.com, and it uses id.pre.sdk-example.com session
 service domain, your local domain should be local.sdk-example.com.
