@@ -24,8 +24,9 @@ export class Monetization extends EventEmitter {
      * @param {object} options
      * @param {string} options.clientId - Mandatory client id
      * @param {string} [options.redirectUri] - Redirect uri
+     * @param {string} options.sessionDomain - Example: "https://id.site.com"
      * @param {string} [options.env=PRE] - Schibsted account environment: `PRE`, `PRO` or `PRO_NO`
-     * @param {string} [options.sessionDomain] - Example: "https://id.site.com"
+     * @param {object} [options.window]
      * @throws {SDKError} - If any of options are invalid
      */
     constructor({ clientId, redirectUri, env = 'PRE', sessionDomain, window = globalWindow() }) {
