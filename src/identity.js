@@ -611,18 +611,18 @@ export class Identity extends EventEmitter {
      * @return {Window|null} - Reference to popup window if created (or `null` otherwise)
      */
     login({
-              state,
-              acrValues = '',
-              scope = 'openid',
-              redirectUri = this.redirectUri,
-              preferPopup = false,
-              loginHint = '',
-              tag = '',
-              teaser = '',
-              maxAge = '',
-              locale = '',
-              oneStepLogin = false
-          }) {
+        state,
+        acrValues = '',
+        scope = 'openid',
+        redirectUri = this.redirectUri,
+        preferPopup = false,
+        loginHint = '',
+        tag = '',
+        teaser = '',
+        maxAge = '',
+        locale = '',
+        oneStepLogin = false
+    }) {
         this._closePopup();
         this.cache.delete(HAS_SESSION_CACHE_KEY);
         const url = this.loginUrl({ state, acrValues, scope, redirectUri, loginHint, tag,
@@ -702,17 +702,17 @@ export class Identity extends EventEmitter {
      * @return {string} - The url
      */
     loginUrl({
-                 state,
-                 acrValues = '',
-                 scope = 'openid',
-                 redirectUri = this.redirectUri,
-                 loginHint = '',
-                 tag = '',
-                 teaser = '',
-                 maxAge = '',
-                 locale = '',
-                 oneStepLogin = false
-             }) {
+        state,
+        acrValues = '',
+        scope = 'openid',
+        redirectUri = this.redirectUri,
+        loginHint = '',
+        tag = '',
+        teaser = '',
+        maxAge = '',
+        locale = '',
+        oneStepLogin = false
+    }) {
         if (typeof arguments[0] !== 'object') {
             // backward compatibility
             state = arguments[0];
