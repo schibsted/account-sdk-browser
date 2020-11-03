@@ -99,10 +99,12 @@ export class RESTClient {
      * @param {string} options.method - can be 'GET', 'POST', 'DELETE', etc. case sensitive.  To be
      *        more specific, this can be one of the values that are passed to the `methods`
      *        property of the constructor's `options` parameter.
-     * @param {string} pathname - the path to the endpoint like 'api/2/endpoint-name'
-     * @param {Object} [data={}] - data payload (depending on GET/DELETE or POST it may be a query
+     * @param {string} options.pathname - the path to the endpoint like 'api/2/endpoint-name'
+     * @param {Object} [options.data={}] - data payload (depending on GET/DELETE or POST it may be a query
      *        string or form body)
-     * @param {boolean} [useDefaultParams] - should we add the defaultParams to the query?
+     * @param {array} [options.headers] - fetch options headers
+     * @param {boolean} [options.useDefaultParams] - should we add the defaultParams to the query?
+     * @param {object} [options.fetchOptions] - fetch options
      * @throws {SDKError} - if the call can't be made for whatever reason.
      * @return {Promise<object>} - A promise that will resolve to the call's response or reject if there
      *         is an error before making the call or if the server returns a non-2xx error or

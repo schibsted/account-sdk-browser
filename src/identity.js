@@ -79,10 +79,11 @@ export class Identity extends EventEmitter {
      * @param {object} options
      * @param {string} options.clientId - Example: "1234567890abcdef12345678"
      * @param {string} options.sessionDomain - Example: "https://id.site.com"
-     * @param {string} [options.redirectUri] - Example: "https://site.com"
-     * @param {string} [options.env='PRE'] - Schibsted account environment: `PRE`, `PRO` or `PRO_NO`
+     * @param {string} options.redirectUri - Example: "https://site.com"
+     * @param {string} [options.env=PRE] - Schibsted account environment: `PRE`, `PRO` or `PRO_NO`
      * @param {function} [options.log] - A function that receives debug log information. If not set,
      * no logging will be done
+     * @param {object} [options.window] - window object
      * @throws {SDKError} - If any of options are invalid
      */
     constructor({ clientId, redirectUri, sessionDomain, env = 'PRE', log, window = globalWindow() }) {
@@ -570,28 +571,15 @@ export class Identity extends EventEmitter {
     }
 
     /**
-     * @summary Retrieve the sp_id (Varnish ID)
-     * @description This function calls {@link Identity#hasSession} internally and thus has the side
-     * effect that it might perform an auto-login on the user
-     * @todo Is this an accurate description?
-     * @return {string|null} - The sp_id string or null (if the server didn't return it)
-     */
-    async getSpId() {
-        try {
-            const user = await this.hasSession();
-            return user.sp_id || null;
-        } catch (_) {
-            return null;
-        }
-    }
-
-    /**
      * If a popup is desired, this function needs to be called in response to a user event (like
      * click or tap) in order to work correctly. Otherwise the popup will be blocked by the
      * browser's popup blockers and has to be explicitly authorized to be shown.
      * @summary Perform a login, either using a full-page redirect or a popup
      * @see https://tools.ietf.org/html/rfc6749#section-4.1.1
+     *
      * @param {object} options
+     * @param {string} options.state - An opaque value used by the client to maintain state between
+     * the request and callback. It's also recommended to prevent CSRF {@link https://tools.ietf.org/html/rfc6749#section-10.12}
      * @param {string} [options.acrValues] - Authentication Context Class Reference Values. If
      * omitted, the user will be asked to authenticate using username+password.
      * For 2FA (Two-Factor Authentication) possible values are `sms`, `otp` (one time password) and
@@ -601,34 +589,30 @@ export class Identity extends EventEmitter {
      * Might also be used to ensure additional acr (sms, otp) for already logged in users.
      * Supported values are also 'otp-email' means one time password using email, and 'otp-sms' means
      * one time password using sms.
-     * @param {string} options.state - An opaque value used by the client to maintain state between
-     * the request and callback. It's also recommended to prevent CSRF
-     * @see https://tools.ietf.org/html/rfc6749#section-10.12
-     * @param {string} [options.scope='openid'] - The OAuth scopes for the tokens. This is a list of
+     * @param {string} [options.scope=openid] - The OAuth scopes for the tokens. This is a list of
      * scopes, separated by space. If the list of scopes contains `openid`, the generated tokens
      * includes the id token which can be useful for getting information about the user. Omitting
      * scope is allowed, while `invalid_scope` is returned when the client asks for a scope you
-     * aren’t allowed to request.
-     * @see https://tools.ietf.org/html/rfc6749#section-3.3
-     * @param {string} [options.redirectUri=this.redirectUri] - Redirect uri that will receive the
+     * aren’t allowed to request. {@link https://tools.ietf.org/html/rfc6749#section-3.3}
+     * @param {string} [options.redirectUri] - Redirect uri that will receive the
      * code. Must exactly match a redirectUri from your client in self-service
      * @param {boolean} [options.preferPopup=false] - Should we try to open a popup window?
-     * @param {string} [options.loginHint=''] - user email or UUID hint
-     * @param {string} [options.tag=''] - Pulse tag
-     * @param {string} [options.teaser=''] - Teaser slug. Teaser with given slug will be displayed
+     * @param {string} [options.loginHint] - user email or UUID hint
+     * @param {string} [options.tag] - Pulse tag
+     * @param {string} [options.teaser] - Teaser slug. Teaser with given slug will be displayed
      * in place of default teaser
-     * @param {number|string} [options.maxAge=''] - Specifies the allowable elapsed time in seconds since
+     * @param {number|string} [options.maxAge] - Specifies the allowable elapsed time in seconds since
      * the last time the End-User was actively authenticated. If last authentication time is more
      * than maxAge seconds in the past, re-authentication will be required. See the OpenID Connect
      * spec section 3.1.2.1 for more information
-     * @param {string} [options.locale=''] - Optional parameter to overwrite client locale setting.
+     * @param {string} [options.locale] - Optional parameter to overwrite client locale setting.
      * New flows supports nb_NO, fi_FI, sv_SE, en_US
      * @param {boolean} [options.oneStepLogin=false] - display username and password on one screen
      * @return {Window|null} - Reference to popup window if created (or `null` otherwise)
      */
     login({
-        acrValues,
         state,
+        acrValues = '',
         scope = 'openid',
         redirectUri = this.redirectUri,
         preferPopup = false,
@@ -656,6 +640,21 @@ export class Identity extends EventEmitter {
     }
 
     /**
+     * @summary Retrieve the sp_id (Varnish ID)
+     * @description This function calls {@link Identity#hasSession} internally and thus has the side
+     * effect that it might perform an auto-login on the user
+     * @return {string|null} - The sp_id string or null (if the server didn't return it)
+     */
+    async getSpId() {
+        try {
+            const user = await this.hasSession();
+            return user.sp_id || null;
+        } catch (_) {
+            return null;
+        }
+    }
+
+    /**
      * @summary Logs the user out from the Identity platform
      * @param {string} redirectUri - Where to redirect the browser after logging out of Schibsted
      * account
@@ -671,30 +670,40 @@ export class Identity extends EventEmitter {
     /**
      * Generates the link to the new login page that'll be used in the popup or redirect flow
      * @param {object} options
-     * @param {string} options.state - An opaque value used by the client to maintain state between the
-     * request and callback. It's also recommended to prevent CSRF.
-     * @see https://tools.ietf.org/html/rfc6749#section-10.12
-     * @param {string} [options.acrValues] - Authentication method. If omitted, user authenticates with
-     * username+password. If set to `'otp-email'`, then  passwordless login using email is used. If
-     * `'otp-sms'`, then passwordless login using sms is used.
-     * @param {string} [options.scope='openid']
-     * @param {string} [options.redirectUri=this.redirectUri]
-     * @param {string} [options.loginHint=''] - user email or UUID hint
-     * @param {string} [options.tag=''] - Pulse tag
-     * @param {string} [options.teaser=''] - Teaser slug. Teaser with given slug will be displayed
+     * @param {string} options.state - An opaque value used by the client to maintain state between
+     * the request and callback. It's also recommended to prevent CSRF {@link https://tools.ietf.org/html/rfc6749#section-10.12}
+     * @param {string} [options.acrValues] - Authentication Context Class Reference Values. If
+     * omitted, the user will be asked to authenticate using username+password.
+     * For 2FA (Two-Factor Authentication) possible values are `sms`, `otp` (one time password) and
+     * `password` (will force password confirmation, even if user is already logged in). Those values might
+     * be mixed as space-separated string. To make sure that user has authenticated with 2FA you need
+     * to verify AMR (Authentication Methods References) claim in ID token.
+     * Might also be used to ensure additional acr (sms, otp) for already logged in users.
+     * Supported values are also 'otp-email' means one time password using email, and 'otp-sms' means
+     * one time password using sms.
+     * @param {string} [options.scope=openid] - The OAuth scopes for the tokens. This is a list of
+     * scopes, separated by space. If the list of scopes contains `openid`, the generated tokens
+     * includes the id token which can be useful for getting information about the user. Omitting
+     * scope is allowed, while `invalid_scope` is returned when the client asks for a scope you
+     * aren’t allowed to request. {@link https://tools.ietf.org/html/rfc6749#section-3.3}
+     * @param {string} [options.redirectUri] - Redirect uri that will receive the
+     * code. Must exactly match a redirectUri from your client in self-service
+     * @param {string} [options.loginHint] - user email or UUID hint
+     * @param {string} [options.tag] - Pulse tag
+     * @param {string} [options.teaser] - Teaser slug. Teaser with given slug will be displayed
      * in place of default teaser
-     * @param {number|string} [options.maxAge=''] - Specifies the allowable elapsed time in seconds since
+     * @param {number|string} [options.maxAge] - Specifies the allowable elapsed time in seconds since
      * the last time the End-User was actively authenticated. If last authentication time is more
      * than maxAge seconds in the past, re-authentication will be required. See the OpenID Connect
      * spec section 3.1.2.1 for more information
-     * @param {string} [options.locale=''] - Optional parameter to overwrite client locale setting.
+     * @param {string} [options.locale] - Optional parameter to overwrite client locale setting.
      * New flows supports nb_NO, fi_FI, sv_SE, en_US
      * @param {boolean} [options.oneStepLogin=false] - display username and password on one screen
      * @return {string} - The url
      */
     loginUrl({
         state,
-        acrValues,
+        acrValues = '',
         scope = 'openid',
         redirectUri = this.redirectUri,
         loginHint = '',

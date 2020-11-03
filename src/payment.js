@@ -23,6 +23,8 @@ export class Payment {
      * @param {string} [options.redirectUri] - Redirect uri
      * @param {string} [options.env=PRE] - Schibsted account environment: `PRE`, `PRO` or `PRO_NO`
      * @param {string} [options.publisher] - ZUORA publisher
+     * @param {object} [options.window]
+     *
      * @throws {SDKError} - If any of options are invalid
      */
     constructor({ clientId, redirectUri, env = 'PRE', publisher, window = globalWindow() }) {
