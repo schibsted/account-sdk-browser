@@ -1,5 +1,10 @@
 # Changelog
 
+## v4.1.0 (2020-11-03)
+
+## New features
+* Add .d.ts files
+
 ## v4.0.0 (2020-09-03)
 
 ## Breaking changes
