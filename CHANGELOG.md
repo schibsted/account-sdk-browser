@@ -1,5 +1,10 @@
 # Changelog
 
+## v4.2.0 (2020-11-09)
+
+## New features
+* Add Finnish env
+
 ## v4.1.0 (2020-11-03)
 
 ## New features
