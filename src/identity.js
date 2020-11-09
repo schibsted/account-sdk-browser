@@ -17,7 +17,7 @@ import * as spidTalk from './spidTalk';
 import { version } from '../package.json';
 
 /**
- * @typedef {object} Identity#HasSessionSuccessResponse
+ * @typedef {object} HasSessionSuccessResponse
  * @property {boolean} result - Is the user connected to the merchant? (it means that the merchant
  * id is in the list of merchants listed of this user in the database)? Example: false
  * @property {string} userStatus - Example: 'notConnected' or 'connected'. Deprecated, use
@@ -49,7 +49,7 @@ import { version } from '../package.json';
  */
 
 /**
- * @typedef {object} Identity#HasSessionFailureResponse
+ * @typedef {object} HasSessionFailureResponse
  * @property {object} error
  * @property {number} error.code - Typically an HTTP response code. Example: 401
  * @property {string} error.description - Example: "No session found!"
@@ -62,7 +62,7 @@ import { version } from '../package.json';
  */
 
 /**
- * @typedef {object} Identity#SimplifiedLoginData
+ * @typedef {object} SimplifiedLoginData
  * @property {string} identifier - Deprecated: User UUID, to be be used as `loginHint` for {@link Identity#login}
  * @property {string} display_text - Human-readable user identifier
  * @property {string} client_name - Client name
@@ -398,7 +398,7 @@ export class Identity extends EventEmitter {
      * @fires Identity#sessionInit
      * @fires Identity#statusChange
      * @fires Identity#error
-     * @return {Promise<Identity#HasSessionSuccessResponse|Identity#HasSessionFailureResponse>}
+     * @return {Promise<HasSessionSuccessResponse|HasSessionFailureResponse>}
      */
     hasSession() {
         if (this._hasSessionInProgress) {
@@ -560,7 +560,7 @@ export class Identity extends EventEmitter {
      * is a third-party cookie and hence might be blocked by the browser (for example due to ITP in
      * Safari). So there's no guarantee any data is returned, even though a user is logged-in in
      * the current browser.
-     * @return {Identity#SimplifiedLoginData|null}
+     * @return {SimplifiedLoginData|null}
      */
     async getUserContextData() {
         try {

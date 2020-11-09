@@ -141,9 +141,9 @@ export class Identity {
      * @fires Identity#sessionInit
      * @fires Identity#statusChange
      * @fires Identity#error
-     * @return {Promise<Identity#HasSessionSuccessResponse|Identity#HasSessionFailureResponse>}
+     * @return {Promise<HasSessionSuccessResponse|HasSessionFailureResponse>}
      */
-    hasSession(): Promise<Identity>;
+    hasSession(): Promise<HasSessionSuccessResponse | HasSessionFailureResponse>;
     _hasSessionInProgress: boolean | Promise<any>;
     /**
      * @summary Allows the client app to check if the user is logged in to Schibsted account
@@ -175,7 +175,7 @@ export class Identity {
      * @throws {SDKError} If we couldn't get the user
      * @return {HasSessionSuccessResponse}
      */
-    getUser(): any;
+    getUser(): HasSessionSuccessResponse;
     /**
      * @summary In Schibsted account, there are two ways of identifying a user; the `userId` and the
      * `uuid`. There are reasons for them both existing. The `userId` is a numeric identifier, but
@@ -355,5 +355,95 @@ export class Identity {
     showSimplifiedLoginWidget(loginParams: any): Promise<boolean | SDKError>;
 }
 export default Identity;
+export type HasSessionSuccessResponse = {
+    /**
+     * - Is the user connected to the merchant? (it means that the merchant
+     * id is in the list of merchants listed of this user in the database)? Example: false
+     */
+    result: boolean;
+    /**
+     * - Example: 'notConnected' or 'connected'. Deprecated, use
+     * `Identity.isConnected()`
+     */
+    userStatus: string;
+    /**
+     * - Example: 'localhost'
+     */
+    baseDomain: string;
+    /**
+     * - Example: '58eca10fdbb9f6df72c3368f'. Obsolete
+     */
+    id: string;
+    /**
+     * - Example: 37162
+     */
+    userId: number;
+    /**
+     * - Example: 'b3b23aa7-34f2-5d02-a10e-5a3455c6ab2c'
+     */
+    uuid: string;
+    /**
+     * - Example: 'eyJjbGllbnRfaWQ...'
+     */
+    sp_id: string;
+    /**
+     * - Example: 30 * 60 * 1000 (for 30 minutes)
+     */
+    expiresIn: number;
+    /**
+     * - Example: 1506285759
+     */
+    serverTime: number;
+    /**
+     * - Example: 'NCdzXaz4ZRb7...' The sig parameter is a concatenation of an
+     * HMAC SHA-256 signature string, a dot (.) and a base64url encoded JSON object (session).
+     */
+    sig: string;
+};
+export type HasSessionFailureResponse = {
+    error: {
+        /**
+         * - Typically an HTTP response code. Example: 401
+         */
+        code: number;
+        /**
+         * - Example: "No session found!"
+         */
+        description: string;
+        /**
+         * - Example: "UserException"
+         */
+        type: string;
+    };
+    response: {
+        /**
+         * - Example: "localhost"
+         */
+        baseDomain: string;
+        /**
+         * - Time span in milliseconds. Example: 30 * 60 * 1000 (for 30 minutes)
+         */
+        expiresIn: number;
+        result: boolean;
+        /**
+         * - Server time in seconds since the Unix Epoch. Example: 1506287788
+         */
+        serverTime: number;
+    };
+};
+export type SimplifiedLoginData = {
+    /**
+     * - Deprecated: User UUID, to be be used as `loginHint` for {@link Identity#login}
+     */
+    identifier: string;
+    /**
+     * - Human-readable user identifier
+     */
+    display_text: string;
+    /**
+     * - Client name
+     */
+    client_name: string;
+};
 import RESTClient from "./RESTClient";
 import SDKError from "./SDKError";
