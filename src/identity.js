@@ -14,7 +14,7 @@ import * as popup from './popup';
 import RESTClient from './RESTClient';
 import SDKError from './SDKError';
 import * as spidTalk from './spidTalk';
-import { version } from '../package.json';
+const { version } = require('../package.json');
 
 /**
  * @typedef {object} Identity#HasSessionSuccessResponse
