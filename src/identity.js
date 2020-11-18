@@ -455,10 +455,11 @@ export class Identity extends EventEmitter {
     }
 
     /**
+     * @async
      * @summary Allows the client app to check if the user is logged in to Schibsted account
      * @description This function calls {@link Identity#hasSession} internally and thus has the side
      * effect that it might perform an auto-login on the user
-     * @return {boolean}
+     * @return {Promise<boolean>}
      */
     async isLoggedIn() {
         try {
@@ -478,13 +479,14 @@ export class Identity extends EventEmitter {
     }
 
     /**
+     * @async
      * @summary Allows the caller to check if the current user is connected to the client_id in
      * Schibsted account. Being connected means that the user has agreed for their account to be
      * used by your web app and have accepted the required terms
      * @description This function calls {@link Identity#hasSession} internally and thus has the side
      * effect that it might perform an auto-login on the user
      * @summary Check if the user is connected to the client_id
-     * @return {boolean}
+     * @return {Promise<boolean>}
      */
     async isConnected() {
         try {
@@ -498,12 +500,13 @@ export class Identity extends EventEmitter {
     }
 
     /**
+     * @async
      * @summary Returns information about the user
      * @description This function calls {@link Identity#hasSession} internally and thus has the side
      * effect that it might perform an auto-login on the user
      * @throws {SDKError} If the user isn't connected to the merchant
      * @throws {SDKError} If we couldn't get the user
-     * @return {HasSessionSuccessResponse}
+     * @return {Promise<HasSessionSuccessResponse>}
      */
     async getUser() {
         const user = await this.hasSession();
@@ -514,6 +517,7 @@ export class Identity extends EventEmitter {
     }
 
     /**
+     * @async
      * @summary In Schibsted account, there are two ways of identifying a user; the `userId` and the
      * `uuid`. There are reasons for them both existing. The `userId` is a numeric identifier, but
      * since Schibsted account is deployed separately in Norway and Sweden, there are a lot of
@@ -523,7 +527,7 @@ export class Identity extends EventEmitter {
      * @description This function calls {@link Identity#hasSession} internally and thus has the side
      * effect that it might perform an auto-login on the user
      * @throws {SDKError} If the user isn't connected to the merchant
-     * @return {string} The `userId` field (not to be confused with the `uuid`)
+     * @return {Promise<string>} The `userId` field (not to be confused with the `uuid`)
      */
     async getUserId() {
         const user = await this.hasSession();
@@ -534,6 +538,7 @@ export class Identity extends EventEmitter {
     }
 
     /**
+     * @async
      * @summary In Schibsted account, there are two ways of identifying a user; the `userId` and the
      * `uuid`. There are reasons for them both existing. The `userId` is a numeric identifier, but
      * since Schibsted account is deployed separately in Norway and Sweden, there are a lot of
@@ -543,7 +548,7 @@ export class Identity extends EventEmitter {
      * @description This function calls {@link Identity#hasSession} internally and thus has the side
      * effect that it might perform an auto-login on the user
      * @throws {SDKError} If the user isn't connected to the merchant
-     * @return {string} The `uuid` field (not to be confused with the `userId`)
+     * @return {Promise<string>} The `uuid` field (not to be confused with the `userId`)
      */
     async getUserUuid() {
         const user = await this.hasSession();
@@ -554,13 +559,14 @@ export class Identity extends EventEmitter {
     }
 
     /**
+     * @async
      * @summary Get basic information about any user currently logged-in to their Schibsted account
      * in this browser. Can be used to provide context in a continue-as prompt.
      * @description This function relies on the global Schibsted account user session cookie, which
      * is a third-party cookie and hence might be blocked by the browser (for example due to ITP in
      * Safari). So there's no guarantee any data is returned, even though a user is logged-in in
      * the current browser.
-     * @return {SimplifiedLoginData|null}
+     * @return {Promise<SimplifiedLoginData|null>}
      */
     async getUserContextData() {
         try {
@@ -640,10 +646,11 @@ export class Identity extends EventEmitter {
     }
 
     /**
+     * @async
      * @summary Retrieve the sp_id (Varnish ID)
      * @description This function calls {@link Identity#hasSession} internally and thus has the side
      * effect that it might perform an auto-login on the user
-     * @return {string|null} - The sp_id string or null (if the server didn't return it)
+     * @return {Promise<string|null>} - The sp_id string or null (if the server didn't return it)
      */
     async getSpId() {
         try {
@@ -788,6 +795,7 @@ export class Identity extends EventEmitter {
      * widget will be display is up to you. Preferred way would be to show it once per user,
      * and store that info in localStorage. Widget will be display only if user is logged in to SSO.
      *
+     * @async
      * @param {object} loginParams - the same as `options` param for login function. Login will be called on user
      * continue action. `state` might be string or async function.
      * @return {Promise<boolean|SDKError>} - will resolve to true if widget will be display. Otherwise will throw SDKError
