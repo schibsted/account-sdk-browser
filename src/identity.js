@@ -64,8 +64,8 @@ const { version } = require('../package.json');
  * @property {number} expiresIn - Example: 30 * 60 * 1000 (for 30 minutes)
  * @property {number} serverTime - Example: 1506285759
  * @property {string} sig - Example: 'NCdzXaz4ZRb7...' The sig parameter is a concatenation of an
- * HMAC SHA-256 signature string, a dot (.) and a base64url encoded JSON object (session). @see
- * http://techdocs.spid.no/sdks/js/response-signature-and-validation/
+ * HMAC SHA-256 signature string, a dot (.) and a base64url encoded JSON object (session). 
+ * {@link http://techdocs.spid.no/sdks/js/response-signature-and-validation/}
  * @property {string} displayName - (Only for connected users) Example: 'batman'
  * @property {string} givenName - (Only for connected users) Example: 'Bruce'
  * @property {string} familyName - (Only for connected users) Example: 'Wayne'

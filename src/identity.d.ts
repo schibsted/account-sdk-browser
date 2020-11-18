@@ -409,8 +409,42 @@ export type HasSessionSuccessResponse = {
     /**
      * - Example: 'NCdzXaz4ZRb7...' The sig parameter is a concatenation of an
      * HMAC SHA-256 signature string, a dot (.) and a base64url encoded JSON object (session).
+     * {@link http://techdocs.spid.no/sdks/js/response-signature-and-validation/}
      */
     sig: string;
+    /**
+     * - (Only for connected users) Example: 'batman'
+     */
+    displayName: string;
+    /**
+     * - (Only for connected users) Example: 'Bruce'
+     */
+    givenName: string;
+    /**
+     * - (Only for connected users) Example: 'Wayne'
+     */
+    familyName: string;
+    /**
+     * - (Only for connected users) Example: 'male', 'female', 'undisclosed'
+     */
+    gender: string;
+    /**
+     * - (Only for connected users) Example:
+     * 'http://www.srv.com/some/picture.jpg'
+     */
+    photo: string;
+    /**
+     * - (Only for connected users)
+     */
+    tracking: boolean;
+    /**
+     * - (Only for connected users)
+     */
+    clientAgreementAccepted: boolean;
+    /**
+     * - (Only for connected users)
+     */
+    defaultAgreementAccepted: boolean;
 };
 export type HasSessionFailureResponse = {
     error: {
