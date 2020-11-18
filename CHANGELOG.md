@@ -1,5 +1,10 @@
 # Changelog
 
+## v4.2.1 (2020-18-11)
+
+## Fixes
+* Fix TS issues
+
 ## v4.2.0 (2020-11-09)
 
 ## New features
