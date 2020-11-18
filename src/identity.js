@@ -17,7 +17,41 @@ import * as spidTalk from './spidTalk';
 const { version } = require('../package.json');
 
 /**
- * @typedef {object} Identity#HasSessionSuccessResponse
+ * @typedef {object} LoginOptions
+ * @property {string} state - An opaque value used by the client to maintain state between
+ * the request and callback. It's also recommended to prevent CSRF {@link https://tools.ietf.org/html/rfc6749#section-10.12}
+ * @property {string} [acrValues] - Authentication Context Class Reference Values. If
+ * omitted, the user will be asked to authenticate using username+password.
+ * For 2FA (Two-Factor Authentication) possible values are `sms`, `otp` (one time password) and
+ * `password` (will force password confirmation, even if user is already logged in). Those values might
+ * be mixed as space-separated string. To make sure that user has authenticated with 2FA you need
+ * to verify AMR (Authentication Methods References) claim in ID token.
+ * Might also be used to ensure additional acr (sms, otp) for already logged in users.
+ * Supported values are also 'otp-email' means one time password using email, and 'otp-sms' means
+ * one time password using sms.
+ * @property {string} [scope] - The OAuth scopes for the tokens. This is a list of
+ * scopes, separated by space. If the list of scopes contains `openid`, the generated tokens
+ * includes the id token which can be useful for getting information about the user. Omitting
+ * scope is allowed, while `invalid_scope` is returned when the client asks for a scope you
+ * aren’t allowed to request. {@link https://tools.ietf.org/html/rfc6749#section-3.3}
+ * @property {string} [redirectUri] - Redirect uri that will receive the
+ * code. Must exactly match a redirectUri from your client in self-service
+ * @property {boolean} [preferPopup] - Should we try to open a popup window?
+ * @property {string} [loginHint] - user email or UUID hint
+ * @property {string} [tag] - Pulse tag
+ * @property {string} [teaser] - Teaser slug. Teaser with given slug will be displayed
+ * in place of default teaser
+ * @property {number|string} [maxAge] - Specifies the allowable elapsed time in seconds since
+ * the last time the End-User was actively authenticated. If last authentication time is more
+ * than maxAge seconds in the past, re-authentication will be required. See the OpenID Connect
+ * spec section 3.1.2.1 for more information
+ * @property {string} [locale] - Optional parameter to overwrite client locale setting.
+ * New flows supports nb_NO, fi_FI, sv_SE, en_US
+ * @property {boolean} [oneStepLogin] - display username and password on one screen
+ */
+
+/**
+ * @typedef {object} HasSessionSuccessResponse
  * @property {boolean} result - Is the user connected to the merchant? (it means that the merchant
  * id is in the list of merchants listed of this user in the database)? Example: false
  * @property {string} userStatus - Example: 'notConnected' or 'connected'. Deprecated, use
@@ -49,7 +83,7 @@ const { version } = require('../package.json');
  */
 
 /**
- * @typedef {object} Identity#HasSessionFailureResponse
+ * @typedef {object} HasSessionFailureResponse
  * @property {object} error
  * @property {number} error.code - Typically an HTTP response code. Example: 401
  * @property {string} error.description - Example: "No session found!"
@@ -62,7 +96,7 @@ const { version } = require('../package.json');
  */
 
 /**
- * @typedef {object} Identity#SimplifiedLoginData
+ * @typedef {object} SimplifiedLoginData
  * @property {string} identifier - Deprecated: User UUID, to be be used as `loginHint` for {@link Identity#login}
  * @property {string} display_text - Human-readable user identifier
  * @property {string} client_name - Client name
@@ -398,7 +432,7 @@ export class Identity extends EventEmitter {
      * @fires Identity#sessionInit
      * @fires Identity#statusChange
      * @fires Identity#error
-     * @return {Promise<Identity#HasSessionSuccessResponse|Identity#HasSessionFailureResponse>}
+     * @return {Promise<HasSessionSuccessResponse|HasSessionFailureResponse>}
      */
     hasSession() {
         if (this._hasSessionInProgress) {
@@ -455,10 +489,11 @@ export class Identity extends EventEmitter {
     }
 
     /**
+     * @async
      * @summary Allows the client app to check if the user is logged in to Schibsted account
      * @description This function calls {@link Identity#hasSession} internally and thus has the side
      * effect that it might perform an auto-login on the user
-     * @return {boolean}
+     * @return {Promise<boolean>}
      */
     async isLoggedIn() {
         try {
@@ -478,13 +513,14 @@ export class Identity extends EventEmitter {
     }
 
     /**
+     * @async
      * @summary Allows the caller to check if the current user is connected to the client_id in
      * Schibsted account. Being connected means that the user has agreed for their account to be
      * used by your web app and have accepted the required terms
      * @description This function calls {@link Identity#hasSession} internally and thus has the side
      * effect that it might perform an auto-login on the user
      * @summary Check if the user is connected to the client_id
-     * @return {boolean}
+     * @return {Promise<boolean>}
      */
     async isConnected() {
         try {
@@ -498,12 +534,13 @@ export class Identity extends EventEmitter {
     }
 
     /**
+     * @async
      * @summary Returns information about the user
      * @description This function calls {@link Identity#hasSession} internally and thus has the side
      * effect that it might perform an auto-login on the user
      * @throws {SDKError} If the user isn't connected to the merchant
      * @throws {SDKError} If we couldn't get the user
-     * @return {HasSessionSuccessResponse}
+     * @return {Promise<HasSessionSuccessResponse>}
      */
     async getUser() {
         const user = await this.hasSession();
@@ -514,6 +551,7 @@ export class Identity extends EventEmitter {
     }
 
     /**
+     * @async
      * @summary In Schibsted account, there are two ways of identifying a user; the `userId` and the
      * `uuid`. There are reasons for them both existing. The `userId` is a numeric identifier, but
      * since Schibsted account is deployed separately in Norway and Sweden, there are a lot of
@@ -523,7 +561,7 @@ export class Identity extends EventEmitter {
      * @description This function calls {@link Identity#hasSession} internally and thus has the side
      * effect that it might perform an auto-login on the user
      * @throws {SDKError} If the user isn't connected to the merchant
-     * @return {string} The `userId` field (not to be confused with the `uuid`)
+     * @return {Promise<string>} The `userId` field (not to be confused with the `uuid`)
      */
     async getUserId() {
         const user = await this.hasSession();
@@ -534,6 +572,7 @@ export class Identity extends EventEmitter {
     }
 
     /**
+     * @async
      * @summary In Schibsted account, there are two ways of identifying a user; the `userId` and the
      * `uuid`. There are reasons for them both existing. The `userId` is a numeric identifier, but
      * since Schibsted account is deployed separately in Norway and Sweden, there are a lot of
@@ -543,7 +582,7 @@ export class Identity extends EventEmitter {
      * @description This function calls {@link Identity#hasSession} internally and thus has the side
      * effect that it might perform an auto-login on the user
      * @throws {SDKError} If the user isn't connected to the merchant
-     * @return {string} The `uuid` field (not to be confused with the `userId`)
+     * @return {Promise<string>} The `uuid` field (not to be confused with the `userId`)
      */
     async getUserUuid() {
         const user = await this.hasSession();
@@ -554,13 +593,14 @@ export class Identity extends EventEmitter {
     }
 
     /**
+     * @async
      * @summary Get basic information about any user currently logged-in to their Schibsted account
      * in this browser. Can be used to provide context in a continue-as prompt.
      * @description This function relies on the global Schibsted account user session cookie, which
      * is a third-party cookie and hence might be blocked by the browser (for example due to ITP in
      * Safari). So there's no guarantee any data is returned, even though a user is logged-in in
      * the current browser.
-     * @return {Identity#SimplifiedLoginData|null}
+     * @return {Promise<SimplifiedLoginData|null>}
      */
     async getUserContextData() {
         try {
@@ -569,7 +609,6 @@ export class Identity extends EventEmitter {
             return null;
         }
     }
-
     /**
      * If a popup is desired, this function needs to be called in response to a user event (like
      * click or tap) in order to work correctly. Otherwise the popup will be blocked by the
@@ -577,37 +616,18 @@ export class Identity extends EventEmitter {
      * @summary Perform a login, either using a full-page redirect or a popup
      * @see https://tools.ietf.org/html/rfc6749#section-4.1.1
      *
-     * @param {object} options
-     * @param {string} options.state - An opaque value used by the client to maintain state between
-     * the request and callback. It's also recommended to prevent CSRF {@link https://tools.ietf.org/html/rfc6749#section-10.12}
-     * @param {string} [options.acrValues] - Authentication Context Class Reference Values. If
-     * omitted, the user will be asked to authenticate using username+password.
-     * For 2FA (Two-Factor Authentication) possible values are `sms`, `otp` (one time password) and
-     * `password` (will force password confirmation, even if user is already logged in). Those values might
-     * be mixed as space-separated string. To make sure that user has authenticated with 2FA you need
-     * to verify AMR (Authentication Methods References) claim in ID token.
-     * Might also be used to ensure additional acr (sms, otp) for already logged in users.
-     * Supported values are also 'otp-email' means one time password using email, and 'otp-sms' means
-     * one time password using sms.
-     * @param {string} [options.scope=openid] - The OAuth scopes for the tokens. This is a list of
-     * scopes, separated by space. If the list of scopes contains `openid`, the generated tokens
-     * includes the id token which can be useful for getting information about the user. Omitting
-     * scope is allowed, while `invalid_scope` is returned when the client asks for a scope you
-     * aren’t allowed to request. {@link https://tools.ietf.org/html/rfc6749#section-3.3}
-     * @param {string} [options.redirectUri] - Redirect uri that will receive the
-     * code. Must exactly match a redirectUri from your client in self-service
-     * @param {boolean} [options.preferPopup=false] - Should we try to open a popup window?
-     * @param {string} [options.loginHint] - user email or UUID hint
-     * @param {string} [options.tag] - Pulse tag
-     * @param {string} [options.teaser] - Teaser slug. Teaser with given slug will be displayed
-     * in place of default teaser
-     * @param {number|string} [options.maxAge] - Specifies the allowable elapsed time in seconds since
-     * the last time the End-User was actively authenticated. If last authentication time is more
-     * than maxAge seconds in the past, re-authentication will be required. See the OpenID Connect
-     * spec section 3.1.2.1 for more information
-     * @param {string} [options.locale] - Optional parameter to overwrite client locale setting.
-     * New flows supports nb_NO, fi_FI, sv_SE, en_US
-     * @param {boolean} [options.oneStepLogin=false] - display username and password on one screen
+     * @param {LoginOptions} options
+     * @param {string} options.state
+     * @param {string} [options.acrValues] 
+     * @param {string} [options.scope=openid]
+     * @param {string} [options.redirectUri] 
+     * @param {boolean} [options.preferPopup=false]
+     * @param {string} [options.loginHint]
+     * @param {string} [options.tag] 
+     * @param {string} [options.teaser] 
+     * @param {number|string} [options.maxAge]
+     * @param {string} [options.locale]
+     * @param {boolean} [options.oneStepLogin=false]
      * @return {Window|null} - Reference to popup window if created (or `null` otherwise)
      */
     login({
@@ -640,10 +660,11 @@ export class Identity extends EventEmitter {
     }
 
     /**
+     * @async
      * @summary Retrieve the sp_id (Varnish ID)
      * @description This function calls {@link Identity#hasSession} internally and thus has the side
      * effect that it might perform an auto-login on the user
-     * @return {string|null} - The sp_id string or null (if the server didn't return it)
+     * @return {Promise<string|null>} - The sp_id string or null (if the server didn't return it)
      */
     async getSpId() {
         try {
@@ -669,36 +690,17 @@ export class Identity extends EventEmitter {
 
     /**
      * Generates the link to the new login page that'll be used in the popup or redirect flow
-     * @param {object} options
-     * @param {string} options.state - An opaque value used by the client to maintain state between
-     * the request and callback. It's also recommended to prevent CSRF {@link https://tools.ietf.org/html/rfc6749#section-10.12}
-     * @param {string} [options.acrValues] - Authentication Context Class Reference Values. If
-     * omitted, the user will be asked to authenticate using username+password.
-     * For 2FA (Two-Factor Authentication) possible values are `sms`, `otp` (one time password) and
-     * `password` (will force password confirmation, even if user is already logged in). Those values might
-     * be mixed as space-separated string. To make sure that user has authenticated with 2FA you need
-     * to verify AMR (Authentication Methods References) claim in ID token.
-     * Might also be used to ensure additional acr (sms, otp) for already logged in users.
-     * Supported values are also 'otp-email' means one time password using email, and 'otp-sms' means
-     * one time password using sms.
-     * @param {string} [options.scope=openid] - The OAuth scopes for the tokens. This is a list of
-     * scopes, separated by space. If the list of scopes contains `openid`, the generated tokens
-     * includes the id token which can be useful for getting information about the user. Omitting
-     * scope is allowed, while `invalid_scope` is returned when the client asks for a scope you
-     * aren’t allowed to request. {@link https://tools.ietf.org/html/rfc6749#section-3.3}
-     * @param {string} [options.redirectUri] - Redirect uri that will receive the
-     * code. Must exactly match a redirectUri from your client in self-service
-     * @param {string} [options.loginHint] - user email or UUID hint
-     * @param {string} [options.tag] - Pulse tag
-     * @param {string} [options.teaser] - Teaser slug. Teaser with given slug will be displayed
-     * in place of default teaser
-     * @param {number|string} [options.maxAge] - Specifies the allowable elapsed time in seconds since
-     * the last time the End-User was actively authenticated. If last authentication time is more
-     * than maxAge seconds in the past, re-authentication will be required. See the OpenID Connect
-     * spec section 3.1.2.1 for more information
-     * @param {string} [options.locale] - Optional parameter to overwrite client locale setting.
-     * New flows supports nb_NO, fi_FI, sv_SE, en_US
-     * @param {boolean} [options.oneStepLogin=false] - display username and password on one screen
+     * @param {LoginOptions} options
+     * @param {string} options.state
+     * @param {string} [options.acrValues]
+     * @param {string} [options.scope=openid]
+     * @param {string} [options.redirectUri]
+     * @param {string} [options.loginHint]
+     * @param {string} [options.tag] 
+     * @param {string} [options.teaser]
+     * @param {number|string} [options.maxAge]
+     * @param {string} [options.locale]
+     * @param {boolean} [options.oneStepLogin=false]
      * @return {string} - The url
      */
     loginUrl({
@@ -788,7 +790,8 @@ export class Identity extends EventEmitter {
      * widget will be display is up to you. Preferred way would be to show it once per user,
      * and store that info in localStorage. Widget will be display only if user is logged in to SSO.
      *
-     * @param {object} loginParams - the same as `options` param for login function. Login will be called on user
+     * @async
+     * @param {LoginOptions} loginParams - the same as `options` param for login function. Login will be called on user
      * continue action. `state` might be string or async function.
      * @return {Promise<boolean|SDKError>} - will resolve to true if widget will be display. Otherwise will throw SDKError
      */
