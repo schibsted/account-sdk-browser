@@ -225,52 +225,21 @@ export class Identity {
      * @summary Perform a login, either using a full-page redirect or a popup
      * @see https://tools.ietf.org/html/rfc6749#section-4.1.1
      *
-     * @param {object} options
-     * @param {string} options.state - An opaque value used by the client to maintain state between
-     * the request and callback. It's also recommended to prevent CSRF {@link https://tools.ietf.org/html/rfc6749#section-10.12}
-     * @param {string} [options.acrValues] - Authentication Context Class Reference Values. If
-     * omitted, the user will be asked to authenticate using username+password.
-     * For 2FA (Two-Factor Authentication) possible values are `sms`, `otp` (one time password) and
-     * `password` (will force password confirmation, even if user is already logged in). Those values might
-     * be mixed as space-separated string. To make sure that user has authenticated with 2FA you need
-     * to verify AMR (Authentication Methods References) claim in ID token.
-     * Might also be used to ensure additional acr (sms, otp) for already logged in users.
-     * Supported values are also 'otp-email' means one time password using email, and 'otp-sms' means
-     * one time password using sms.
-     * @param {string} [options.scope=openid] - The OAuth scopes for the tokens. This is a list of
-     * scopes, separated by space. If the list of scopes contains `openid`, the generated tokens
-     * includes the id token which can be useful for getting information about the user. Omitting
-     * scope is allowed, while `invalid_scope` is returned when the client asks for a scope you
-     * aren’t allowed to request. {@link https://tools.ietf.org/html/rfc6749#section-3.3}
-     * @param {string} [options.redirectUri] - Redirect uri that will receive the
-     * code. Must exactly match a redirectUri from your client in self-service
-     * @param {boolean} [options.preferPopup=false] - Should we try to open a popup window?
-     * @param {string} [options.loginHint] - user email or UUID hint
-     * @param {string} [options.tag] - Pulse tag
-     * @param {string} [options.teaser] - Teaser slug. Teaser with given slug will be displayed
-     * in place of default teaser
-     * @param {number|string} [options.maxAge] - Specifies the allowable elapsed time in seconds since
-     * the last time the End-User was actively authenticated. If last authentication time is more
-     * than maxAge seconds in the past, re-authentication will be required. See the OpenID Connect
-     * spec section 3.1.2.1 for more information
-     * @param {string} [options.locale] - Optional parameter to overwrite client locale setting.
-     * New flows supports nb_NO, fi_FI, sv_SE, en_US
-     * @param {boolean} [options.oneStepLogin=false] - display username and password on one screen
+     * @param {LoginOptions} options
+     * @param {string} options.state
+     * @param {string} [options.acrValues]
+     * @param {string} [options.scope=openid]
+     * @param {string} [options.redirectUri]
+     * @param {boolean} [options.preferPopup=false]
+     * @param {string} [options.loginHint]
+     * @param {string} [options.tag]
+     * @param {string} [options.teaser]
+     * @param {number|string} [options.maxAge]
+     * @param {string} [options.locale]
+     * @param {boolean} [options.oneStepLogin=false]
      * @return {Window|null} - Reference to popup window if created (or `null` otherwise)
      */
-    login({ state, acrValues, scope, redirectUri, preferPopup, loginHint, tag, teaser, maxAge, locale, oneStepLogin }: {
-        state: string;
-        acrValues?: string;
-        scope?: string;
-        redirectUri?: string;
-        preferPopup?: boolean;
-        loginHint?: string;
-        tag?: string;
-        teaser?: string;
-        maxAge?: string | number;
-        locale?: string;
-        oneStepLogin?: boolean;
-    }): Window;
+    login({ state, acrValues, scope, redirectUri, preferPopup, loginHint, tag, teaser, maxAge, locale, oneStepLogin }: LoginOptions): Window;
     /**
      * @async
      * @summary Retrieve the sp_id (Varnish ID)
@@ -288,50 +257,20 @@ export class Identity {
     logout(redirectUri?: string): void;
     /**
      * Generates the link to the new login page that'll be used in the popup or redirect flow
-     * @param {object} options
-     * @param {string} options.state - An opaque value used by the client to maintain state between
-     * the request and callback. It's also recommended to prevent CSRF {@link https://tools.ietf.org/html/rfc6749#section-10.12}
-     * @param {string} [options.acrValues] - Authentication Context Class Reference Values. If
-     * omitted, the user will be asked to authenticate using username+password.
-     * For 2FA (Two-Factor Authentication) possible values are `sms`, `otp` (one time password) and
-     * `password` (will force password confirmation, even if user is already logged in). Those values might
-     * be mixed as space-separated string. To make sure that user has authenticated with 2FA you need
-     * to verify AMR (Authentication Methods References) claim in ID token.
-     * Might also be used to ensure additional acr (sms, otp) for already logged in users.
-     * Supported values are also 'otp-email' means one time password using email, and 'otp-sms' means
-     * one time password using sms.
-     * @param {string} [options.scope=openid] - The OAuth scopes for the tokens. This is a list of
-     * scopes, separated by space. If the list of scopes contains `openid`, the generated tokens
-     * includes the id token which can be useful for getting information about the user. Omitting
-     * scope is allowed, while `invalid_scope` is returned when the client asks for a scope you
-     * aren’t allowed to request. {@link https://tools.ietf.org/html/rfc6749#section-3.3}
-     * @param {string} [options.redirectUri] - Redirect uri that will receive the
-     * code. Must exactly match a redirectUri from your client in self-service
-     * @param {string} [options.loginHint] - user email or UUID hint
-     * @param {string} [options.tag] - Pulse tag
-     * @param {string} [options.teaser] - Teaser slug. Teaser with given slug will be displayed
-     * in place of default teaser
-     * @param {number|string} [options.maxAge] - Specifies the allowable elapsed time in seconds since
-     * the last time the End-User was actively authenticated. If last authentication time is more
-     * than maxAge seconds in the past, re-authentication will be required. See the OpenID Connect
-     * spec section 3.1.2.1 for more information
-     * @param {string} [options.locale] - Optional parameter to overwrite client locale setting.
-     * New flows supports nb_NO, fi_FI, sv_SE, en_US
-     * @param {boolean} [options.oneStepLogin=false] - display username and password on one screen
+     * @param {LoginOptions} options
+     * @param {string} options.state
+     * @param {string} [options.acrValues]
+     * @param {string} [options.scope=openid]
+     * @param {string} [options.redirectUri]
+     * @param {string} [options.loginHint]
+     * @param {string} [options.tag]
+     * @param {string} [options.teaser]
+     * @param {number|string} [options.maxAge]
+     * @param {string} [options.locale]
+     * @param {boolean} [options.oneStepLogin=false]
      * @return {string} - The url
      */
-    loginUrl({ state, acrValues, scope, redirectUri, loginHint, tag, teaser, maxAge, locale, oneStepLogin }: {
-        state: string;
-        acrValues?: string;
-        scope?: string;
-        redirectUri?: string;
-        loginHint?: string;
-        tag?: string;
-        teaser?: string;
-        maxAge?: string | number;
-        locale?: string;
-        oneStepLogin?: boolean;
-    }, ...args: any[]): string;
+    loginUrl({ state, acrValues, scope, redirectUri, loginHint, tag, teaser, maxAge, locale, oneStepLogin }: LoginOptions, ...args: any[]): string;
     /**
      * The url for logging the user out
      * @param {string} [redirectUri=this.redirectUri]
@@ -356,13 +295,78 @@ export class Identity {
      * and store that info in localStorage. Widget will be display only if user is logged in to SSO.
      *
      * @async
-     * @param {object} loginParams - the same as `options` param for login function. Login will be called on user
+     * @param {LoginOptions} loginParams - the same as `options` param for login function. Login will be called on user
      * continue action. `state` might be string or async function.
      * @return {Promise<boolean|SDKError>} - will resolve to true if widget will be display. Otherwise will throw SDKError
      */
-    showSimplifiedLoginWidget(loginParams: any): Promise<boolean | SDKError>;
+    showSimplifiedLoginWidget(loginParams: LoginOptions): Promise<boolean | SDKError>;
 }
 export default Identity;
+export type LoginOptions = {
+    /**
+     * - An opaque value used by the client to maintain state between
+     * the request and callback. It's also recommended to prevent CSRF {@link https://tools.ietf.org/html/rfc6749#section-10.12}
+     */
+    state: string;
+    /**
+     * - Authentication Context Class Reference Values. If
+     * omitted, the user will be asked to authenticate using username+password.
+     * For 2FA (Two-Factor Authentication) possible values are `sms`, `otp` (one time password) and
+     * `password` (will force password confirmation, even if user is already logged in). Those values might
+     * be mixed as space-separated string. To make sure that user has authenticated with 2FA you need
+     * to verify AMR (Authentication Methods References) claim in ID token.
+     * Might also be used to ensure additional acr (sms, otp) for already logged in users.
+     * Supported values are also 'otp-email' means one time password using email, and 'otp-sms' means
+     * one time password using sms.
+     */
+    acrValues?: string;
+    /**
+     * - The OAuth scopes for the tokens. This is a list of
+     * scopes, separated by space. If the list of scopes contains `openid`, the generated tokens
+     * includes the id token which can be useful for getting information about the user. Omitting
+     * scope is allowed, while `invalid_scope` is returned when the client asks for a scope you
+     * aren’t allowed to request. {@link https://tools.ietf.org/html/rfc6749#section-3.3}
+     */
+    scope?: string;
+    /**
+     * - Redirect uri that will receive the
+     * code. Must exactly match a redirectUri from your client in self-service
+     */
+    redirectUri?: string;
+    /**
+     * - Should we try to open a popup window?
+     */
+    preferPopup?: boolean;
+    /**
+     * - user email or UUID hint
+     */
+    loginHint?: string;
+    /**
+     * - Pulse tag
+     */
+    tag?: string;
+    /**
+     * - Teaser slug. Teaser with given slug will be displayed
+     * in place of default teaser
+     */
+    teaser?: string;
+    /**
+     * - Specifies the allowable elapsed time in seconds since
+     * the last time the End-User was actively authenticated. If last authentication time is more
+     * than maxAge seconds in the past, re-authentication will be required. See the OpenID Connect
+     * spec section 3.1.2.1 for more information
+     */
+    maxAge?: string | number;
+    /**
+     * - Optional parameter to overwrite client locale setting.
+     * New flows supports nb_NO, fi_FI, sv_SE, en_US
+     */
+    locale?: string;
+    /**
+     * - display username and password on one screen
+     */
+    oneStepLogin?: boolean;
+};
 export type HasSessionSuccessResponse = {
     /**
      * - Is the user connected to the merchant? (it means that the merchant
