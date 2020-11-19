@@ -1,1 +1,1 @@
-export { default, Identity } from "./src/identity.js";
+export * from "./src/identity.js";

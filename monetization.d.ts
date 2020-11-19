@@ -1,1 +1,1 @@
-export { default, Monetization } from "./src/monetization.js";
+export * from "./src/monetization.js";
