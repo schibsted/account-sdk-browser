@@ -798,6 +798,28 @@ describe('Identity', () => {
             expect(window.openSimplifiedLoginWidget).toHaveBeenCalledTimes(2);
         });
 
+        test('Should works with loginNotYouHandler', async () => {
+            identity._globalSessionService.fetch = jest.fn(() => ({ ok: true, json: () => expectedData }));
+            identity.login = jest.fn();
+            document.getElementsByTagName('body')[0].appendChild = jest.fn((el) => {
+                window.openSimplifiedLoginWidget = jest.fn(async (initialParams, loginHandler, loginNotYouhandler) => {
+
+                    await loginNotYouhandler();
+                    expect(identity.login).toHaveBeenCalledWith({
+                        state,
+                        loginHint: expectedData.identifier,
+                        prompt: 'login'
+                    });
+
+                    return true;
+                });
+
+                el.onload();
+            });
+
+            expect(await identity.showSimplifiedLoginWidget({ state })).toEqual(true);
+        });
+
         test('Should call state function on login action', async () => {
             const stateFn = jest.fn(() => state);
             identity._globalSessionService.fetch = jest.fn(() => ({ ok: true, json: () => expectedData }));
