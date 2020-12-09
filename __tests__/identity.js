@@ -832,6 +832,7 @@ describe('Identity', () => {
                     expect(stateFn).toHaveBeenCalled();
                     expect(identity.login).toHaveBeenCalledWith({
                         state,
+                        prompt: 'login',
                         loginHint: expectedData.identifier
                     });
 
