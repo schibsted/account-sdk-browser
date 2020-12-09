@@ -762,7 +762,7 @@ export class Identity extends EventEmitter {
             max_age: maxAge,
             locale,
             one_step_login: oneStepLogin || '',
-            prompt: prompt ? prompt : !acrValues ? 'select_account' : ''
+            prompt: prompt || !acrValues ? 'select_account' : ''
         });
     }
 
