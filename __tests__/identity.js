@@ -802,9 +802,9 @@ describe('Identity', () => {
             identity._globalSessionService.fetch = jest.fn(() => ({ ok: true, json: () => expectedData }));
             identity.login = jest.fn();
             document.getElementsByTagName('body')[0].appendChild = jest.fn((el) => {
-                window.openSimplifiedLoginWidget = jest.fn(async (initialParams, loginHandler, loginNotYouhandler) => {
+                window.openSimplifiedLoginWidget = jest.fn(async (initialParams, loginHandler, loginNotYouHandler) => {
 
-                    await loginNotYouhandler();
+                    await loginNotYouHandler();
                     expect(identity.login).toHaveBeenCalledWith({
                         state,
                         loginHint: expectedData.identifier,
@@ -818,6 +818,32 @@ describe('Identity', () => {
             });
 
             expect(await identity.showSimplifiedLoginWidget({ state })).toEqual(true);
+        });
+
+        test('Should call state function on login not you action', async () => {
+            const stateFn = jest.fn(() => state);
+            identity._globalSessionService.fetch = jest.fn(() => ({ ok: true, json: () => expectedData }));
+            identity.login = jest.fn();
+            document.getElementsByTagName('body')[0].appendChild = jest.fn((el) => {
+                window.openSimplifiedLoginWidget = jest.fn(async (initialParams, loginHandler, loginNotYouHandler) => {
+
+                    expect(stateFn).not.toHaveBeenCalled();
+                    await loginNotYouHandler();
+                    expect(stateFn).toHaveBeenCalled();
+                    expect(identity.login).toHaveBeenCalledWith({
+                        state,
+                        loginHint: expectedData.identifier
+                    });
+
+                    return true;
+                });
+
+                el.onload();
+            });
+
+            expect(await identity.showSimplifiedLoginWidget({ state: stateFn })).toEqual(true);
+            expect(document.getElementsByTagName('body')[0].appendChild).toHaveBeenCalledTimes(1);
+            expect(window.openSimplifiedLoginWidget).toHaveBeenCalledTimes(1);
         });
 
         test('Should call state function on login action', async () => {
