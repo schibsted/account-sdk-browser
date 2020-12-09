@@ -48,6 +48,7 @@ const { version } = require('../package.json');
  * @property {string} [locale] - Optional parameter to overwrite client locale setting.
  * New flows supports nb_NO, fi_FI, sv_SE, en_US
  * @property {boolean} [oneStepLogin] - display username and password on one screen
+ *  * @property {string} [prompt] - prompt value
  */
 
 /**
