@@ -7,6 +7,7 @@
 import { assert, isStr, isNonEmptyString, isObject, isUrl, isStrIn } from './validate';
 import { cloneDeep } from './object';
 import { urlMapper } from './url';
+import { prepareLoginParams } from './prepareLoginParams'
 import { ENDPOINTS, NAMESPACE } from './config';
 import EventEmitter from 'tiny-emitter';
 import Cache from './cache';
@@ -836,17 +837,11 @@ export class Identity extends EventEmitter {
                 };
 
                 const loginHandler = async () => {
-                    if (typeof loginParams.state === 'function') {
-                        loginParams.state = await loginParams.state();
-                    }
-                    this.login(Object.assign(loginParams, {loginHint: userData.identifier}));
+                    this.login(Object.assign(await prepareLoginParams(loginParams), {loginHint: userData.identifier}));
                 };
 
                 const loginNotYouHandler = async () => {
-                    if (typeof loginParams.state === 'function') {
-                        loginParams.state = await loginParams.state();
-                    }
-                    this.login(Object.assign(loginParams, {loginHint: userData.identifier, prompt: 'login'}));
+                    this.login(Object.assign(await prepareLoginParams(loginParams), {loginHint: userData.identifier, prompt: 'login'}));
                 };
 
                 if (window.openSimplifiedLoginWidget) {
