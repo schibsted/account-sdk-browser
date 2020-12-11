@@ -730,7 +730,7 @@ export class Identity extends EventEmitter {
         maxAge = '',
         locale = '',
         oneStepLogin = false,
-        prompt,
+        prompt = 'select_account',
     }) {
         if (typeof arguments[0] !== 'object') {
             // backward compatibility
@@ -763,7 +763,7 @@ export class Identity extends EventEmitter {
             max_age: maxAge,
             locale,
             one_step_login: oneStepLogin || '',
-            prompt: prompt ? prompt : !acrValues ? 'select_account' : ''
+            prompt: acrValues ? '' : prompt
         });
     }
 
