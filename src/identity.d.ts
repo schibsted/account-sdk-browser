@@ -370,7 +370,7 @@ export type LoginOptions = {
     oneStepLogin?: boolean;
     /**
      * - String that specifies whether the Authorization Server prompts the
-     * End-User for reauthentication and consent. Supported values: select_account or login
+     * End-User for reauthentication or confirm account screen. Supported values: `select_account` or `login`
      */
     prompt?: string;
 };
