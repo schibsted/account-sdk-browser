@@ -630,7 +630,7 @@ export class Identity extends EventEmitter {
      * @param {number|string} [options.maxAge]
      * @param {string} [options.locale]
      * @param {boolean} [options.oneStepLogin=false]
-     * @param {string} [options.prompt]
+     * @param {string} [options.prompt=select_account]
      * @return {Window|null} - Reference to popup window if created (or `null` otherwise)
      */
     login({
@@ -645,7 +645,7 @@ export class Identity extends EventEmitter {
         maxAge = '',
         locale = '',
         oneStepLogin = false,
-        prompt
+        prompt = 'select_account'
     }) {
         this._closePopup();
         this.cache.delete(HAS_SESSION_CACHE_KEY);
@@ -716,7 +716,7 @@ export class Identity extends EventEmitter {
      * @param {number|string} [options.maxAge]
      * @param {string} [options.locale]
      * @param {boolean} [options.oneStepLogin=false]
-     * @param {string} [options.prompt]
+     * @param {string} [options.prompt=select_account]
      * @return {string} - The url
      */
     loginUrl({
