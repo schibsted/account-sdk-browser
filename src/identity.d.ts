@@ -17,14 +17,14 @@ export class Identity {
         clientId: string;
         sessionDomain: string;
         redirectUri: string;
-        env: string;
-        log: Function;
-        window: object;
+        env?: string;
+        log?: Function;
+        window?: any;
     });
     _sessionInitiatedSent: boolean;
     window: any;
     clientId: string;
-    cache: Cache;
+    cache: any;
     redirectUri: string;
     env: string;
     log: Function;
@@ -96,8 +96,8 @@ export class Identity {
      * @returns {void}
      */
     enableVarnishCookie(options?: {
-        expiresIn: number;
-        domain: boolean;
+        expiresIn?: number;
+        domain?: boolean;
     }): void;
     setVarnishCookie: boolean;
     varnishExpiresIn: number;
@@ -144,7 +144,7 @@ export class Identity {
      * @return {Promise<HasSessionSuccessResponse|HasSessionFailureResponse>}
      */
     hasSession(): Promise<HasSessionSuccessResponse | HasSessionFailureResponse>;
-    _hasSessionInProgress: any;
+    _hasSessionInProgress: boolean | Promise<any>;
     /**
      * @async
      * @summary Allows the client app to check if the user is logged in to Schibsted account
@@ -240,7 +240,7 @@ export class Identity {
      * @param {string} [options.prompt]
      * @return {Window|null} - Reference to popup window if created (or `null` otherwise)
      */
-    login({ state, acrValues, scope, redirectUri, preferPopup, loginHint, tag, teaser, maxAge, locale, oneStepLogin, prompt }: LoginOptions): Window | null;
+    login({ state, acrValues, scope, redirectUri, preferPopup, loginHint, tag, teaser, maxAge, locale, oneStepLogin, prompt }: LoginOptions): Window;
     /**
      * @async
      * @summary Retrieve the sp_id (Varnish ID)
@@ -358,7 +358,7 @@ export type LoginOptions = {
      * than maxAge seconds in the past, re-authentication will be required. See the OpenID Connect
      * spec section 3.1.2.1 for more information
      */
-    maxAge?: number | string;
+    maxAge?: string | number;
     /**
      * - Optional parameter to overwrite client locale setting.
      * New flows supports nb_NO, fi_FI, sv_SE, en_US
@@ -366,11 +366,11 @@ export type LoginOptions = {
     locale?: string;
     /**
      * - display username and password on one screen
-     * *
      */
     oneStepLogin?: boolean;
     /**
-     * - prompt value
+     * - String that specifies whether the Authorization Server prompts the
+     * End-User for reauthentication and consent. Supported values: select_account or login
      */
     prompt?: string;
 };
@@ -455,14 +455,32 @@ export type HasSessionSuccessResponse = {
 };
 export type HasSessionFailureResponse = {
     error: {
+        /**
+         * - Typically an HTTP response code. Example: 401
+         */
         code: number;
+        /**
+         * - Example: "No session found!"
+         */
         description: string;
+        /**
+         * - Example: "UserException"
+         */
         type: string;
     };
     response: {
+        /**
+         * - Example: "localhost"
+         */
         baseDomain: string;
+        /**
+         * - Time span in milliseconds. Example: 30 * 60 * 1000 (for 30 minutes)
+         */
         expiresIn: number;
         result: boolean;
+        /**
+         * - Server time in seconds since the Unix Epoch. Example: 1506287788
+         */
         serverTime: number;
     };
 };
@@ -480,6 +498,5 @@ export type SimplifiedLoginData = {
      */
     client_name: string;
 };
-import Cache from "./cache";
 import RESTClient from "./RESTClient";
 import SDKError from "./SDKError";
