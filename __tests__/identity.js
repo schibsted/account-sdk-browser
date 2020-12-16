@@ -117,6 +117,16 @@ describe('Identity', () => {
             expect(popup).toHaveProperty('fakePopup', 'yup');
             expect(oldPopup.close).toHaveBeenCalledTimes(0);
         });
+
+        test('Should return url with prompt query', () => {
+            const window = { location: {} };
+            const identity = new Identity(Object.assign({}, defaultOptions, { window }));
+            identity.login({ state: 'foo', prompt: 'login' });
+            compareUrls(
+                window.location.href,
+                'https://identity-pre.schibsted.com/oauth/authorize?client_id=foo&redirect_uri=http%3A%2F%2Ffoo.com&response_type=code&scope=openid&state=foo&prompt=login'
+            );
+        });
     });
 
     describe('logout()', () => {
@@ -180,6 +190,21 @@ describe('Identity', () => {
                 oneStepLogin: true
             }), 'https://login.schibsted.com/oauth/authorize?redirect_uri=http%3A%2F%2Ffoo.com&client_id=foo&state=dummy-state&response_type=code&scope=openid&login_hint=dev@spid.no&max_age=0&tag=sample-tag&teaser=sample-teaser-slug&locale=en_US&one_step_login=true&prompt=select_account');
         });
+
+        test('returns the expected endpoint for new flows with prompt=login', () => {
+            const identity = new Identity(Object.assign({}, defaultOptions, { env: 'PRO' }));
+            compareUrls(identity.loginUrl({
+                state: 'dummy-state',
+                loginHint: 'dev@spid.no',
+                tag: 'sample-tag',
+                teaser: 'sample-teaser-slug',
+                maxAge: 0,
+                locale: 'en_US',
+                oneStepLogin: true,
+                prompt: 'login'
+            }), 'https://login.schibsted.com/oauth/authorize?redirect_uri=http%3A%2F%2Ffoo.com&client_id=foo&state=dummy-state&response_type=code&scope=openid&login_hint=dev@spid.no&max_age=0&tag=sample-tag&teaser=sample-teaser-slug&locale=en_US&one_step_login=true&prompt=login');
+        });
+
 
         test('returns the expected endpoint for new flows with default params', () => {
             const identity = new Identity(Object.assign({}, defaultOptions, { env: 'PRO' }));
@@ -771,6 +796,55 @@ describe('Identity', () => {
             expect(await identity.showSimplifiedLoginWidget({ state })).toEqual(true);
             expect(document.getElementsByTagName('body')[0].appendChild).toHaveBeenCalledTimes(1);
             expect(window.openSimplifiedLoginWidget).toHaveBeenCalledTimes(2);
+        });
+
+        test('Should works with loginNotYouHandler', async () => {
+            identity._globalSessionService.fetch = jest.fn(() => ({ ok: true, json: () => expectedData }));
+            identity.login = jest.fn();
+            document.getElementsByTagName('body')[0].appendChild = jest.fn((el) => {
+                window.openSimplifiedLoginWidget = jest.fn(async (initialParams, loginHandler, loginNotYouHandler) => {
+
+                    await loginNotYouHandler();
+                    expect(identity.login).toHaveBeenCalledWith({
+                        state,
+                        loginHint: expectedData.identifier,
+                        prompt: 'login'
+                    });
+
+                    return true;
+                });
+
+                el.onload();
+            });
+
+            expect(await identity.showSimplifiedLoginWidget({ state })).toEqual(true);
+        });
+
+        test('Should call state function on login not you action', async () => {
+            const stateFn = jest.fn(() => state);
+            identity._globalSessionService.fetch = jest.fn(() => ({ ok: true, json: () => expectedData }));
+            identity.login = jest.fn();
+            document.getElementsByTagName('body')[0].appendChild = jest.fn((el) => {
+                window.openSimplifiedLoginWidget = jest.fn(async (initialParams, loginHandler, loginNotYouHandler) => {
+
+                    expect(stateFn).not.toHaveBeenCalled();
+                    await loginNotYouHandler();
+                    expect(stateFn).toHaveBeenCalled();
+                    expect(identity.login).toHaveBeenCalledWith({
+                        state,
+                        prompt: 'login',
+                        loginHint: expectedData.identifier
+                    });
+
+                    return true;
+                });
+
+                el.onload();
+            });
+
+            expect(await identity.showSimplifiedLoginWidget({ state: stateFn })).toEqual(true);
+            expect(document.getElementsByTagName('body')[0].appendChild).toHaveBeenCalledTimes(1);
+            expect(window.openSimplifiedLoginWidget).toHaveBeenCalledTimes(1);
         });
 
         test('Should call state function on login action', async () => {

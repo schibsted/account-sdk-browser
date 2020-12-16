@@ -217,7 +217,7 @@ export class Identity {
      * the current browser.
      * @return {Promise<SimplifiedLoginData|null>}
      */
-    getUserContextData(): Promise<SimplifiedLoginData>;
+    getUserContextData(): Promise<SimplifiedLoginData | null>;
     /**
      * If a popup is desired, this function needs to be called in response to a user event (like
      * click or tap) in order to work correctly. Otherwise the popup will be blocked by the
@@ -237,9 +237,10 @@ export class Identity {
      * @param {number|string} [options.maxAge]
      * @param {string} [options.locale]
      * @param {boolean} [options.oneStepLogin=false]
+     * @param {string} [options.prompt]
      * @return {Window|null} - Reference to popup window if created (or `null` otherwise)
      */
-    login({ state, acrValues, scope, redirectUri, preferPopup, loginHint, tag, teaser, maxAge, locale, oneStepLogin }: LoginOptions): Window;
+    login({ state, acrValues, scope, redirectUri, preferPopup, loginHint, tag, teaser, maxAge, locale, oneStepLogin, prompt }: LoginOptions): Window;
     /**
      * @async
      * @summary Retrieve the sp_id (Varnish ID)
@@ -247,7 +248,7 @@ export class Identity {
      * effect that it might perform an auto-login on the user
      * @return {Promise<string|null>} - The sp_id string or null (if the server didn't return it)
      */
-    getSpId(): Promise<string>;
+    getSpId(): Promise<string | null>;
     /**
      * @summary Logs the user out from the Identity platform
      * @param {string} redirectUri - Where to redirect the browser after logging out of Schibsted
@@ -268,9 +269,10 @@ export class Identity {
      * @param {number|string} [options.maxAge]
      * @param {string} [options.locale]
      * @param {boolean} [options.oneStepLogin=false]
+     * @param {string} [options.prompt]
      * @return {string} - The url
      */
-    loginUrl({ state, acrValues, scope, redirectUri, loginHint, tag, teaser, maxAge, locale, oneStepLogin }: LoginOptions, ...args: any[]): string;
+    loginUrl({ state, acrValues, scope, redirectUri, loginHint, tag, teaser, maxAge, locale, oneStepLogin, prompt, }: LoginOptions, ...args: any[]): string;
     /**
      * The url for logging the user out
      * @param {string} [redirectUri=this.redirectUri]
@@ -366,6 +368,11 @@ export type LoginOptions = {
      * - display username and password on one screen
      */
     oneStepLogin?: boolean;
+    /**
+     * - String that specifies whether the Authorization Server prompts the
+     * End-User for reauthentication or confirm account screen. Supported values: `select_account` or `login`
+     */
+    prompt?: string;
 };
 export type HasSessionSuccessResponse = {
     /**

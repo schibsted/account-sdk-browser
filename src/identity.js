@@ -48,6 +48,8 @@ const { version } = require('../package.json');
  * @property {string} [locale] - Optional parameter to overwrite client locale setting.
  * New flows supports nb_NO, fi_FI, sv_SE, en_US
  * @property {boolean} [oneStepLogin] - display username and password on one screen
+* @property {string} [prompt] - String that specifies whether the Authorization Server prompts the
+ * End-User for reauthentication or confirm account screen. Supported values: `select_account` or `login`
  */
 
 /**
@@ -64,7 +66,7 @@ const { version } = require('../package.json');
  * @property {number} expiresIn - Example: 30 * 60 * 1000 (for 30 minutes)
  * @property {number} serverTime - Example: 1506285759
  * @property {string} sig - Example: 'NCdzXaz4ZRb7...' The sig parameter is a concatenation of an
- * HMAC SHA-256 signature string, a dot (.) and a base64url encoded JSON object (session). 
+ * HMAC SHA-256 signature string, a dot (.) and a base64url encoded JSON object (session).
  * {@link http://techdocs.spid.no/sdks/js/response-signature-and-validation/}
  * @property {string} displayName - (Only for connected users) Example: 'batman'
  * @property {string} givenName - (Only for connected users) Example: 'Bruce'
@@ -618,16 +620,17 @@ export class Identity extends EventEmitter {
      *
      * @param {LoginOptions} options
      * @param {string} options.state
-     * @param {string} [options.acrValues] 
+     * @param {string} [options.acrValues]
      * @param {string} [options.scope=openid]
-     * @param {string} [options.redirectUri] 
+     * @param {string} [options.redirectUri]
      * @param {boolean} [options.preferPopup=false]
      * @param {string} [options.loginHint]
-     * @param {string} [options.tag] 
-     * @param {string} [options.teaser] 
+     * @param {string} [options.tag]
+     * @param {string} [options.teaser]
      * @param {number|string} [options.maxAge]
      * @param {string} [options.locale]
      * @param {boolean} [options.oneStepLogin=false]
+     * @param {string} [options.prompt=select_account]
      * @return {Window|null} - Reference to popup window if created (or `null` otherwise)
      */
     login({
@@ -641,12 +644,24 @@ export class Identity extends EventEmitter {
         teaser = '',
         maxAge = '',
         locale = '',
-        oneStepLogin = false
+        oneStepLogin = false,
+        prompt = 'select_account'
     }) {
         this._closePopup();
         this.cache.delete(HAS_SESSION_CACHE_KEY);
-        const url = this.loginUrl({ state, acrValues, scope, redirectUri, loginHint, tag,
-            teaser, maxAge, locale, oneStepLogin });
+        const url = this.loginUrl({
+            state,
+            acrValues,
+            scope,
+            redirectUri,
+            loginHint,
+            tag,
+            teaser,
+            maxAge,
+            locale,
+            oneStepLogin,
+            prompt
+        });
 
         if (preferPopup) {
             this.popup =
@@ -696,11 +711,12 @@ export class Identity extends EventEmitter {
      * @param {string} [options.scope=openid]
      * @param {string} [options.redirectUri]
      * @param {string} [options.loginHint]
-     * @param {string} [options.tag] 
+     * @param {string} [options.tag]
      * @param {string} [options.teaser]
      * @param {number|string} [options.maxAge]
      * @param {string} [options.locale]
      * @param {boolean} [options.oneStepLogin=false]
+     * @param {string} [options.prompt=select_account]
      * @return {string} - The url
      */
     loginUrl({
@@ -713,7 +729,8 @@ export class Identity extends EventEmitter {
         teaser = '',
         maxAge = '',
         locale = '',
-        oneStepLogin = false
+        oneStepLogin = false,
+        prompt = 'select_account',
     }) {
         if (typeof arguments[0] !== 'object') {
             // backward compatibility
@@ -746,7 +763,7 @@ export class Identity extends EventEmitter {
             max_age: maxAge,
             locale,
             one_step_login: oneStepLogin || '',
-            prompt: !acrValues ? 'select_account' : ''
+            prompt: acrValues ? '' : prompt
         });
     }
 
@@ -800,6 +817,15 @@ export class Identity extends EventEmitter {
         const userData = await this.getUserContextData();
         const widgetUrl = this._bffService.makeUrl('simplified-login-widget', { client_id: this.clientId }, false);
 
+        const prepareLoginParams = async (loginPrams) => {
+            if (typeof loginPrams.state === 'function') {
+                loginPrams.state = await loginPrams.state();
+            }
+
+            return loginPrams;
+        }
+
+
         return new Promise(
             (resolve, reject) => {
                 if (!userData || !userData.display_text || !userData.identifier) {
@@ -819,14 +845,15 @@ export class Identity extends EventEmitter {
                 };
 
                 const loginHandler = async () => {
-                    if (typeof loginParams.state === 'function') {
-                        loginParams.state = await loginParams.state();
-                    }
-                    this.login(Object.assign(loginParams, {loginHint: userData.identifier}));
+                    this.login(Object.assign(await prepareLoginParams(loginParams), {loginHint: userData.identifier}));
+                };
+
+                const loginNotYouHandler = async () => {
+                    this.login(Object.assign(await prepareLoginParams(loginParams), {loginHint: userData.identifier, prompt: 'login'}));
                 };
 
                 if (window.openSimplifiedLoginWidget) {
-                    window.openSimplifiedLoginWidget(initialParams, loginHandler);
+                    window.openSimplifiedLoginWidget(initialParams, loginHandler, loginNotYouHandler);
                     return resolve(true);
                 }
 
@@ -834,7 +861,7 @@ export class Identity extends EventEmitter {
                 simplifiedLoginWidget.type = "text/javascript";
                 simplifiedLoginWidget.src = widgetUrl;
                 simplifiedLoginWidget.onload = () => {
-                    window.openSimplifiedLoginWidget(initialParams, loginHandler);
+                    window.openSimplifiedLoginWidget(initialParams, loginHandler, loginNotYouHandler);
                     resolve(true);
                 };
                 simplifiedLoginWidget.onerror = () => {
