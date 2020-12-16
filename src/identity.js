@@ -7,7 +7,6 @@
 import { assert, isStr, isNonEmptyString, isObject, isUrl, isStrIn } from './validate';
 import { cloneDeep } from './object';
 import { urlMapper } from './url';
-import { prepareLoginParams } from './prepareLoginParams'
 import { ENDPOINTS, NAMESPACE } from './config';
 import EventEmitter from 'tiny-emitter';
 import Cache from './cache';
