@@ -49,7 +49,7 @@ const { version } = require('../package.json');
  * New flows supports nb_NO, fi_FI, sv_SE, en_US
  * @property {boolean} [oneStepLogin] - display username and password on one screen
 * @property {string} [prompt] - String that specifies whether the Authorization Server prompts the
- * End-User for reauthentication and consent. Supported values: select_account or login
+ * End-User for reauthentication or confirm account screen. Supported values: `select_account` or `login`
  */
 
 /**
