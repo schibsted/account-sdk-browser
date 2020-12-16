@@ -818,6 +818,15 @@ export class Identity extends EventEmitter {
         const userData = await this.getUserContextData();
         const widgetUrl = this._bffService.makeUrl('simplified-login-widget', { client_id: this.clientId }, false);
 
+        const prepareLoginParams = async (loginPrams) => {
+            if (typeof loginPrams.state === 'function') {
+                loginPrams.state = await loginPrams.state();
+            }
+
+            return loginPrams;
+        }
+
+
         return new Promise(
             (resolve, reject) => {
                 if (!userData || !userData.display_text || !userData.identifier) {
