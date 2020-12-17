@@ -1,5 +1,11 @@
 # Changelog
 
+## v4.3.0 (2020-12-16)
+
+## New features
+* Add `not you?` button to simplified login widget
+
+
 ## v4.2.1 (2020-18-11)
 
 ## Fixes
