@@ -3,8 +3,8 @@
 ## v4.3.0 (2020-12-16)
 
 ## New features
-* Add prompt param support in login function that could be `select_account` or `login`
-* Prepare callback function for `showSimplifiedLoginWidget` that fire login with `promp=login`
+* Add `not you?` button to simplified login widget
+
 
 ## v4.2.1 (2020-18-11)
 
