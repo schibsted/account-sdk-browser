@@ -240,7 +240,7 @@ import { Identity } from '@schibsted/account-sdk-browser'
 const identity = new Identity({
     clientId: '56e9a5d1eee0000000000000',
     redirectUri: 'https://awesomenews.site', // ensure it's listed in selfservice
-    env: 'PRE', // Schibsted account env. A url or a special key: 'PRE', 'PRO' or 'PRO_NO'
+    env: 'PRE', // Schibsted account env. A url or a special key: 'PRE', 'PRO', 'PRO_NO' or 'PRO_FI'
 })
 
 async function whenSiteLoaded() {
