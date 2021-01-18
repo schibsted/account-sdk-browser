@@ -92,12 +92,12 @@ export class Identity {
      * @param {object} [options]
      * @param {number} [options.expiresIn] Override this to set number of seconds before the varnish
      * cookie expires. The default is to use the same time that hasSession responses are cached for
-     * @param {boolean} [options.domain] Override cookie domain. E.g. «vg.no» instead of «www.vg.no»
+     * @param {string} [options.domain] Override cookie domain. E.g. «vg.no» instead of «www.vg.no»
      * @returns {void}
      */
     enableVarnishCookie(options?: {
         expiresIn?: number;
-        domain?: boolean;
+        domain?: string;
     }): void;
     setVarnishCookie: boolean;
     varnishExpiresIn: number;
