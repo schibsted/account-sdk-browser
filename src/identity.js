@@ -810,12 +810,13 @@ export class Identity extends EventEmitter {
      * @async
      * @param {LoginOptions} loginParams - the same as `options` param for login function. Login will be called on user
      * continue action. `state` might be string or async function.
+     * @param {string} encoding - desired character encoding of simplified login widget
      * @return {Promise<boolean|SDKError>} - will resolve to true if widget will be display. Otherwise will throw SDKError
      */
-    async showSimplifiedLoginWidget(loginParams) {
+    async showSimplifiedLoginWidget(loginParams, encoding = 'utf-8') {
         // getUserContextData doens't throw exception
         const userData = await this.getUserContextData();
-        const widgetUrl = this._bffService.makeUrl('simplified-login-widget', { client_id: this.clientId }, false);
+        const widgetUrl = this._bffService.makeUrl('simplified-login-widget', { client_id: this.clientId, encoding }, false);
 
         const prepareLoginParams = async (loginPrams) => {
             if (typeof loginPrams.state === 'function') {

@@ -877,6 +877,41 @@ describe('Identity', () => {
             expect(document.getElementsByTagName('body')[0].appendChild).toHaveBeenCalledTimes(1);
             expect(window.openSimplifiedLoginWidget).toHaveBeenCalledTimes(1);
         });
+
+        test('Should open simplified login widget with utf-8 encoding by default', async () => {
+            const stateFn = jest.fn(() => state);
+            identity._globalSessionService.fetch = jest.fn(() => ({ ok: true, json: () => expectedData }));
+            identity.login = jest.fn();
+
+            document.getElementsByTagName('body')[0].appendChild = jest.fn((el) => {
+                window.openSimplifiedLoginWidget = jest.fn(() => true);
+
+                expect(el.src).toBe(`https://identity-pre.schibsted.com/authn/simplified-login-widget?client_id=${defaultOptions.clientId}&encoding=utf-8`);
+                el.onload();
+            });
+
+            expect(await identity.showSimplifiedLoginWidget({ state: stateFn })).toEqual(true);
+            expect(document.getElementsByTagName('body')[0].appendChild).toHaveBeenCalledTimes(1);
+            expect(window.openSimplifiedLoginWidget).toHaveBeenCalledTimes(1);
+        });
+
+        test('Should pass encoding param to simplified login widget script URL', async () => {
+            const stateFn = jest.fn(() => state);
+            const expectedEncoding = 'latin1';
+            identity._globalSessionService.fetch = jest.fn(() => ({ ok: true, json: () => expectedData }));
+            identity.login = jest.fn();
+
+            document.getElementsByTagName('body')[0].appendChild = jest.fn((el) => {
+                window.openSimplifiedLoginWidget = jest.fn(() => true);
+
+                expect(el.src).toBe(`https://identity-pre.schibsted.com/authn/simplified-login-widget?client_id=${defaultOptions.clientId}&encoding=${expectedEncoding}`);
+                el.onload();
+            });
+
+            expect(await identity.showSimplifiedLoginWidget({ state: stateFn }, expectedEncoding)).toEqual(true);
+            expect(document.getElementsByTagName('body')[0].appendChild).toHaveBeenCalledTimes(1);
+            expect(window.openSimplifiedLoginWidget).toHaveBeenCalledTimes(1);
+        });
     });
 
     describe('logSettings', () => {
