@@ -1,5 +1,10 @@
 # Changelog
 
+## v4.4.0 (2021-06-24)
+
+## New features
+* Added optional `options` param to `showSimplifiedLoginWidget` function, allowing to specify widget `encoding`
+
 ## v4.3.0 (2020-12-16)
 
 ## New features
