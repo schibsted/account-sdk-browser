@@ -101,7 +101,7 @@ export class Identity {
     }): void;
     setVarnishCookie: boolean;
     varnishExpiresIn: number;
-    varnishCookieDomain: boolean;
+    varnishCookieDomain: string;
     /**
      * Set the Varnish cookie if configured
      * @private
@@ -237,10 +237,10 @@ export class Identity {
      * @param {number|string} [options.maxAge]
      * @param {string} [options.locale]
      * @param {boolean} [options.oneStepLogin=false]
-     * @param {string} [options.prompt]
+     * @param {string} [options.prompt=select_account]
      * @return {Window|null} - Reference to popup window if created (or `null` otherwise)
      */
-    login({ state, acrValues, scope, redirectUri, preferPopup, loginHint, tag, teaser, maxAge, locale, oneStepLogin, prompt }: LoginOptions): Window;
+    login({ state, acrValues, scope, redirectUri, preferPopup, loginHint, tag, teaser, maxAge, locale, oneStepLogin, prompt }: LoginOptions): Window | null;
     /**
      * @async
      * @summary Retrieve the sp_id (Varnish ID)
@@ -269,7 +269,7 @@ export class Identity {
      * @param {number|string} [options.maxAge]
      * @param {string} [options.locale]
      * @param {boolean} [options.oneStepLogin=false]
-     * @param {string} [options.prompt]
+     * @param {string} [options.prompt=select_account]
      * @return {string} - The url
      */
     loginUrl({ state, acrValues, scope, redirectUri, loginHint, tag, teaser, maxAge, locale, oneStepLogin, prompt, }: LoginOptions, ...args: any[]): string;
@@ -299,9 +299,10 @@ export class Identity {
      * @async
      * @param {LoginOptions} loginParams - the same as `options` param for login function. Login will be called on user
      * continue action. `state` might be string or async function.
+     * @param {SimplifiedLoginWidgetOptions} options - additional configuration of Simplified Login Widget
      * @return {Promise<boolean|SDKError>} - will resolve to true if widget will be display. Otherwise will throw SDKError
      */
-    showSimplifiedLoginWidget(loginParams: LoginOptions): Promise<boolean | SDKError>;
+    showSimplifiedLoginWidget(loginParams: LoginOptions, options: SimplifiedLoginWidgetOptions): Promise<boolean | SDKError>;
 }
 export default Identity;
 export type LoginOptions = {
@@ -497,6 +498,12 @@ export type SimplifiedLoginData = {
      * - Client name
      */
     client_name: string;
+};
+export type SimplifiedLoginWidgetOptions = {
+    /**
+     * - expected encoding of simplified login widget. Could be utf-8 (default), iso-8859-1 or iso-8859-15
+     */
+    encoding: string;
 };
 import RESTClient from "./RESTClient";
 import SDKError from "./SDKError";

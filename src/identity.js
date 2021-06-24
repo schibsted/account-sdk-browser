@@ -104,6 +104,11 @@ const { version } = require('../package.json');
  * @property {string} client_name - Client name
  */
 
+/**
+ * @typedef {object} SimplifiedLoginWidgetOptions
+ * @property {string} encoding - expected encoding of simplified login widget. Could be utf-8 (default), iso-8859-1 or iso-8859-15
+ */
+
 const HAS_SESSION_CACHE_KEY = 'hasSession-cache';
 const globalWindow = () => window;
 
@@ -810,12 +815,18 @@ export class Identity extends EventEmitter {
      * @async
      * @param {LoginOptions} loginParams - the same as `options` param for login function. Login will be called on user
      * continue action. `state` might be string or async function.
+     * @param {SimplifiedLoginWidgetOptions} options - additional configuration of Simplified Login Widget
      * @return {Promise<boolean|SDKError>} - will resolve to true if widget will be display. Otherwise will throw SDKError
      */
-    async showSimplifiedLoginWidget(loginParams) {
+    async showSimplifiedLoginWidget(loginParams, options) {
         // getUserContextData doens't throw exception
         const userData = await this.getUserContextData();
-        const widgetUrl = this._bffService.makeUrl('simplified-login-widget', { client_id: this.clientId }, false);
+
+        const queryParams = { client_id: this.clientId };
+        if (options && options.encoding) {
+            queryParams.encoding = options.encoding;
+        } 
+        const widgetUrl = this._bffService.makeUrl('simplified-login-widget', queryParams, false);
 
         const prepareLoginParams = async (loginPrams) => {
             if (typeof loginPrams.state === 'function') {

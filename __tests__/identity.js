@@ -877,6 +877,41 @@ describe('Identity', () => {
             expect(document.getElementsByTagName('body')[0].appendChild).toHaveBeenCalledTimes(1);
             expect(window.openSimplifiedLoginWidget).toHaveBeenCalledTimes(1);
         });
+
+        test('Should not pass any encoding param to simplified login widget script URL when not specified', async () => {
+            const stateFn = jest.fn(() => state);
+            identity._globalSessionService.fetch = jest.fn(() => ({ ok: true, json: () => expectedData }));
+            identity.login = jest.fn();
+
+            document.getElementsByTagName('body')[0].appendChild = jest.fn((el) => {
+                window.openSimplifiedLoginWidget = jest.fn(() => true);
+
+                expect(el.src).toBe(`https://identity-pre.schibsted.com/authn/simplified-login-widget?client_id=${defaultOptions.clientId}`);
+                el.onload();
+            });
+
+            expect(await identity.showSimplifiedLoginWidget({ state: stateFn })).toEqual(true);
+            expect(document.getElementsByTagName('body')[0].appendChild).toHaveBeenCalledTimes(1);
+            expect(window.openSimplifiedLoginWidget).toHaveBeenCalledTimes(1);
+        });
+
+        test('Should pass encoding param to simplified login widget script URL', async () => {
+            const stateFn = jest.fn(() => state);
+            const expectedEncoding = 'iso-8859-1';
+            identity._globalSessionService.fetch = jest.fn(() => ({ ok: true, json: () => expectedData }));
+            identity.login = jest.fn();
+
+            document.getElementsByTagName('body')[0].appendChild = jest.fn((el) => {
+                window.openSimplifiedLoginWidget = jest.fn(() => true);
+
+                expect(el.src).toBe(`https://identity-pre.schibsted.com/authn/simplified-login-widget?client_id=${defaultOptions.clientId}&encoding=${expectedEncoding}`);
+                el.onload();
+            });
+
+            expect(await identity.showSimplifiedLoginWidget({ state: stateFn }, { encoding: expectedEncoding })).toEqual(true);
+            expect(document.getElementsByTagName('body')[0].appendChild).toHaveBeenCalledTimes(1);
+            expect(window.openSimplifiedLoginWidget).toHaveBeenCalledTimes(1);
+        });
     });
 
     describe('logSettings', () => {
