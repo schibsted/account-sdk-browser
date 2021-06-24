@@ -104,6 +104,11 @@ const { version } = require('../package.json');
  * @property {string} client_name - Client name
  */
 
+/**
+ * @typedef {object} SimplifiedLoginWidgetOptions
+ * @property {string} encoding - expected encoding of simplified login widget. Could be utf-8 (default), iso-8859-1 or iso-8859-15
+ */
+
 const HAS_SESSION_CACHE_KEY = 'hasSession-cache';
 const globalWindow = () => window;
 
@@ -810,8 +815,7 @@ export class Identity extends EventEmitter {
      * @async
      * @param {LoginOptions} loginParams - the same as `options` param for login function. Login will be called on user
      * continue action. `state` might be string or async function.
-     * @param {SimplifiedLoginWidgetOptions} options
-     * @param {string} [options.encoding] - expected encoding of simplified login widget. Could be utf-8 (default), iso-8859-1 or iso-8859-15
+     * @param {SimplifiedLoginWidgetOptions} options - additional configuration of Simplified Login Widget
      * @return {Promise<boolean|SDKError>} - will resolve to true if widget will be display. Otherwise will throw SDKError
      */
     async showSimplifiedLoginWidget(loginParams, options) {
