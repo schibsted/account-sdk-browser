@@ -150,6 +150,14 @@ them from polyfill.io like this:
 
 <a name="itp-yo"></a>
 
+#### Local development on Chrome version 88 (or higher)
+
+Google Chrome in version 88 (or higher) [introduced changes](https://support.google.com/chrome/a/answer/7679408#88&zippy=%2Cchrome) in the definition of cookies `same-site` attribute. 
+From now on cross-scheme requests (e.g. `http` <-> `https`) will be considered cross-site instead of same-site, hence you may experience problems with localhost development, resulting in `Bad Request` responses from `hasSession` calls.
+While we are working on more permanent resolution of this this issue, as a temporary workaround we can suggest [running your site with HTTPS locally](https://web.dev/how-to-use-local-https/) or disabling `schemeful-same-site` flag in Chrome for the time of local development.
+
+More info: https://web.dev/schemeful-samesite/
+
 ## Notes on Apple Intelligent Tracking Prevention (ITP)
 #### or.. how I learned to stop worrying and ❤️ the Schibsted account session service
 
