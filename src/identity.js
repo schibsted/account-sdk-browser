@@ -818,7 +818,7 @@ export class Identity extends EventEmitter {
      * @param {SimplifiedLoginWidgetOptions} options - additional configuration of Simplified Login Widget
      * @return {Promise<boolean|SDKError>} - will resolve to true if widget will be display. Otherwise will throw SDKError
      */
-    async showSimplifiedLoginWidget(loginParams, options) {
+    async showSimplifiedLoginWidget(loginParams, options?) {
         // getUserContextData doens't throw exception
         const userData = await this.getUserContextData();
 
