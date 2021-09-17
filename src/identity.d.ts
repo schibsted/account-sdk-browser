@@ -302,7 +302,7 @@ export class Identity {
      * @param {SimplifiedLoginWidgetOptions} options - additional configuration of Simplified Login Widget
      * @return {Promise<boolean|SDKError>} - will resolve to true if widget will be display. Otherwise will throw SDKError
      */
-    showSimplifiedLoginWidget(loginParams: LoginOptions, options: SimplifiedLoginWidgetOptions): Promise<boolean | SDKError>;
+    showSimplifiedLoginWidget(loginParams: LoginOptions, options?: SimplifiedLoginWidgetOptions): Promise<boolean | SDKError>;
 }
 export default Identity;
 export type LoginOptions = {
