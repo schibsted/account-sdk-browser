@@ -299,10 +299,10 @@ export class Identity {
      * @async
      * @param {LoginOptions} loginParams - the same as `options` param for login function. Login will be called on user
      * continue action. `state` might be string or async function.
-     * @param {SimplifiedLoginWidgetOptions} options - additional configuration of Simplified Login Widget
+     * @param {SimplifiedLoginWidgetOptions} [options] - additional configuration of Simplified Login Widget
      * @return {Promise<boolean|SDKError>} - will resolve to true if widget will be display. Otherwise will throw SDKError
      */
-    showSimplifiedLoginWidget(loginParams: LoginOptions, options: SimplifiedLoginWidgetOptions): Promise<boolean | SDKError>;
+    showSimplifiedLoginWidget(loginParams: LoginOptions, options?: SimplifiedLoginWidgetOptions): Promise<boolean | SDKError>;
 }
 export default Identity;
 export type LoginOptions = {
