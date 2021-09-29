@@ -1,5 +1,13 @@
 # Changelog
 
+## v4.5.0 (2021-09-29)
+
+## New features
+* Add Danish env
+
+## Fixes
+* `options` param in `showSimplifiedLoginWidget` function is optional in Typescript now
+
 ## v4.4.0 (2021-06-24)
 
 ## New features
