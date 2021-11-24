@@ -48,7 +48,42 @@ const { version } = require('../package.json');
  * @property {string} [locale] - Optional parameter to overwrite client locale setting.
  * New flows supports nb_NO, fi_FI, sv_SE, en_US
  * @property {boolean} [oneStepLogin] - display username and password on one screen
-* @property {string} [prompt] - String that specifies whether the Authorization Server prompts the
+ * @property {string} [prompt] - String that specifies whether the Authorization Server prompts the
+ * End-User for reauthentication or confirm account screen. Supported values: `select_account` or `login`
+ */
+/**
+ * @typedef {object} SimplifiedLoginWidgetLoginOptions
+ * @property {string|Promise<string>|function(): string} state - An opaque value used by the client to maintain state between
+ * the request and callback. It's also recommended to prevent CSRF {@link https://tools.ietf.org/html/rfc6749#section-10.12}
+ * @property {string} [acrValues] - Authentication Context Class Reference Values. If
+ * omitted, the user will be asked to authenticate using username+password.
+ * For 2FA (Two-Factor Authentication) possible values are `sms`, `otp` (one time password) and
+ * `password` (will force password confirmation, even if user is already logged in). Those values might
+ * be mixed as space-separated string. To make sure that user has authenticated with 2FA you need
+ * to verify AMR (Authentication Methods References) claim in ID token.
+ * Might also be used to ensure additional acr (sms, otp) for already logged in users.
+ * Supported values are also 'otp-email' means one time password using email, and 'otp-sms' means
+ * one time password using sms.
+ * @property {string} [scope] - The OAuth scopes for the tokens. This is a list of
+ * scopes, separated by space. If the list of scopes contains `openid`, the generated tokens
+ * includes the id token which can be useful for getting information about the user. Omitting
+ * scope is allowed, while `invalid_scope` is returned when the client asks for a scope you
+ * aren’t allowed to request. {@link https://tools.ietf.org/html/rfc6749#section-3.3}
+ * @property {string} [redirectUri] - Redirect uri that will receive the
+ * code. Must exactly match a redirectUri from your client in self-service
+ * @property {boolean} [preferPopup] - Should we try to open a popup window?
+ * @property {string} [loginHint] - user email or UUID hint
+ * @property {string} [tag] - Pulse tag
+ * @property {string} [teaser] - Teaser slug. Teaser with given slug will be displayed
+ * in place of default teaser
+ * @property {number|string} [maxAge] - Specifies the allowable elapsed time in seconds since
+ * the last time the End-User was actively authenticated. If last authentication time is more
+ * than maxAge seconds in the past, re-authentication will be required. See the OpenID Connect
+ * spec section 3.1.2.1 for more information
+ * @property {string} [locale] - Optional parameter to overwrite client locale setting.
+ * New flows supports nb_NO, fi_FI, sv_SE, en_US
+ * @property {boolean} [oneStepLogin] - display username and password on one screen
+ * @property {string} [prompt] - String that specifies whether the Authorization Server prompts the
  * End-User for reauthentication or confirm account screen. Supported values: `select_account` or `login`
  */
 
@@ -813,7 +848,7 @@ export class Identity extends EventEmitter {
      * and store that info in localStorage. Widget will be display only if user is logged in to SSO.
      *
      * @async
-     * @param {LoginOptions} loginParams - the same as `options` param for login function. Login will be called on user
+     * @param {SimplifiedLoginWidgetLoginOptions} loginParams - the same as `options` param for login function. Login will be called on user
      * continue action. `state` might be string or async function.
      * @param {SimplifiedLoginWidgetOptions} [options] - additional configuration of Simplified Login Widget
      * @return {Promise<boolean|SDKError>} - will resolve to true if widget will be display. Otherwise will throw SDKError
