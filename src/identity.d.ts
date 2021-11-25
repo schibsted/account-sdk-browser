@@ -380,7 +380,7 @@ export type SimplifiedLoginWidgetLoginOptions = {
      * - An opaque value used by the client to maintain state between
      * the request and callback. It's also recommended to prevent CSRF {@link https://tools.ietf.org/html/rfc6749#section-10.12}
      */
-    state: string | (() => Promise<string>) | (() => string);
+     state: string | (() => (string | Promise<string>));
     /**
      * - Authentication Context Class Reference Values. If
      * omitted, the user will be asked to authenticate using username+password.
