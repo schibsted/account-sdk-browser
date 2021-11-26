@@ -1,5 +1,10 @@
 # Changelog
 
+## v4.5.2 (2021-11-26)
+
+## Fixes
+* Fix SimplifiedLoginWidgetLoginOptions 
+
 ## v4.5.1 (2021-11-19)
 
 ## Fixes
