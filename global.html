@@ -608,6 +608,502 @@ End-User for reauthentication or confirm account screen. Supported values: <code
 
             
                 
+<h4 class="name" id="SimplifiedLoginWidgetLoginOptions">SimplifiedLoginWidgetLoginOptions</h4>
+
+
+
+
+
+<dl class="details">
+
+    
+    <dt class="tag-source">Source:</dt>
+    <dd class="tag-source"><ul class="dummy"><li>
+        <a href="identity.js.html">identity.js</a>, <a href="identity.js.html#line54">line 54</a>
+    </li></ul></dd>
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+</dl>
+
+
+
+    <h5 class="subsection-title">Properties:</h5>
+
+    
+
+<table class="props">
+    <thead>
+    <tr>
+        
+        <th>Name</th>
+        
+
+        <th>Type</th>
+
+        
+        <th>Attributes</th>
+        
+
+        
+
+        <th class="last">Description</th>
+    </tr>
+    </thead>
+
+    <tbody>
+    
+
+        <tr>
+            
+                <td class="name"><code>state</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">string</span>
+|
+
+<span class="param-type">function</span>
+
+
+            
+            </td>
+
+            
+                <td class="attributes">
+                
+
+                
+                </td>
+            
+
+            
+
+            <td class="description last"><p>An opaque value used by the client to maintain state between
+the request and callback. It's also recommended to prevent CSRF <a href="https://tools.ietf.org/html/rfc6749#section-10.12">https://tools.ietf.org/html/rfc6749#section-10.12</a></p></td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>acrValues</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">string</span>
+
+
+            
+            </td>
+
+            
+                <td class="attributes">
+                
+                    &lt;optional><br>
+                
+
+                
+                </td>
+            
+
+            
+
+            <td class="description last"><p>Authentication Context Class Reference Values. If
+omitted, the user will be asked to authenticate using username+password.
+For 2FA (Two-Factor Authentication) possible values are <code>sms</code>, <code>otp</code> (one time password) and
+<code>password</code> (will force password confirmation, even if user is already logged in). Those values might
+be mixed as space-separated string. To make sure that user has authenticated with 2FA you need
+to verify AMR (Authentication Methods References) claim in ID token.
+Might also be used to ensure additional acr (sms, otp) for already logged in users.
+Supported values are also 'otp-email' means one time password using email, and 'otp-sms' means
+one time password using sms.</p></td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>scope</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">string</span>
+
+
+            
+            </td>
+
+            
+                <td class="attributes">
+                
+                    &lt;optional><br>
+                
+
+                
+                </td>
+            
+
+            
+
+            <td class="description last"><p>The OAuth scopes for the tokens. This is a list of
+scopes, separated by space. If the list of scopes contains <code>openid</code>, the generated tokens
+includes the id token which can be useful for getting information about the user. Omitting
+scope is allowed, while <code>invalid_scope</code> is returned when the client asks for a scope you
+aren’t allowed to request. <a href="https://tools.ietf.org/html/rfc6749#section-3.3">https://tools.ietf.org/html/rfc6749#section-3.3</a></p></td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>redirectUri</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">string</span>
+
+
+            
+            </td>
+
+            
+                <td class="attributes">
+                
+                    &lt;optional><br>
+                
+
+                
+                </td>
+            
+
+            
+
+            <td class="description last"><p>Redirect uri that will receive the
+code. Must exactly match a redirectUri from your client in self-service</p></td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>preferPopup</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">boolean</span>
+
+
+            
+            </td>
+
+            
+                <td class="attributes">
+                
+                    &lt;optional><br>
+                
+
+                
+                </td>
+            
+
+            
+
+            <td class="description last"><p>Should we try to open a popup window?</p></td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>loginHint</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">string</span>
+
+
+            
+            </td>
+
+            
+                <td class="attributes">
+                
+                    &lt;optional><br>
+                
+
+                
+                </td>
+            
+
+            
+
+            <td class="description last"><p>user email or UUID hint</p></td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>tag</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">string</span>
+
+
+            
+            </td>
+
+            
+                <td class="attributes">
+                
+                    &lt;optional><br>
+                
+
+                
+                </td>
+            
+
+            
+
+            <td class="description last"><p>Pulse tag</p></td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>teaser</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">string</span>
+
+
+            
+            </td>
+
+            
+                <td class="attributes">
+                
+                    &lt;optional><br>
+                
+
+                
+                </td>
+            
+
+            
+
+            <td class="description last"><p>Teaser slug. Teaser with given slug will be displayed
+in place of default teaser</p></td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>maxAge</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">number</span>
+|
+
+<span class="param-type">string</span>
+
+
+            
+            </td>
+
+            
+                <td class="attributes">
+                
+                    &lt;optional><br>
+                
+
+                
+                </td>
+            
+
+            
+
+            <td class="description last"><p>Specifies the allowable elapsed time in seconds since
+the last time the End-User was actively authenticated. If last authentication time is more
+than maxAge seconds in the past, re-authentication will be required. See the OpenID Connect
+spec section 3.1.2.1 for more information</p></td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>locale</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">string</span>
+
+
+            
+            </td>
+
+            
+                <td class="attributes">
+                
+                    &lt;optional><br>
+                
+
+                
+                </td>
+            
+
+            
+
+            <td class="description last"><p>Optional parameter to overwrite client locale setting.
+New flows supports nb_NO, fi_FI, sv_SE, en_US</p></td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>oneStepLogin</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">boolean</span>
+
+
+            
+            </td>
+
+            
+                <td class="attributes">
+                
+                    &lt;optional><br>
+                
+
+                
+                </td>
+            
+
+            
+
+            <td class="description last"><p>display username and password on one screen</p></td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>prompt</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">string</span>
+
+
+            
+            </td>
+
+            
+                <td class="attributes">
+                
+                    &lt;optional><br>
+                
+
+                
+                </td>
+            
+
+            
+
+            <td class="description last"><p>String that specifies whether the Authorization Server prompts the
+End-User for reauthentication or confirm account screen. Supported values: <code>select_account</code> or <code>login</code></p></td>
+        </tr>
+
+    
+    </tbody>
+</table>
+
+
+
+
+
+
+
+
+    <h5>Type:</h5>
+    <ul>
+        <li>
+            
+<span class="param-type">object</span>
+
+
+        </li>
+    </ul>
+
+
+
+
+
+
+            
+                
 <h4 class="name" id="HasSessionSuccessResponse">HasSessionSuccessResponse</h4>
 
 
@@ -619,7 +1115,7 @@ End-User for reauthentication or confirm account screen. Supported values: <code
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="identity.js.html">identity.js</a>, <a href="identity.js.html#line55">line 55</a>
+        <a href="identity.js.html">identity.js</a>, <a href="identity.js.html#line90">line 90</a>
     </li></ul></dd>
     
 
@@ -1136,7 +1632,7 @@ HMAC SHA-256 signature string, a dot (.) and a base64url encoded JSON object (se
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="identity.js.html">identity.js</a>, <a href="identity.js.html#line87">line 87</a>
+        <a href="identity.js.html">identity.js</a>, <a href="identity.js.html#line122">line 122</a>
     </li></ul></dd>
     
 
@@ -1491,7 +1987,7 @@ HMAC SHA-256 signature string, a dot (.) and a base64url encoded JSON object (se
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="identity.js.html">identity.js</a>, <a href="identity.js.html#line100">line 100</a>
+        <a href="identity.js.html">identity.js</a>, <a href="identity.js.html#line135">line 135</a>
     </li></ul></dd>
     
 
@@ -1658,7 +2154,7 @@ HMAC SHA-256 signature string, a dot (.) and a base64url encoded JSON object (se
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="identity.js.html">identity.js</a>, <a href="identity.js.html#line107">line 107</a>
+        <a href="identity.js.html">identity.js</a>, <a href="identity.js.html#line142">line 142</a>
     </li></ul></dd>
     
 
@@ -1782,7 +2278,7 @@ HMAC SHA-256 signature string, a dot (.) and a base64url encoded JSON object (se
 <br class="clear">
 
 <footer>
-    Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.6.7</a> on Fri Nov 19 2021 09:23:40 GMT+0000 (Coordinated Universal Time) using the <a href="https://github.com/clenemt/docdash">docdash</a> theme.
+    Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.6.7</a> on Fri Nov 26 2021 13:53:11 GMT+0000 (Coordinated Universal Time) using the <a href="https://github.com/clenemt/docdash">docdash</a> theme.
 </footer>
 
 <script>prettyPrint();</script>
