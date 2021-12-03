@@ -129,7 +129,6 @@ export class Identity extends TinyEmitter {
         this.env = env;
         this.log = log;
         this._sessionDomain = sessionDomain;
-        this._session.baseDomain = "";
 
         // Internal hack: set to false to always refresh from hassession
         this._enableSessionCaching = true;
@@ -224,7 +223,7 @@ export class Identity extends TinyEmitter {
      * @returns {void}
      */
     private _emitSessionEvent(
-        previous: HasSessionSuccessResponse,
+        previous: HasSessionSuccessResponse | undefined,
         current: HasSessionSuccessResponse
     ) {
         /**
@@ -239,7 +238,7 @@ export class Identity extends TinyEmitter {
          * Emitted when the user logged out
          * @event Identity#logout
          */
-        if (previous.userId && !current.userId) {
+        if (previous?.userId && !current.userId) {
             this.emit("logout", current);
         }
         /**
@@ -248,10 +247,10 @@ export class Identity extends TinyEmitter {
          * this invocation, and the userId has now changed
          * @event Identity#userChange
          */
-        if (previous.userId && current.userId && previous.userId !== current.userId) {
+        if (previous?.userId && current.userId && previous.userId !== current.userId) {
             this.emit("userChange", current);
         }
-        if (previous.userId || current.userId) {
+        if (previous?.userId || current.userId) {
             /**
              * Emitted when the session is changed. More accurately, this event is emitted if there
              * was a logged-in user either before or after {@link Identity#hasSession} was called.
