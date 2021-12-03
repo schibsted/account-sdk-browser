@@ -7,7 +7,8 @@ declare type StoreProvider = () => Storage;
  * @private
  */
 export default class Cache {
-    #private;
+    private cache;
+    private type;
     /**
      * @param {StoreProvider} [storeProvider] - A function to return a WebStorage instance (either
      * `sessionStorage` or `localStorage` from a `Window` object)

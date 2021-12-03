@@ -82,8 +82,8 @@ const maxExpiresIn = Math.pow(2, 31) - 1;
  * @private
  */
 export default class Cache {
-    #cache: WebStorageCache | LiteralCache;
-    #type: string;
+    private cache: WebStorageCache | LiteralCache;
+    private type: string;
     /**
      * @param {StoreProvider} [storeProvider] - A function to return a WebStorage instance (either
      * `sessionStorage` or `localStorage` from a `Window` object)
@@ -91,11 +91,11 @@ export default class Cache {
      */
     constructor(storeProvider: StoreProvider) {
         if (webStorageWorks(storeProvider)) {
-            this.#cache = new WebStorageCache(storeProvider());
-            this.#type = 'WebStorage';
+            this.cache = new WebStorageCache(storeProvider());
+            this.type = 'WebStorage';
         } else {
-            this.#cache = new LiteralCache();
-            this.#type = 'ObjectLiteralStorage';
+            this.cache = new LiteralCache();
+            this.type = 'ObjectLiteralStorage';
         }
     }
 
@@ -107,7 +107,7 @@ export default class Cache {
      */
     get(key: string) {
         try {
-            const raw = this.#cache.get(key);
+            const raw = this.cache.get(key);
             const obj = raw ? JSON.parse(raw) : null;
             if (obj && Number.isInteger(obj.expiresOn) && obj.expiresOn > Date.now()) {
                 return obj.value;
@@ -135,7 +135,7 @@ export default class Cache {
 
         try {
             const expiresOn = Math.floor(Date.now() + expiresIn);
-            this.#cache.set(key, JSON.stringify({ expiresOn, value }));
+            this.cache.set(key, JSON.stringify({ expiresOn, value }));
             setTimeout(() => this.delete(key), expiresIn);
         } catch (e) {
             throw new SDKError(e);
@@ -150,7 +150,7 @@ export default class Cache {
      */
     delete(key: string) {
         try {
-            this.#cache.delete(key);
+            this.cache.delete(key);
         } catch (e) {
             throw new SDKError(e);
         }
