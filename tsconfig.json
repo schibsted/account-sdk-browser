@@ -8,5 +8,5 @@
         "declaration": true,
         "moduleResolution": "node"
     },
-    "include": ["./src/**/*"]
+    "include": ["@types/globals.d.ts", "./src/**/*"]
 }

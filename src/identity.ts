@@ -16,212 +16,7 @@ import SDKError from "./SDKError";
 import * as spidTalk from "./spidTalk";
 const { version } = require("../package.json");
 
-export type BaseLoginOptions = {
-    /**
-     * - Authentication Context Class Reference Values. If
-     * omitted, the user will be asked to authenticate using username+password.
-     * For 2FA (Two-Factor Authentication) possible values are `sms`, `otp` (one time password) and
-     * `password` (will force password confirmation, even if user is already logged in). Those values might
-     * be mixed as space-separated string. To make sure that user has authenticated with 2FA you need
-     * to verify AMR (Authentication Methods References) claim in ID token.
-     * Might also be used to ensure additional acr (sms, otp) for already logged in users.
-     * Supported values are also 'otp-email' means one time password using email, and 'otp-sms' means
-     * one time password using sms.
-     */
-    acrValues?: string;
-    /**
-     * - The OAuth scopes for the tokens. This is a list of
-     * scopes, separated by space. If the list of scopes contains `openid`, the generated tokens
-     * includes the id token which can be useful for getting information about the user. Omitting
-     * scope is allowed, while `invalid_scope` is returned when the client asks for a scope you
-     * aren’t allowed to request. {@link https://tools.ietf.org/html/rfc6749#section-3.3}
-     */
-    scope?: string;
-    /**
-     * - Redirect uri that will receive the
-     * code. Must exactly match a redirectUri from your client in self-service
-     */
-    redirectUri?: string;
-    /**
-     * - Should we try to open a popup window?
-     */
-    preferPopup?: boolean;
-    /**
-     * - user email or UUID hint
-     */
-    loginHint?: string;
-    /**
-     * - Pulse tag
-     */
-    tag?: string;
-    /**
-     * - Teaser slug. Teaser with given slug will be displayed
-     * in place of default teaser
-     */
-    teaser?: string;
-    /**
-     * - Specifies the allowable elapsed time in seconds since
-     * the last time the End-User was actively authenticated. If last authentication time is more
-     * than maxAge seconds in the past, re-authentication will be required. See the OpenID Connect
-     * spec section 3.1.2.1 for more information
-     */
-    maxAge?: number | string;
-    /**
-     * - Optional parameter to overwrite client locale setting.
-     * New flows supports nb_NO, fi_FI, sv_SE, en_US
-     */
-    locale?: string;
-    /**
-     * - display username and password on one screen
-     */
-    oneStepLogin?: boolean;
-    /**
-     * - String that specifies whether the Authorization Server prompts the
-     * End-User for reauthentication or confirm account screen. Supported values: `select_account` or `login`
-     */
-    prompt?: string;
-};
 
-export interface LoginOptions extends BaseLoginOptions {
-    /**
-     * - An opaque value used by the client to maintain state between
-     * the request and callback. It's also recommended to prevent CSRF {@link https://tools.ietf.org/html/rfc6749#section-10.12}
-     */
-    state: string;
-}
-
-export interface SimplifiedLoginWidgetLoginOptions extends BaseLoginOptions {
-    /**
-     * - An opaque value used by the client to maintain state between
-     * the request and callback. It's also recommended to prevent CSRF {@link https://tools.ietf.org/html/rfc6749#section-10.12}
-     */
-    state: string | (() => string | Promise<string>);
-}
-
-export type HasSessionSuccessResponse = {
-    /**
-     * - Is the user connected to the merchant? (it means that the merchant
-     * id is in the list of merchants listed of this user in the database)? Example: false
-     */
-    result: boolean;
-    /**
-     * - Example: 'notConnected' or 'connected'. Deprecated, use
-     * `Identity.isConnected()`
-     */
-    userStatus: string;
-    /**
-     * - Example: 'localhost'
-     */
-    baseDomain: string;
-    /**
-     * - Example: '58eca10fdbb9f6df72c3368f'. Obsolete
-     */
-    id: string;
-    /**
-     * - Example: 37162
-     */
-    userId: number;
-    /**
-     * - Example: 'b3b23aa7-34f2-5d02-a10e-5a3455c6ab2c'
-     */
-    uuid: string;
-    /**
-     * - Example: 'eyJjbGllbnRfaWQ...'
-     */
-    sp_id: string;
-    /**
-     * - Example: 30 * 60 * 1000 (for 30 minutes)
-     */
-    expiresIn: number;
-    /**
-     * - Example: 1506285759
-     */
-    serverTime: number;
-    /**
-     * - Example: 'NCdzXaz4ZRb7...' The sig parameter is a concatenation of an
-     * HMAC SHA-256 signature string, a dot (.) and a base64url encoded JSON object (session).
-     * {@link http://techdocs.spid.no/sdks/js/response-signature-and-validation/}
-     */
-    sig: string;
-    /**
-     * - (Only for connected users) Example: 'batman'
-     */
-    displayName: string;
-    /**
-     * - (Only for connected users) Example: 'Bruce'
-     */
-    givenName: string;
-    /**
-     * - (Only for connected users) Example: 'Wayne'
-     */
-    familyName: string;
-    /**
-     * - (Only for connected users) Example: 'male', 'female', 'undisclosed'
-     */
-    gender: string;
-    /**
-     * - (Only for connected users) Example:
-     * 'http://www.srv.com/some/picture.jpg'
-     */
-    photo: string;
-    /**
-     * - (Only for connected users)
-     */
-    tracking: boolean;
-    /**
-     * - (Only for connected users)
-     */
-    clientAgreementAccepted: boolean;
-    /**
-     * - (Only for connected users)
-     */
-    defaultAgreementAccepted: boolean;
-};
-
-/**
- * Emitted when an error happens (useful for debugging)
- * @event Identity#error
- */
-
-export type HasSessionFailureResponse = {
-    error: {
-        /**
-         * - Typically an HTTP response code. Example: 401
-         */
-        code: number;
-        /**
-         * - Example: "No session found!"
-         */
-        description: string;
-        /**
-         * - Example: "UserException"
-         */
-        type: string;
-    };
-    response: {
-        /**
-         * - Example: "localhost"
-         */
-        baseDomain: string;
-        /**
-         * - Time span in milliseconds. Example: 30 * 60 * 1000 (for 30 minutes)
-         */
-        expiresIn: number;
-        result: boolean;
-        /**
-         * - Server time in seconds since the Unix Epoch. Example: 1506287788
-         */
-        serverTime: number;
-    };
-};
-/**
- * A promise for the user's favorite color.
- *
- * @promise HasSessionResponse
- * @fulfill {HasSessionSuccessResponse} Successfull session request.
- * @reject {HasSessionFailureResponse} Unable to get session
- */
-export type HasSessionResponse = HasSessionSuccessResponse | HasSessionFailureResponse;
 
 function isHasSessionSuccessResponse(
     response: HasSessionResponse
@@ -1043,7 +838,7 @@ export class Identity extends TinyEmitter {
                 clientId: this.clientId,
                 providerId: userData.provider_id,
                 windowWidth: () => window.innerWidth,
-                windowOnResize: (f) => {
+                windowOnResize: (f: ((this: GlobalEventHandlers, ev: UIEvent) => any) & ((this: Window, ev: UIEvent) => any)) => {
                     window.onresize = f;
                 },
             };
@@ -1086,3 +881,209 @@ export class Identity extends TinyEmitter {
 }
 
 export default Identity;
+export type BaseLoginOptions = {
+    /**
+     * - Authentication Context Class Reference Values. If
+     * omitted, the user will be asked to authenticate using username+password.
+     * For 2FA (Two-Factor Authentication) possible values are `sms`, `otp` (one time password) and
+     * `password` (will force password confirmation, even if user is already logged in). Those values might
+     * be mixed as space-separated string. To make sure that user has authenticated with 2FA you need
+     * to verify AMR (Authentication Methods References) claim in ID token.
+     * Might also be used to ensure additional acr (sms, otp) for already logged in users.
+     * Supported values are also 'otp-email' means one time password using email, and 'otp-sms' means
+     * one time password using sms.
+     */
+    acrValues?: string;
+    /**
+     * - The OAuth scopes for the tokens. This is a list of
+     * scopes, separated by space. If the list of scopes contains `openid`, the generated tokens
+     * includes the id token which can be useful for getting information about the user. Omitting
+     * scope is allowed, while `invalid_scope` is returned when the client asks for a scope you
+     * aren’t allowed to request. {@link https://tools.ietf.org/html/rfc6749#section-3.3}
+     */
+    scope?: string;
+    /**
+     * - Redirect uri that will receive the
+     * code. Must exactly match a redirectUri from your client in self-service
+     */
+    redirectUri?: string;
+    /**
+     * - Should we try to open a popup window?
+     */
+    preferPopup?: boolean;
+    /**
+     * - user email or UUID hint
+     */
+    loginHint?: string;
+    /**
+     * - Pulse tag
+     */
+    tag?: string;
+    /**
+     * - Teaser slug. Teaser with given slug will be displayed
+     * in place of default teaser
+     */
+    teaser?: string;
+    /**
+     * - Specifies the allowable elapsed time in seconds since
+     * the last time the End-User was actively authenticated. If last authentication time is more
+     * than maxAge seconds in the past, re-authentication will be required. See the OpenID Connect
+     * spec section 3.1.2.1 for more information
+     */
+    maxAge?: number | string;
+    /**
+     * - Optional parameter to overwrite client locale setting.
+     * New flows supports nb_NO, fi_FI, sv_SE, en_US
+     */
+    locale?: string;
+    /**
+     * - display username and password on one screen
+     */
+    oneStepLogin?: boolean;
+    /**
+     * - String that specifies whether the Authorization Server prompts the
+     * End-User for reauthentication or confirm account screen. Supported values: `select_account` or `login`
+     */
+    prompt?: string;
+};
+
+export interface LoginOptions extends BaseLoginOptions {
+    /**
+     * - An opaque value used by the client to maintain state between
+     * the request and callback. It's also recommended to prevent CSRF {@link https://tools.ietf.org/html/rfc6749#section-10.12}
+     */
+    state: string;
+}
+
+export interface SimplifiedLoginWidgetLoginOptions extends BaseLoginOptions {
+    /**
+     * - An opaque value used by the client to maintain state between
+     * the request and callback. It's also recommended to prevent CSRF {@link https://tools.ietf.org/html/rfc6749#section-10.12}
+     */
+    state: string | (() => string | Promise<string>);
+}
+
+export type HasSessionSuccessResponse = {
+    /**
+     * - Is the user connected to the merchant? (it means that the merchant
+     * id is in the list of merchants listed of this user in the database)? Example: false
+     */
+    result: boolean;
+    /**
+     * - Example: 'notConnected' or 'connected'. Deprecated, use
+     * `Identity.isConnected()`
+     */
+    userStatus: string;
+    /**
+     * - Example: 'localhost'
+     */
+    baseDomain: string;
+    /**
+     * - Example: '58eca10fdbb9f6df72c3368f'. Obsolete
+     */
+    id: string;
+    /**
+     * - Example: 37162
+     */
+    userId: number;
+    /**
+     * - Example: 'b3b23aa7-34f2-5d02-a10e-5a3455c6ab2c'
+     */
+    uuid: string;
+    /**
+     * - Example: 'eyJjbGllbnRfaWQ...'
+     */
+    sp_id: string;
+    /**
+     * - Example: 30 * 60 * 1000 (for 30 minutes)
+     */
+    expiresIn: number;
+    /**
+     * - Example: 1506285759
+     */
+    serverTime: number;
+    /**
+     * - Example: 'NCdzXaz4ZRb7...' The sig parameter is a concatenation of an
+     * HMAC SHA-256 signature string, a dot (.) and a base64url encoded JSON object (session).
+     * {@link http://techdocs.spid.no/sdks/js/response-signature-and-validation/}
+     */
+    sig: string;
+    /**
+     * - (Only for connected users) Example: 'batman'
+     */
+    displayName: string;
+    /**
+     * - (Only for connected users) Example: 'Bruce'
+     */
+    givenName: string;
+    /**
+     * - (Only for connected users) Example: 'Wayne'
+     */
+    familyName: string;
+    /**
+     * - (Only for connected users) Example: 'male', 'female', 'undisclosed'
+     */
+    gender: string;
+    /**
+     * - (Only for connected users) Example:
+     * 'http://www.srv.com/some/picture.jpg'
+     */
+    photo: string;
+    /**
+     * - (Only for connected users)
+     */
+    tracking: boolean;
+    /**
+     * - (Only for connected users)
+     */
+    clientAgreementAccepted: boolean;
+    /**
+     * - (Only for connected users)
+     */
+    defaultAgreementAccepted: boolean;
+};
+
+/**
+ * Emitted when an error happens (useful for debugging)
+ * @event Identity#error
+ */
+
+export type HasSessionFailureResponse = {
+    error: {
+        /**
+         * - Typically an HTTP response code. Example: 401
+         */
+        code: number;
+        /**
+         * - Example: "No session found!"
+         */
+        description: string;
+        /**
+         * - Example: "UserException"
+         */
+        type: string;
+    };
+    response: {
+        /**
+         * - Example: "localhost"
+         */
+        baseDomain: string;
+        /**
+         * - Time span in milliseconds. Example: 30 * 60 * 1000 (for 30 minutes)
+         */
+        expiresIn: number;
+        result: boolean;
+        /**
+         * - Server time in seconds since the Unix Epoch. Example: 1506287788
+         */
+        serverTime: number;
+    };
+};
+/**
+ * A promise for the user's favorite color.
+ *
+ * @promise HasSessionResponse
+ * @fulfill {HasSessionSuccessResponse} Successfull session request.
+ * @reject {HasSessionFailureResponse} Unable to get session
+ */
+export type HasSessionResponse = HasSessionSuccessResponse | HasSessionFailureResponse;
