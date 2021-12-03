@@ -4,7 +4,7 @@
   "description": "Schibsted account SDK for browsers",
   "main": "index.js",
   "scripts": {
-    "clean": "rimraf .cache coverage dist docs",
+    "clean": "rimraf .cache coverage dist docs es5",
     "docs": "rimraf docs && jsdoc -c ./utils/jsdoc.js --verbose",
     "lint": "eslint .",
     "pretest": "npm run lint",
@@ -14,9 +14,10 @@
     "postcover": "codecov",
     "type-check": "tsc --noEmit",
     "type-check:watch": "npm run type-check -- --watch",
+    "prebuild": "npm run clean",
     "build": "npm run build:types && npm run build:js",
     "build:types": "tsc --emitDeclarationOnly",
-    "build:js": "webpack --mode=production"
+    "build:js": "webpack"
   },
   "author": "",
   "license": "MIT",
@@ -40,8 +41,8 @@
     "node-fetch": "^2.6.0",
     "regenerator-runtime": "^0.13.7",
     "typescript": "^4.5.2",
-    "webpack": "^5.64.3",
-    "webpack-cli": "^4.9.1",
+    "webpack": "^4.44.1",
+    "webpack-cli": "^3.3.12",
     "whatwg-url": "^8.0.0"
   },
   "repository": {
