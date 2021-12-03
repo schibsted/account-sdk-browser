@@ -2,19 +2,19 @@
  * See LICENSE.md in the project root.
  */
 
-'use strict';
+"use strict";
 
-import { assert, isStr, isNonEmptyString, isObject, isUrl, isStrIn } from './validate';
-import { cloneDeep } from './object';
-import { urlMapper } from './url';
-import { ENDPOINTS, NAMESPACE } from './config';
-import EventEmitter from 'tiny-emitter';
-import Cache from './cache';
-import * as popup from './popup';
-import RESTClient from './RESTClient';
-import SDKError from './SDKError';
-import * as spidTalk from './spidTalk';
-const { version } = require('../package.json');
+import { assert, isStr, isNonEmptyString, isObject, isUrl, isStrIn } from "./validate";
+import { cloneDeep } from "./object";
+import { urlMapper } from "./url";
+import { ENDPOINTS, NAMESPACE } from "./config";
+import EventEmitter from "tiny-emitter";
+import Cache from "./cache";
+import * as popup from "./popup";
+import RESTClient from "./RESTClient";
+import SDKError from "./SDKError";
+import * as spidTalk from "./spidTalk";
+const { version } = require("../package.json");
 
 /**
  * @typedef {object} LoginOptions
@@ -144,7 +144,7 @@ const { version } = require('../package.json');
  * @property {string} encoding - expected encoding of simplified login widget. Could be utf-8 (default), iso-8859-1 or iso-8859-15
  */
 
-const HAS_SESSION_CACHE_KEY = 'hasSession-cache';
+const HAS_SESSION_CACHE_KEY = "hasSession-cache";
 const globalWindow = () => window;
 
 /**
@@ -162,12 +162,19 @@ export class Identity extends EventEmitter {
      * @param {object} [options.window] - window object
      * @throws {SDKError} - If any of options are invalid
      */
-    constructor({ clientId, redirectUri, sessionDomain, env = 'PRE', log, window = globalWindow() }) {
+    constructor({
+        clientId,
+        redirectUri,
+        sessionDomain,
+        env = "PRE",
+        log,
+        window = globalWindow(),
+    }) {
         super();
-        assert(isNonEmptyString(clientId), 'clientId parameter is required');
-        assert(isObject(window), 'The reference to window is missing');
-        assert(!redirectUri || isUrl(redirectUri), 'redirectUri parameter is invalid');
-        assert(sessionDomain && isUrl(sessionDomain), 'sessionDomain parameter is not a valid URL');
+        assert(isNonEmptyString(clientId), "clientId parameter is required");
+        assert(isObject(window), "The reference to window is missing");
+        assert(!redirectUri || isUrl(redirectUri), "redirectUri parameter is invalid");
+        assert(sessionDomain && isUrl(sessionDomain), "sessionDomain parameter is not a valid URL");
 
         spidTalk.emulate(window);
         this._sessionInitiatedSent = false;
@@ -283,14 +290,14 @@ export class Identity extends EventEmitter {
          * @event Identity#login
          */
         if (current.userId) {
-            this.emit('login', current);
+            this.emit("login", current);
         }
         /**
          * Emitted when the user logged out
          * @event Identity#logout
          */
         if (previous.userId && !current.userId) {
-            this.emit('logout', current);
+            this.emit("logout", current);
         }
         /**
          * Emitted when the user is changed. This happens as a result of calling
@@ -299,7 +306,7 @@ export class Identity extends EventEmitter {
          * @event Identity#userChange
          */
         if (previous.userId && current.userId && previous.userId !== current.userId) {
-            this.emit('userChange', current);
+            this.emit("userChange", current);
         }
         if (previous.userId || current.userId) {
             /**
@@ -308,14 +315,14 @@ export class Identity extends EventEmitter {
              * In practice, this means the event is emitted a lot
              * @event Identity#sessionChange
              */
-            this.emit('sessionChange', current);
+            this.emit("sessionChange", current);
         } else {
             /**
              * Emitted when there is no logged-in user. More specifically, it means that there was
              * no logged-in user neither before nor after {@link Identity#hasSession} was called
              * @event Identity#notLoggedin
              */
-            this.emit('notLoggedin', current);
+            this.emit("notLoggedin", current);
         }
         /**
          * Emitted when the session is first created
@@ -323,7 +330,7 @@ export class Identity extends EventEmitter {
          */
         if (current.userId && !this._sessionInitiatedSent) {
             this._sessionInitiatedSent = true;
-            this.emit('sessionInit', current);
+            this.emit("sessionInit", current);
         }
         /**
          * Emitted when the user status changes. This happens as a result of calling
@@ -331,7 +338,7 @@ export class Identity extends EventEmitter {
          * @event Identity#statusChange
          */
         if (previous.userStatus !== current.userStatus) {
-            this.emit('statusChange', current);
+            this.emit("statusChange", current);
         }
     }
 
@@ -363,8 +370,7 @@ export class Identity extends EventEmitter {
         let domain;
         if (Number.isInteger(options)) {
             expiresIn = options;
-        }
-        else if (typeof options == 'object') {
+        } else if (typeof options == "object") {
             ({ expiresIn = expiresIn, domain = domain } = options);
         }
 
@@ -386,28 +392,30 @@ export class Identity extends EventEmitter {
             return;
         }
         const date = new Date();
-        const validExpires = this.varnishExpiresIn
-            || typeof sessionData.expiresIn === 'number' && sessionData.expiresIn > 0;
+        const validExpires =
+            this.varnishExpiresIn ||
+            (typeof sessionData.expiresIn === "number" && sessionData.expiresIn > 0);
         if (validExpires) {
             const expires = this.varnishExpiresIn || sessionData.expiresIn;
-            date.setTime(date.getTime() + (expires * 1000));
+            date.setTime(date.getTime() + expires * 1000);
         } else {
             date.setTime(0);
         }
 
         // If the domain is missing or of the wrong type, we'll use document.domain
-        let domain = this.varnishCookieDomain ||
-            (typeof sessionData.baseDomain === 'string'
+        let domain =
+            this.varnishCookieDomain ||
+            (typeof sessionData.baseDomain === "string"
                 ? sessionData.baseDomain
                 : document.domain) ||
-            '';
+            "";
 
         const cookie = [
             `SP_ID=${sessionData.sp_id}`,
             `expires=${date.toUTCString()}`,
             `path=/`,
-            `domain=.${domain}`
-        ].join('; ');
+            `domain=.${domain}`,
+        ].join("; ");
         document.cookie = cookie;
     }
 
@@ -428,11 +436,12 @@ export class Identity extends EventEmitter {
      * @returns {void}
      */
     _clearVarnishCookie() {
-        let domain = this.varnishCookieDomain ||
-            ((this._session && typeof this._session.baseDomain === 'string')
+        let domain =
+            this.varnishCookieDomain ||
+            (this._session && typeof this._session.baseDomain === "string"
                 ? this._session.baseDomain
                 : document.domain) ||
-            '';
+            "";
 
         document.cookie = `SP_ID=nothing; expires=Thu, 01 Jan 1970 00:00:00 GMT; path=/; domain=.${domain}`;
     }
@@ -444,7 +453,7 @@ export class Identity extends EventEmitter {
      */
     logSettings() {
         if (!this.log && !window.console) {
-            throw new SDKError('You have to provide log method in constructor');
+            throw new SDKError("You have to provide log method in constructor");
         }
 
         const log = this.log || console.log;
@@ -454,8 +463,8 @@ export class Identity extends EventEmitter {
             redirectUri: this.redirectUri,
             env: this.env,
             sessionDomain: this._sessionDomain,
-            sdkVersion: version
-        }
+            sdkVersion: version,
+        };
 
         log(`Schibsted account SDK for browsers settings: \n${JSON.stringify(settings, null, 2)}`);
     }
@@ -482,7 +491,7 @@ export class Identity extends EventEmitter {
         }
         const _postProcess = (sessionData) => {
             if (sessionData.error) {
-                throw new SDKError('HasSession failed', sessionData.error);
+                throw new SDKError("HasSession failed", sessionData.error);
             }
             this._maybeSetVarnishCookie(sessionData);
             this._emitSessionEvent(this._session, sessionData);
@@ -499,7 +508,7 @@ export class Identity extends EventEmitter {
             }
             let sessionData = null;
             try {
-                sessionData = await this._sessionService.get('/session');
+                sessionData = await this._sessionService.get("/session");
             } catch (err) {
                 if (err && err.code === 400 && this._enableSessionCaching) {
                     const expiresIn = 1000 * (err.expiresIn || 300);
@@ -514,18 +523,17 @@ export class Identity extends EventEmitter {
             }
             return _postProcess(sessionData);
         };
-        this._hasSessionInProgress = _getSession()
-            .then(
-                sessionData => {
-                    this._hasSessionInProgress = false;
-                    return sessionData;
-                },
-                err => {
-                    this.emit('error', err);
-                    this._hasSessionInProgress = false;
-                    throw new SDKError('HasSession failed', err);
-                }
-            );
+        this._hasSessionInProgress = _getSession().then(
+            (sessionData) => {
+                this._hasSessionInProgress = false;
+                return sessionData;
+            },
+            (err) => {
+                this.emit("error", err);
+                this._hasSessionInProgress = false;
+                throw new SDKError("HasSession failed", err);
+            }
+        );
 
         return this._hasSessionInProgress;
     }
@@ -540,7 +548,7 @@ export class Identity extends EventEmitter {
     async isLoggedIn() {
         try {
             const data = await this.hasSession();
-            return 'result' in data;
+            return "result" in data;
         } catch (_) {
             return false;
         }
@@ -587,7 +595,7 @@ export class Identity extends EventEmitter {
     async getUser() {
         const user = await this.hasSession();
         if (!user.result) {
-            throw new SDKError('The user is not connected to this merchant');
+            throw new SDKError("The user is not connected to this merchant");
         }
         return cloneDeep(user);
     }
@@ -610,7 +618,7 @@ export class Identity extends EventEmitter {
         if (user.userId && user.result) {
             return user.userId;
         }
-        throw new SDKError('The user is not connected to this merchant');
+        throw new SDKError("The user is not connected to this merchant");
     }
 
     /**
@@ -631,7 +639,7 @@ export class Identity extends EventEmitter {
         if (user.uuid && user.result) {
             return user.uuid;
         }
-        throw new SDKError('The user is not connected to this merchant');
+        throw new SDKError("The user is not connected to this merchant");
     }
 
     /**
@@ -646,7 +654,7 @@ export class Identity extends EventEmitter {
      */
     async getUserContextData() {
         try {
-            return await this._globalSessionService.get('/user-context');
+            return await this._globalSessionService.get("/user-context");
         } catch (_) {
             return null;
         }
@@ -675,17 +683,17 @@ export class Identity extends EventEmitter {
      */
     login({
         state,
-        acrValues = '',
-        scope = 'openid',
+        acrValues = "",
+        scope = "openid",
         redirectUri = this.redirectUri,
         preferPopup = false,
-        loginHint = '',
-        tag = '',
-        teaser = '',
-        maxAge = '',
-        locale = '',
+        loginHint = "",
+        tag = "",
+        teaser = "",
+        maxAge = "",
+        locale = "",
         oneStepLogin = false,
-        prompt = 'select_account'
+        prompt = "select_account",
     }) {
         this._closePopup();
         this.cache.delete(HAS_SESSION_CACHE_KEY);
@@ -700,12 +708,14 @@ export class Identity extends EventEmitter {
             maxAge,
             locale,
             oneStepLogin,
-            prompt
+            prompt,
         });
 
         if (preferPopup) {
-            this.popup =
-                popup.open(this.window, url, 'Schibsted account', { width: 360, height: 570 });
+            this.popup = popup.open(this.window, url, "Schibsted account", {
+                width: 360,
+                height: 570,
+            });
             if (this.popup) {
                 return this.popup;
             }
@@ -739,7 +749,7 @@ export class Identity extends EventEmitter {
     logout(redirectUri = this.redirectUri) {
         this.cache.delete(HAS_SESSION_CACHE_KEY);
         this._maybeClearVarnishCookie();
-        this.emit('logout');
+        this.emit("logout");
         this.window.location.href = this.logoutUrl(redirectUri);
     }
 
@@ -761,18 +771,18 @@ export class Identity extends EventEmitter {
      */
     loginUrl({
         state,
-        acrValues = '',
-        scope = 'openid',
+        acrValues = "",
+        scope = "openid",
         redirectUri = this.redirectUri,
-        loginHint = '',
-        tag = '',
-        teaser = '',
-        maxAge = '',
-        locale = '',
+        loginHint = "",
+        tag = "",
+        teaser = "",
+        maxAge = "",
+        locale = "",
         oneStepLogin = false,
-        prompt = 'select_account',
+        prompt = "select_account",
     }) {
-        if (typeof arguments[0] !== 'object') {
+        if (typeof arguments[0] !== "object") {
             // backward compatibility
             state = arguments[0];
             acrValues = arguments[1];
@@ -783,16 +793,24 @@ export class Identity extends EventEmitter {
             teaser = arguments[6] || teaser;
             maxAge = isNaN(arguments[7]) ? maxAge : arguments[7];
         }
-        const isValidAcrValue = (acrValue) => isStrIn(acrValue, ['password', 'otp', 'sms'], true);
-        assert(!acrValues || isStrIn(acrValues, ['', 'otp-email', 'otp-sms'], true) || acrValues.split(' ').every(isValidAcrValue),
-            `The acrValues parameter is not acceptable: ${acrValues}`);
-        assert(isUrl(redirectUri),
-            `loginUrl(): redirectUri must be a valid url but is ${redirectUri}`);
-        assert(isNonEmptyString(state),
-            `the state parameter should be a non empty string but it is ${state}`);
+        const isValidAcrValue = (acrValue) => isStrIn(acrValue, ["password", "otp", "sms"], true);
+        assert(
+            !acrValues ||
+                isStrIn(acrValues, ["", "otp-email", "otp-sms"], true) ||
+                acrValues.split(" ").every(isValidAcrValue),
+            `The acrValues parameter is not acceptable: ${acrValues}`
+        );
+        assert(
+            isUrl(redirectUri),
+            `loginUrl(): redirectUri must be a valid url but is ${redirectUri}`
+        );
+        assert(
+            isNonEmptyString(state),
+            `the state parameter should be a non empty string but it is ${state}`
+        );
 
-        return this._oauthService.makeUrl('oauth/authorize', {
-            response_type: 'code',
+        return this._oauthService.makeUrl("oauth/authorize", {
+            response_type: "code",
             redirect_uri: redirectUri,
             scope,
             state,
@@ -802,8 +820,8 @@ export class Identity extends EventEmitter {
             teaser,
             max_age: maxAge,
             locale,
-            one_step_login: oneStepLogin || '',
-            prompt: acrValues ? '' : prompt
+            one_step_login: oneStepLogin || "",
+            prompt: acrValues ? "" : prompt,
         });
     }
 
@@ -815,7 +833,7 @@ export class Identity extends EventEmitter {
     logoutUrl(redirectUri = this.redirectUri) {
         assert(isUrl(redirectUri), `logoutUrl(): redirectUri is invalid`);
         const params = { redirect_uri: redirectUri };
-        return this._sessionService.makeUrl('logout', params);
+        return this._sessionService.makeUrl("logout", params);
     }
 
     /**
@@ -824,9 +842,9 @@ export class Identity extends EventEmitter {
      * @return {string}
      */
     accountUrl(redirectUri = this.redirectUri) {
-        return this._spid.makeUrl('account/summary', {
-            response_type: 'code',
-            redirect_uri: redirectUri
+        return this._spid.makeUrl("account/summary", {
+            response_type: "code",
+            redirect_uri: redirectUri,
         });
     }
 
@@ -836,9 +854,9 @@ export class Identity extends EventEmitter {
      * @return {string}
      */
     phonesUrl(redirectUri = this.redirectUri) {
-        return this._spid.makeUrl('account/phones', {
-            response_type: 'code',
-            redirect_uri: redirectUri
+        return this._spid.makeUrl("account/phones", {
+            response_type: "code",
+            redirect_uri: redirectUri,
         });
     }
 
@@ -861,60 +879,67 @@ export class Identity extends EventEmitter {
         if (options && options.encoding) {
             queryParams.encoding = options.encoding;
         }
-        const widgetUrl = this._bffService.makeUrl('simplified-login-widget', queryParams, false);
+        const widgetUrl = this._bffService.makeUrl("simplified-login-widget", queryParams, false);
 
         const prepareLoginParams = async (loginPrams) => {
-            if (typeof loginPrams.state === 'function') {
+            if (typeof loginPrams.state === "function") {
                 loginPrams.state = await loginPrams.state();
             }
 
             return loginPrams;
-        }
+        };
 
+        return new Promise((resolve, reject) => {
+            if (!userData || !userData.display_text || !userData.identifier) {
+                return reject(new SDKError("Missing user data"));
+            }
 
-        return new Promise(
-            (resolve, reject) => {
-                if (!userData || !userData.display_text || !userData.identifier) {
-                    return reject(new SDKError('Missing user data'));
-                }
+            const initialParams = {
+                displayText: userData.display_text,
+                env: this.env,
+                clientName: userData.client_name,
+                clientId: this.clientId,
+                providerId: userData.provider_id,
+                windowWidth: () => window.innerWidth,
+                windowOnResize: (f) => {
+                    window.onresize = f;
+                },
+            };
 
-                const initialParams = {
-                    displayText: userData.display_text,
-                    env: this.env,
-                    clientName: userData.client_name,
-                    clientId: this.clientId,
-                    providerId: userData.provider_id,
-                    windowWidth: () => window.innerWidth,
-                    windowOnResize: (f) => {
-                        window.onresize = f;
-                    },
-                };
+            const loginHandler = async () => {
+                this.login(
+                    Object.assign(await prepareLoginParams(loginParams), {
+                        loginHint: userData.identifier,
+                    })
+                );
+            };
 
-                const loginHandler = async () => {
-                    this.login(Object.assign(await prepareLoginParams(loginParams), {loginHint: userData.identifier}));
-                };
+            const loginNotYouHandler = async () => {
+                this.login(
+                    Object.assign(await prepareLoginParams(loginParams), {
+                        loginHint: userData.identifier,
+                        prompt: "login",
+                    })
+                );
+            };
 
-                const loginNotYouHandler = async () => {
-                    this.login(Object.assign(await prepareLoginParams(loginParams), {loginHint: userData.identifier, prompt: 'login'}));
-                };
+            if (window.openSimplifiedLoginWidget) {
+                window.openSimplifiedLoginWidget(initialParams, loginHandler, loginNotYouHandler);
+                return resolve(true);
+            }
 
-                if (window.openSimplifiedLoginWidget) {
-                    window.openSimplifiedLoginWidget(initialParams, loginHandler, loginNotYouHandler);
-                    return resolve(true);
-                }
-
-                const simplifiedLoginWidget = document.createElement("script");
-                simplifiedLoginWidget.type = "text/javascript";
-                simplifiedLoginWidget.src = widgetUrl;
-                simplifiedLoginWidget.onload = () => {
-                    window.openSimplifiedLoginWidget(initialParams, loginHandler, loginNotYouHandler);
-                    resolve(true);
-                };
-                simplifiedLoginWidget.onerror = () => {
-                    reject(new SDKError('Error when loading simplified login widget content'));
-                };
-                document.getElementsByTagName('body')[0].appendChild(simplifiedLoginWidget);
-            });
+            const simplifiedLoginWidget = document.createElement("script");
+            simplifiedLoginWidget.type = "text/javascript";
+            simplifiedLoginWidget.src = widgetUrl;
+            simplifiedLoginWidget.onload = () => {
+                window.openSimplifiedLoginWidget(initialParams, loginHandler, loginNotYouHandler);
+                resolve(true);
+            };
+            simplifiedLoginWidget.onerror = () => {
+                reject(new SDKError("Error when loading simplified login widget content"));
+            };
+            document.getElementsByTagName("body")[0].appendChild(simplifiedLoginWidget);
+        });
     }
 }
 
