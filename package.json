@@ -4,7 +4,6 @@
   "description": "Schibsted account SDK for browsers",
   "main": "index.js",
   "scripts": {
-    "build": "./build.sh",
     "clean": "rimraf .cache coverage dist docs",
     "docs": "rimraf docs && jsdoc -c ./utils/jsdoc.js --verbose",
     "lint": "eslint .",
@@ -12,7 +11,12 @@
     "test": "jest",
     "precover": "npm run lint",
     "cover": "jest --coverage",
-    "postcover": "codecov"
+    "postcover": "codecov",
+    "type-check": "tsc --noEmit",
+    "type-check:watch": "npm run type-check -- --watch",
+    "build": "npm run build:types && npm run build:js",
+    "build:types": "tsc --emitDeclarationOnly",
+    "build:js": "babel src --out-dir lib --extensions \".ts,.tsx\" --source-maps inline"
   },
   "author": "",
   "license": "MIT",
@@ -22,6 +26,8 @@
   "devDependencies": {
     "@babel/core": "^7.11.4",
     "@babel/preset-env": "^7.11.0",
+    "@babel/plugin-proposal-class-properties": "^7.11.0",
+    "@babel/preset-typescript": "^7.11.0",
     "babel-loader": "^8.1.0",
     "codecov": "^3.6.5",
     "core-js": "^3.6.5",
@@ -33,36 +39,14 @@
     "jsdoc": "^3.6.5",
     "node-fetch": "^2.6.0",
     "regenerator-runtime": "^0.13.7",
-    "webpack": "^4.44.1",
-    "webpack-cli": "^3.3.12",
+    "typescript": "^4.5.2",
+    "webpack": "^5.64.3",
+    "webpack-cli": "^4.9.1",
     "whatwg-url": "^8.0.0"
   },
   "repository": {
     "type": "git",
     "url": "git://github.com/schibsted/account-sdk-browser.git"
-  },
-  "babel": {
-    "presets": [
-      [
-        "@babel/preset-env",
-        {
-          "useBuiltIns": "usage",
-          "corejs": 3,
-          "targets": {
-            "browsers": [
-              "> 1%",
-              "last 10 chrome major versions",
-              "last 10 firefox major versions",
-              "last 10 opera major versions",
-              "last 2 safari major versions",
-              "last 2 ios major versions",
-              "last 2 ie major versions",
-              "last 5 edge major versions"
-            ]
-          }
-        }
-      ]
-    ]
   },
   "typings": "index.d.ts"
 }

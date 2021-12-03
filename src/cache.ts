@@ -6,20 +6,21 @@
 
 import SDKError from './SDKError';
 
+type StoreProvider = () => Storage;
 /**
  * Check whether we are able to use web storage
- * @param {Storage} storeProvider - A function to return a WebStorage instance (either
+ * @param {StoreProvider} storeProvider - A function to return a WebStorage instance (either
  * `sessionStorage` or `localStorage` from a `Window` object)
  * @private
  * @returns {boolean}
  */
-function webStorageWorks(storeProvider) {
+function webStorageWorks(storeProvider: StoreProvider) {
     if (!storeProvider) {
         return false;
     }
     try {
         const store = storeProvider();
-        const randomKey = 'x-x-x-x'.replace(/x/g, () => Math.random());
+        const randomKey = 'x-x-x-x'.replace(/x/g, () => Math.random().toString());
         const testValue = 'TEST-VALUE';
         store.setItem(randomKey, testValue);
         const val = store.getItem(randomKey);
@@ -35,12 +36,16 @@ function webStorageWorks(storeProvider) {
  * @private
  */
 class WebStorageCache {
+    store: Storage;
+    get: (key: any) => any;
+    set: (key: any, value: any) => any;
+    delete: (key: any) => any;
     /**
      * Create web storage cache object
      * @param {Storage} store - A reference to either `sessionStorage` or `localStorage` from a
      * `Window` object
      */
-    constructor(store) {
+    constructor(store: Storage) {
         this.store = store;
         this.get = (key) => this.store.getItem(key);
         this.set = (key, value) => this.store.setItem(key, value);
@@ -53,6 +58,10 @@ class WebStorageCache {
  * @private
  */
 class LiteralCache {
+    store: Record<string, any>;
+    get: (key: any) => any;
+    set: (key: any, value: any) => any;
+    delete: (key: any) => boolean;
     /**
      * Create JS object literal cache object
      */
@@ -71,12 +80,14 @@ const maxExpiresIn = Math.pow(2, 31) - 1;
  * @private
  */
 export default class Cache {
+    cache: WebStorageCache | LiteralCache;
+    type: string;
     /**
-     * @param {Storage} [storeProvider] - A function to return a WebStorage instance (either
+     * @param {StoreProvider} [storeProvider] - A function to return a WebStorage instance (either
      * `sessionStorage` or `localStorage` from a `Window` object)
      * @throws {SDKError} - If sessionStorage or localStorage are not accessible
      */
-    constructor(storeProvider) {
+    constructor(storeProvider: StoreProvider) {
         if (webStorageWorks(storeProvider)) {
             this.cache = new WebStorageCache(storeProvider());
             this.type = 'WebStorage';
@@ -92,7 +103,7 @@ export default class Cache {
      * @private
      * @returns {*} - The value if it exists, otherwise null
      */
-    get(key) {
+    get(key: string) {
         try {
             const raw = this.cache.get(key);
             const obj = raw ? JSON.parse(raw) : null;
@@ -114,7 +125,7 @@ export default class Cache {
      * @private
      * @returns {void}
      */
-    set(key, value, expiresIn = 0) {
+    set(key: string, value: any, expiresIn = 0) {
         if (expiresIn <= 0) {
             return;
         }
@@ -135,7 +146,7 @@ export default class Cache {
      * @private
      * @returns {void}
      */
-    delete(key) {
+    delete(key: string) {
         try {
             this.cache.delete(key);
         } catch (e) {

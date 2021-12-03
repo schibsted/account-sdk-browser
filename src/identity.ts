@@ -8,7 +8,7 @@ import { assert, isStr, isNonEmptyString, isObject, isUrl, isStrIn } from "./val
 import { cloneDeep } from "./object";
 import { urlMapper } from "./url";
 import { ENDPOINTS, NAMESPACE } from "./config";
-import EventEmitter from "tiny-emitter";
+import { TinyEmitter } from "tiny-emitter";
 import Cache from "./cache";
 import * as popup from "./popup";
 import RESTClient from "./RESTClient";
@@ -16,150 +16,299 @@ import SDKError from "./SDKError";
 import * as spidTalk from "./spidTalk";
 const { version } = require("../package.json");
 
-/**
- * @typedef {object} LoginOptions
- * @property {string} state - An opaque value used by the client to maintain state between
- * the request and callback. It's also recommended to prevent CSRF {@link https://tools.ietf.org/html/rfc6749#section-10.12}
- * @property {string} [acrValues] - Authentication Context Class Reference Values. If
- * omitted, the user will be asked to authenticate using username+password.
- * For 2FA (Two-Factor Authentication) possible values are `sms`, `otp` (one time password) and
- * `password` (will force password confirmation, even if user is already logged in). Those values might
- * be mixed as space-separated string. To make sure that user has authenticated with 2FA you need
- * to verify AMR (Authentication Methods References) claim in ID token.
- * Might also be used to ensure additional acr (sms, otp) for already logged in users.
- * Supported values are also 'otp-email' means one time password using email, and 'otp-sms' means
- * one time password using sms.
- * @property {string} [scope] - The OAuth scopes for the tokens. This is a list of
- * scopes, separated by space. If the list of scopes contains `openid`, the generated tokens
- * includes the id token which can be useful for getting information about the user. Omitting
- * scope is allowed, while `invalid_scope` is returned when the client asks for a scope you
- * aren’t allowed to request. {@link https://tools.ietf.org/html/rfc6749#section-3.3}
- * @property {string} [redirectUri] - Redirect uri that will receive the
- * code. Must exactly match a redirectUri from your client in self-service
- * @property {boolean} [preferPopup] - Should we try to open a popup window?
- * @property {string} [loginHint] - user email or UUID hint
- * @property {string} [tag] - Pulse tag
- * @property {string} [teaser] - Teaser slug. Teaser with given slug will be displayed
- * in place of default teaser
- * @property {number|string} [maxAge] - Specifies the allowable elapsed time in seconds since
- * the last time the End-User was actively authenticated. If last authentication time is more
- * than maxAge seconds in the past, re-authentication will be required. See the OpenID Connect
- * spec section 3.1.2.1 for more information
- * @property {string} [locale] - Optional parameter to overwrite client locale setting.
- * New flows supports nb_NO, fi_FI, sv_SE, en_US
- * @property {boolean} [oneStepLogin] - display username and password on one screen
- * @property {string} [prompt] - String that specifies whether the Authorization Server prompts the
- * End-User for reauthentication or confirm account screen. Supported values: `select_account` or `login`
- */
-/**
- * @typedef {object} SimplifiedLoginWidgetLoginOptions
- * @property {string|function(): (string|Promise<string>)} state - An opaque value used by the client to maintain state between
- * the request and callback. It's also recommended to prevent CSRF {@link https://tools.ietf.org/html/rfc6749#section-10.12}
- * @property {string} [acrValues] - Authentication Context Class Reference Values. If
- * omitted, the user will be asked to authenticate using username+password.
- * For 2FA (Two-Factor Authentication) possible values are `sms`, `otp` (one time password) and
- * `password` (will force password confirmation, even if user is already logged in). Those values might
- * be mixed as space-separated string. To make sure that user has authenticated with 2FA you need
- * to verify AMR (Authentication Methods References) claim in ID token.
- * Might also be used to ensure additional acr (sms, otp) for already logged in users.
- * Supported values are also 'otp-email' means one time password using email, and 'otp-sms' means
- * one time password using sms.
- * @property {string} [scope] - The OAuth scopes for the tokens. This is a list of
- * scopes, separated by space. If the list of scopes contains `openid`, the generated tokens
- * includes the id token which can be useful for getting information about the user. Omitting
- * scope is allowed, while `invalid_scope` is returned when the client asks for a scope you
- * aren’t allowed to request. {@link https://tools.ietf.org/html/rfc6749#section-3.3}
- * @property {string} [redirectUri] - Redirect uri that will receive the
- * code. Must exactly match a redirectUri from your client in self-service
- * @property {boolean} [preferPopup] - Should we try to open a popup window?
- * @property {string} [loginHint] - user email or UUID hint
- * @property {string} [tag] - Pulse tag
- * @property {string} [teaser] - Teaser slug. Teaser with given slug will be displayed
- * in place of default teaser
- * @property {number|string} [maxAge] - Specifies the allowable elapsed time in seconds since
- * the last time the End-User was actively authenticated. If last authentication time is more
- * than maxAge seconds in the past, re-authentication will be required. See the OpenID Connect
- * spec section 3.1.2.1 for more information
- * @property {string} [locale] - Optional parameter to overwrite client locale setting.
- * New flows supports nb_NO, fi_FI, sv_SE, en_US
- * @property {boolean} [oneStepLogin] - display username and password on one screen
- * @property {string} [prompt] - String that specifies whether the Authorization Server prompts the
- * End-User for reauthentication or confirm account screen. Supported values: `select_account` or `login`
- */
+export type BaseLoginOptions = {
+    /**
+     * - Authentication Context Class Reference Values. If
+     * omitted, the user will be asked to authenticate using username+password.
+     * For 2FA (Two-Factor Authentication) possible values are `sms`, `otp` (one time password) and
+     * `password` (will force password confirmation, even if user is already logged in). Those values might
+     * be mixed as space-separated string. To make sure that user has authenticated with 2FA you need
+     * to verify AMR (Authentication Methods References) claim in ID token.
+     * Might also be used to ensure additional acr (sms, otp) for already logged in users.
+     * Supported values are also 'otp-email' means one time password using email, and 'otp-sms' means
+     * one time password using sms.
+     */
+    acrValues?: string;
+    /**
+     * - The OAuth scopes for the tokens. This is a list of
+     * scopes, separated by space. If the list of scopes contains `openid`, the generated tokens
+     * includes the id token which can be useful for getting information about the user. Omitting
+     * scope is allowed, while `invalid_scope` is returned when the client asks for a scope you
+     * aren’t allowed to request. {@link https://tools.ietf.org/html/rfc6749#section-3.3}
+     */
+    scope?: string;
+    /**
+     * - Redirect uri that will receive the
+     * code. Must exactly match a redirectUri from your client in self-service
+     */
+    redirectUri?: string;
+    /**
+     * - Should we try to open a popup window?
+     */
+    preferPopup?: boolean;
+    /**
+     * - user email or UUID hint
+     */
+    loginHint?: string;
+    /**
+     * - Pulse tag
+     */
+    tag?: string;
+    /**
+     * - Teaser slug. Teaser with given slug will be displayed
+     * in place of default teaser
+     */
+    teaser?: string;
+    /**
+     * - Specifies the allowable elapsed time in seconds since
+     * the last time the End-User was actively authenticated. If last authentication time is more
+     * than maxAge seconds in the past, re-authentication will be required. See the OpenID Connect
+     * spec section 3.1.2.1 for more information
+     */
+    maxAge?: number | string;
+    /**
+     * - Optional parameter to overwrite client locale setting.
+     * New flows supports nb_NO, fi_FI, sv_SE, en_US
+     */
+    locale?: string;
+    /**
+     * - display username and password on one screen
+     */
+    oneStepLogin?: boolean;
+    /**
+     * - String that specifies whether the Authorization Server prompts the
+     * End-User for reauthentication or confirm account screen. Supported values: `select_account` or `login`
+     */
+    prompt?: string;
+};
 
-/**
- * @typedef {object} HasSessionSuccessResponse
- * @property {boolean} result - Is the user connected to the merchant? (it means that the merchant
- * id is in the list of merchants listed of this user in the database)? Example: false
- * @property {string} userStatus - Example: 'notConnected' or 'connected'. Deprecated, use
- * `Identity.isConnected()`
- * @property {string} baseDomain - Example: 'localhost'
- * @property {string} id - Example: '58eca10fdbb9f6df72c3368f'. Obsolete
- * @property {number} userId - Example: 37162
- * @property {string} uuid - Example: 'b3b23aa7-34f2-5d02-a10e-5a3455c6ab2c'
- * @property {string} sp_id - Example: 'eyJjbGllbnRfaWQ...'
- * @property {number} expiresIn - Example: 30 * 60 * 1000 (for 30 minutes)
- * @property {number} serverTime - Example: 1506285759
- * @property {string} sig - Example: 'NCdzXaz4ZRb7...' The sig parameter is a concatenation of an
- * HMAC SHA-256 signature string, a dot (.) and a base64url encoded JSON object (session).
- * {@link http://techdocs.spid.no/sdks/js/response-signature-and-validation/}
- * @property {string} displayName - (Only for connected users) Example: 'batman'
- * @property {string} givenName - (Only for connected users) Example: 'Bruce'
- * @property {string} familyName - (Only for connected users) Example: 'Wayne'
- * @property {string} gender - (Only for connected users) Example: 'male', 'female', 'undisclosed'
- * @property {string} photo - (Only for connected users) Example:
- * 'http://www.srv.com/some/picture.jpg'
- * @property {boolean} tracking - (Only for connected users)
- * @property {boolean} clientAgreementAccepted - (Only for connected users)
- * @property {boolean} defaultAgreementAccepted - (Only for connected users)
- */
+export interface LoginOptions extends BaseLoginOptions {
+    /**
+     * - An opaque value used by the client to maintain state between
+     * the request and callback. It's also recommended to prevent CSRF {@link https://tools.ietf.org/html/rfc6749#section-10.12}
+     */
+    state: string;
+}
+
+export interface SimplifiedLoginWidgetLoginOptions extends BaseLoginOptions {
+    /**
+     * - An opaque value used by the client to maintain state between
+     * the request and callback. It's also recommended to prevent CSRF {@link https://tools.ietf.org/html/rfc6749#section-10.12}
+     */
+    state: string | (() => string | Promise<string>);
+}
+
+export type HasSessionSuccessResponse = {
+    /**
+     * - Is the user connected to the merchant? (it means that the merchant
+     * id is in the list of merchants listed of this user in the database)? Example: false
+     */
+    result: boolean;
+    /**
+     * - Example: 'notConnected' or 'connected'. Deprecated, use
+     * `Identity.isConnected()`
+     */
+    userStatus: string;
+    /**
+     * - Example: 'localhost'
+     */
+    baseDomain: string;
+    /**
+     * - Example: '58eca10fdbb9f6df72c3368f'. Obsolete
+     */
+    id: string;
+    /**
+     * - Example: 37162
+     */
+    userId: number;
+    /**
+     * - Example: 'b3b23aa7-34f2-5d02-a10e-5a3455c6ab2c'
+     */
+    uuid: string;
+    /**
+     * - Example: 'eyJjbGllbnRfaWQ...'
+     */
+    sp_id: string;
+    /**
+     * - Example: 30 * 60 * 1000 (for 30 minutes)
+     */
+    expiresIn: number;
+    /**
+     * - Example: 1506285759
+     */
+    serverTime: number;
+    /**
+     * - Example: 'NCdzXaz4ZRb7...' The sig parameter is a concatenation of an
+     * HMAC SHA-256 signature string, a dot (.) and a base64url encoded JSON object (session).
+     * {@link http://techdocs.spid.no/sdks/js/response-signature-and-validation/}
+     */
+    sig: string;
+    /**
+     * - (Only for connected users) Example: 'batman'
+     */
+    displayName: string;
+    /**
+     * - (Only for connected users) Example: 'Bruce'
+     */
+    givenName: string;
+    /**
+     * - (Only for connected users) Example: 'Wayne'
+     */
+    familyName: string;
+    /**
+     * - (Only for connected users) Example: 'male', 'female', 'undisclosed'
+     */
+    gender: string;
+    /**
+     * - (Only for connected users) Example:
+     * 'http://www.srv.com/some/picture.jpg'
+     */
+    photo: string;
+    /**
+     * - (Only for connected users)
+     */
+    tracking: boolean;
+    /**
+     * - (Only for connected users)
+     */
+    clientAgreementAccepted: boolean;
+    /**
+     * - (Only for connected users)
+     */
+    defaultAgreementAccepted: boolean;
+};
 
 /**
  * Emitted when an error happens (useful for debugging)
  * @event Identity#error
  */
 
+export type HasSessionFailureResponse = {
+    error: {
+        /**
+         * - Typically an HTTP response code. Example: 401
+         */
+        code: number;
+        /**
+         * - Example: "No session found!"
+         */
+        description: string;
+        /**
+         * - Example: "UserException"
+         */
+        type: string;
+    };
+    response: {
+        /**
+         * - Example: "localhost"
+         */
+        baseDomain: string;
+        /**
+         * - Time span in milliseconds. Example: 30 * 60 * 1000 (for 30 minutes)
+         */
+        expiresIn: number;
+        result: boolean;
+        /**
+         * - Server time in seconds since the Unix Epoch. Example: 1506287788
+         */
+        serverTime: number;
+    };
+};
 /**
- * @typedef {object} HasSessionFailureResponse
- * @property {object} error
- * @property {number} error.code - Typically an HTTP response code. Example: 401
- * @property {string} error.description - Example: "No session found!"
- * @property {string} error.type - Example: "UserException"
- * @property {object} response
- * @property {string} response.baseDomain - Example: "localhost"
- * @property {number} response.expiresIn - Time span in milliseconds. Example: 30 * 60 * 1000 (for 30 minutes)
- * @property {boolean} response.result
- * @property {number} response.serverTime - Server time in seconds since the Unix Epoch. Example: 1506287788
+ * A promise for the user's favorite color.
+ *
+ * @promise HasSessionResponse
+ * @fulfill {HasSessionSuccessResponse} Successfull session request.
+ * @reject {HasSessionFailureResponse} Unable to get session
  */
+export type HasSessionResponse = HasSessionSuccessResponse | HasSessionFailureResponse;
 
-/**
- * @typedef {object} SimplifiedLoginData
- * @property {string} identifier - Deprecated: User UUID, to be be used as `loginHint` for {@link Identity#login}
- * @property {string} display_text - Human-readable user identifier
- * @property {string} client_name - Client name
- */
+function isHasSessionSuccessResponse(
+    response: HasSessionResponse
+): response is HasSessionSuccessResponse {
+    return "result" in response;
+}
+function isHasSessionFailureResponse(
+    response: HasSessionResponse
+): response is HasSessionFailureResponse {
+    return "error" in response;
+}
 
-/**
- * @typedef {object} SimplifiedLoginWidgetOptions
- * @property {string} encoding - expected encoding of simplified login widget. Could be utf-8 (default), iso-8859-1 or iso-8859-15
- */
+export type SimplifiedLoginData = {
+    /**
+     * - Deprecated: User UUID, to be be used as `loginHint` for {@link Identity#login}
+     */
+    identifier: string;
+    /**
+     * - Human-readable user identifier
+     */
+    display_text: string;
+    /**
+     * - Client name
+     */
+    client_name: string;
+};
+
+export type SimplifiedLoginWidgetOptions = {
+    /**
+     * - expected encoding of simplified login widget. Could be utf-8 (default), iso-8859-1 or iso-8859-15
+     */
+    encoding: string;
+};
+
+export type EnableVarnishCookieOptions = {
+    /**
+     * Override this to set number of seconds before the varnish
+     * cookie expires. The default is to use the same time that hasSession responses are cached for
+     */
+    expiresIn?: number;
+    /** Override cookie domain. E.g. «vg.no» instead of «www.vg.no» */
+    domain?: string;
+};
 
 const HAS_SESSION_CACHE_KEY = "hasSession-cache";
 const globalWindow = () => window;
 
+export interface IdentityOptions {
+    /** Example: "1234567890abcdef12345678" */
+    clientId: string;
+    /** Example: "https://id.site.com" */
+    sessionDomain: string;
+    /** Example: "https://site.com" */
+    redirectUri: string;
+    /** Schibsted account environment: `PRE`, `PRO`, `PRO_NO`, `PRO_FI` or `PRO_DK` */
+    env?: string;
+    /** A function that receives debug log information. If not set, no logging will be done */
+    log?: Function;
+    /** window object */
+    window?: Window;
+}
 /**
  * Provides Identity functionalty to a web page
  */
-export class Identity extends EventEmitter {
+export class Identity extends TinyEmitter {
+    private _sessionInitiatedSent: boolean = false;
+    private _sessionDomain: string;
+    private _enableSessionCaching: boolean;
+    private _session: HasSessionSuccessResponse | undefined;
+    private _spid: RESTClient;
+    private _oauthService: RESTClient;
+    private _bffService: RESTClient;
+    private _sessionService: RESTClient;
+    private _globalSessionService: RESTClient;
+    private _hasSessionInProgress: Promise<HasSessionSuccessResponse> | undefined;
+    window: Window;
+    clientId: string;
+    cache: Cache;
+    redirectUri: string;
+    env: string;
+    log: Function;
+    popup: any;
+    setVarnishCookie: boolean;
+    varnishExpiresIn: number;
+    varnishCookieDomain: any;
     /**
-     * @param {object} options
-     * @param {string} options.clientId - Example: "1234567890abcdef12345678"
-     * @param {string} options.sessionDomain - Example: "https://id.site.com"
-     * @param {string} options.redirectUri - Example: "https://site.com"
-     * @param {string} [options.env=PRE] - Schibsted account environment: `PRE`, `PRO`, `PRO_NO`, `PRO_FI` or `PRO_DK`
-     * @param {function} [options.log] - A function that receives debug log information. If not set,
-     * no logging will be done
-     * @param {object} [options.window] - window object
+     * @param options
      * @throws {SDKError} - If any of options are invalid
      */
     constructor({
@@ -169,7 +318,7 @@ export class Identity extends EventEmitter {
         env = "PRE",
         log,
         window = globalWindow(),
-    }) {
+    }: IdentityOptions) {
         super();
         assert(isNonEmptyString(clientId), "clientId parameter is required");
         assert(isObject(window), "The reference to window is missing");
@@ -177,7 +326,7 @@ export class Identity extends EventEmitter {
         assert(sessionDomain && isUrl(sessionDomain), "sessionDomain parameter is not a valid URL");
 
         spidTalk.emulate(window);
-        this._sessionInitiatedSent = false;
+
         this.window = window;
         this.clientId = clientId;
         this.cache = new Cache(() => this.window && this.window.sessionStorage);
@@ -185,12 +334,10 @@ export class Identity extends EventEmitter {
         this.env = env;
         this.log = log;
         this._sessionDomain = sessionDomain;
+        this._session.baseDomain = "";
 
         // Internal hack: set to false to always refresh from hassession
         this._enableSessionCaching = true;
-
-        // Old session
-        this._session = {};
 
         this._setSessionServiceUrl(sessionDomain);
         this._setSpidServerUrl(env);
@@ -201,11 +348,10 @@ export class Identity extends EventEmitter {
 
     /**
      * Set SPiD server URL
-     * @private
-     * @param {string} url - real URL or 'PRE' style key
+     * @param url - real URL or 'PRE' style key
      * @returns {void}
      */
-    _setSpidServerUrl(url) {
+    private _setSpidServerUrl(url: string) {
         assert(isStr(url), `url parameter is invalid: ${url}`);
         this._spid = new RESTClient({
             serverUrl: urlMapper(url, ENDPOINTS.SPiD),
@@ -216,11 +362,10 @@ export class Identity extends EventEmitter {
 
     /**
      * Set OAuth server URL
-     * @private
-     * @param {string} url - real URL or 'PRE' style key
+     * @param url - real URL or 'PRE' style key
      * @returns {void}
      */
-    _setOauthServerUrl(url) {
+    private _setOauthServerUrl(url: string) {
         assert(isStr(url), `url parameter is invalid: ${url}`);
         this._oauthService = new RESTClient({
             serverUrl: urlMapper(url, ENDPOINTS.SPiD),
@@ -235,7 +380,7 @@ export class Identity extends EventEmitter {
      * @param {string} url  - real URL or 'PRE' style key
      * @returns {void}
      */
-    _setBffServerUrl(url) {
+    private _setBffServerUrl(url: string) {
         assert(isStr(url), `url parameter is invalid: ${url}`);
         this._bffService = new RESTClient({
             serverUrl: urlMapper(url, ENDPOINTS.BFF),
@@ -250,7 +395,7 @@ export class Identity extends EventEmitter {
      * @param {string} domain - real URL — (**not** 'PRE' style env key)
      * @returns {void}
      */
-    _setSessionServiceUrl(domain) {
+    private _setSessionServiceUrl(domain: string) {
         assert(isStr(domain), `domain parameter is invalid: ${domain}`);
         const client_sdrn = `sdrn:${NAMESPACE[this.env]}:client:${this.clientId}`;
         this._sessionService = new RESTClient({
@@ -266,7 +411,7 @@ export class Identity extends EventEmitter {
      * @param {string} url - real URL or 'PRE' style key
      * @returns {void}
      */
-    _setGlobalSessionServiceUrl(url) {
+    private _setGlobalSessionServiceUrl(url: string) {
         assert(isStr(url), `url parameter is invalid: ${url}`);
         const client_sdrn = `sdrn:${NAMESPACE[this.env]}:client:${this.clientId}`;
         this._globalSessionService = new RESTClient({
@@ -283,7 +428,10 @@ export class Identity extends EventEmitter {
      * @param {object} current
      * @returns {void}
      */
-    _emitSessionEvent(previous, current) {
+    private _emitSessionEvent(
+        previous: HasSessionSuccessResponse,
+        current: HasSessionSuccessResponse
+    ) {
         /**
          * Emitted when the user is logged in (This happens as a result of calling
          * {@link Identity#hasSession}, so it is also emitted if the user was previously logged in)
@@ -359,16 +507,12 @@ export class Identity extends EventEmitter {
     /**
      * Set the Varnish cookie (`SP_ID`) when hasSession() is called. Note that most browsers require
      * that you are on a "real domain" for this to work — so, **not** `localhost`
-     * @param {object} [options]
-     * @param {number} [options.expiresIn] Override this to set number of seconds before the varnish
-     * cookie expires. The default is to use the same time that hasSession responses are cached for
-     * @param {string} [options.domain] Override cookie domain. E.g. «vg.no» instead of «www.vg.no»
-     * @returns {void}
+     * @param {EnableVarnishCookieOptions|number} [options] Either VarnishCookieOptions or expiresIn
      */
-    enableVarnishCookie(options) {
+    enableVarnishCookie(options: EnableVarnishCookieOptions | number) {
         let expiresIn = 0;
         let domain;
-        if (Number.isInteger(options)) {
+        if (typeof options === "number" && Number.isInteger(options)) {
             expiresIn = options;
         } else if (typeof options == "object") {
             ({ expiresIn = expiresIn, domain = domain } = options);
@@ -383,11 +527,8 @@ export class Identity extends EventEmitter {
 
     /**
      * Set the Varnish cookie if configured
-     * @private
-     * @param {HasSessionSuccessResponse} sessionData
-     * @returns {void}
      */
-    _maybeSetVarnishCookie(sessionData) {
+    private _maybeSetVarnishCookie(sessionData: HasSessionSuccessResponse) {
         if (!this.setVarnishCookie) {
             return;
         }
@@ -421,10 +562,8 @@ export class Identity extends EventEmitter {
 
     /**
      * Clear the Varnish cookie if configured
-     * @private
-     * @returns {void}
      */
-    _maybeClearVarnishCookie() {
+    private _maybeClearVarnishCookie(): void {
         if (this.setVarnishCookie) {
             this._clearVarnishCookie();
         }
@@ -432,10 +571,8 @@ export class Identity extends EventEmitter {
 
     /**
      * Clear the Varnish cookie
-     * @private
-     * @returns {void}
      */
-    _clearVarnishCookie() {
+    private _clearVarnishCookie(): void {
         let domain =
             this.varnishCookieDomain ||
             (this._session && typeof this._session.baseDomain === "string"
@@ -483,14 +620,14 @@ export class Identity extends EventEmitter {
      * @fires Identity#sessionInit
      * @fires Identity#statusChange
      * @fires Identity#error
-     * @return {Promise<HasSessionSuccessResponse|HasSessionFailureResponse>}
+     * @return {Promise<HasSessionSuccessResponse>}
      */
-    hasSession() {
+    public hasSession(): Promise<HasSessionSuccessResponse> {
         if (this._hasSessionInProgress) {
             return this._hasSessionInProgress;
         }
-        const _postProcess = (sessionData) => {
-            if (sessionData.error) {
+        const _postProcess = (sessionData: HasSessionResponse) => {
+            if (isHasSessionFailureResponse(sessionData)) {
                 throw new SDKError("HasSession failed", sessionData.error);
             }
             this._maybeSetVarnishCookie(sessionData);
@@ -525,12 +662,12 @@ export class Identity extends EventEmitter {
         };
         this._hasSessionInProgress = _getSession().then(
             (sessionData) => {
-                this._hasSessionInProgress = false;
+                this._hasSessionInProgress = undefined;
                 return sessionData;
             },
             (err) => {
                 this.emit("error", err);
-                this._hasSessionInProgress = false;
+                this._hasSessionInProgress = undefined;
                 throw new SDKError("HasSession failed", err);
             }
         );
@@ -548,7 +685,8 @@ export class Identity extends EventEmitter {
     async isLoggedIn() {
         try {
             const data = await this.hasSession();
-            return "result" in data;
+            // TODO: Should this not also check data.result?
+            return isHasSessionSuccessResponse(data);
         } catch (_) {
             return false;
         }
@@ -590,9 +728,8 @@ export class Identity extends EventEmitter {
      * effect that it might perform an auto-login on the user
      * @throws {SDKError} If the user isn't connected to the merchant
      * @throws {SDKError} If we couldn't get the user
-     * @return {Promise<HasSessionSuccessResponse>}
      */
-    async getUser() {
+    async getUser(): Promise<HasSessionSuccessResponse> {
         const user = await this.hasSession();
         if (!user.result) {
             throw new SDKError("The user is not connected to this merchant");
@@ -611,12 +748,12 @@ export class Identity extends EventEmitter {
      * @description This function calls {@link Identity#hasSession} internally and thus has the side
      * effect that it might perform an auto-login on the user
      * @throws {SDKError} If the user isn't connected to the merchant
-     * @return {Promise<string>} The `userId` field (not to be confused with the `uuid`)
+     * @return The `userId` field (not to be confused with the `uuid`)
      */
-    async getUserId() {
+    async getUserId(): Promise<string> {
         const user = await this.hasSession();
         if (user.userId && user.result) {
-            return user.userId;
+            return String(user.userId);
         }
         throw new SDKError("The user is not connected to this merchant");
     }
@@ -694,7 +831,7 @@ export class Identity extends EventEmitter {
         locale = "",
         oneStepLogin = false,
         prompt = "select_account",
-    }) {
+    }: LoginOptions) {
         this._closePopup();
         this.cache.delete(HAS_SESSION_CACHE_KEY);
         const url = this.loginUrl({
@@ -781,7 +918,7 @@ export class Identity extends EventEmitter {
         locale = "",
         oneStepLogin = false,
         prompt = "select_account",
-    }) {
+    }: LoginOptions) {
         if (typeof arguments[0] !== "object") {
             // backward compatibility
             state = arguments[0];
@@ -793,7 +930,8 @@ export class Identity extends EventEmitter {
             teaser = arguments[6] || teaser;
             maxAge = isNaN(arguments[7]) ? maxAge : arguments[7];
         }
-        const isValidAcrValue = (acrValue) => isStrIn(acrValue, ["password", "otp", "sms"], true);
+        const isValidAcrValue = (acrValue: string) =>
+            isStrIn(acrValue, ["password", "otp", "sms"], true);
         assert(
             !acrValues ||
                 isStrIn(acrValues, ["", "otp-email", "otp-sms"], true) ||
@@ -871,22 +1009,26 @@ export class Identity extends EventEmitter {
      * @param {SimplifiedLoginWidgetOptions} [options] - additional configuration of Simplified Login Widget
      * @return {Promise<boolean|SDKError>} - will resolve to true if widget will be display. Otherwise will throw SDKError
      */
-    async showSimplifiedLoginWidget(loginParams, options) {
+    async showSimplifiedLoginWidget(
+        loginParams: SimplifiedLoginWidgetLoginOptions,
+        options: SimplifiedLoginWidgetOptions
+    ) {
         // getUserContextData doens't throw exception
         const userData = await this.getUserContextData();
 
-        const queryParams = { client_id: this.clientId };
+        const queryParams: Record<string, string> = { client_id: this.clientId };
         if (options && options.encoding) {
             queryParams.encoding = options.encoding;
         }
         const widgetUrl = this._bffService.makeUrl("simplified-login-widget", queryParams, false);
 
-        const prepareLoginParams = async (loginPrams) => {
-            if (typeof loginPrams.state === "function") {
-                loginPrams.state = await loginPrams.state();
+        const prepareLoginParams = async (
+            loginPrams: SimplifiedLoginWidgetLoginOptions
+        ): Promise<LoginOptions> => {
+            if (typeof loginParams.state === "function") {
+                return { ...loginPrams, state: await loginParams.state() };
             }
-
-            return loginPrams;
+            return loginParams as LoginOptions;
         };
 
         return new Promise((resolve, reject) => {
