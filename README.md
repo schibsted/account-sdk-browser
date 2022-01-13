@@ -249,6 +249,7 @@ const identity = new Identity({
     clientId: '56e9a5d1eee0000000000000',
     redirectUri: 'https://awesomenews.site', // ensure it's listed in selfservice
     env: 'PRE', // Schibsted account env. A url or a special key: 'PRE', 'PRO', 'PRO_NO', 'PRO_FI' or 'PRO_DK'
+    sessionDomain: 'https://id.awesomenews.site', // client-configured session-service domain
 })
 
 async function whenSiteLoaded() {
