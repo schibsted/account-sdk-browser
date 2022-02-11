@@ -1,52 +1,89 @@
+import { TinyEmitter } from "tiny-emitter";
+import Cache from "./cache";
+export declare type SimplifiedLoginData = {
+    /**
+     * - Deprecated: User UUID, to be be used as `loginHint` for {@link Identity#login}
+     */
+    identifier: string;
+    /**
+     * - Human-readable user identifier
+     */
+    display_text: string;
+    /**
+     * - Client name
+     */
+    client_name: string;
+};
+export declare type SimplifiedLoginWidgetOptions = {
+    /**
+     * - expected encoding of simplified login widget. Could be utf-8 (default), iso-8859-1 or iso-8859-15
+     */
+    encoding: string;
+};
+export declare type EnableVarnishCookieOptions = {
+    /**
+     * Override this to set number of seconds before the varnish
+     * cookie expires. The default is to use the same time that hasSession responses are cached for
+     */
+    expiresIn?: number;
+    /** Override cookie domain. E.g. «vg.no» instead of «www.vg.no» */
+    domain?: string;
+};
+export interface IdentityOptions {
+    /** Example: "1234567890abcdef12345678" */
+    clientId: string;
+    /** Example: "https://id.site.com" */
+    sessionDomain: string;
+    /** Example: "https://site.com" */
+    redirectUri: string;
+    /** Schibsted account environment: `PRE`, `PRO`, `PRO_NO`, `PRO_FI` or `PRO_DK` */
+    env?: string;
+    /** A function that receives debug log information. If not set, no logging will be done */
+    log?: Function;
+    /** window object */
+    window?: Window;
+}
 /**
  * Provides Identity functionalty to a web page
  */
-export class Identity {
-    /**
-     * @param {object} options
-     * @param {string} options.clientId - Example: "1234567890abcdef12345678"
-     * @param {string} options.sessionDomain - Example: "https://id.site.com"
-     * @param {string} options.redirectUri - Example: "https://site.com"
-     * @param {string} [options.env=PRE] - Schibsted account environment: `PRE`, `PRO`, `PRO_NO`, `PRO_FI` or `PRO_DK`
-     * @param {function} [options.log] - A function that receives debug log information. If not set,
-     * no logging will be done
-     * @param {object} [options.window] - window object
-     * @throws {SDKError} - If any of options are invalid
-     */
-    constructor({ clientId, redirectUri, sessionDomain, env, log, window }: {
-        clientId: string;
-        sessionDomain: string;
-        redirectUri: string;
-        env?: string;
-        log?: Function;
-        window?: any;
-    });
-    _sessionInitiatedSent: boolean;
-    window: any;
+export declare class Identity extends TinyEmitter {
+    private _sessionInitiatedSent;
+    private _sessionDomain;
+    private _enableSessionCaching;
+    private _session;
+    private _spid;
+    private _oauthService;
+    private _bffService;
+    private _sessionService;
+    private _globalSessionService;
+    private _hasSessionInProgress;
+    window: Window;
     clientId: string;
-    cache: any;
+    cache: Cache;
     redirectUri: string;
     env: string;
     log: Function;
-    _sessionDomain: string;
-    _enableSessionCaching: boolean;
-    _session: {};
+    popup: any;
+    setVarnishCookie: boolean;
+    varnishExpiresIn: number;
+    varnishCookieDomain: any;
+    /**
+     * @param options
+     * @throws {SDKError} - If any of options are invalid
+     */
+    constructor({ clientId, redirectUri, sessionDomain, env, log, window, }: IdentityOptions);
     /**
      * Set SPiD server URL
-     * @private
-     * @param {string} url - real URL or 'PRE' style key
+     * @param url - real URL or 'PRE' style key
      * @returns {void}
      */
     private _setSpidServerUrl;
-    _spid: RESTClient;
     /**
      * Set OAuth server URL
-     * @private
-     * @param {string} url - real URL or 'PRE' style key
+     * @param url - real URL or 'PRE' style key
      * @returns {void}
      */
     private _setOauthServerUrl;
-    _oauthService: RESTClient;
     /**
      * Set BFF server URL
      * @private
@@ -54,7 +91,6 @@ export class Identity {
      * @returns {void}
      */
     private _setBffServerUrl;
-    _bffService: RESTClient;
     /**
      * Set site-specific session-service domain
      * @private
@@ -62,7 +98,6 @@ export class Identity {
      * @returns {void}
      */
     private _setSessionServiceUrl;
-    _sessionService: RESTClient;
     /**
      * Set global session-service server URL
      * @private
@@ -70,7 +105,6 @@ export class Identity {
      * @returns {void}
      */
     private _setGlobalSessionServiceUrl;
-    _globalSessionService: RESTClient;
     /**
      * Emits the relevant events based on the previous and new reply from hassession
      * @private
@@ -84,41 +118,23 @@ export class Identity {
      * @private
      * @returns {void}
      */
-    private _closePopup;
-    popup: Window;
+    _closePopup(): void;
     /**
      * Set the Varnish cookie (`SP_ID`) when hasSession() is called. Note that most browsers require
      * that you are on a "real domain" for this to work — so, **not** `localhost`
-     * @param {object} [options]
-     * @param {number} [options.expiresIn] Override this to set number of seconds before the varnish
-     * cookie expires. The default is to use the same time that hasSession responses are cached for
-     * @param {string} [options.domain] Override cookie domain. E.g. «vg.no» instead of «www.vg.no»
-     * @returns {void}
+     * @param {EnableVarnishCookieOptions|number} [options] Either VarnishCookieOptions or expiresIn
      */
-    enableVarnishCookie(options?: {
-        expiresIn?: number;
-        domain?: string;
-    }): void;
-    setVarnishCookie: boolean;
-    varnishExpiresIn: number;
-    varnishCookieDomain: string;
+    enableVarnishCookie(options: EnableVarnishCookieOptions | number): void;
     /**
      * Set the Varnish cookie if configured
-     * @private
-     * @param {HasSessionSuccessResponse} sessionData
-     * @returns {void}
      */
     private _maybeSetVarnishCookie;
     /**
      * Clear the Varnish cookie if configured
-     * @private
-     * @returns {void}
      */
     private _maybeClearVarnishCookie;
     /**
      * Clear the Varnish cookie
-     * @private
-     * @returns {void}
      */
     private _clearVarnishCookie;
     /**
@@ -141,10 +157,9 @@ export class Identity {
      * @fires Identity#sessionInit
      * @fires Identity#statusChange
      * @fires Identity#error
-     * @return {Promise<HasSessionSuccessResponse|HasSessionFailureResponse>}
+     * @return {Promise<HasSessionSuccessResponse>}
      */
-    hasSession(): Promise<HasSessionSuccessResponse | HasSessionFailureResponse>;
-    _hasSessionInProgress: boolean | Promise<any>;
+    hasSession(): Promise<HasSessionSuccessResponse>;
     /**
      * @async
      * @summary Allows the client app to check if the user is logged in to Schibsted account
@@ -176,7 +191,6 @@ export class Identity {
      * effect that it might perform an auto-login on the user
      * @throws {SDKError} If the user isn't connected to the merchant
      * @throws {SDKError} If we couldn't get the user
-     * @return {Promise<HasSessionSuccessResponse>}
      */
     getUser(): Promise<HasSessionSuccessResponse>;
     /**
@@ -190,7 +204,7 @@ export class Identity {
      * @description This function calls {@link Identity#hasSession} internally and thus has the side
      * effect that it might perform an auto-login on the user
      * @throws {SDKError} If the user isn't connected to the merchant
-     * @return {Promise<string>} The `userId` field (not to be confused with the `uuid`)
+     * @return The `userId` field (not to be confused with the `uuid`)
      */
     getUserId(): Promise<string>;
     /**
@@ -217,7 +231,7 @@ export class Identity {
      * the current browser.
      * @return {Promise<SimplifiedLoginData|null>}
      */
-    getUserContextData(): Promise<SimplifiedLoginData | null>;
+    getUserContextData(): Promise<any>;
     /**
      * If a popup is desired, this function needs to be called in response to a user event (like
      * click or tap) in order to work correctly. Otherwise the popup will be blocked by the
@@ -240,7 +254,7 @@ export class Identity {
      * @param {string} [options.prompt=select_account]
      * @return {Window|null} - Reference to popup window if created (or `null` otherwise)
      */
-    login({ state, acrValues, scope, redirectUri, preferPopup, loginHint, tag, teaser, maxAge, locale, oneStepLogin, prompt }: LoginOptions): Window | null;
+    login({ state, acrValues, scope, redirectUri, preferPopup, loginHint, tag, teaser, maxAge, locale, oneStepLogin, prompt, }: LoginOptions): any;
     /**
      * @async
      * @summary Retrieve the sp_id (Varnish ID)
@@ -248,7 +262,7 @@ export class Identity {
      * effect that it might perform an auto-login on the user
      * @return {Promise<string|null>} - The sp_id string or null (if the server didn't return it)
      */
-    getSpId(): Promise<string | null>;
+    getSpId(): Promise<string>;
     /**
      * @summary Logs the user out from the Identity platform
      * @param {string} redirectUri - Where to redirect the browser after logging out of Schibsted
@@ -272,7 +286,7 @@ export class Identity {
      * @param {string} [options.prompt=select_account]
      * @return {string} - The url
      */
-    loginUrl({ state, acrValues, scope, redirectUri, loginHint, tag, teaser, maxAge, locale, oneStepLogin, prompt, }: LoginOptions, ...args: any[]): string;
+    loginUrl({ state, acrValues, scope, redirectUri, loginHint, tag, teaser, maxAge, locale, oneStepLogin, prompt, }: LoginOptions): string;
     /**
      * The url for logging the user out
      * @param {string} [redirectUri=this.redirectUri]
@@ -302,15 +316,10 @@ export class Identity {
      * @param {SimplifiedLoginWidgetOptions} [options] - additional configuration of Simplified Login Widget
      * @return {Promise<boolean|SDKError>} - will resolve to true if widget will be display. Otherwise will throw SDKError
      */
-    showSimplifiedLoginWidget(loginParams: SimplifiedLoginWidgetLoginOptions, options?: SimplifiedLoginWidgetOptions): Promise<boolean | SDKError>;
+    showSimplifiedLoginWidget(loginParams: SimplifiedLoginWidgetLoginOptions, options: SimplifiedLoginWidgetOptions): Promise<unknown>;
 }
 export default Identity;
-export type LoginOptions = {
-    /**
-     * - An opaque value used by the client to maintain state between
-     * the request and callback. It's also recommended to prevent CSRF {@link https://tools.ietf.org/html/rfc6749#section-10.12}
-     */
-    state: string;
+export declare type BaseLoginOptions = {
     /**
      * - Authentication Context Class Reference Values. If
      * omitted, the user will be asked to authenticate using username+password.
@@ -375,77 +384,21 @@ export type LoginOptions = {
      */
     prompt?: string;
 };
-export type SimplifiedLoginWidgetLoginOptions = {
+export interface LoginOptions extends BaseLoginOptions {
     /**
      * - An opaque value used by the client to maintain state between
      * the request and callback. It's also recommended to prevent CSRF {@link https://tools.ietf.org/html/rfc6749#section-10.12}
      */
-     state: string | (() => (string | Promise<string>));
+    state: string;
+}
+export interface SimplifiedLoginWidgetLoginOptions extends BaseLoginOptions {
     /**
-     * - Authentication Context Class Reference Values. If
-     * omitted, the user will be asked to authenticate using username+password.
-     * For 2FA (Two-Factor Authentication) possible values are `sms`, `otp` (one time password) and
-     * `password` (will force password confirmation, even if user is already logged in). Those values might
-     * be mixed as space-separated string. To make sure that user has authenticated with 2FA you need
-     * to verify AMR (Authentication Methods References) claim in ID token.
-     * Might also be used to ensure additional acr (sms, otp) for already logged in users.
-     * Supported values are also 'otp-email' means one time password using email, and 'otp-sms' means
-     * one time password using sms.
+     * - An opaque value used by the client to maintain state between
+     * the request and callback. It's also recommended to prevent CSRF {@link https://tools.ietf.org/html/rfc6749#section-10.12}
      */
-    acrValues?: string;
-    /**
-     * - The OAuth scopes for the tokens. This is a list of
-     * scopes, separated by space. If the list of scopes contains `openid`, the generated tokens
-     * includes the id token which can be useful for getting information about the user. Omitting
-     * scope is allowed, while `invalid_scope` is returned when the client asks for a scope you
-     * aren’t allowed to request. {@link https ://tools.ietf.org/html/rfc6749#section-3.3}
-     */
-    scope?: string;
-    /**
-     * - Redirect uri that will receive the
-     * code. Must exactly match a redirectUri from your client in self-service
-     */
-    redirectUri?: string;
-    /**
-     * - Should we try to open a popup window?
-     */
-    preferPopup?: boolean;
-    /**
-     * - user email or UUID hint
-     */
-    loginHint?: string;
-    /**
-     * - Pulse tag
-     */
-    tag?: string;
-    /**
-     * - Teaser slug. Teaser with given slug will be displayed
-     * in place of default teaser
-     */
-    teaser?: string;
-    /**
-     * - Specifies the allowable elapsed time in seconds since
-     * the last time the End-User was actively authenticated. If last authentication time is more
-     * than maxAge seconds in the past, re-authentication will be required. See the OpenID Connect
-     * spec section 3.1.2.1 for more information
-     */
-    maxAge?: string | number;
-    /**
-     * - Optional parameter to overwrite client locale setting.
-     * New flows supports nb_NO, fi_FI, sv_SE, en_US
-     */
-    locale?: string;
-    /**
-     * - display username and password on one screen
-     */
-    oneStepLogin?: boolean;
-    /**
-     * - String that specifies whether the Authorization Server prompts the
-     * End-User for reauthentication or confirm account screen. Supported values: `select_account` or `login`
-     */
-    prompt?: string;
-};
-export type HasSessionSuccessResponse = {
+    state: string | (() => string | Promise<string>);
+}
+export declare type HasSessionSuccessResponse = {
     /**
      * - Is the user connected to the merchant? (it means that the merchant
      * id is in the list of merchants listed of this user in the database)? Example: false
@@ -524,7 +477,11 @@ export type HasSessionSuccessResponse = {
      */
     defaultAgreementAccepted: boolean;
 };
-export type HasSessionFailureResponse = {
+/**
+ * Emitted when an error happens (useful for debugging)
+ * @event Identity#error
+ */
+export declare type HasSessionFailureResponse = {
     error: {
         /**
          * - Typically an HTTP response code. Example: 401
@@ -555,25 +512,11 @@ export type HasSessionFailureResponse = {
         serverTime: number;
     };
 };
-export type SimplifiedLoginData = {
-    /**
-     * - Deprecated: User UUID, to be be used as `loginHint` for {@link Identity#login}
-     */
-    identifier: string;
-    /**
-     * - Human-readable user identifier
-     */
-    display_text: string;
-    /**
-     * - Client name
-     */
-    client_name: string;
-};
-export type SimplifiedLoginWidgetOptions = {
-    /**
-     * - expected encoding of simplified login widget. Could be utf-8 (default), iso-8859-1 or iso-8859-15
-     */
-    encoding: string;
-};
-import RESTClient from "./RESTClient";
-import SDKError from "./SDKError";
+/**
+ * A promise for the user's favorite color.
+ *
+ * @promise HasSessionResponse
+ * @fulfill {HasSessionSuccessResponse} Successfull session request.
+ * @reject {HasSessionFailureResponse} Unable to get session
+ */
+export declare type HasSessionResponse = HasSessionSuccessResponse | HasSessionFailureResponse;

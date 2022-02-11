@@ -2,8 +2,4 @@
  * See LICENSE.md in the project root.
  */
 
-'use strict';
-
-export * from './identity.js';
-export * from './monetization.js';
-export * from './payment.js';
+export { default, Identity } from './src/identity.js';
