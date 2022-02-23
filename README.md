@@ -318,8 +318,7 @@ experimental purposes for now. Please let us know before using this in productio
 The default is username & password. If you wish to use one of the passwordless login methods, the
 `login()` function takes an optional parameter called `acrValues` (Authentication Context Class Reference).
 The `acrValues` parameter with multifactor authentication can take following values: 
- - `eid-no` - authentication using norwegian bankid
- - `eid-se` - authentication using swedish bankid
+ - `eid` - authentication using BankID (for DEV and PRE environments you can choose between country specific solution by specifying `eid-no` or `eid-se` instead)
  - `otp-email` - passwordless authentication using code sent to registered email
  - `otp-sms` - passwordless authentication using code sent to registered phone number
  - `password` - force password authentication (even if user is already logged in)

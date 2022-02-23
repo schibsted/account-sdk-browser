@@ -225,7 +225,7 @@ describe('Identity', () => {
             }).toThrowError(new SDKError('The acrValues parameter is not acceptable: sms otp password youShallNoTPass'));
         });
 
-        test('should accept variations of sms, otp, password, eid-no, eid-se acrValues. Url shouldn\'t contain prompt=select_account', () => {
+        test('should accept variations of sms, otp, password, eid-no, eid-se, eid acrValues. Url shouldn\'t contain prompt=select_account', () => {
             const identity = new Identity(Object.assign({}, defaultOptions, { env: 'PRO' }));
 
             compareUrls(identity.loginUrl({
@@ -242,6 +242,11 @@ describe('Identity', () => {
                 state: 'dummy-state',
                 acrValues: 'eid-se',
             }), 'https://login.schibsted.com/oauth/authorize?redirect_uri=http%3A%2F%2Ffoo.com&client_id=foo&state=dummy-state&response_type=code&scope=openid&acr_values=eid-se');
+
+            compareUrls(identity.loginUrl({
+                state: 'dummy-state',
+                acrValues: 'eid',
+            }), 'https://login.schibsted.com/oauth/authorize?redirect_uri=http%3A%2F%2Ffoo.com&client_id=foo&state=dummy-state&response_type=code&scope=openid&acr_values=eid');
 
             compareUrls(identity.loginUrl({
                 state: 'dummy-state',

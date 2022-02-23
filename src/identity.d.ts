@@ -315,10 +315,10 @@ export type LoginOptions = {
      * - Authentication Context Class Reference Values. If
      * omitted, the user will be asked to authenticate using username+password.
      * For 2FA (Two-Factor Authentication) possible values are `sms`, `otp` (one time password),
-     * `password` (will force password confirmation, even if user is already logged in), `eid-no` and `eid-se`. Those values might
+     * `password` (will force password confirmation, even if user is already logged in), `eid`. Those values might
      * be mixed as space-separated string. To make sure that user has authenticated with 2FA you need
      * to verify AMR (Authentication Methods References) claim in ID token.
-     * Might also be used to ensure additional acr (sms, otp, eid-no, eid-se) for already logged in users.
+     * Might also be used to ensure additional acr (sms, otp, eid) for already logged in users.
      * Supported values are also 'otp-email' means one time password using email, and 'otp-sms' means
      * one time password using sms.
      */
