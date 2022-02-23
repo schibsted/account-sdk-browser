@@ -22,8 +22,8 @@ const { version } = require('../package.json');
  * the request and callback. It's also recommended to prevent CSRF {@link https://tools.ietf.org/html/rfc6749#section-10.12}
  * @property {string} [acrValues] - Authentication Context Class Reference Values. If
  * omitted, the user will be asked to authenticate using username+password.
- * For 2FA (Two-Factor Authentication) possible values are `sms`, `otp` (one time password) and
- * `password` (will force password confirmation, even if user is already logged in). Those values might
+ * For 2FA (Two-Factor Authentication) possible values are `sms`, `otp` (one time password),
+ * `password` (will force password confirmation, even if user is already logged in), `eid`. Those values might
  * be mixed as space-separated string. To make sure that user has authenticated with 2FA you need
  * to verify AMR (Authentication Methods References) claim in ID token.
  * Might also be used to ensure additional acr (sms, otp) for already logged in users.
@@ -783,7 +783,7 @@ export class Identity extends EventEmitter {
             teaser = arguments[6] || teaser;
             maxAge = isNaN(arguments[7]) ? maxAge : arguments[7];
         }
-        const isValidAcrValue = (acrValue) => isStrIn(acrValue, ['password', 'otp', 'sms'], true);
+        const isValidAcrValue = (acrValue) => isStrIn(acrValue, ['password', 'otp', 'sms', 'eid-no', 'eid-se', 'eid'], true);
         assert(!acrValues || isStrIn(acrValues, ['', 'otp-email', 'otp-sms'], true) || acrValues.split(' ').every(isValidAcrValue),
             `The acrValues parameter is not acceptable: ${acrValues}`);
         assert(isUrl(redirectUri),
