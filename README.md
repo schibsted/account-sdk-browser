@@ -319,13 +319,14 @@ experimental purposes for now. Please let us know before using this in productio
 The default is username & password. If you wish to use one of the passwordless login methods, the
 `login()` function takes an optional parameter called `acrValues` (Authentication Context Class Reference).
 The `acrValues` parameter with multifactor authentication can take following values: 
+ - `eid` - authentication using BankID (for DEV and PRE environments you can choose between country specific solution by specifying `eid-no` or `eid-se` instead)
  - `otp-email` - passwordless authentication using code sent to registered email
  - `otp-sms` - passwordless authentication using code sent to registered phone number
  - `password` - force password authentication (even if user is already logged in)
  - `otp` - authentication using registered one time code generator (https://tools.ietf.org/html/rfc6238)
  - `sms` - authentication using SMS code sent to phone number 
  - `password otp sms` - those authentication methods might be combined
-
+ 
 The classic way to authenticate a user, is to send them from your site to the Schibsted account
 domain, let the user authenticate there, and then have us redirect them back to your site. If you
 prefer, we also provide a popup that you can use. In this method, the authentication happens on a
