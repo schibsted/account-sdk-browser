@@ -185,6 +185,7 @@ export class Payment {
     }
 
     /**
+     * @deprecated
      * Get the url for flow to purchase a promo code product with ZUORA
      * @param {string} code - promocode product code
      * @param {string} [state=''] - An opaque value used by the client to maintain state between

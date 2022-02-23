@@ -1,5 +1,20 @@
 # Changelog
 
+## v4.5.3 (2021-11-26)
+
+## Fixes
+* Fix SimplifiedLoginWidgetLoginOptions typo
+
+## v4.5.2 (2021-11-26)
+
+## Fixes
+* Fix SimplifiedLoginWidgetLoginOptions 
+
+## v4.5.1 (2021-11-19)
+
+## Fixes
+* .d.ts files publishing
+
 ## v4.5.0 (2021-09-29)
 
 ## New features
