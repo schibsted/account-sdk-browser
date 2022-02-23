@@ -1,5 +1,10 @@
 # Changelog
 
+## v4.6.0 (2022-02-23)
+
+## New features
+* Add `eid`, `eid-no` and `eid-se` to valid acrValues
+
 ## v4.5.3 (2021-11-26)
 
 ## Fixes
