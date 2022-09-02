@@ -319,8 +319,7 @@ export type LoginOptions = {
      * be mixed as space-separated string. To make sure that user has authenticated with 2FA you need
      * to verify AMR (Authentication Methods References) claim in ID token.
      * Might also be used to ensure additional acr (sms, otp, eid) for already logged in users.
-     * Supported values are also 'otp-email' means one time password using email, and 'otp-sms' means
-     * one time password using sms.
+     * Supported value is also 'otp-email' means one time password using email.
      */
     acrValues?: string;
     /**
@@ -389,8 +388,7 @@ export type SimplifiedLoginWidgetLoginOptions = {
      * be mixed as space-separated string. To make sure that user has authenticated with 2FA you need
      * to verify AMR (Authentication Methods References) claim in ID token.
      * Might also be used to ensure additional acr (sms, otp) for already logged in users.
-     * Supported values are also 'otp-email' means one time password using email, and 'otp-sms' means
-     * one time password using sms.
+     * Supported value is also 'otp-email' means one time password using email.
      */
     acrValues?: string;
     /**

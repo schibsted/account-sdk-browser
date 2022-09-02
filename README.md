@@ -308,20 +308,14 @@ mentioning that your end users have a few ways to log in:
   self-chosen password
 * Passwordless - email: here, the users enter their email address and receive a one-time code that
   they can use to log in
-* Passwordless - SMS (BETA): similar to the previous method but instead of an email address, they receive
-  the code on their phone as an SMS
 * Multifactor authentication: first client indicates which methods should be preferred, later these 
-  will be included (if fulfilled) in `AMR` claim of IDToken  
-
-IMPORTANT: Passwordless using SMS is still in BETA. It's only recommended to use it for testing and
-experimental purposes for now. Please let us know before using this in production.
+  will be included (if fulfilled) in `AMR` claim of IDToken
 
 The default is username & password. If you wish to use one of the passwordless login methods, the
 `login()` function takes an optional parameter called `acrValues` (Authentication Context Class Reference).
 The `acrValues` parameter with multifactor authentication can take following values: 
  - `eid` - authentication using BankID (for DEV and PRE environments you can choose between country specific solution by specifying `eid-no` or `eid-se` instead)
  - `otp-email` - passwordless authentication using code sent to registered email
- - `otp-sms` - passwordless authentication using code sent to registered phone number
  - `password` - force password authentication (even if user is already logged in)
  - `otp` - authentication using registered one time code generator (https://tools.ietf.org/html/rfc6238)
  - `sms` - authentication using SMS code sent to phone number 
