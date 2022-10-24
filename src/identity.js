@@ -852,7 +852,7 @@ export class Identity extends EventEmitter {
      * @return {Promise<boolean|SDKError>} - will resolve to true if widget will be display. Otherwise will throw SDKError
      */
     async showSimplifiedLoginWidget(loginParams, options) {
-        // getUserContextData doens't throw exception
+        // getUserContextData doesn't throw exception
         const userData = await this.getUserContextData();
 
         const queryParams = { client_id: this.clientId };
@@ -886,8 +886,11 @@ export class Identity extends EventEmitter {
                     windowOnResize: (f) => {
                         window.onresize = f;
                     },
-                    locale: options.locale,
                 };
+
+                if (options && options.locale) {
+                    initialParams.locale = options.locale;
+                }
 
                 const loginHandler = async () => {
                     this.login(Object.assign(await prepareLoginParams(loginParams), {loginHint: userData.identifier}));

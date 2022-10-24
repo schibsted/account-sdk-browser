@@ -576,7 +576,7 @@ export type SimplifiedLoginWidgetOptions = {
      * - expected locale of simplified login widget. Should be provided in a short format like 'nb',
      * 'sv'. If not set, a value from the env variable is used.
      */
-    locale?: "nb"|"sv"|"fi"|"da";
+    locale?: "nb"|"sv"|"fi"|"da"|"en";
 };
 import RESTClient from "./RESTClient";
 import SDKError from "./SDKError";
