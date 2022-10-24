@@ -930,6 +930,7 @@ describe('Identity', () => {
 
         test('Should pass locale param to simplified login widget', async () => {
             const expectedLocale = 'fi';
+            const stateFn = jest.fn(() => state);
             identity._globalSessionService.fetch = jest.fn(() => ({ ok: true, json: () => expectedData }));
             identity.login = jest.fn();
 
@@ -947,7 +948,7 @@ describe('Identity', () => {
                 el.onload();
             });
 
-            expect(await identity.showSimplifiedLoginWidget({ locale: expectedLocale })).toEqual(true);
+            expect(await identity.showSimplifiedLoginWidget({ state: stateFn }, { locale: expectedLocale })).toEqual(true);
             expect(document.getElementsByTagName('body')[0].appendChild).toHaveBeenCalledTimes(1);
             expect(window.openSimplifiedLoginWidget).toHaveBeenCalledTimes(1);
         });
