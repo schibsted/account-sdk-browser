@@ -927,6 +927,30 @@ describe('Identity', () => {
             expect(document.getElementsByTagName('body')[0].appendChild).toHaveBeenCalledTimes(1);
             expect(window.openSimplifiedLoginWidget).toHaveBeenCalledTimes(1);
         });
+
+        test('Should pass locale param to simplified login widget', async () => {
+            const expectedLocale = 'fi';
+            identity._globalSessionService.fetch = jest.fn(() => ({ ok: true, json: () => expectedData }));
+            identity.login = jest.fn();
+
+            document.getElementsByTagName('body')[0].appendChild = jest.fn((el) => {
+                window.openSimplifiedLoginWidget = jest.fn(async (initialParams, loginHandler) => {
+                    expect(initialParams.locale).toEqual(expectedLocale);
+                    await loginHandler();
+                    expect(identity.login).toHaveBeenCalledWith({
+                        state,
+                        loginHint: expectedData.identifier
+                    });
+                    return true;
+                });
+
+                el.onload();
+            });
+
+            expect(await identity.showSimplifiedLoginWidget({ locale: expectedLocale })).toEqual(true);
+            expect(document.getElementsByTagName('body')[0].appendChild).toHaveBeenCalledTimes(1);
+            expect(window.openSimplifiedLoginWidget).toHaveBeenCalledTimes(1);
+        });
     });
 
     describe('logSettings', () => {
