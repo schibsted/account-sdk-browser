@@ -886,6 +886,7 @@ export class Identity extends EventEmitter {
                     windowOnResize: (f) => {
                         window.onresize = f;
                     },
+                    locale: options.locale,
                 };
 
                 const loginHandler = async () => {
