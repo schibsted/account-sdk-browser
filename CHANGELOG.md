@@ -1,5 +1,8 @@
 # Changelog
 
+## v4.7.0 (2022-10-27)
+* Add locale support in the Simplified Login widget
+
 ## v4.6.0 (2022-02-23)
 
 ## New features
