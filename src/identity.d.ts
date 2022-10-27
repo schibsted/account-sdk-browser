@@ -572,6 +572,11 @@ export type SimplifiedLoginWidgetOptions = {
      * - expected encoding of simplified login widget. Could be utf-8 (default), iso-8859-1 or iso-8859-15
      */
     encoding: string;
+    /**
+     * - expected locale of simplified login widget. Should be provided in a short format like 'nb',
+     * 'sv'. If not set, a value from the env variable is used.
+     */
+    locale?: "nb"|"sv"|"fi"|"da"|"en";
 };
 import RESTClient from "./RESTClient";
 import SDKError from "./SDKError";
