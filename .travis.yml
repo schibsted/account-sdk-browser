@@ -6,7 +6,8 @@ cache:
   directories:
   - node_modules
 install: npm install
-script: npm run cover
+script: 
+  - ./scripts/run.sh
 before_deploy:
   - npm config set @schibsted:registry=https://registry.npmjs.org/
   - npm config set //registry.npmjs.org/:_authToken=${NPMJS_AUTHTOKEN}
