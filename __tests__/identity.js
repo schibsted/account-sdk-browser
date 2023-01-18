@@ -248,7 +248,6 @@ describe('Identity', () => {
                 acrValues: 'eid-fi',
             }), 'https://login.schibsted.com/oauth/authorize?redirect_uri=http%3A%2F%2Ffoo.com&client_id=foo&state=dummy-state&response_type=code&scope=openid&acr_values=eid-fi');
 
-
             compareUrls(identity.loginUrl({
                 state: 'dummy-state',
                 acrValues: 'eid',
