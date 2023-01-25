@@ -1,5 +1,8 @@
 # Changelog
 
+## v4.7.1 (2023-01-24)
+* Add support for eID Finland
+
 ## v4.7.0 (2022-10-27)
 * Add locale support in the Simplified Login widget
 
