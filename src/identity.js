@@ -822,7 +822,7 @@ export class Identity extends EventEmitter {
      * @return {string}
      */
     accountUrl(redirectUri = this.redirectUri) {
-        return this._spid.makeUrl('account/summary', {
+        return this._spid.makeUrl('profile-pages', {
             response_type: 'code',
             redirect_uri: redirectUri
         });
@@ -834,7 +834,7 @@ export class Identity extends EventEmitter {
      * @return {string}
      */
     phonesUrl(redirectUri = this.redirectUri) {
-        return this._spid.makeUrl('account/phones', {
+        return this._spid.makeUrl('profile-pages/about-you/phone', {
             response_type: 'code',
             redirect_uri: redirectUri
         });

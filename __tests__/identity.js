@@ -726,8 +726,8 @@ describe('Identity', () => {
         const redirects = [undefined, 'http://other.example.com'];
         describe.each(redirects)(`redirect='%s'`, (redirect) => {
             const urlFunctions = [
-                ['accountUrl', '/account/summary'],
-                ['phonesUrl', '/account/phones'],
+                ['accountUrl', '/profile-pages'],
+                ['phonesUrl', '/profile-pages/about-you/phone'],
             ];
             test.each(urlFunctions)('%s -> %s', (func, pathname) => {
                 const identity = new Identity(defaultOptions);
