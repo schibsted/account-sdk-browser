@@ -1,5 +1,8 @@
 # Changelog
 
+## 4.7.2 (2023-01-31)
+* Update path to Schibsted account profile pages.
+
 ## v4.7.1 (2023-01-24)
 * Add support for eID Finland
 
