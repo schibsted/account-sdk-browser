@@ -99,7 +99,7 @@ export default class Cache {
             if (raw) {
                 try {
                     obj = JSON.parse(raw);
-                } catch () {}
+                } catch (e) {}
             }
             if (obj && Number.isInteger(obj.expiresOn) && obj.expiresOn > Date.now()) {
                 return obj.value;
