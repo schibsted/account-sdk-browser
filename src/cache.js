@@ -95,7 +95,12 @@ export default class Cache {
     get(key) {
         try {
             const raw = this.cache.get(key);
-            const obj = raw ? JSON.parse(raw) : null;
+            let obj = null;
+            if (raw) {
+                try {
+                    obj = JSON.parse(raw);
+                } catch () {}
+            }
             if (obj && Number.isInteger(obj.expiresOn) && obj.expiresOn > Date.now()) {
                 return obj.value;
             }
