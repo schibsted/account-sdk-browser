@@ -1,17 +1,15 @@
+dist: focal
 language: node_js
-sudo: false
-node_js:
-- '12'
-cache:
-  directories:
-  - node_modules
-install: npm install
-script: npm run cover
-before_deploy:
-  - npm config set @schibsted:registry=https://registry.npmjs.org/
-  - npm config set //registry.npmjs.org/:_authToken=${NPMJS_AUTHTOKEN}
-  - npm run build
-  - npm run docs
+node_js: '18'
+cache: npm
+before_install:
+    - npm config set @schibsted:registry=https://registry.npmjs.org/
+    - npm config set //registry.npmjs.org/:_authToken=${NPMJS_AUTHTOKEN}
+install: npm ci
+script:
+    - npm run cover
+    - npm run build
+    - npm run docs
 deploy:
   - provider: script
     skip_cleanup: true

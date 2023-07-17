@@ -12,7 +12,7 @@ describe('Payment', () => {
     describe('constructor()', () => {
         test('throws if the options object is not passed to the constructor', () => {
             expect(() => new Payment())
-                .toThrowError(/Cannot read property 'clientId' of undefined/);
+                .toThrowError(/Cannot read properties of undefined \(reading 'clientId'\)/);
         });
 
         test('throws if the clientId setting is missing or has wrong type', () => {

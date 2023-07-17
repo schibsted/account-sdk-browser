@@ -29,7 +29,7 @@ describe('Identity', () => {
 
     describe('constructor()', () => {
         test('throws if the options object is not passed to the constructor', () => {
-            expect(() => new Identity()).toThrowError(/Cannot read property 'clientId' of undefined/);
+            expect(() => new Identity()).toThrowError(/Cannot read properties of undefined \(reading 'clientId'\)/);
         });
 
         test('throws if window is missing or has wrong type', () => {
