@@ -93,9 +93,17 @@ export default class Cache {
      * @returns {*} - The value if it exists, otherwise null
      */
     get(key) {
+        function getObj(raw) {
+            try {
+                return JSON.parse(raw);
+            } catch (e) {
+                return null;
+            }
+        }
+
         try {
             const raw = this.cache.get(key);
-            const obj = raw ? JSON.parse(raw) : null;
+            let obj = getObj(raw);
             if (obj && Number.isInteger(obj.expiresOn) && obj.expiresOn > Date.now()) {
                 return obj.value;
             }
