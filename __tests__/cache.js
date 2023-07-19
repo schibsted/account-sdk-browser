@@ -127,7 +127,7 @@ describe('cache', () => {
                 expect(() => cache.get('foo')).toThrow(/get failure/);
             });
 
-            test('get should return null f impl returns non-json-parsable mess', () => {
+            test('get should return null if impl returns non-json-parsable mess', () => {
                 cache.cache.get = jest.fn().mockImplementationOnce(() => ({}));
                 expect(cache.get('foo')).toBe(null);
             });
