@@ -1,7 +1,7 @@
 /**
- * Provides Identity functionalty to a web page
+ * Provides Identity functionality to a web page
  */
-export class Identity {
+export class Identity extends EventEmitter {
     /**
      * @param {object} options
      * @param {string} options.clientId - Example: "1234567890abcdef12345678"
