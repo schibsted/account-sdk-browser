@@ -1,7 +1,9 @@
+import type { TinyEmitter } from 'tiny-emitter';
+
 /**
  * Provides Identity functionality to a web page
  */
-export class Identity extends EventEmitter {
+export class Identity extends TinyEmitter {
     /**
      * @param {object} options
      * @param {string} options.clientId - Example: "1234567890abcdef12345678"
