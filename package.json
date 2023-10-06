@@ -7,7 +7,7 @@
   "scripts": {
     "build": "./build.sh",
     "clean": "rimraf .cache coverage dist docs",
-    "docs": "rimraf docs && jsdoc -c ./utils/jsdoc.js --verbose",
+    "docs": "rimraf docs && jsdoc -c ./jsdoc.conf.json --verbose",
     "lint": "eslint .",
     "pretest": "npm run lint",
     "test": "jest",
