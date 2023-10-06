@@ -1,0 +1,37 @@
+{
+    "plugins": ["plugins/markdown"],
+    "encoding": "utf8",
+    "recurseDepth": 10,
+    "source": {
+        "include": [
+            "src"
+        ],
+        "includePattern": ".+\\.js$",
+        "excludePattern": "(node_modules|dist)"
+    },
+    "sourceType": "module",
+    "opts": {
+        "destination": "./docs",
+        "encoding": "utf8",
+        "readme": "./README.md",
+        "recurse": true,
+        "template": "node_modules/docdash"
+    },
+    "templates": {
+        "cleverLinks": true
+    },
+    "docdash": {
+        "static": true,
+        "sort": false,
+        "sectionOrder": [
+            "Tutorials",
+            "Modules",
+            "Namespaces",
+            "Classes",
+            "Interfaces",
+            "Events",
+            "Externals",
+            "Mixins"
+        ]
+    }
+}
