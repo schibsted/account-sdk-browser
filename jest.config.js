@@ -1,4 +1,4 @@
-module.exports = {
+export default {
     testURL: 'http://spid.no',
     testPathIgnorePatterns: [
         '/node_modules/',

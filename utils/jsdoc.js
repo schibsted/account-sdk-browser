@@ -4,7 +4,7 @@
 
 'use strict';
 
-module.exports = {
+export default {
     plugins: ['plugins/markdown' ],
     encoding: 'utf8',
     recurseDepth: 10,

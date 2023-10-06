@@ -3,6 +3,7 @@
   "version": "4.7.3",
   "description": "Schibsted account SDK for browsers",
   "main": "index.js",
+  "type": "module",
   "scripts": {
     "build": "./build.sh",
     "clean": "rimraf .cache coverage dist docs",
