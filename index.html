@@ -48,7 +48,7 @@
 
     <section class="readme">
         <article><p><a href="https://github.com/schibsted/account-sdk-browser"><img src="https://www.schibsted.com/Global/LogoTypes/Logos%202014/SMG_Small_2014_RGB.png" alt="logo"></a></p>
-<p><a href="https://travis-ci.com/schibsted/account-sdk-browser"><img src="https://travis-ci.com/schibsted/account-sdk-browser.svg?branch=master" alt="Build Status"></a>
+<p><a href="https://app.travis-ci.com/schibsted/account-sdk-browser"><img src="https://app.travis-ci.com/schibsted/account-sdk-browser.svg?branch=master" alt="Build Status"></a>
 <a href="https://codecov.io/gh/schibsted/account-sdk-browser"><img src="https://codecov.io/gh/schibsted/account-sdk-browser/branch/master/graph/badge.svg" alt="Code coverage"></a>
 <a href="https://snyk.io/test/github/schibsted/account-sdk-browser"><img src="https://snyk.io/test/github/schibsted/account-sdk-browser/badge.svg?targetFile=package.json" alt="Snyk"></a></p>
 <h1>Schibsted account SDK for browsers</h1>
@@ -56,168 +56,29 @@
 to use Schibsted account to sign up and log in users. Use it to generate URLs for your site's &quot;Log
 in&quot; button, query the logged-in status of your users, and to check whether they have access to
 products and subscriptions, etc.</p>
-<p><a name="getting-started"></a></p>
 <h2>Getting started</h2>
-<p>You can do local development using our <code>dev</code> or <code>pre</code> environment.</p>
+<p>This sdk mainly communicates with a service named Session Service, which is available on brand
+domains (i.e. id.vg.no) to avoid Third-Party Cookie request.</p>
 <p>Since browsers started to block Third-Party Cookies, your top domain from local machine needs to
 match your session service top domain. Otherwise session service cookie will be Third-Party Cookie,
 and will not be sent with XHR request.</p>
+<p>The same applies to cross scheme requests. The session service is hosted on https and therefore you need to <a href="https://web.dev/how-to-use-local-https/">run your site with HTTPS locally</a>.</p>
 <p>For example if your <code>pre</code> domain is pre.sdk-example.com, and it uses id.pre.sdk-example.com session
 service domain, your local domain should be local.sdk-example.com.</p>
 <ol>
 <li>Do <code>npm install --save @schibsted/account-sdk-browser</code></li>
 <li>Use this library as you would any other npm module: <code>import { Identity, Monetization, Payment } from '@schibsted/account-sdk-browser'</code>
-<ol>
-<li>If you use the CommonJS <code>require</code> syntax and you both want to reduce the size of your
-JavaScript bundle <strong>and</strong> don't need all of Identity, Monetization and Payment modules from
-this SDK — it's possible to <code>require('@schibsted/account-sdk-browser/identity')</code> (note the
-<code>/identity</code> at the end) or <code>/monetization'</code> or <code>/payment'</code></li>
-</ol>
-</li>
+With CommonJS it is possible to <code>require</code> the modules Identity, Monetization and Payment
+by appending <code>/identity</code>, <code>/monetization'</code> or <code>/payment'</code> at the end.</li>
 <li>Build your site as you prefer. This library uses modern JavaScript syntax (including async/await
 and other ES2017 and WHATWG features) by default. We recommend that you do any transpilation
-yourself for the browser versions you need to cater to. See <a href="#polyfills-yo">this paragraph</a> for
+yourself for the browser versions you need to cater to. See <a href="#polyfills">this paragraph</a> for
 info about our babelified version and info about polyfills.</li>
+<li>Initiate the SDK and provide at least <code>clientId</code>, <code>env</code> and <code>sessionDomain</code>.</li>
 </ol>
-<p><a name="upgrading-from-2.x"></a></p>
-<h2>Upgrading from 2.x</h2>
-<p>If you already use the 2.x branch of the Schibsted account JS SDK, certain changes will be required
-to use this version of the SDK. We have chosen what we believe to be a middle ground between
-&quot;remembering the work done in the old SDK&quot; and &quot;starting fresh&quot;. Therefore it is recommended that
-you read this document in full. But ok, let's present some highlighted differences:</p>
-<p><a name="differences-from-2.x"></a></p>
-<h4>Differences from 2.x</h4>
-<ul>
-<li>Instead of using <code>SPiD.init()</code> for initialization, the new SDK exports three classes; <code>Identity</code>,
-<code>Monetization</code> and <code>Payment</code></li>
-<li>Many features (like logging in) requires a <code>redirectUri</code> parameter — both in the 2.x and 3.x
-versions of the SDK. An important difference in the new version of our backends, is that we strive
-to be more compliant with OpenID Connect standards. This means that redirect uris need to match
-<strong>exactly</strong> (that is — including the query string). This will be a breaking change for some
-people, because in the 2.x world, a redirect uri might look like <code>https://site.com</code> in self
-service, and a login attempt with <code>redirectUri=https://site.com?article=1234</code> would then be ok
-because it would only match on domain+path — but not query string. However — this will <strong>not</strong>
-work in the 3.x world. OpenID Connect <strong>does</strong> have a suggestion for how to handle these
-situations though, which is a parameter called <code>state</code> that you send in addition to the
-<code>redirectUri</code>. See <a href="#regarding-state">this paragraph</a> for more information</li>
-<li>The <code>'SPiD.'</code> string is removed from the name of all SDK events. So the event that used to be
-<code>'SPiD.login'</code> is now just <code>'login'</code></li>
-<li>You don't log in by setting <code>window.location</code>. Instead, you use the <code>login()</code> method on an
-instance of <code>Identity</code></li>
-<li>The JavaScript code in this browser SDK does <strong>NOT</strong> set any <code>document.cookie = ...</code> by default.
-There is a function <code>enableVarnishCookie</code> that you can call on an <code>Identity</code> instance. This will
-enable setting the <code>SP_ID</code> cookie whenever <code>hasSession()</code> is called (though most browsers require
-that you are on a &quot;real domain&quot; for this to work — so, <strong>not</strong> <code>localhost</code>). Any other cookie
-that you need set, you will have to set yourself</li>
-<li>All functions that used to take callback functions in the 2.x version of the SDK don't do that
-anymore. The new SDK instead uses promises where it makes sense (often written as <code>async</code>
-functions). For example <code>Identity.getUser()</code> returns a promise. So, for instance if you used to do
-this in v2.x:<pre class="prettyprint source lang-javascript"><code>identity.hasSession((err, data) => {
-    if (err) {
-        console.log('Nooo!', err)
-    } else {
-        console.log('Yay', data)
-    }
-});
-</code></pre>
-Now you should instead do:<pre class="prettyprint source lang-javascript"><code>// Either
-identity.hasSession()
-    .then(data => console.log('Yay', data))
-    .catch(err => console.log('Nooo!', err));
-// ... or if you're using async functions
-try {
-    const data = await identity.hasSession();
-    console.log('Yay', data);
-} catch (err) {
-    console.log('Nooo!', err);
-}
-</code></pre>
-</li>
-<li>Listening to events is still supported, although since many functions return Promises, we expect
-many users will find the use of Promise results preferable. But for those that prefer the events,
-it works using a function <code>.on</code> that's compatible with Node's <code>EventEmitter</code>. For example
-<code>SPiD.event.subscribe('SPiD.login', handler)</code> from 2.x becomes <code>Identity.on('login', handler)</code>.
-Also, the functions <code>.off</code> and <code>.once</code> are supported</li>
-<li>SPiD URI is gone. There are a handful of <code>***Url()</code> functions in each of the <code>Identity</code>,
-<code>Monetization</code> and <code>Payment</code> classes for the relevant flows</li>
-<li>The new SDK has inline jsdoc documentation that's available
-<a href="https://schibsted.github.io/account-sdk-browser/">here</a> instead of tech docs.
-These documents will always be up to date with the latest release so make sure to run <code>npm  outdated</code> in your project to be notified about any new releases</li>
-<li>The new UI flows are different than the old ones in that they use the Schibsted account API
-endpoints just like any other client. For most clients this means absolutely nothing at all, but
-for some, it's quite important; If you have ever asked our support staff to disable certain API
-endpoint accesses, there is a chance that you'll encounter problems. For instance, if you've set
-<code>NO ACCESS</code> on the <code>POST /signup</code> endpoint, <strong>users will not be able to sign up to your site</strong>
-using the new flows</li>
-<li>If you use our session-service, there are certain changes in the response from the session endpoint.
-<ul>
-<li>The <code>userStatus</code> field makes no sense in the session-service world, since it operates &quot;per-site&quot;
-(there is one id.site.example domain for each site, so being logged in and connected for that
-site means the same thing. Also, there is the <code>Identity.isConnected</code> function that's still kept
-in case people prefer to keep the same logic with and without the session-service).</li>
-<li>The <code>id</code> field (the one returning a MongoDb identifier like <code>abcdef0123456789abcdd00d</code>) has
-finally been removed. It's been deprecated for a long time. The numeric <code>userId</code> (legacy) and
-<code>uuid</code> fields are still present.</li>
-</ul>
-</li>
-</ul>
-<p><a name="polyfills-yo"></a></p>
-<h4>Polyfills required for older browsers</h4>
-<p>This SDK uses modern JavaScript features. If you support older browsers, you should use a tool like
-babel to transform the JavaScript as needed. However — since certain teams have deployment pipelines
-where it's difficult to do their own transpilation, we do provide some opt-in es5 files as well:</p>
-<ol>
-<li><code>@schibsted/account-sdk-browser/es5</code>: Include both <code>Identity</code>, <code>Monetization</code> and <code>Payment</code>.</li>
-<li><code>@schibsted/account-sdk-browser/es5/global</code>: Include both <code>Identity</code>, <code>Monetization</code> and
-<code>Payment</code>. In addition, add them as variables to the global <code>window</code> object.</li>
-<li><code>@schibsted/account-sdk-browser/es5/identity</code>, <code>@schibsted/account-sdk-browser/es5/monetization</code>
-or <code>@schibsted/account-sdk-browser/es5/payment</code> can be used to only include each class by itself.</li>
-</ol>
-<p>But then regardless of whether you use the es5 versions or not, you might need to polyfill certain
-things that might be missing in the browsers you wish to support. A quick test using IE11 showed
-that we needed polyfills for <code>Promise</code>, <code>URL</code>, <code>Object.entries</code>, <code>fetch</code>, <code>Number.isFinite</code> and
-<code>Number.isInteger</code>. If you want any sort of debugging to work (say, if you're passing a function
-using <code>console.log</code> as a parameter to any SDK function that supports logging), you might also need
-to polyfill <code>console</code> and <code>console.log</code> (yeah, it's baffling, but a <a href="https://stackoverflow.com/questions/22315167/in-ie11-how-to-use-console-log">known
-issue</a> in IE). We added
-them from polyfill.io like this:</p>
-<pre><code>&lt;script src=&quot;https://cdn.polyfill.io/v2/polyfill.js?features=Promise,URL,Object.entries,fetch,Number.isFinite,Number.isInteger,console,console.log&quot;&gt;&lt;/script&gt;
-</code></pre>
-<p><a name="itp-yo"></a></p>
-<h4>Local development on Chrome version 88 (or higher)</h4>
-<p>Google Chrome in version 88 (or higher) <a href="https://support.google.com/chrome/a/answer/7679408#88&amp;zippy=%2Cchrome">introduced changes</a> in the definition of cookies <code>same-site</code> attribute.
-From now on cross-scheme requests (e.g. <code>http</code> &lt;-&gt; <code>https</code>) will be considered cross-site instead of same-site, hence you may experience problems with localhost development, resulting in <code>Bad Request</code> responses from <code>hasSession</code> calls.
-While we are working on more permanent resolution of this this issue, as a temporary workaround we can suggest <a href="https://web.dev/how-to-use-local-https/">running your site with HTTPS locally</a> or disabling <code>schemeful-same-site</code> flag in Chrome for the time of local development.</p>
-<p>More info: https://web.dev/schemeful-samesite/</p>
-<h2>Notes on Apple Intelligent Tracking Prevention (ITP)</h2>
-<h4>or.. how I learned to stop worrying and ❤️ the Schibsted account session service</h4>
-<p>Right, as of Safari 12, we can't rely on making requests from a site domain to the Schibsted account
-domain. Safari 12 will possibly partition cookies in such requests in an attempt to protect the
-user's privacy. While this is good for end-users, it presented a real problem for Schibsted account,
-since our technique for deciding whether a user is logged in, is to send a request in precisely this
-manner.</p>
-<p>To ensure consistent user sessions despite these restrictions, we have re-designed our platform and
-introduced what we call the
-session-service. If your site lives on site.example, you should assign a sub-domain for use with the
-session-service (we propose id.site.example for production and id-pre.site.example for staging —
-talk to our Customer Success team regarding how to get this set up). The goal is to have
-https://id.site.example be a DNS name resolving to our session-service, since this enables us to
-place a cookie on that domain that indicates that the user is logged in.</p>
-<p>When the domain is set up, your client needs to be modified by our Customer Success team to enable
-using this feature (this is done by them setting <code>session_service_domain = https://id.site.example</code>
-in SysAdmin).</p>
-<p>Finally, and this is where you, the user of account-sdk-browser need a change; When creating an
-instance of <code>Identity</code> or <code>Monetization</code>, include the property <code>sessionDomain: 'https://id.site.example</code> in the constructor'.</p>
-<p>So to sum up:</p>
-<ol>
-<li>Prepare a subdomain id.site.example (optionally id-pre.site.example for staging)</li>
-<li>Enable the session-service for the client you use on your site</li>
-<li>Add the <code>sessionDomain</code> property to the <code>Identity</code> or <code>Monetization</code> constructors</li>
-</ol>
-<p>1 and 2 requires <a href="mailto:schibstedaccount@schibsted.com">communication with us</a>, and 3 is done by you at a time of your choosing.</p>
-<p><a name="example-project"></a></p>
+<p>If this is for a new site and there is no sessionDomain yet, contact
+<a href="mailto:schibstedaccount@schibsted.com">support</a> to initiate the process.</p>
 <h2>Simplified login widget</h2>
-<p>Implementing this functionality requires that your brand uses session service. With this as a starting point, implementing simplified login in production is relatively straightforward:</p>
 <ol>
 <li>Ensure that your site has no site specific terms and conditions in the Schibsted account login flow.</li>
 <li>Define rules for when and how often the simplified login prompt should be shown to unique users on your site. How you do this is up to you, but we recommend starting with showing the prompt once per user before potentially increasing this frequency over time.</li>
@@ -241,7 +102,6 @@ credentials (client id &amp; secret) to get an <em>Access Token</em> (AT) and <e
 send the AT (and never ever the RT!) to the browser but rather keep it on the server side and
 associate it with that particular user session in order to be able to call Schibsted account APIs on
 behalf of that user.</p>
-<p><a name="events"></a></p>
 <h2>Events</h2>
 <p>The SDK fires events when something we deem interesting is happening. For example the
 <a href="https://schibsted.github.io/account-sdk-browser/Identity.html">Identity</a> class
@@ -249,7 +109,6 @@ emits some events when the user is logged in or logged out. This SDK uses a fami
 very similar to Node's <a href="https://nodejs.org/api/events.html">EventEmitter</a>. The most important
 methods are <code>.on(eventName, listener)</code> (to subscribe to an event) and <code>.off(eventName, listener)</code>
 (to unsubscribe to an event).</p>
-<p><a name="identity"></a></p>
 <h2>Identity</h2>
 <p>Let's start with a bit of example code:</p>
 <h4>Example</h4>
@@ -278,7 +137,6 @@ function userClicksLogIn() {
     identity.login({ state: 'some-random-string-1234-foobar-wonky-pig' })
 }
 </code></pre>
-<p><a name="regarding-state"></a></p>
 <h4>Regarding <code>state</code></h4>
 <p>This parameter is an OpenID Connect parameter (described in <a href="http://openid.net/specs/openid-connect-core-1_0.html#rfc.section.3.1.2.1">this paragraph in the
 spec</a>). It's formatted as
@@ -302,7 +160,6 @@ query parameters <code>code</code> (which it can exchange for OAuth tokens for t
 attempted. If successful, remove the token from the tokenCache so the same token can't be used
 again, and continue to show <code>decodedState.article</code></li>
 </ol>
-<p><a name="authentication-methods"></a></p>
 <h4>Authentication methods</h4>
 <p>Although Schibsted account abstracts away the details of how the users sign up or log in, it's worth
 mentioning that your end users have a few ways to log in:</p>
@@ -335,7 +192,6 @@ similar — to indicate that the user is logged in. If the popup window fails to
 automatically fall back to the redirect flow. The SDK Example project mentioned above demonstrates
 how it can work. Again, you can see <a href="https://github.com/schibsted/sdk-example">sdk-example</a> if you
 want a working example.</p>
-<p><a name="is-the-user-logged-in"></a></p>
 <h4>Is the user logged in?</h4>
 <p>Schibsted account relies on browser cookies to determine whether a user is recognized as logged in.
 The SDK provides functions that can be used to check if the user that's visiting your site is
@@ -351,18 +207,10 @@ and privacy policy for your site.</li>
 <p>If you've lately changed your terms &amp; conditions, maybe the user still hasn't accepted them. In that
 case they are considered <em>not connected</em>. In that case, if they click &quot;Log in&quot; from your site, we
 will just ask them to accept those terms and redirect them right back to your site.</p>
-<p><a name="logging-out"></a></p>
 <h4>Logging out</h4>
 <p>If you want to log the user out of Schibsted account, you can call
 <a href="https://schibsted.github.io/account-sdk-browser/Identity.html#logout">Identity#logout</a>. This
-will remove the Schibsted account browser session, and so log the user out of all Schibsted sites in
-that browser.</p>
-<p>On your site backend, it may or may not make sense to remove the access/refresh tokens that you got
-from Schibsted account. This can simply be achieved by removing it from your session or just
-deleting the session. At this time, there are no ways to invalidate the tokens so they will not be
-usable. <em>In the future you might be able to invalidate tokens. This comes in handy if you know that
-a token is compromised and you don't want them to be usable in the future.</em></p>
-<p><a name="monetization"></a></p>
+will remove the Schibsted account brand session. User will still be logged into Schibsted account.</p>
 <h2>Monetization</h2>
 <p>The preferred method for checking whether a user has access to a product/subscription is
 <a href="https://schibsted.github.io/account-sdk-browser/Monetization.html#hasAccess">Monetization#hasAccess</a>.
@@ -387,7 +235,6 @@ try {
     alert(`Could not query if the user has access to ${productId} because ${err}`)
 }
 </code></pre>
-<p><a name="payment"></a></p>
 <h2>Payment</h2>
 <p>This class provides methods for paying with a so-called paylink, buying a product, getting links to
 pages for redeeming voucher codes, reviewing payment history, and more.</p>
@@ -407,8 +254,28 @@ const paylinkUrl = paymentSDK.purchasePaylinkUrl(paylink)
 // Or another example --- pay with paylink in a popup
 paymentSDK.payWithPaylink(paylink)
 </code></pre>
-<p><a name="appendix"></a></p>
 <h2>Appendix</h2>
+<h4>Polyfills</h4>
+<p>This SDK uses modern JavaScript features. If you support older browsers, you should use a tool like
+babel to transform the JavaScript as needed. However — since certain teams have deployment pipelines
+where it's difficult to do their own transpilation, we do provide some opt-in es5 files as well:</p>
+<ol>
+<li><code>@schibsted/account-sdk-browser/es5</code>: Include both <code>Identity</code>, <code>Monetization</code> and <code>Payment</code>.</li>
+<li><code>@schibsted/account-sdk-browser/es5/global</code>: Include both <code>Identity</code>, <code>Monetization</code> and
+<code>Payment</code>. In addition, add them as variables to the global <code>window</code> object.</li>
+<li><code>@schibsted/account-sdk-browser/es5/identity</code>, <code>@schibsted/account-sdk-browser/es5/monetization</code>
+or <code>@schibsted/account-sdk-browser/es5/payment</code> can be used to only include each class by itself.</li>
+</ol>
+<p>But then regardless of whether you use the es5 versions or not, you might need to polyfill certain
+things that might be missing in the browsers you wish to support. A quick test using IE11 showed
+that we needed polyfills for <code>Promise</code>, <code>URL</code>, <code>Object.entries</code>, <code>fetch</code>, <code>Number.isFinite</code> and
+<code>Number.isInteger</code>. If you want any sort of debugging to work (say, if you're passing a function
+using <code>console.log</code> as a parameter to any SDK function that supports logging), you might also need
+to polyfill <code>console</code> and <code>console.log</code> (yeah, it's baffling, but a <a href="https://stackoverflow.com/questions/22315167/in-ie11-how-to-use-console-log">known
+issue</a> in IE). We added
+them from polyfill.io like this:</p>
+<pre><code>&lt;script src=&quot;https://cdn.polyfill.io/v2/polyfill.js?features=Promise,URL,Object.entries,fetch,Number.isFinite,Number.isInteger,console,console.log&quot;&gt;&lt;/script&gt;
+</code></pre>
 <h4>Cookies</h4>
 <p>There are some cookies used by Schibsted account. They should all be considered opaque on the
 browser side. Nevertheless, here is a short description of them.</p>
@@ -449,6 +316,12 @@ return a <code>401</code> with a <code>UserException</code> that says <code>No s
 </ul>
 </li>
 </ol>
+<h2>Releasing</h2>
+<p>Tags are pushed to NPM via Travis. To release a new version, run in master</p>
+<pre class="prettyprint source lang-bash"><code>$ npm version &lt;major|minor|patch>
+</code></pre>
+<p>which will run the test, update version in package.json, commi, tag the commit
+and push.</p>
 <h2>LICENSE</h2>
 <p>Copyright (c) 2018 Schibsted Products &amp; Technology AS</p>
 <p>Licensed under the <a href="https://github.com/schibsted/account-sdk-browser/blob/master/LICENSE.md">MIT
@@ -469,7 +342,7 @@ License.</p></article>
 <br class="clear">
 
 <footer>
-    Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.6.7</a> on Fri Oct 28 2022 06:35:38 GMT+0000 (Coordinated Universal Time) using the <a href="https://github.com/clenemt/docdash">docdash</a> theme.
+    Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.6.7</a> on Mon Oct 09 2023 07:57:21 GMT+0000 (Coordinated Universal Time) using the <a href="https://github.com/clenemt/docdash">docdash</a> theme.
 </footer>
 
 <script>prettyPrint();</script>
