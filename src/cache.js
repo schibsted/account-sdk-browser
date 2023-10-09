@@ -93,6 +93,11 @@ export default class Cache {
      * @returns {*} - The value if it exists, otherwise null
      */
     get(key) {
+        /**
+         * JSON.parse safe wrapper
+         * @param {string} raw
+         * @returns {*} parsed value or null if failed to parse
+         */
         function getObj(raw) {
             try {
                 return JSON.parse(raw);
