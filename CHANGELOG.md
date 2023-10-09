@@ -1,5 +1,13 @@
 # Changelog
 
+## 4.7.4 (2023-09-08)
+* Ignore malformed session storage objects
+* Cleanup ReadMe
+
+## 4.7.3 (2023-07-19)
+* Ignore malformed session storage objects
+* Upgrade NodeJS used to build package from version 12 to 18
+
 ## 4.7.2 (2023-01-31)
 * Update path to Schibsted account profile pages.
 
