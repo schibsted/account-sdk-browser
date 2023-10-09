@@ -12,7 +12,9 @@
     "test": "jest",
     "precover": "npm run lint",
     "cover": "jest --coverage",
-    "postcover": "codecov"
+    "postcover": "codecov",
+    "preversion": "npm test",
+    "postversion": "git push && git push --tags"
   },
   "author": "",
   "license": "MIT",

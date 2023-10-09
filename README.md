@@ -296,6 +296,16 @@ browser side. Nevertheless, here is a short description of them.
    * `referer` (yep, missing the double "rr"..): If this is missing, a call to hassession will
      return a `401` with a `UserException` that says `No session found`.
 
+## Releasing
+Tags are pushed to NPM via Travis. To release a new version, run in master
+
+```bash
+$ npm version <major|minor|patch>
+```
+
+which will run the test, update version in package.json, commi, tag the commit
+and push.
+
 ## LICENSE
 
 Copyright (c) 2018 Schibsted Products & Technology AS
