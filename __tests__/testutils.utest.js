@@ -2,7 +2,7 @@
  * See LICENSE.md in the project root.
  */
 
-import { compareUrls } from './utils';
+import { compareUrls } from './utils.js';
 
 describe('testutils', () => {
     describe('equal', () => {

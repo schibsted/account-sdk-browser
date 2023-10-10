@@ -4,13 +4,14 @@
 
 'use strict';
 
-import SDKError from '../src/SDKError';
+import SDKError from '../src/SDKError.js';
 
-import Identity from '../identity';
-import { compareUrls, Fixtures } from './utils';
+import Identity from '../identity.js';
+import { compareUrls, Fixtures } from './utils.js';
 import { URL } from 'url';
 import { URL as u } from 'whatwg-url';
-import {version} from "../package.json";
+import packageJson from '../package.json';
+const { version } = packageJson;
 
 describe('Identity', () => {
     const defaultOptions = {

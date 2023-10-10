@@ -12,8 +12,8 @@ import RESTClient from './RESTClient.js';
 import Cache from './cache.js';
 import * as spidTalk from './spidTalk.js';
 import SDKError from './SDKError.js';
-import { readFileSync } from 'fs';
-const { version } = JSON.parse(readFileSync('package.json', 'utf8'));
+import packageJson from '../package.json';
+const { version } = packageJson;
 
 const globalWindow = () => window;
 

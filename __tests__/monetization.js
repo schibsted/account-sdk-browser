@@ -4,9 +4,9 @@
 
 'use strict';
 
-jest.mock('../src/RESTClient');
+jest.mock('../src/RESTClient.js');
 
-import Monetization from '../monetization';
+import Monetization from '../monetization.js';
 
 describe('Monetization', () => {
 
