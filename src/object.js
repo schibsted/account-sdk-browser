@@ -9,8 +9,8 @@
  * @private
  */
 
-import { assert, isObject, isNonEmptyObj } from './validate';
-import SDKError from './SDKError';
+import { assert, isObject, isNonEmptyObj } from './validate.js';
+import SDKError from './SDKError.js';
 
 /**
  * Similar to Object.assign({}, src) but only clones the keys of an object that have non-undefined

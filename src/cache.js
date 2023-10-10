@@ -4,7 +4,7 @@
 
 'use strict';
 
-import SDKError from './SDKError';
+import SDKError from './SDKError.js';
 
 /**
  * Check whether we are able to use web storage

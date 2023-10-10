@@ -4,7 +4,7 @@
 
 'use strict'
 
-import { assert, isNonEmptyString, isUrl, isNonEmptyObj } from './validate';
+import { assert, isNonEmptyString, isUrl, isNonEmptyObj } from './validate.js';
 
 /**
  * A simple utility function that allows looking up URLs from a dictionary

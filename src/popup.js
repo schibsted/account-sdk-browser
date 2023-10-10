@@ -2,8 +2,8 @@
  * See LICENSE.md in the project root.
  */
 
-import { assert, isObject, isUrl, isFunction } from './validate';
-import { cloneDefined } from './object';
+import { assert, isObject, isUrl, isFunction } from './validate.js';
+import { cloneDefined } from './object.js';
 
 /**
  * Serializes an object to string.

@@ -9,7 +9,7 @@
  * @private
  */
 
-import { isFunction } from './validate';
+import { isFunction } from './validate.js';
 
 /**
  * This is a workaround for making the old SPiD/hassession on JSONP APIs compatible with more common
