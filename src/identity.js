@@ -14,7 +14,9 @@ import * as popup from './popup.js';
 import RESTClient from './RESTClient.js';
 import SDKError from './SDKError.js';
 import * as spidTalk from './spidTalk.js';
-import { version } from '../package.json';
+
+import { readFileSync } from 'fs';
+const { version } = JSON.parse(readFileSync('package.json', 'utf8'));
 
 /**
  * @typedef {object} LoginOptions
