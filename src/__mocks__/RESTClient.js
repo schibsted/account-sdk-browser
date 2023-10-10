@@ -1,7 +1,7 @@
 import { URL } from 'url';
-import { urlMapper } from '../url';
-import { cloneDefined } from '../object';
-import { Fixtures } from '../../__tests__/utils';
+import { urlMapper } from '../url.js';
+import { cloneDefined } from '../object.js';
+import { Fixtures } from '../../__tests__/utils.js';
 
 const goFn = () => jest.fn().mockImplementation(async ({ pathname }) => {
     if (pathname.startsWith('/hasAccess/')) {

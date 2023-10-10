@@ -10,6 +10,9 @@ env:
     mocha: true
     es6: true
 rules:
+    import/extensions:
+      - error
+      - always
     no-undefined: error
     no-var: error
     indent:
