@@ -4,8 +4,8 @@
 
 'use strict';
 
-import { Payment } from '../payment';
-import { compareUrls } from './utils';
+import { Payment } from '../payment.js';
+import { compareUrls } from './utils.js';
 
 describe('Payment', () => {
 

@@ -2,7 +2,7 @@
  * See LICENSE.md in the project root.
  */
 
-import * as spidTalk from '../src/spidTalk';
+import * as spidTalk from '../src/spidTalk.js';
 
 describe('spidTalk', () => {
     test('should be able to call response function', () => {
