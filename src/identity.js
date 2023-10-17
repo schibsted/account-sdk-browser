@@ -925,9 +925,9 @@ export class Identity extends EventEmitter {
                 simplifiedLoginWidget.src = widgetUrl;
                 simplifiedLoginWidget.onload = () => {
                     window.openSimplifiedLoginWidget(initialParams, loginHandler, loginNotYouHandler, cancelLoginHandler);
+                    this.emit('simplifiedLoginOpened');
                     resolve(true);
                 };
-                this.emit('simplifiedLoginOpened');
                 simplifiedLoginWidget.onerror = () => {
                     reject(new SDKError('Error when loading simplified login widget content'));
                 };
