@@ -902,6 +902,14 @@ export class Identity extends EventEmitter {
                     this.login(Object.assign(await prepareLoginParams(loginParams), {loginHint: userData.identifier, prompt: 'login'}));
                 };
 
+                const initHandler = () => {
+                    /**
+                     * Emitted when the simplified login widget is displayed on the screen
+                     * @event Identity#simplifiedLoginOpened
+                     */
+                    this.emit('simplifiedLoginOpened');
+                }
+
                 const cancelLoginHandler = () => {
                     /**
                      * Emitted when the user closes the simplified login widget
@@ -911,12 +919,7 @@ export class Identity extends EventEmitter {
                 }
 
                 if (window.openSimplifiedLoginWidget) {
-                    window.openSimplifiedLoginWidget(initialParams, loginHandler, loginNotYouHandler, cancelLoginHandler);
-                    /**
-                     * Emitted when the simplified login widget is displayed on the screen
-                     * @event Identity#simplifiedLoginOpened
-                     */
-                    this.emit('simplifiedLoginOpened');
+                    window.openSimplifiedLoginWidget(initialParams, loginHandler, loginNotYouHandler, initHandler, cancelLoginHandler);
                     return resolve(true);
                 }
 
@@ -924,8 +927,7 @@ export class Identity extends EventEmitter {
                 simplifiedLoginWidget.type = "text/javascript";
                 simplifiedLoginWidget.src = widgetUrl;
                 simplifiedLoginWidget.onload = () => {
-                    window.openSimplifiedLoginWidget(initialParams, loginHandler, loginNotYouHandler, cancelLoginHandler);
-                    this.emit('simplifiedLoginOpened');
+                    window.openSimplifiedLoginWidget(initialParams, loginHandler, loginNotYouHandler, initHandler, cancelLoginHandler);
                     resolve(true);
                 };
                 simplifiedLoginWidget.onerror = () => {

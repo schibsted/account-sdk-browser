@@ -757,6 +757,8 @@ describe('Identity', () => {
 
         beforeEach(() => {
             identity = new Identity({ clientId: 'foo', redirectUri: 'http://example.com', sessionDomain: 'http://id.example.com' });
+            identity._globalSessionService.fetch = jest.fn(() => ({ ok: true, json: () => expectedData }));
+            identity.login = jest.fn();
         });
 
         afterEach(() => {
@@ -961,40 +963,27 @@ describe('Identity', () => {
         test('Should emit simplifiedLoginOpened if loaded successfully', async () => {
             const spy = jest.fn();
 
-            identity._globalSessionService.fetch = jest.fn(() => ({ ok: true, json: () => expectedData }));
-            identity.login = jest.fn();
-
-            document.getElementsByTagName('body')[0].appendChild = jest.fn((el) => {
-                window.openSimplifiedLoginWidget = jest.fn(async () => {
-                    return true;
-                });
-
-                el.onload();
+            window.openSimplifiedLoginWidget = jest.fn(async (initialParams, loginHandler, loginNotYouHandler, initHandler) => {
+                initHandler();
             });
 
             identity.on('simplifiedLoginOpened', spy);
 
             expect(await identity.showSimplifiedLoginWidget({ state })).toEqual(true);
-            expect(document.getElementsByTagName('body')[0].appendChild).toHaveBeenCalledTimes(1);
             expect(window.openSimplifiedLoginWidget).toHaveBeenCalledTimes(1);
             expect(spy).toHaveBeenCalledTimes(1);
         })
 
         test('Should emit simplifiedLoginCancelled after closing the widget', async () => {
             const spy = jest.fn();
-            identity._globalSessionService.fetch = jest.fn(() => ({ ok: true, json: () => expectedData }));
+
             identity.on('simplifiedLoginCancelled', spy)
 
-            document.getElementsByTagName('body')[0].appendChild = jest.fn((el) => {
-                window.openSimplifiedLoginWidget = jest.fn(async (initialParams, loginHandler, loginNotYouHandler, cancelHandler) => {
-                    cancelHandler();
-                });
-
-                el.onload();
+            window.openSimplifiedLoginWidget = jest.fn(async (initialParams, loginHandler, loginNotYouHandler, initHandler, cancelHandler) => {
+                cancelHandler();
             });
 
             expect(await identity.showSimplifiedLoginWidget({ state })).toEqual(true);
-            expect(document.getElementsByTagName('body')[0].appendChild).toHaveBeenCalledTimes(1);
             expect(window.openSimplifiedLoginWidget).toHaveBeenCalledTimes(1);
             expect(spy).toHaveBeenCalledTimes(1);
         })
