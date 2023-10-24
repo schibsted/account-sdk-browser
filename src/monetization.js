@@ -12,8 +12,7 @@ import RESTClient from './RESTClient.js';
 import Cache from './cache.js';
 import * as spidTalk from './spidTalk.js';
 import SDKError from './SDKError.js';
-import packageJson from '../package.json';
-const { version } = packageJson;
+import version from './version.js';
 
 const globalWindow = () => window;
 

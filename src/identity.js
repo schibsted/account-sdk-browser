@@ -14,8 +14,7 @@ import * as popup from './popup.js';
 import RESTClient from './RESTClient.js';
 import SDKError from './SDKError.js';
 import * as spidTalk from './spidTalk.js';
-import packageJson from '../package.json';
-const { version } = packageJson;
+import version from './version.js';
 
 /**
  * @typedef {object} LoginOptions
