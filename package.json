@@ -15,7 +15,8 @@
     "cover": "jest --coverage",
     "postcover": "codecov",
     "preversion": "npm test",
-    "version": "node ./scripts/genversion.js && git add src/version.js"
+    "version": "node ./scripts/genversion.js && git add src/version.js",
+    "postversion": "git push && git push --tags"
   },
   "author": "",
   "license": "MIT",
