@@ -10,8 +10,7 @@ import Identity from '../identity.js';
 import { compareUrls, Fixtures } from './utils.js';
 import { URL } from 'url';
 import { URL as u } from 'whatwg-url';
-import packageJson from '../package.json';
-const { version } = packageJson;
+import version from '../src/version.js';
 
 describe('Identity', () => {
     const defaultOptions = {
