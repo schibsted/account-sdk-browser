@@ -849,7 +849,9 @@ export class Identity extends EventEmitter {
      * @param {SimplifiedLoginWidgetLoginOptions} loginParams - the same as `options` param for login function. Login will be called on user
      * continue action. `state` might be string or async function.
      * @param {SimplifiedLoginWidgetOptions} [options] - additional configuration of Simplified Login Widget
-     * @return {Promise<boolean|SDKError>} - will resolve to true if widget will be display. Otherwise will throw SDKError
+     * @fires Identity#simplifiedLoginOpened
+     * @fires Identity#simplifiedLoginCancelled
+     * @return {Promise<boolean|SDKError>} - will resolve to true if widget will be display. Otherwise, will throw SDKError
      */
     async showSimplifiedLoginWidget(loginParams, options) {
         // getUserContextData doesn't throw exception
@@ -900,8 +902,24 @@ export class Identity extends EventEmitter {
                     this.login(Object.assign(await prepareLoginParams(loginParams), {loginHint: userData.identifier, prompt: 'login'}));
                 };
 
+                const initHandler = () => {
+                    /**
+                     * Emitted when the simplified login widget is displayed on the screen
+                     * @event Identity#simplifiedLoginOpened
+                     */
+                    this.emit('simplifiedLoginOpened');
+                }
+
+                const cancelLoginHandler = () => {
+                    /**
+                     * Emitted when the user closes the simplified login widget
+                     * @event Identity#simplifiedLoginCancelled
+                     */
+                    this.emit('simplifiedLoginCancelled');
+                }
+
                 if (window.openSimplifiedLoginWidget) {
-                    window.openSimplifiedLoginWidget(initialParams, loginHandler, loginNotYouHandler);
+                    window.openSimplifiedLoginWidget(initialParams, loginHandler, loginNotYouHandler, initHandler, cancelLoginHandler);
                     return resolve(true);
                 }
 
@@ -909,7 +927,7 @@ export class Identity extends EventEmitter {
                 simplifiedLoginWidget.type = "text/javascript";
                 simplifiedLoginWidget.src = widgetUrl;
                 simplifiedLoginWidget.onload = () => {
-                    window.openSimplifiedLoginWidget(initialParams, loginHandler, loginNotYouHandler);
+                    window.openSimplifiedLoginWidget(initialParams, loginHandler, loginNotYouHandler, initHandler, cancelLoginHandler);
                     resolve(true);
                 };
                 simplifiedLoginWidget.onerror = () => {
