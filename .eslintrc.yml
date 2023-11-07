@@ -13,6 +13,8 @@ rules:
     import/extensions:
       - error
       - always
+      -   js: always
+          ts: never
     no-undefined: error
     no-var: error
     indent:

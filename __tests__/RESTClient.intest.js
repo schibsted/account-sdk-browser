@@ -4,6 +4,10 @@
 
 'use strict';
 
+/**
+ * @jest-environment node
+ */
+
 import fetch from 'node-fetch';
 import RESTClient from '../src/RESTClient.js';
 import config from '../src/config.js';
