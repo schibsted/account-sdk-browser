@@ -661,6 +661,55 @@ describe('Identity', () => {
         });
     });
 
+    describe('getExternalId', () => {
+        let identity;
+
+        beforeEach(() => {
+            identity = new Identity(defaultOptions);
+            identity._sessionService.fetch = jest.fn(() => ({ ok: true, json: () => Fixtures.sessionResponse }));
+        });
+
+        test('should throw if externalParty is missing', async () => {
+
+        })
+
+        test('should return correct externalId when externalParty is provided', async () => {
+            const expectedHash = "75907c00749031cfdc798cd29de9ac68e86b39e9edd873dedb6813dba5f97824";
+            const externalId = await identity.getExternalId("3rd-party");
+
+            expect(externalId).toBe(expectedHash);
+        })
+    })
+
+    describe('getClientSDRN', () => {
+        let identity;
+
+        beforeEach(() => {
+            identity = new Identity(defaultOptions);
+            identity._sessionService.fetch = jest.fn(() => ({ ok: true, json: () => Fixtures.sessionResponse }));
+        });
+
+        test(`should fail when we don't get a 'clientSDRN' from hasSession`, async () => {
+            identity._sessionService.fetch.mockImplementationOnce(() => ({ ok: true, json: () => ({}) }));
+            await expect(identity.getClientSDRN()).rejects.toMatchObject({
+                message: 'Failed to get SDRN from user session'
+            });
+        });
+
+        test(`should work when we get a 'clientSDRN' from hasSession`, async () => {
+            const result = { result: true, sdrn: 'sdrn:schibsted.com:client:123456' };
+            identity._sessionService.fetch.mockImplementationOnce(() => ({ ok: true, json: () => result }));
+            await expect(identity.getClientSDRN()).resolves.toBe('sdrn:schibsted.com:client:123456');
+        });
+
+        test(`should propagate errors from HasSession call`, async () => {
+            identity._sessionService.fetch.mockImplementationOnce(() => ({ ok: false, statusText: 'Blah!' }));
+            await expect(identity.getClientSDRN()).rejects.toMatchObject({
+                message: 'HasSession failed'
+            });
+        });
+    });
+
     describe('getUserUuid', () => {
         let identity;
 

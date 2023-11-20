@@ -54,7 +54,8 @@ const sessionResponse = {
     clientAgreementAccepted: true,
     defaultAgreementAccepted: true,
     sp_id: 'some-jwt-token',
-    sig: 'some-encrypted-value'
+    sig: 'some-encrypted-value',
+    pairId: 'b2a23caae8ead566099b43b2b33f0cd344f66d50a62034ccbe8bbaa435fd760e',
 };
 const sessionServiceAccess = {
     entitled: true,

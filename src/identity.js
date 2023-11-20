@@ -110,6 +110,8 @@ import version from './version.js';
  * @property {boolean} tracking - (Only for connected users)
  * @property {boolean} clientAgreementAccepted - (Only for connected users)
  * @property {boolean} defaultAgreementAccepted - (Only for connected users)
+ * @property {string} pairId
+ * @property {string} sdrn
  */
 
 /**
@@ -592,8 +594,10 @@ export class Identity extends EventEmitter {
 
     /**
      * @async
-     * @summary In Schibsted account, there are two ways of identifying a user; the `userId` and the
-     * `uuid`. There are reasons for them both existing. The `userId` is a numeric identifier, but
+     * @summary
+     * In Schibsted account, there are multiple ways of identifying a user; the `userId`,
+     * `uuid` and `externalId` (see {@link Identity#getExternalId}). There are reasons for them all
+     * to exist. The `userId` is a numeric identifier, but
      * since Schibsted account is deployed separately in Norway and Sweden, there are a lot of
      * duplicates. The `userId` was introduced early, so many sites still need to use them for
      * legacy reasons. The `uuid` is universally unique, and so — if we could disregard a lot of
@@ -609,6 +613,87 @@ export class Identity extends EventEmitter {
             return user.userId;
         }
         throw new SDKError('The user is not connected to this merchant');
+    }
+
+    // /**
+    //  * @async
+    //  * @summary Enables brands to programmatically get their `merchantId` based on the user's session.
+    //  * @description This function calls {@link Identity#hasSession} internally and thus has the side
+    //  * effect that it might perform an auto-login on the user
+    //  * @throws {SDKError} If the merchantId is missing in user session object.
+    //  * @returns {Promise<*>}
+    //  */
+    // async getMerchantId() {
+    //     const { merchantId } = await this.hasSession();
+    //     if (merchantId) {
+    //         return merchantId;
+    //     }
+    //     throw new SDKError('Failed to get merchantId from user session');
+    // }
+
+
+    /**
+     * @async
+     * @function
+     * @summary
+     * Retrieves the external identifier (`externalId`) for the authenticated user.
+     *
+     * In Schibsted Account there are multiple ways of identifying users, however for integrations with
+     * third-parties it's recommended to use `externalId` as it does not disclose
+     * any critical data whilst allowing for user identification.
+     *
+     * `externalId` is merchant-scoped using a pairwise identifier (`pairId`),
+     * meaning the same user's ID will differ between merchants.
+     * Additionally, this identifier is bound to the external party provided as argument.
+     *
+     * @description This function calls {@link Identity#hasSession} internally and thus has the side
+     * effect that it might perform an auto-login on the user
+     * @throws {SDKError} If the `pairId` is missing in user session.
+     * @throws {SDKError} If the `externalParty` is not defined
+     * @return {Promise<string>} The merchant- and 3rd-party- specific `externalId`
+     */
+    async getExternalId(externalParty, optionalSuffix = "") {
+        if(!externalParty || externalParty.length === 0) {
+            throw new SDKError('externalParty cannot be empty');
+        }
+        const _toHexDigest = (hashBuffer) =>{
+            // convert buffer to byte array
+            const hashArray = Array.from(new Uint8Array(hashBuffer));
+            // convert bytes to hex string
+            return hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
+        }
+
+        const _getSha256Digest = (data) => {
+            return crypto.subtle.digest('SHA-256', data);
+        }
+
+        const _hashMessage = async (message) => {
+            const msgUint8 = new TextEncoder().encode(message);
+            return _getSha256Digest(msgUint8).then( (it) => _toHexDigest(it));
+        }
+
+        const { pairId } = await this.hasSession();
+
+        if (!pairId)
+            throw new SDKError('pairId missing in user session!');
+
+        return _hashMessage([pairId, externalParty, optionalSuffix].join(':'))
+    }
+
+    /**
+     * @async
+     * @summary Enables brands to programmatically get the current the SDRN based on the user's session.
+     * @description This function calls {@link Identity#hasSession} internally and thus has the side
+     * effect that it might perform an auto-login on the user
+     * @throws {SDKError} If the SDRN is missing in user session object.
+     * @returns {Promise<*>}
+     */
+    async getUserSDRN() {
+        const { sdrn } = await this.hasSession();
+        if (sdrn) {
+            return sdrn;
+        }
+        throw new SDKError('Failed to get SDRN from user session');
     }
 
     /**
