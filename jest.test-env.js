@@ -13,5 +13,6 @@ export default class CustomJsDomEnv extends JSDOMEnvironment {
             global.TextEncoder = TextEncoder;
         if (!global.TextDecoder)
             global.TextDecoder = TextDecoder;
+        global.fetch = fetch;
     }
 }
