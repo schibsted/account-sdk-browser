@@ -4,18 +4,11 @@
 
 'use strict';
 
-
 import RESTClient from '../src/RESTClient.js';
 import config from '../src/config.js';
 
-/**
- * @jest-environment node
- */
 describe('RESTClient', () => {
-
-    /**
-     * @jest-environment node
-     */
+    
     test('can make a call to Schibsted account DEV /api/2/version', () => {
         const restClient = new RESTClient({
             serverUrl: 'PRE',

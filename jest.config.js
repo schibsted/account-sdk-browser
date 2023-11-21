@@ -3,7 +3,6 @@ export default {
         url: 'http://spid.no'
     },
     testPathIgnorePatterns: [
-        '/node_modules/(?!(node-fetch))',
         '__tests__/utils.js',
     ],
     testEnvironment: "./jest.test-env.js",

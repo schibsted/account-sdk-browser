@@ -6,10 +6,7 @@
 
 import { URL } from 'whatwg-url';
 import { urlMapper } from '../src/url.js';
-import { TextEncoder } from "util";
 import RESTClient from '../src/RESTClient.js';
-
-global.TextEncoder = TextEncoder;
 
 describe('url', () => {
 
