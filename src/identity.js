@@ -672,12 +672,18 @@ export class Identity extends EventEmitter {
             return _getSha256Digest(msgUint8).then( (it) => _toHexDigest(it));
         }
 
+        const _constructMessage = (pairId, externalParty, optionalSuffix) => {
+            return optionalSuffix
+                ? `${pairId}:${externalParty}:${optionalSuffix}`
+                : `${pairId}:${externalParty}`;
+        }
+
         const { pairId } = await this.hasSession();
 
         if (!pairId)
             throw new SDKError('pairId missing in user session!');
 
-        return _hashMessage([pairId, externalParty, optionalSuffix].join(':'))
+        return _hashMessage(_constructMessage(pairId, externalParty, optionalSuffix))
     }
 
     /**
