@@ -650,7 +650,7 @@ export class Identity extends EventEmitter {
      * effect that it might perform an auto-login on the user
      * @throws {SDKError} If the `pairId` is missing in user session.
      * @throws {SDKError} If the `externalParty` is not defined
-     * @return {Promise<string>} The merchant- and 3rd-party- specific `externalId`
+     * @return {Promise<string>} The merchant- and 3rd-party-specific `externalId`
      */
     async getExternalId(externalParty, optionalSuffix = "") {
         if(!externalParty || externalParty.length === 0) {
@@ -692,7 +692,7 @@ export class Identity extends EventEmitter {
      * @description This function calls {@link Identity#hasSession} internally and thus has the side
      * effect that it might perform an auto-login on the user
      * @throws {SDKError} If the SDRN is missing in user session object.
-     * @returns {Promise<*>}
+     * @returns {Promise<string>}
      */
     async getUserSDRN() {
         const { sdrn } = await this.hasSession();

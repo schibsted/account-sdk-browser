@@ -44,6 +44,7 @@ const sessionResponse = {
     id: '59e9eaaaacb3ad0aaaedaaaa',
     userId: 12345,
     uuid: 'aaaaaaaa-de42-5c4b-80ee-eeeeeeeeeeee',
+    sdrn: 'sdrn:spid.no:user:12345',
     displayName: 'bruce_wayne',
     givenName: 'Bruce',
     familyName: 'Wayne',

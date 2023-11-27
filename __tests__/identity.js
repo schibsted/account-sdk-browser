@@ -705,6 +705,26 @@ describe('Identity', () => {
         })
     })
 
+    describe('getUserSDRN', () => {
+        let identity;
+
+        beforeEach(() => {
+            identity = new Identity(defaultOptions);
+            identity._sessionService.fetch = jest.fn(() => ({ ok: true, json: () => Fixtures.sessionResponse }));
+        });
+
+        test(`should fail when sdrn is not present in hasSession response`, async () => {
+            identity._sessionService.fetch = jest.fn(() => ({ ok: true, json: () => ({}) }));
+            expect(async () => await identity.getUserSDRN()).rejects.toThrowError(new SDKError('Failed to get SDRN from user session'));
+        })
+
+        test(`should return userSDRN`, async () => {
+            const expectedSdrn = Fixtures.sessionResponse.sdrn;
+            const sdrn = await identity.getUserSDRN();
+            expect(sdrn).toBe(expectedSdrn);
+        })
+    })
+
     describe('getUserUuid', () => {
         let identity;
 
