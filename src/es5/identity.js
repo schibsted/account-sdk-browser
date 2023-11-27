@@ -5,6 +5,6 @@
 'use strict';
 
 window.regeneratorRuntime = require('regenerator-runtime');
-const { Identity } = require('../identity');
+const { Identity } = require('../identity.js');
 
 module.exports = { Identity };
