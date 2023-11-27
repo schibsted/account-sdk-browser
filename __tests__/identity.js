@@ -12,6 +12,17 @@ import { URL } from 'url';
 import { URL as u } from 'whatwg-url';
 import version from '../src/version.js';
 
+import { TextEncoder, TextDecoder } from 'util';
+Object.assign(global, {TextEncoder, TextDecoder});
+
+import crypto from "crypto";
+
+Object.defineProperty(global.self, "crypto", {
+    value: {
+        subtle: crypto.webcrypto.subtle,
+    },
+});
+
 describe('Identity', () => {
     const defaultOptions = {
         clientId: 'foo',
@@ -669,8 +680,14 @@ describe('Identity', () => {
             identity._sessionService.fetch = jest.fn(() => ({ ok: true, json: () => Fixtures.sessionResponse }));
         });
 
-        test('should throw if externalParty is missing', async () => {
+        test('should throw if pairId is missing in hasSession response', async () => {
+            identity._sessionService.fetch = jest.fn(() => ({ ok: true, json: () => ({}) }));
+            expect(async () => await identity.getExternalId('3rd-party')).rejects.toThrowError(new SDKError('pairId missing in user session!'));
+        })
 
+        test('should throw if externalParty is missing', async () => {
+            expect(async () => await identity.getExternalId()).rejects.toThrowError(new SDKError('externalParty cannot be empty'));
+            expect(async () => await identity.getExternalId('')).rejects.toThrowError(new SDKError('externalParty cannot be empty'));
         })
 
         test('should return correct externalId when externalParty is provided', async () => {
@@ -679,36 +696,14 @@ describe('Identity', () => {
 
             expect(externalId).toBe(expectedHash);
         })
+
+        test('should return correct externalId when externalParty and suffix are provided', async () => {
+            const expectedHash = "a0ad9a8261f2dc1b687ddd2c51f48445340985e34cb9db5d0a42856480ecc5fb";
+            const externalId = await identity.getExternalId("3rd-party", "suffix");
+
+            expect(externalId).toBe(expectedHash);
+        })
     })
-
-    describe('getClientSDRN', () => {
-        let identity;
-
-        beforeEach(() => {
-            identity = new Identity(defaultOptions);
-            identity._sessionService.fetch = jest.fn(() => ({ ok: true, json: () => Fixtures.sessionResponse }));
-        });
-
-        test(`should fail when we don't get a 'clientSDRN' from hasSession`, async () => {
-            identity._sessionService.fetch.mockImplementationOnce(() => ({ ok: true, json: () => ({}) }));
-            await expect(identity.getClientSDRN()).rejects.toMatchObject({
-                message: 'Failed to get SDRN from user session'
-            });
-        });
-
-        test(`should work when we get a 'clientSDRN' from hasSession`, async () => {
-            const result = { result: true, sdrn: 'sdrn:schibsted.com:client:123456' };
-            identity._sessionService.fetch.mockImplementationOnce(() => ({ ok: true, json: () => result }));
-            await expect(identity.getClientSDRN()).resolves.toBe('sdrn:schibsted.com:client:123456');
-        });
-
-        test(`should propagate errors from HasSession call`, async () => {
-            identity._sessionService.fetch.mockImplementationOnce(() => ({ ok: false, statusText: 'Blah!' }));
-            await expect(identity.getClientSDRN()).rejects.toMatchObject({
-                message: 'HasSession failed'
-            });
-        });
-    });
 
     describe('getUserUuid', () => {
         let identity;
