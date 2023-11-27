@@ -615,23 +615,6 @@ export class Identity extends EventEmitter {
         throw new SDKError('The user is not connected to this merchant');
     }
 
-    // /**
-    //  * @async
-    //  * @summary Enables brands to programmatically get their `merchantId` based on the user's session.
-    //  * @description This function calls {@link Identity#hasSession} internally and thus has the side
-    //  * effect that it might perform an auto-login on the user
-    //  * @throws {SDKError} If the merchantId is missing in user session object.
-    //  * @returns {Promise<*>}
-    //  */
-    // async getMerchantId() {
-    //     const { merchantId } = await this.hasSession();
-    //     if (merchantId) {
-    //         return merchantId;
-    //     }
-    //     throw new SDKError('Failed to get merchantId from user session');
-    // }
-
-
     /**
      * @async
      * @function
