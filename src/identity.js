@@ -596,8 +596,8 @@ export class Identity extends EventEmitter {
      * @async
      * @summary
      * In Schibsted account, there are multiple ways of identifying a user; the `userId`,
-     * `uuid` and `externalId` (see {@link Identity#getExternalId}). There are reasons for them all
-     * to exist. The `userId` is a numeric identifier, but
+     * `uuid` and `externalId` used for identifying a user-merchant pair (see {@link Identity#getExternalId}).
+     * There are reasons for them all to exist. The `userId` is a numeric identifier, but
      * since Schibsted account is deployed separately in Norway and Sweden, there are a lot of
      * duplicates. The `userId` was introduced early, so many sites still need to use them for
      * legacy reasons. The `uuid` is universally unique, and so — if we could disregard a lot of
@@ -636,6 +636,11 @@ export class Identity extends EventEmitter {
      * @return {Promise<string>} The merchant- and 3rd-party-specific `externalId`
      */
     async getExternalId(externalParty, optionalSuffix = "") {
+        const { pairId } = await this.hasSession();
+
+        if (!pairId)
+            throw new SDKError('pairId missing in user session!');
+
         if(!externalParty || externalParty.length === 0) {
             throw new SDKError('externalParty cannot be empty');
         }
@@ -660,11 +665,6 @@ export class Identity extends EventEmitter {
                 ? `${pairId}:${externalParty}:${optionalSuffix}`
                 : `${pairId}:${externalParty}`;
         }
-
-        const { pairId } = await this.hasSession();
-
-        if (!pairId)
-            throw new SDKError('pairId missing in user session!');
 
         return _hashMessage(_constructMessage(pairId, externalParty, optionalSuffix))
     }
