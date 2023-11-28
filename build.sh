@@ -3,7 +3,7 @@
 COMMON_OPTS="--mode=production --module-bind js=babel-loader --devtool source-map"
 CJS_OPTS="--output-library-target=commonjs2"
 WINDOW_OPTS="--output-library-target=window"
-#export NODE_OPTIONS="--openssl-legacy-provider" # remove when package will be updated
+export NODE_OPTIONS="--openssl-legacy-provider" # remove when package will be updated
 
 rm -rf es5
 webpack src/es5/index.js -o es5/index.min.js $COMMON_OPTS $CJS_OPTS
