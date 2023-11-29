@@ -221,6 +221,36 @@ export class Identity extends TinyEmitter {
      */
     getUserContextData(): Promise<SimplifiedLoginData | null>;
     /**
+     * @async
+     * @function
+     * @summary
+     * Retrieves the external identifier (`externalId`) for the authenticated user.
+     *
+     * In Schibsted Account there are multiple ways of identifying users, however for integrations with
+     * third-parties it's recommended to use `externalId` as it does not disclose
+     * any critical data whilst allowing for user identification.
+     *
+     * `externalId` is merchant-scoped using a pairwise identifier (`pairId`),
+     * meaning the same user's ID will differ between merchants.
+     * Additionally, this identifier is bound to the external party provided as argument.
+     *
+     * @description This function calls {@link Identity#hasSession} internally and thus has the side
+     * effect that it might perform an auto-login on the user
+     * @throws {SDKError} If the `pairId` is missing in user session.
+     * @throws {SDKError} If the `externalParty` is not defined
+     * @return {Promise<string>} The merchant- and 3rd-party-specific `externalId`
+     */
+     getExternalId(externalParty: string, optionalSuffix?: string): Promise<string>;
+    /**
+     * @async
+     * @summary Enables brands to programmatically get the current the SDRN based on the user's session.
+     * @description This function calls {@link Identity#hasSession} internally and thus has the side
+     * effect that it might perform an auto-login on the user
+     * @throws {SDKError} If the SDRN is missing in user session object.
+     * @returns {Promise<string>}
+     */
+    getUserSDRN(): Promise<string>;
+    /**
      * If a popup is desired, this function needs to be called in response to a user event (like
      * click or tap) in order to work correctly. Otherwise the popup will be blocked by the
      * browser's popup blockers and has to be explicitly authorized to be shown.
