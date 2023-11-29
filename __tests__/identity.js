@@ -12,6 +12,17 @@ import { URL } from 'url';
 import { URL as u } from 'whatwg-url';
 import version from '../src/version.js';
 
+import { TextEncoder, TextDecoder } from 'util';
+Object.assign(global, {TextEncoder, TextDecoder});
+
+import crypto from "crypto";
+
+Object.defineProperty(global.self, "crypto", {
+    value: {
+        subtle: crypto.webcrypto.subtle,
+    },
+});
+
 describe('Identity', () => {
     const defaultOptions = {
         clientId: 'foo',
@@ -660,6 +671,59 @@ describe('Identity', () => {
             });
         });
     });
+
+    describe('getExternalId', () => {
+        let identity;
+
+        beforeEach(() => {
+            identity = new Identity(defaultOptions);
+            identity._sessionService.fetch = jest.fn(() => ({ ok: true, json: () => Fixtures.sessionResponse }));
+        });
+
+        test('should throw if pairId is missing in hasSession response', async () => {
+            identity._sessionService.fetch = jest.fn(() => ({ ok: true, json: () => ({}) }));
+            expect(async () => await identity.getExternalId('3rd-party')).rejects.toThrowError(new SDKError('pairId missing in user session!'));
+        })
+
+        test('should throw if externalParty is missing', async () => {
+            expect(async () => await identity.getExternalId()).rejects.toThrowError(new SDKError('externalParty cannot be empty'));
+            expect(async () => await identity.getExternalId('')).rejects.toThrowError(new SDKError('externalParty cannot be empty'));
+        })
+
+        test('should return correct externalId when externalParty is provided', async () => {
+            const expectedHash = "75907c00749031cfdc798cd29de9ac68e86b39e9edd873dedb6813dba5f97824";
+            const externalId = await identity.getExternalId("3rd-party");
+
+            expect(externalId).toBe(expectedHash);
+        })
+
+        test('should return correct externalId when externalParty and suffix are provided', async () => {
+            const expectedHash = "a0ad9a8261f2dc1b687ddd2c51f48445340985e34cb9db5d0a42856480ecc5fb";
+            const externalId = await identity.getExternalId("3rd-party", "suffix");
+
+            expect(externalId).toBe(expectedHash);
+        })
+    })
+
+    describe('getUserSDRN', () => {
+        let identity;
+
+        beforeEach(() => {
+            identity = new Identity(defaultOptions);
+            identity._sessionService.fetch = jest.fn(() => ({ ok: true, json: () => Fixtures.sessionResponse }));
+        });
+
+        test(`should fail when sdrn is not present in hasSession response`, async () => {
+            identity._sessionService.fetch = jest.fn(() => ({ ok: true, json: () => ({}) }));
+            expect(async () => await identity.getUserSDRN()).rejects.toThrowError(new SDKError('Failed to get SDRN from user session'));
+        })
+
+        test(`should return userSDRN`, async () => {
+            const expectedSdrn = Fixtures.sessionResponse.sdrn;
+            const sdrn = await identity.getUserSDRN();
+            expect(sdrn).toBe(expectedSdrn);
+        })
+    })
 
     describe('getUserUuid', () => {
         let identity;

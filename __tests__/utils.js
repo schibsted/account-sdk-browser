@@ -44,6 +44,7 @@ const sessionResponse = {
     id: '59e9eaaaacb3ad0aaaedaaaa',
     userId: 12345,
     uuid: 'aaaaaaaa-de42-5c4b-80ee-eeeeeeeeeeee',
+    sdrn: 'sdrn:spid.no:user:12345',
     displayName: 'bruce_wayne',
     givenName: 'Bruce',
     familyName: 'Wayne',
@@ -54,7 +55,8 @@ const sessionResponse = {
     clientAgreementAccepted: true,
     defaultAgreementAccepted: true,
     sp_id: 'some-jwt-token',
-    sig: 'some-encrypted-value'
+    sig: 'some-encrypted-value',
+    pairId: 'b2a23caae8ead566099b43b2b33f0cd344f66d50a62034ccbe8bbaa435fd760e',
 };
 const sessionServiceAccess = {
     entitled: true,
