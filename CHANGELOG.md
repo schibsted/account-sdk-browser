@@ -1,5 +1,18 @@
 # Changelog
 
+## 4.7.7 (2023-11-29)
+* docs: dts update by @michal-oleniacz-stp in https://github.com/schibsted/account-sdk-browser/pull/263
+
+## 4.7.6 (2023-11-29)
+* Add open & cancel events to SimplifiedLoginWidget by @michal-oleniacz-stp in https://github.com/schibsted/account-sdk-browser/pull/258
+* [UUI-525] Feat: externalId  by @michal-oleniacz-stp in https://github.com/schibsted/account-sdk-browser/pull/261
+* 4.8.3 by @michal-oleniacz-stp in https://github.com/schibsted/account-sdk-browser/pull/262
+
+## 4.7.5 (2023-10-09) 
+* release 4.7.4 by @bogdan-niculescu-sch in https://github.com/schibsted/account-sdk-browser/pull/252
+* Added readme on release process by @joawan in https://github.com/schibsted/account-sdk-browser/pull/254
+* Fix lint warning by @joawan in https://github.com/schibsted/account-sdk-browser/pull/255
+
 ## 4.7.4 (2023-09-08)
 * Ignore malformed session storage objects
 * Cleanup ReadMe
