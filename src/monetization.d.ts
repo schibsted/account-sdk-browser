@@ -77,4 +77,4 @@ export class Monetization {
     productsUrl(redirectUri?: string): string;
 }
 export default Monetization;
-import RESTClient from "./RESTClient";
+import RESTClient from "./RESTClient.js";

@@ -610,5 +610,5 @@ export type SimplifiedLoginWidgetOptions = {
      */
     locale?: "nb"|"sv"|"fi"|"da"|"en";
 };
-import RESTClient from "./RESTClient";
-import SDKError from "./SDKError";
+import RESTClient from "./RESTClient.js";
+import SDKError from "./SDKError.js";
