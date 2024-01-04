@@ -304,12 +304,28 @@ describe('Identity', () => {
 
     describe('hasSession', () => {
         let identity;
+        let locationReplaceStub = jest.fn();
+
+        const { location } = window;
+
+        beforeAll(() => {
+            delete window.location;
+            window.location = { replace: locationReplaceStub };
+        });
+
+        afterAll(() => {
+            window.location = location;
+        });
 
         beforeEach(() => {
             identity = new Identity(defaultOptions);
             identity._sessionService.fetch = jest.fn(() => ({ ok: true, json: () => Fixtures.sessionResponse }));
             identity._clearVarnishCookie();
         });
+
+        afterEach(()=>{
+            jest.clearAllMocks();
+        })
 
         test('should be able to set varnish cookie', async () => {
             await identity.hasSession();
@@ -484,6 +500,28 @@ describe('Identity', () => {
                 expect(identity._sessionService.fetch.mock.calls.length).toBe(2);
             });
         });
+
+        describe('full page redirect', ()=>{
+            test('should do redirect when session endpoint respond with redirectUrl only', async () => {
+                identity._sessionService.fetch.mockReturnValueOnce(
+                    ({ ok: true, json: () => Fixtures.sessionNeedsToBeRefreshedResponse })
+                )
+
+                await identity.hasSession();
+
+                expect(locationReplaceStub).toHaveBeenCalledWith(Fixtures.sessionNeedsToBeRefreshedResponse.redirectUrl)
+            });
+
+            test('should throw error when session refresh redirectUrl is not valid', async () => {
+                identity._sessionService.fetch.mockReturnValueOnce(
+                    ({ ok: true, json: () => ({
+                        redirectUrl: 'NOT_VALID'
+                    }) })
+                )
+
+                expect(async () => await identity.hasSession()).rejects.toThrowError(new SDKError('HasSession failed'));
+            });
+        })
     });
 
     describe('isLoggedIn', () => {

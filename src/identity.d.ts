@@ -553,6 +553,11 @@ export type HasSessionSuccessResponse = {
      * - (Only for connected users)
      */
     defaultAgreementAccepted: boolean;
+} | {
+    /**
+     * Used for expiring session in Safari browser to indicate redirection need
+     */
+    redirectUrl: string;
 };
 export type HasSessionFailureResponse = {
     error: {
