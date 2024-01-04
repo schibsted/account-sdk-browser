@@ -492,6 +492,18 @@ export class Identity extends EventEmitter {
             this._session = sessionData;
             return sessionData;
         };
+        const _checkRedirectionNeed = (sessionData={})=>{
+            const sessionDataKeys = Object.keys(sessionData);
+
+            const isRedirectNeeded = sessionDataKeys.length === 1 &&
+                sessionDataKeys[0] === 'redirectUrl';
+
+            if(isRedirectNeeded && !isUrl(sessionData.redirectUrl)){
+                throw new SDKError('Session refresh url is not valid');
+            }
+
+            return isRedirectNeeded;
+        }
         const _getSession = async () => {
             if (this._enableSessionCaching) {
                 // Try to resolve from cache (it has a TTL)
@@ -511,10 +523,19 @@ export class Identity extends EventEmitter {
                 throw err;
             }
 
-            if (sessionData && this._enableSessionCaching) {
-                const expiresIn = 1000 * (sessionData.expiresIn || 300);
-                this.cache.set(HAS_SESSION_CACHE_KEY, sessionData, expiresIn);
+            if(sessionData){
+                // for expiring session and safari browser do full page redirect to gain new session
+                if(_checkRedirectionNeed(sessionData)){
+                    window.location.replace(sessionData.redirectUrl);
+                    return;
+                }
+
+                if (this._enableSessionCaching) {
+                    const expiresIn = 1000 * (sessionData.expiresIn || 300);
+                    this.cache.set(HAS_SESSION_CACHE_KEY, sessionData, expiresIn);
+                }
             }
+
             return _postProcess(sessionData);
         };
         this._hasSessionInProgress = _getSession()
@@ -632,6 +653,8 @@ export class Identity extends EventEmitter {
      * meaning the same user's ID will differ between merchants.
      * Additionally, this identifier is bound to the external party provided as argument.
      *
+     * @param {string} externalParty
+     * @param {string|null} optionalSuffix
      * @description This function calls {@link Identity#hasSession} internally and thus has the side
      * effect that it might perform an auto-login on the user
      * @param {string} externalParty

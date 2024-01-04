@@ -58,6 +58,11 @@ const sessionResponse = {
     sig: 'some-encrypted-value',
     pairId: 'b2a23caae8ead566099b43b2b33f0cd344f66d50a62034ccbe8bbaa435fd760e',
 };
+
+const sessionNeedsToBeRefreshedResponse = {
+    redirectUrl: 'http://example.com/test'
+};
+
 const sessionServiceAccess = {
     entitled: true,
     allowedFeatures: ["existing"],
@@ -80,4 +85,5 @@ export const Fixtures = {
     sessionResponse,
     sessionServiceAccess,
     sessionServiceNoAccess,
+    sessionNeedsToBeRefreshedResponse
 };
