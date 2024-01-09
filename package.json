@@ -5,7 +5,7 @@
   "main": "index.js",
   "type": "module",
   "scripts": {
-    "build": "./build.sh",
+    "build": "webpack --mode production",
     "clean": "rimraf .cache coverage dist docs",
     "docs": "rimraf docs && jsdoc -c ./jsdoc.conf.json --verbose",
     "lint": "eslint .",
