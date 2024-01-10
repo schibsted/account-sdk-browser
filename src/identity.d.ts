@@ -559,7 +559,7 @@ export type HasSessionSuccessResponse = {
     /**
      * Used for expiring session in Safari browser to indicate redirection need
      */
-    redirectUrl: string;
+    redirectURL: string;
 };
 export type HasSessionFailureResponse = {
     error: {

@@ -502,20 +502,20 @@ describe('Identity', () => {
         });
 
         describe('full page redirect', ()=>{
-            test('should do redirect when session endpoint respond with redirectUrl only', async () => {
+            test('should do redirect when session endpoint respond with redirectURL only', async () => {
                 identity._sessionService.fetch.mockReturnValueOnce(
                     ({ ok: true, json: () => Fixtures.sessionNeedsToBeRefreshedResponse })
                 )
 
                 await identity.hasSession();
 
-                expect(locationReplaceStub).toHaveBeenCalledWith(Fixtures.sessionNeedsToBeRefreshedResponse.redirectUrl)
+                expect(locationReplaceStub).toHaveBeenCalledWith(Fixtures.sessionNeedsToBeRefreshedResponse.redirectURL)
             });
 
-            test('should throw error when session refresh redirectUrl is not valid', async () => {
+            test('should throw error when session refresh redirectURL is not valid', async () => {
                 identity._sessionService.fetch.mockReturnValueOnce(
                     ({ ok: true, json: () => ({
-                        redirectUrl: 'NOT_VALID'
+                        redirectURL: 'NOT_VALID'
                     }) })
                 )
 
