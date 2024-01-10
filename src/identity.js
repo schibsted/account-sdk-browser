@@ -496,9 +496,9 @@ export class Identity extends EventEmitter {
             const sessionDataKeys = Object.keys(sessionData);
 
             const isRedirectNeeded = sessionDataKeys.length === 1 &&
-                sessionDataKeys[0] === 'redirectUrl';
+                sessionDataKeys[0] === 'redirectURL';
 
-            if(isRedirectNeeded && !isUrl(sessionData.redirectUrl)){
+            if(isRedirectNeeded && !isUrl(sessionData.redirectURL)){
                 throw new SDKError('Session refresh url is not valid');
             }
 
@@ -526,7 +526,7 @@ export class Identity extends EventEmitter {
             if(sessionData){
                 // for expiring session and safari browser do full page redirect to gain new session
                 if(_checkRedirectionNeed(sessionData)){
-                    window.location.replace(sessionData.redirectUrl);
+                    window.location.replace(sessionData.redirectURL);
                     return;
                 }
 
