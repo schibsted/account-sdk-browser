@@ -60,7 +60,7 @@ const sessionResponse = {
 };
 
 const sessionNeedsToBeRefreshedResponse = {
-    redirectUrl: 'http://example.com/test'
+    redirectURL: 'http://example.com/test'
 };
 
 const sessionServiceAccess = {
