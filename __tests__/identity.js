@@ -494,9 +494,7 @@ describe('Identity', () => {
 
                 await identity.hasSession();
 
-                expect(spy).toHaveProperty('mock.calls.length');
-                expect(spy.mock.calls.length).toBeGreaterThan(0);
-                expect(spy.mock.calls.some(c => c[0] === 'redirectToSessionService')).toBe(true);
+                expect(spy).toHaveBeenCalledWith('redirectToSessionService');
             });
         })
     });
