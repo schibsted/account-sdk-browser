@@ -498,10 +498,6 @@ export class Identity extends EventEmitter {
             const isRedirectNeeded = sessionDataKeys.length === 1 &&
                 sessionDataKeys[0] === 'redirectURL';
 
-            if(isRedirectNeeded && !isUrl(sessionData.redirectURL)){
-                throw new SDKError('Session refresh url is not valid');
-            }
-
             return isRedirectNeeded;
         }
         const _getSession = async () => {
@@ -526,7 +522,11 @@ export class Identity extends EventEmitter {
             if(sessionData){
                 // for expiring session and safari browser do full page redirect to gain new session
                 if(_checkRedirectionNeed(sessionData)){
-                    window.location.replace(sessionData.redirectURL);
+                    const client_sdrn = `sdrn:${NAMESPACE[this.env]}:client:${this.clientId}`;
+                    const redirectBackUrl = this.redirectUri.substring(0 , this.redirectUri.lastIndexOf('/'));
+                    const params = { redirect_uri: redirectBackUrl, client_sdrn:  client_sdrn};
+                    this.emit('redirectToSessionService');
+                    this.window.location.href = this._sessionService.makeUrl(sessionData.redirectURL.substring(sessionData.redirectURL.lastIndexOf('/')), params);
                     return;
                 }
 
