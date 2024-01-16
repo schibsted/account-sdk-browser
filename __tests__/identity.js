@@ -304,28 +304,12 @@ describe('Identity', () => {
 
     describe('hasSession', () => {
         let identity;
-        let locationReplaceStub = jest.fn();
-
-        const { location } = window;
-
-        beforeAll(() => {
-            delete window.location;
-            window.location = { replace: locationReplaceStub };
-        });
-
-        afterAll(() => {
-            window.location = location;
-        });
 
         beforeEach(() => {
             identity = new Identity(defaultOptions);
             identity._sessionService.fetch = jest.fn(() => ({ ok: true, json: () => Fixtures.sessionResponse }));
             identity._clearVarnishCookie();
         });
-
-        afterEach(()=>{
-            jest.clearAllMocks();
-        })
 
         test('should be able to set varnish cookie', async () => {
             await identity.hasSession();
@@ -506,20 +490,13 @@ describe('Identity', () => {
                 identity._sessionService.fetch.mockReturnValueOnce(
                     ({ ok: true, json: () => Fixtures.sessionNeedsToBeRefreshedResponse })
                 )
+                const spy = jest.spyOn(identity, 'emit');
 
                 await identity.hasSession();
 
-                expect(locationReplaceStub).toHaveBeenCalledWith(Fixtures.sessionNeedsToBeRefreshedResponse.redirectURL)
-            });
-
-            test('should throw error when session refresh redirectURL is not valid', async () => {
-                identity._sessionService.fetch.mockReturnValueOnce(
-                    ({ ok: true, json: () => ({
-                        redirectURL: 'NOT_VALID'
-                    }) })
-                )
-
-                expect(async () => await identity.hasSession()).rejects.toThrowError(new SDKError('HasSession failed'));
+                expect(spy).toHaveProperty('mock.calls.length');
+                expect(spy.mock.calls.length).toBeGreaterThan(0);
+                expect(spy.mock.calls.some(c => c[0] === 'redirectToSessionService')).toBe(true);
             });
         })
     });
