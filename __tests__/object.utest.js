@@ -70,25 +70,28 @@ describe('object', () => {
             expect(cloneDefined({foo: 1, bar: 2}, {foo: 2})).toEqual({foo: 2, bar: 2});
         });
 
-        test('deeply clones any objectvalue', () => {
+        test('deeply clones any object with values', () => {
             const obj = {a: 'foo'};
             const result = cloneDefined({ a: 'bar' }, obj);
             expect(result).toEqual({a: 'foo'});
             expect(result).not.toBe(obj);
         });
 
-        test('deeply clones any objectvalue', () => {
+        test('deeply clones any object value with values', () => {
             const arr = [13];
             const result = cloneDefined({ a: 'bar' }, arr);
             expect(result).toEqual({a: 'bar', '0': 13});
             expect(result).not.toBe(arr);
-
         });
 
+        test('deeply clones nested object with values', () => {
+            const obj = {a: 'foo', b: {c: 1, d: 2}};
+            const result = cloneDefined({a: 'bar', b: {c: 1}}, obj);
+            expect(result).toEqual({a: 'foo', b: {c: 1, d: 2}});
+        });
     });
 
     describe('cloneDeep()', () => {
-
         test('clones an empty object', () => {
             const a = {};
             const b = cloneDeep(a);

@@ -305,32 +305,63 @@ describe('Identity', () => {
     describe('hasSession', () => {
         let identity;
 
+        const getSessionMock = jest.fn(() => ({ ok: true, json: () => Fixtures.sessionResponse }));
+        const mockSessionOkResponse = (response)=>{
+            getSessionMock.mockImplementationOnce(() => ({ ok: true, json: () => response }));
+        }
+
         beforeEach(() => {
             identity = new Identity(defaultOptions);
-            identity._sessionService.fetch = jest.fn(() => ({ ok: true, json: () => Fixtures.sessionResponse }));
+            identity._sessionService.fetch = getSessionMock;
             identity._clearVarnishCookie();
+        });
+
+        afterEach(()=>{
+            jest.clearAllMocks();
+        })
+
+        test('should clear varnish cookie for domain', async () => {
+            identity.enableVarnishCookie(10);
+
+            mockSessionOkResponse({ result: true, sp_id: 'abc', baseDomain: 'spid.no' });
+
+            await identity.hasSession();
+
+            expect(document.cookie).toBe('SP_ID=abc');
+
+            identity._clearVarnishCookie();
+
+            expect(document.cookie).toBe('');
         });
 
         test('should be able to set varnish cookie', async () => {
             await identity.hasSession();
+
             expect(document.cookie).toBe('');
+
             identity.enableVarnishCookie();
+
             await identity.hasSession();
             expect(document.cookie).toBe('SP_ID=some-jwt-token');
         });
 
         test('should not set varnish cookie if session has no `expiresIn`', async () => {
             identity.enableVarnishCookie();
-            identity._sessionService.fetch.mockImplementationOnce(() => ({ ok: true, json: () => ({ result: true, sp_id: 'abc' }) }));
+
+            mockSessionOkResponse({ result: true, sp_id: 'abc' });
+
             await identity.hasSession();
+
             expect(document.cookie).toBe('');
         });
 
         test('should set varnish cookie also when reading from cache', async () => {
             identity.enableVarnishCookie();
-            const session = { result: true, sp_id: 'should_not_expire', expiresIn: 2 };
-            identity._sessionService.fetch.mockImplementationOnce(() => ({ ok: true, json: () => session }));
+
+            mockSessionOkResponse({ result: true, sp_id: 'should_not_expire', expiresIn: 2 })
+
             await identity.hasSession();
+
             expect(document.cookie).toBe('SP_ID=should_not_expire');
 
             // 1. Here we first wait a little bit (*less* than the 2 second cache expiry)
@@ -349,95 +380,145 @@ describe('Identity', () => {
 
         test('should work to set varnish cache expiration', async () => {
             identity.enableVarnishCookie(3);
-            const session = { result: true, sp_id: 'should_remain_after_one_sec', expiresIn: 1 };
-            identity._sessionService.fetch.mockImplementationOnce(() => ({ ok: true, json: () => session }));
+
+            mockSessionOkResponse({ result: true, sp_id: 'should_remain_after_one_sec', expiresIn: 1 })
+
             await identity.hasSession();
+
             await new Promise((resolve) => setTimeout(resolve, 1010));
+
             expect(document.cookie).toBe('SP_ID=should_remain_after_one_sec');
         });
 
         test('should work to clear varnish cookie', async () => {
+            mockSessionOkResponse({ result: true, sp_id: 'should_be_cleared', expiresIn: 1 });
+
             identity.enableVarnishCookie(3);
-            const session = { result: true, sp_id: 'should_be_cleared', expiresIn: 1 };
-            identity._sessionService.fetch.mockImplementationOnce(() => ({ ok: true, json: () => session }));
+
             await identity.hasSession();
+
             expect(document.cookie).toBe('SP_ID=should_be_cleared');
+
             identity._maybeClearVarnishCookie();
+
             expect(document.cookie).toBe('');
         });
 
         describe('`baseDomain`', () => {
             test('should respect `baseDomain` from session', async () => {
                 identity.enableVarnishCookie();
-                const session1 = { result: true, sp_id: 'abc', expiresIn: 3600, baseDomain: 'foo.com' };
-                identity._sessionService.fetch.mockImplementationOnce(() => ({ ok: true, json: () => session1 }));
+
+                mockSessionOkResponse({ result: true, sp_id: 'abc', expiresIn: 3600, baseDomain: 'foo.com' });
+
                 await identity.hasSession();
+
                 expect(document.cookie).toBe('');
             });
 
             test('should respect `baseDomain` from session', async () => {
+                mockSessionOkResponse({ result: true, sp_id: 'abc', expiresIn: 3600 });
+
                 identity.enableVarnishCookie();
-                const session2 = { result: true, sp_id: 'abc', expiresIn: 3600 };
-                identity._sessionService.fetch.mockImplementationOnce(() => ({ ok: true, json: () => session2 }));
+
                 await identity.hasSession();
+
                 expect(document.cookie).toBe('SP_ID=abc');
             });
         });
 
         describe(`enableVarnishCookie domain`, () => {
-            test('works', async () => {
-                identity.enableVarnishCookie({ domain: 'spid.no' });
-                expect(identity.varnishCookieDomain).toBe('spid.no');
-                const session1 = { result: true, sp_id: 'abc', expiresIn: 3600, baseDomain: 'tv.spid.no' };
-                identity._sessionService.fetch.mockImplementationOnce(() => ({ ok: true, json: () => session1 }));
-                await identity.hasSession();
-                expect(document.cookie).toBe('SP_ID=abc');
-            });
+            const domain =  'spid.no';
+            const expiresIn=  10;
+
+            beforeEach(()=>{
+                //session base domain is `tv.spid.no` which is different from jest testURL, so cookie is not set
+                mockSessionOkResponse({ result: true, sp_id: 'abc', expiresIn: 3600, baseDomain: 'tv.spid.no' });
+            })
+
+            const cases = [
+                [undefined, undefined, 0, ''],
+                [{expiresIn}, undefined, expiresIn, ''],
+                [{domain}, domain, 0, 'SP_ID=abc'],
+                [{domain, expiresIn}, domain, expiresIn, 'SP_ID=abc'],
+            ]
+
+            test.each(cases)(
+                "with %p as cookieSetup, %p as varnishCookieDomain, %p as varnishExpiresIn set cookies %p",
+                async (cookieConfig, varnishCookieDomain, varnishExpiresIn, exepectedCookie) => {
+                    identity.enableVarnishCookie(cookieConfig);
+
+                    expect(identity.varnishCookieDomain).toBe(varnishCookieDomain);
+                    expect(identity.varnishExpiresIn).toBe(varnishExpiresIn);
+
+                    await identity.hasSession();
+
+                    expect(document.cookie).toBe(exepectedCookie);
+                }
+            );
         });
 
         test('should only go to session-service for site specific logout', async () => {
-            identity._sessionService.fetch.mockImplementationOnce(() => ({ ok: false, status: 400, statusText: 'No cookie present' }));
+            getSessionMock.mockImplementationOnce(() => ({ ok: false, status: 400, statusText: 'No cookie present' }));
+
             await expect(identity.hasSession()).rejects.toMatchObject({ message: 'HasSession failed' });
+
             expect(identity._sessionService.fetch.mock.calls.length).toBe(1);
             expect(identity._sessionService.fetch.mock.calls[0][0]).toMatch(/^http:\/\/id.foo.com\/session/);
         });
 
         test('should fail `hasSession` if session cookie is present but no session is found and site does not have specific logout', async () => {
-            identity._sessionService.fetch.mockImplementationOnce(() => ({ ok: false, status: 404, statusText: 'No session found' }));
+            getSessionMock.mockImplementationOnce(() => ({ ok: false, status: 404, statusText: 'No session found' }));
+
             await expect(identity.hasSession()).rejects.toMatchObject({ message: 'HasSession failed' });
+
             expect(identity._sessionService.fetch.mock.calls.length).toBe(1);
             expect(identity._sessionService.fetch.mock.calls[0][0]).toMatch(/^http:\/\/id.foo.com\/session/);
         });
 
         test('should terminate "chain" if session-service call succeeds', async () => {
-            identity._sessionService.fetch.mockImplementationOnce(() => ({ ok: true, json: () => ({}) }));
+            mockSessionOkResponse({});
+
             await expect(identity.hasSession()).resolves.toMatchObject({});
+
             expect(identity._sessionService.fetch.mock.calls.length).toBe(1);
             expect(identity._sessionService.fetch.mock.calls[0][0]).toMatch(/^http:\/\/id.foo.com\/session/);
         });
 
+        test('should throw en SDK error when get /session returned an error', async () => {
+            mockSessionOkResponse({error: 'some error'});
+
+            await expect(identity.hasSession()).rejects.toThrowError('HasSession failed');
+        });
+
         test('should emit event both when "real" and "cached" values are used', async () => {
             const spy = jest.fn();
+
             identity.on('login', spy);
+
             await identity.hasSession();
             await identity.hasSession();
+
             expect(spy).toHaveBeenCalledTimes(2);
         });
 
         test('should return the same promise if invoked multiple times', async () => {
-            identity._sessionService.fetch.mockImplementationOnce(() => new Promise((resolve) => {
-                setTimeout(resolve({ ok: true, json: () => ({ sp_id: 'yo' }) }), 1);
-            }));
+            mockSessionOkResponse({ sp_id: 'yo' });
+
             const promise1 = identity.hasSession();
             const promise2 = identity.hasSession(); // NOTE: no 'await' — we want the promise
+
             expect(promise2).toBe(promise1);
+
             const dummy = await promise1;
+
             expect(dummy).toMatchObject({ sp_id: 'yo' });
         });
 
         test('should throw error if session-service returns error without 404', async () => {
-            identity._sessionService.fetch.mockImplementationOnce(() => ({ ok: false, status: 401, statusText: 'Unauthorized' }));
+            getSessionMock.mockImplementationOnce(() => ({ ok: false, status: 401, statusText: 'Unauthorized' }));
+
             await expect(identity.hasSession()).rejects.toMatchObject({ message: 'HasSession failed' });
+
             expect(identity._sessionService.fetch.mock.calls.length).toBe(1);
             expect(identity._sessionService.fetch.mock.calls[0][0]).toMatch(/^http:\/\/id.foo.com\/session/);
         });
@@ -445,6 +526,7 @@ describe('Identity', () => {
         describe('cache', () => {
             test('should never cache if caching is off', async () => {
                 identity._enableSessionCaching = false;
+
                 await identity.hasSession();
                 await identity.hasSession();
 
@@ -459,18 +541,25 @@ describe('Identity', () => {
             });
 
             test('cache shouldn\'t be updated when hasSession returns data from cache, but should be if cache expired', async () => {
-                const getExpiresOn = () => JSON.parse(identity.cache.cache.get('hasSession-cache')).expiresOn;
                 jest.spyOn(Date, 'now')
                     .mockReturnValue(new Date("2019-11-09T10:00:00").getTime());
+
+                const getExpiresOn = () => JSON.parse(identity.cache.cache.get('hasSession-cache')).expiresOn;
+
                 await identity.hasSession();
+
                 const cacheExpires = getExpiresOn();
                 jest.spyOn(Date, 'now')
                     .mockReturnValue(new Date("2019-11-09T10:02:00").getTime());
+
                 await identity.hasSession();
+
                 expect(getExpiresOn()).toBe(cacheExpires); // expiresOn shouldn't change on call less than 5m
                 jest.spyOn(Date, 'now')
                     .mockReturnValue(new Date("2019-11-09T11:05:00").getTime());
+
                 await identity.hasSession();
+
                 // expiresOn should change after 1h
                 expect(getExpiresOn()).not.toBe(cacheExpires);
             });

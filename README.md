@@ -303,7 +303,7 @@ Tags are pushed to NPM via Travis. To release a new version, run in master
 $ npm version <major|minor|patch>
 ```
 
-which will run the test, update version in package.json, commi, tag the commit
+which will run the test, update version in package.json, commit, tag the commit
 and push.
 
 ## LICENSE

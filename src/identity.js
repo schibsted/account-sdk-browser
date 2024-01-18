@@ -365,7 +365,8 @@ export class Identity extends EventEmitter {
             expiresIn = options;
         }
         else if (typeof options == 'object') {
-            ({ expiresIn = expiresIn, domain = domain } = options);
+            expiresIn = options.expiresIn || expiresIn;
+            domain = options.domain || domain;
         }
 
         assert(Number.isInteger(expiresIn), `'expiresIn' must be an integer`);
@@ -428,10 +429,12 @@ export class Identity extends EventEmitter {
      * @returns {void}
      */
     _clearVarnishCookie() {
+        const baseDomain =  this._session && typeof this._session.baseDomain === 'string'
+            ? this._session.baseDomain
+            : document.domain;
+
         let domain = this.varnishCookieDomain ||
-            ((this._session && typeof this._session.baseDomain === 'string')
-                ? this._session.baseDomain
-                : document.domain) ||
+            baseDomain ||
             '';
 
         document.cookie = `SP_ID=nothing; expires=Thu, 01 Jan 1970 00:00:00 GMT; path=/; domain=.${domain}`;
@@ -631,6 +634,8 @@ export class Identity extends EventEmitter {
      *
      * @description This function calls {@link Identity#hasSession} internally and thus has the side
      * effect that it might perform an auto-login on the user
+     * @param {string} externalParty
+     * @param {string|null} optionalSuffix
      * @throws {SDKError} If the `pairId` is missing in user session.
      * @throws {SDKError} If the `externalParty` is not defined
      * @return {Promise<string>} The merchant- and 3rd-party-specific `externalId`
