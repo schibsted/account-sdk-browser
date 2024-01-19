@@ -7,6 +7,7 @@ const { default: JSDOMEnvironment } = pkg;
  * https://github.com/jsdom/jsdom/issues/2524
  */
 export default class CustomJsDomEnv extends JSDOMEnvironment {
+    // eslint-disable-next-line require-jsdoc
     constructor(...args) {
         const { global } = super(...args);
         if (!global.TextEncoder)
