@@ -28,21 +28,21 @@ import SDKError from './SDKError.js';
  *         keys for undefined values are removed.
  */
 export function cloneDefined(...sources) {
-    const dest = {};
+    const result = {};
     if (!(sources && sources.length)) {
         throw new SDKError('No objects to clone');
     }
-    sources.forEach(src => {
-        assert(isObject(src));
-        if (isNonEmptyObj(src)) {
-            Object.entries(src).forEach(([key, val]) => {
-                if (val !== undefined ) { // eslint-disable-line no-undefined
-                    dest[key] = isObject(val) ? cloneDeep(val) : val;
+    sources.forEach(source => {
+        assert(isObject(source));
+        if (isNonEmptyObj(source)) {
+            Object.entries(source).forEach(([key, value]) => {
+                if (typeof value !== 'undefined' ) {
+                    result[key] = isObject(value) ? cloneDeep(value) : value;
                 }
             });
         }
     });
-    return dest;
+    return result;
 }
 
 /**

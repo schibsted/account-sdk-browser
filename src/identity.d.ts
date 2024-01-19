@@ -236,6 +236,8 @@ export class Identity extends TinyEmitter {
      *
      * @description This function calls {@link Identity#hasSession} internally and thus has the side
      * effect that it might perform an auto-login on the user
+     * @param {string} externalParty
+     * @param {string|null} optionalSuffix
      * @throws {SDKError} If the `pairId` is missing in user session.
      * @throws {SDKError} If the `externalParty` is not defined
      * @return {Promise<string>} The merchant- and 3rd-party-specific `externalId`
