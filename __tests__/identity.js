@@ -1,4 +1,4 @@
-/* Copyright 2018 Schibsted Products & Technology AS. Licensed under the terms of the MIT license.
+/* Copyright 2024 Schibsted Products & Technology AS. Licensed under the terms of the MIT license.
  * See LICENSE.md in the project root.
  */
 
@@ -462,8 +462,11 @@ describe('Identity', () => {
 
             await expect(identity.hasSession()).rejects.toMatchObject({ message: 'HasSession failed' });
 
-            expect(identity._sessionService.fetch.mock.calls.length).toBe(1);
-            expect(identity._sessionService.fetch.mock.calls[0][0]).toMatch(/^http:\/\/id.foo.com\/session/);
+            expect(getSessionMock).toHaveBeenCalledTimes(1)
+            expect(getSessionMock).toHaveBeenCalledWith(
+                expect.stringMatching(/^http:\/\/id\.foo\.com\/session/),
+                {"credentials": "include", "headers": {}, "method": "get"}
+            )
         });
 
         test('should fail `hasSession` if session cookie is present but no session is found and site does not have specific logout', async () => {

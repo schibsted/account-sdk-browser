@@ -1,7 +1,7 @@
 #########################################################
 #                                                       #
 # Schibsted account SDK for browsers                    #
-# Copyright (c) 2018 Schibsted Products & Technology AS #
+# Copyright (c) 2024 Schibsted Products & Technology AS #
 #                                                       #
 #########################################################
 
@@ -16,4 +16,3 @@ fetch-jsonp
 tiny-emitter
   LICENSE: MIT,
            https://github.com/scottcorgan/tiny-emitter/blob/master/LICENSE
-
