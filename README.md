@@ -1,6 +1,6 @@
 [![logo](https://www.schibsted.com/Global/LogoTypes/Logos%202014/SMG_Small_2014_RGB.png)](https://github.com/schibsted/account-sdk-browser)
 
-[![Build Status](https://app.travis-ci.com/schibsted/account-sdk-browser.svg?branch=master)](https://app.travis-ci.com/schibsted/account-sdk-browser)
+![Build Status](https://github.com/schibsted/account-sdk-browser/actions/workflows/pr.yml/badge.svg)
 [![Code coverage](https://codecov.io/gh/schibsted/account-sdk-browser/branch/master/graph/badge.svg)](https://codecov.io/gh/schibsted/account-sdk-browser)
 [![Snyk](https://snyk.io/test/github/schibsted/account-sdk-browser/badge.svg?targetFile=package.json)](https://snyk.io/test/github/schibsted/account-sdk-browser)
 
@@ -17,22 +17,22 @@ This sdk mainly communicates with a service named Session Service, which is avai
 domains (i.e. id.vg.no) to avoid Third-Party Cookie request.
 
 Since browsers started to block Third-Party Cookies, your top domain from local machine needs to
-match your session service top domain. Otherwise session service cookie will be Third-Party Cookie,
-and will not be sent with XHR request.
+match your Session Service top domain. Otherwise, the Session Service cookie will be a third-party cookie
+and will not be sent with a XHR request.
 
-The same applies to cross scheme requests. The session service is hosted on https and therefore you need to [run your site with HTTPS locally](https://web.dev/how-to-use-local-https/).
+The same applies to cross scheme requests. The Session Service is hosted on https and therefore you need to [run your site with HTTPS locally](https://web.dev/how-to-use-local-https/).
 
-For example if your `pre` domain is pre.sdk-example.com, and it uses id.pre.sdk-example.com session
-service domain, your local domain should be local.sdk-example.com.
+For example if your `pre` domain is pre.sdk-example.com, and it uses id.pre.sdk-example.com Session Service
+domain, your local domain should be local.sdk-example.com.
 
 1. Do `npm install --save @schibsted/account-sdk-browser`
 1. Use this library as you would any other npm module: `import { Identity, Monetization, Payment } from '@schibsted/account-sdk-browser'`
    With CommonJS it is possible to `require` the modules Identity, Monetization and Payment
-   by appending `/identity`, `/monetization'` or `/payment'` at the end.
+   by appending `/identity`, `/monetization'` or `/payment'`.
 1. Build your site as you prefer. This library uses modern JavaScript syntax (including async/await
    and other ES2017 and WHATWG features) by default. We recommend that you do any transpilation
    yourself for the browser versions you need to cater to. See [this paragraph](#polyfills) for
-   info about our babelified version and info about polyfills.
+   info about our Babel-ified version and info about polyfills.
 1. Initiate the SDK and provide at least `clientId`, `env` and `sessionDomain`.
 
 If this is for a new site and there is no sessionDomain yet, contact
@@ -194,7 +194,7 @@ will remove the Schibsted account brand session. User will still be logged into 
 
 The preferred method for checking whether a user has access to a product/subscription is
 [Monetization#hasAccess](https://schibsted.github.io/account-sdk-browser/Monetization.html#hasAccess).
-It requires using session-service, and supports both Schibsted account productId's and Zuora
+It requires using Session Service, and supports both Schibsted account productId's and Zuora
 feature id's.
 
 #### Example
@@ -247,7 +247,7 @@ paymentSDK.payWithPaylink(paylink)
 #### Polyfills
 
 This SDK uses modern JavaScript features. If you support older browsers, you should use a tool like
-babel to transform the JavaScript as needed. However — since certain teams have deployment pipelines
+babel to transform the JavaScript as needed. However, since certain teams have deployment pipelines
 where it's difficult to do their own transpilation, we do provide some opt-in es5 files as well:
 
 1. `@schibsted/account-sdk-browser/es5`: Include both `Identity`, `Monetization` and `Payment`.
