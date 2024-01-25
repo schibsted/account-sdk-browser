@@ -13,15 +13,17 @@ export class Identity extends TinyEmitter {
      * @param {function} [options.log] - A function that receives debug log information. If not set,
      * no logging will be done
      * @param {object} [options.window] - window object
+     * @param {function} [options.callbackBeforeRedirect] - callback triggered before session refresh redirect happen
      * @throws {SDKError} - If any of options are invalid
      */
-    constructor({ clientId, redirectUri, sessionDomain, env, log, window }: {
+    constructor({ clientId, redirectUri, sessionDomain, env, log, window, callbackBeforeRedirect }: {
         clientId: string;
         sessionDomain: string;
         redirectUri: string;
         env?: string;
         log?: Function;
         window?: any;
+        callbackBeforeRedirect?: Function;
     });
     _sessionInitiatedSent: boolean;
     window: any;
@@ -30,6 +32,7 @@ export class Identity extends TinyEmitter {
     redirectUri: string;
     env: string;
     log: Function;
+    callbackBeforeRedirect: Function;
     _sessionDomain: string;
     _enableSessionCaching: boolean;
     _session: {};
