@@ -1,6 +1,6 @@
 [![logo](https://www.schibsted.com/Global/LogoTypes/Logos%202014/SMG_Small_2014_RGB.png)](https://github.com/schibsted/account-sdk-browser)
 
-![Build Status](https://github.com/schibsted/account-sdk-browser/actions/workflows/pr.yml/badge.svg?branch=master)
+![Build Status](https://github.com/schibsted/account-sdk-browser/actions/workflows/pr.yml/badge.svg)
 [![Code coverage](https://codecov.io/gh/schibsted/account-sdk-browser/branch/master/graph/badge.svg)](https://codecov.io/gh/schibsted/account-sdk-browser)
 [![Snyk](https://snyk.io/test/github/schibsted/account-sdk-browser/badge.svg?targetFile=package.json)](https://snyk.io/test/github/schibsted/account-sdk-browser)
 
