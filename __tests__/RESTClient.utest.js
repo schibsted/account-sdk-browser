@@ -25,7 +25,7 @@ describe('RESTClient', () => {
                 throw new Error('Illegal invocation!');
             }
         };
-        jest.resetModuleRegistry();
+        jest.resetModules();
         const restClient = new RESTClient({
             serverUrl: 'DEV',
             envDic: ENDPOINTS.SPiD,

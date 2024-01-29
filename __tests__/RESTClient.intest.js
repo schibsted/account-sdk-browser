@@ -4,12 +4,11 @@
 
 'use strict';
 
-import fetch from 'node-fetch';
 import RESTClient from '../src/RESTClient.js';
 import config from '../src/config.js';
 
 describe('RESTClient', () => {
-
+    
     test('can make a call to Schibsted account DEV /api/2/version', () => {
         const restClient = new RESTClient({
             serverUrl: 'PRE',
