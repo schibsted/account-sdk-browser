@@ -44,7 +44,7 @@ export function isNonEmptyObj(value: any): boolean;
  * URL object
  * @return {boolean}
  */
-export function isUrl(value: string, ...mandatoryFields: string[]): boolean;
+export function isUrl(value: unknown, ...mandatoryFields: string[]): boolean;
 /**
  * Checks if a given value is a function
  * @memberof core

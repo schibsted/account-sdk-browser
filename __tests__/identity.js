@@ -4,7 +4,7 @@
 
 'use strict';
 
-import SDKError from '../src/SDKError.js';
+import SDKError from '../src/utils/SDKError.js';
 
 import Identity from '../identity.js';
 import { compareUrls, Fixtures } from './utils.js';

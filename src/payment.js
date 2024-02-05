@@ -4,12 +4,12 @@
 
 'use strict';
 
-import { assert, isNonEmptyString, isUrl, isStr } from './validate.js';
-import { urlMapper } from './url.js';
-import { ENDPOINTS } from './config.js';
-import * as popup from './popup.js';
-import RESTClient from './RESTClient.js';
-import * as spidTalk from './spidTalk.js';
+import { assert, isNonEmptyString, isUrl, isStr } from './utils/validate.js';
+import { urlMapper } from './utils/url.ts';
+import { ENDPOINTS } from './config/config.js';
+import * as popup from './utils/popup.js';
+import RESTClient from './clients/RESTClient.js';
+import * as spidTalk from './utils/spidTalk.js';
 
 const globalWindow = () => window;
 

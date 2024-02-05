@@ -4,10 +4,10 @@
 
 'use strict';
 
-import SDKError from './SDKError.js';
-import { cloneDefined } from './object.js';
-import { urlMapper } from './url.js';
-import { assert, isObject, isFunction, isStr, isNonEmptyString } from './validate.js';
+import SDKError from '../utils/SDKError.js';
+import { cloneDefined } from '../utils/object.js';
+import { urlMapper } from '../utils/url.ts';
+import { assert, isObject, isFunction, isStr, isNonEmptyString } from '../utils/validate.js';
 
 /**
  * Converts a series of parameters of various types to a string that's suitable for logging.

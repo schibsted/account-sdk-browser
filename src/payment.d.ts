@@ -112,4 +112,4 @@ export class Payment {
     purchasePromoCodeProductFlowUrl(code: string, state?: string, redirectUri?: string): string;
 }
 export default Payment;
-import RESTClient from "./RESTClient.js";
+import RESTClient from "./clients/RESTClient.js";

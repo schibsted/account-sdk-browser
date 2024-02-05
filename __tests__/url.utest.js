@@ -5,8 +5,8 @@
 'use strict';
 
 import { URL } from 'whatwg-url';
-import { urlMapper } from '../src/url.js';
-import RESTClient from '../src/RESTClient.js';
+import { urlMapper } from '../src/utils/url.ts';
+import RESTClient from '../src/clients/RESTClient.js';
 
 describe('url', () => {
 

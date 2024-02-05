@@ -1,6 +1,6 @@
 'use strict';
 
-import * as popup from '../src/popup.js';
+import * as popup from '../src/utils/popup.js';
 
 describe('Popup — open', () => {
     const defaultFeatures = 'scrollbars=yes,location=yes,status=no,menubar=no,toolbar=no,resizable=yes';

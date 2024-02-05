@@ -4,16 +4,16 @@
 
 'use strict';
 
-import { assert, isStr, isNonEmptyString, isObject, isUrl, isStrIn } from './validate.js';
-import { cloneDeep } from './object.js';
-import { urlMapper } from './url.js';
-import { ENDPOINTS, NAMESPACE } from './config.js';
+import { assert, isStr, isNonEmptyString, isObject, isUrl, isStrIn } from './utils/validate.js';
+import { cloneDeep } from './utils/object.js';
+import { urlMapper } from './utils/url.ts';
+import { ENDPOINTS, NAMESPACE } from './config/config.js';
 import EventEmitter from 'tiny-emitter';
-import Cache from './cache.js';
-import * as popup from './popup.js';
-import RESTClient from './RESTClient.js';
-import SDKError from './SDKError.js';
-import * as spidTalk from './spidTalk.js';
+import Cache from './utils/cache.js';
+import * as popup from './utils/popup.js';
+import RESTClient from './clients/RESTClient.js';
+import SDKError from './utils/SDKError.js';
+import * as spidTalk from './utils/spidTalk.js';
 import version from './version.ts';
 
 /**

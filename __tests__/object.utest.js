@@ -4,7 +4,7 @@
 
 'use strict';
 
-import { cloneDefined, cloneDeep } from '../src/object.js';
+import { cloneDefined, cloneDeep } from '../src/utils/object.js';
 
 describe('object', () => {
 

@@ -4,14 +4,14 @@
 
 'use strict';
 
-import { assert, isStr, isNonEmptyString, isUrl } from './validate.js';
-import { urlMapper } from './url.js';
-import { ENDPOINTS, NAMESPACE } from './config.js';
+import { assert, isStr, isNonEmptyString, isUrl } from './utils/validate.js';
+import { urlMapper } from './utils/url.ts';
+import { ENDPOINTS, NAMESPACE } from './config/config.js';
 import EventEmitter from 'tiny-emitter';
-import RESTClient from './RESTClient.js';
-import Cache from './cache.js';
-import * as spidTalk from './spidTalk.js';
-import SDKError from './SDKError.js';
+import RESTClient from './clients/RESTClient.js';
+import Cache from './utils/cache.js';
+import * as spidTalk from './utils/spidTalk.js';
+import SDKError from './utils/SDKError.js';
 import version from './version.ts';
 
 const globalWindow = () => window;
