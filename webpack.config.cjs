@@ -5,14 +5,10 @@ const commonRules = {
     module: {
         rules: [
             {
-                test: /\.d\.ts$/,
-                use: 'file-loader?name=es5/[name].[ext]',
-            },
-            {
                 test: /\.js$/,
                 use: 'babel-loader',
                 exclude: /node_modules/,
-            }
+            },
         ],
     },
     devtool: 'source-map',
@@ -22,12 +18,32 @@ const commonRules = {
     plugins: [],
 }
 
+const tsConfig = {
+    mode: 'production',
+    entry: './index.js',
+    output: {
+        filename: 'es5/[name].min.js',
+        path: __dirname,
+    },
+    resolve: {
+        extensions: ['.ts', '.js'],
+    },
+    module: {
+        rules: [
+            {
+                test: /\.ts$/,
+                use: 'ts-loader',
+                exclude: [/node_modules/, /\.d\.ts$/],
+            }
+        ]
+    }
+}
+
 const cjsConfig = {
     entry: {
-        index: './src/es5/index.js',
-        identity: './src/es5/identity.js',
-        monetization: './src/es5/monetization.js',
-        payment: './src/es5/payment.js',
+        identity: './src/identity.js',
+        monetization: './src/monetization.js',
+        payment: './src/payment.js',
     },
     output: {
         path: path.resolve(__dirname, 'es5'),
@@ -53,4 +69,4 @@ const windowConfig = {
     ...commonRules,
 }
 
-module.exports = [cjsConfig, windowConfig]
+module.exports = [tsConfig, cjsConfig, windowConfig]

@@ -1,7 +1,6 @@
 /* Copyright 2024 Schibsted Products & Technology AS. Licensed under the terms of the MIT license.
  * See LICENSE.md in the project root.
  */
-
 import { assert, isObject, isUrl, isFunction } from './validate.js';
 import { cloneDefined } from './object.js';
 
@@ -25,7 +24,7 @@ const defaultWindowFeatures = {
     status: 'no',
     menubar: 'no',
     toolbar: 'no',
-    resizable: 'yes'
+    resizable: 'yes',
 };
 
 /**
@@ -40,9 +39,9 @@ const defaultWindowFeatures = {
 export function open(parentWindow, url, windowName = '', windowFeatures = {}) {
     assert(isObject(parentWindow), `window was supposed to be an object but it is ${parentWindow}`);
     assert(isObject(parentWindow.screen),
-        `window should be a valid Window object but it lacks a 'screen' property`);
+        'window should be a valid Window object but it lacks a \'screen\' property');
     assert(isFunction(parentWindow.open),
-        `window should be a valid Window object but it lacks an 'open' function`);
+        'window should be a valid Window object but it lacks an \'open\' function');
     assert(isUrl(url), 'Invalid URL for popup');
 
     const { height, width } = parentWindow.screen;

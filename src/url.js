@@ -2,7 +2,7 @@
  * See LICENSE.md in the project root.
  */
 
-'use strict'
+'use strict';
 
 import { assert, isNonEmptyString, isUrl, isNonEmptyObj } from './validate.js';
 

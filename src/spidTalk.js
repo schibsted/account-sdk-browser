@@ -4,12 +4,12 @@
 
 'use strict';
 
+import { isFunction } from './validate.js';
+
 /**
  * A workaround for how Schibsted account handles JSONP calls in the browser
  * @private
  */
-
-import { isFunction } from './validate.js';
 
 /**
  * This is a workaround for making the old SPiD/hassession on JSONP APIs compatible with more common
@@ -31,7 +31,7 @@ export function emulate(global) {
         global.SPiD = {};
     }
     if (global.SPiD.Talk === null || typeof global.SPiD.Talk !== 'object') {
-        global.SPiD.Talk = {}
+        global.SPiD.Talk = {};
     }
     if (!isFunction(global.SPiD.Talk.response)) {
         global.SPiD.Talk.response = (callbackName, data) => global[callbackName](data);

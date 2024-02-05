@@ -4,13 +4,27 @@
 
 'use strict';
 
+import { assert, isObject, isNonEmptyObj } from './validate.js';
+import SDKError from './SDKError.js';
+
 /**
  * @summary Some routines that work on javascript objects
  * @private
  */
 
-import { assert, isObject, isNonEmptyObj } from './validate.js';
-import SDKError from './SDKError.js';
+
+/**
+ * Deep copies an object. This is handy for immutability.
+ * @memberof core
+ * @param {object} obj - An object, array or null.
+ * @return {object} - an exact copy of the object but deep copied
+ * @throws {SDKError} - if the obj is not an accepted type or is not
+ *         stringifiable by JSON for example if it has loops
+ */
+export function cloneDeep(obj) {
+    assert(typeof obj === 'object', `obj should be an object (even null) but it is ${obj}`);
+    return JSON.parse(JSON.stringify(obj)) || obj;
+}
 
 /**
  * Similar to Object.assign({}, src) but only clones the keys of an object that have non-undefined
@@ -43,17 +57,4 @@ export function cloneDefined(...sources) {
         }
     });
     return result;
-}
-
-/**
- * Deep copies an object. This is handy for immutability.
- * @memberof core
- * @param {object} obj - An object, array or null.
- * @return {object} - an exact copy of the object but deep copied
- * @throws {SDKError} - if the obj is not an accepted type or is not
- *         stringifiable by JSON for example if it has loops
- */
-export function cloneDeep(obj) {
-    assert(typeof obj === 'object', `obj should be an object (even null) but it is ${obj}`);
-    return JSON.parse(JSON.stringify(obj)) || obj;
 }

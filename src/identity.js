@@ -14,7 +14,7 @@ import * as popup from './popup.js';
 import RESTClient from './RESTClient.js';
 import SDKError from './SDKError.js';
 import * as spidTalk from './spidTalk.js';
-import version from './version.js';
+import version from './version.ts';
 
 /**
  * @typedef {object} LoginOptions
@@ -363,14 +363,13 @@ export class Identity extends EventEmitter {
         let domain;
         if (Number.isInteger(options)) {
             expiresIn = options;
-        }
-        else if (typeof options == 'object') {
+        } else if (typeof options == 'object') {
             expiresIn = options.expiresIn || expiresIn;
             domain = options.domain || domain;
         }
 
-        assert(Number.isInteger(expiresIn), `'expiresIn' must be an integer`);
-        assert(expiresIn >= 0, `'expiresIn' cannot be negative`);
+        assert(Number.isInteger(expiresIn), '\'expiresIn\' must be an integer');
+        assert(expiresIn >= 0, '\'expiresIn\' cannot be negative');
         this.setVarnishCookie = true;
         this.varnishExpiresIn = expiresIn;
         this.varnishCookieDomain = domain;
@@ -406,8 +405,8 @@ export class Identity extends EventEmitter {
         const cookie = [
             `SP_ID=${sessionData.sp_id}`,
             `expires=${date.toUTCString()}`,
-            `path=/`,
-            `domain=.${domain}`
+            'path=/',
+            `domain=.${domain}`,
         ].join('; ');
         document.cookie = cookie;
     }
@@ -457,8 +456,8 @@ export class Identity extends EventEmitter {
             redirectUri: this.redirectUri,
             env: this.env,
             sessionDomain: this._sessionDomain,
-            sdkVersion: version
-        }
+            sdkVersion: version,
+        };
 
         log(`Schibsted account SDK for browsers settings: \n${JSON.stringify(settings, null, 2)}`);
     }
@@ -527,7 +526,7 @@ export class Identity extends EventEmitter {
                     this.emit('error', err);
                     this._hasSessionInProgress = false;
                     throw new SDKError('HasSession failed', err);
-                }
+                },
             );
 
         return this._hasSessionInProgress;
@@ -640,13 +639,13 @@ export class Identity extends EventEmitter {
      * @throws {SDKError} If the `externalParty` is not defined
      * @return {Promise<string>} The merchant- and 3rd-party-specific `externalId`
      */
-    async getExternalId(externalParty, optionalSuffix = "") {
+    async getExternalId(externalParty, optionalSuffix = '') {
         const { pairId } = await this.hasSession();
 
         if (!pairId)
             throw new SDKError('pairId missing in user session!');
 
-        if(!externalParty || externalParty.length === 0) {
+        if (!externalParty || externalParty.length === 0) {
             throw new SDKError('externalParty cannot be empty');
         }
         const _toHexDigest = (hashBuffer) =>{
@@ -654,24 +653,24 @@ export class Identity extends EventEmitter {
             const hashArray = Array.from(new Uint8Array(hashBuffer));
             // convert bytes to hex string
             return hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
-        }
+        };
 
         const _getSha256Digest = (data) => {
             return crypto.subtle.digest('SHA-256', data);
-        }
+        };
 
         const _hashMessage = async (message) => {
             const msgUint8 = new TextEncoder().encode(message);
             return _getSha256Digest(msgUint8).then( (it) => _toHexDigest(it));
-        }
+        };
 
         const _constructMessage = (pairId, externalParty, optionalSuffix) => {
             return optionalSuffix
                 ? `${pairId}:${externalParty}:${optionalSuffix}`
                 : `${pairId}:${externalParty}`;
-        }
+        };
 
-        return _hashMessage(_constructMessage(pairId, externalParty, optionalSuffix))
+        return _hashMessage(_constructMessage(pairId, externalParty, optionalSuffix));
     }
 
     /**
@@ -728,6 +727,7 @@ export class Identity extends EventEmitter {
             return null;
         }
     }
+
     /**
      * If a popup is desired, this function needs to be called in response to a user event (like
      * click or tap) in order to work correctly. Otherwise the popup will be blocked by the
@@ -762,7 +762,7 @@ export class Identity extends EventEmitter {
         maxAge = '',
         locale = '',
         oneStepLogin = false,
-        prompt = 'select_account'
+        prompt = 'select_account',
     }) {
         this._closePopup();
         this.cache.delete(HAS_SESSION_CACHE_KEY);
@@ -777,7 +777,7 @@ export class Identity extends EventEmitter {
             maxAge,
             locale,
             oneStepLogin,
-            prompt
+            prompt,
         });
 
         if (preferPopup) {
@@ -880,7 +880,7 @@ export class Identity extends EventEmitter {
             max_age: maxAge,
             locale,
             one_step_login: oneStepLogin || '',
-            prompt: acrValues ? '' : prompt
+            prompt: acrValues ? '' : prompt,
         });
     }
 
@@ -890,7 +890,7 @@ export class Identity extends EventEmitter {
      * @return {string} url
      */
     logoutUrl(redirectUri = this.redirectUri) {
-        assert(isUrl(redirectUri), `logoutUrl(): redirectUri is invalid`);
+        assert(isUrl(redirectUri), 'logoutUrl(): redirectUri is invalid');
         const params = { redirect_uri: redirectUri };
         return this._sessionService.makeUrl('logout', params);
     }
@@ -903,7 +903,7 @@ export class Identity extends EventEmitter {
     accountUrl(redirectUri = this.redirectUri) {
         return this._spid.makeUrl('profile-pages', {
             response_type: 'code',
-            redirect_uri: redirectUri
+            redirect_uri: redirectUri,
         });
     }
 
@@ -915,7 +915,7 @@ export class Identity extends EventEmitter {
     phonesUrl(redirectUri = this.redirectUri) {
         return this._spid.makeUrl('profile-pages/about-you/phone', {
             response_type: 'code',
-            redirect_uri: redirectUri
+            redirect_uri: redirectUri,
         });
     }
 
@@ -948,7 +948,7 @@ export class Identity extends EventEmitter {
             }
 
             return loginPrams;
-        }
+        };
 
 
         return new Promise(
@@ -974,11 +974,11 @@ export class Identity extends EventEmitter {
                 }
 
                 const loginHandler = async () => {
-                    this.login(Object.assign(await prepareLoginParams(loginParams), {loginHint: userData.identifier}));
+                    this.login(Object.assign(await prepareLoginParams(loginParams), { loginHint: userData.identifier }));
                 };
 
                 const loginNotYouHandler = async () => {
-                    this.login(Object.assign(await prepareLoginParams(loginParams), {loginHint: userData.identifier, prompt: 'login'}));
+                    this.login(Object.assign(await prepareLoginParams(loginParams), { loginHint: userData.identifier, prompt: 'login' }));
                 };
 
                 const initHandler = () => {
@@ -987,7 +987,7 @@ export class Identity extends EventEmitter {
                      * @event Identity#simplifiedLoginOpened
                      */
                     this.emit('simplifiedLoginOpened');
-                }
+                };
 
                 const cancelLoginHandler = () => {
                     /**
@@ -995,15 +995,15 @@ export class Identity extends EventEmitter {
                      * @event Identity#simplifiedLoginCancelled
                      */
                     this.emit('simplifiedLoginCancelled');
-                }
+                };
 
                 if (window.openSimplifiedLoginWidget) {
                     window.openSimplifiedLoginWidget(initialParams, loginHandler, loginNotYouHandler, initHandler, cancelLoginHandler);
                     return resolve(true);
                 }
 
-                const simplifiedLoginWidget = document.createElement("script");
-                simplifiedLoginWidget.type = "text/javascript";
+                const simplifiedLoginWidget = document.createElement('script');
+                simplifiedLoginWidget.type = 'text/javascript';
                 simplifiedLoginWidget.src = widgetUrl;
                 simplifiedLoginWidget.onload = () => {
                     window.openSimplifiedLoginWidget(initialParams, loginHandler, loginNotYouHandler, initHandler, cancelLoginHandler);
