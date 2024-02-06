@@ -4,8 +4,9 @@
 
 'use strict';
 
-import { assert, isObject, isNonEmptyObj } from './validate.js';
-import SDKError from './SDKError.js';
+import { assert, isObject, isNonEmptyObj } from './validate';
+import SDKError from './SDKError';
+import { GenericObject } from './types';
 
 /**
  * @summary Some routines that work on javascript objects
@@ -21,9 +22,14 @@ import SDKError from './SDKError.js';
  * @throws {SDKError} - if the obj is not an accepted type or is not
  *         stringifiable by JSON for example if it has loops
  */
-export function cloneDeep(obj) {
+export function cloneDeep(obj: Record<string, unknown>) {
     assert(typeof obj === 'object', `obj should be an object (even null) but it is ${obj}`);
-    return JSON.parse(JSON.stringify(obj)) || obj;
+    try {
+        return JSON.parse(JSON.stringify(obj)) || obj;
+    } catch (e) {
+        if (e instanceof Error) throw new SDKError('Failed to deep clone.', e);
+        else throw new SDKError('Failed to deep clone.');
+    }
 }
 
 /**
@@ -41,8 +47,8 @@ export function cloneDeep(obj) {
  * @return {object} a new object that is similar to src with all the key/values where the
  *         keys for undefined values are removed.
  */
-export function cloneDefined(...sources) {
-    const result = {};
+export function cloneDefined(...sources: Array<GenericObject>) {
+    const result: GenericObject = {};
     if (!(sources && sources.length)) {
         throw new SDKError('No objects to clone');
     }
@@ -50,8 +56,8 @@ export function cloneDefined(...sources) {
         assert(isObject(source));
         if (isNonEmptyObj(source)) {
             Object.entries(source).forEach(([key, value]) => {
-                if (typeof value !== 'undefined' ) {
-                    result[key] = isObject(value) ? cloneDeep(value) : value;
+                if (value) {
+                    result[key] = isObject(value) ? cloneDeep(value as GenericObject) : value;
                 }
             });
         }

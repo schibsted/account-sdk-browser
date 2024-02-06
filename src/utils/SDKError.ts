@@ -4,8 +4,6 @@
 
 'use strict';
 
-import {NonFunctionMembers} from './types'
-
 /*
  * Note: this module can't have any internal dependencies because it's used in ./validate which
  * in turn is used as a dependency to a lot of other modules. Doing so may create a circular
@@ -28,7 +26,7 @@ export default class SDKError extends Error {
      * @param {object} [errorObject] - The error object that was returned from the server. Any
      * property of errorObject object will be copied into this instance SDKError
      */
-    constructor(message: string, errorObject: Error) {
+    constructor(message: string, errorObject?: Error) {
         super(message);
         this.name = 'SDKError';
         if (typeof errorObject === 'object') {
