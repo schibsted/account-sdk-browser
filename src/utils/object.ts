@@ -47,8 +47,8 @@ export function cloneDeep(obj: Record<string, unknown>) {
  * @return {object} a new object that is similar to src with all the key/values where the
  *         keys for undefined values are removed.
  */
-export function cloneDefined(...sources: Array<GenericObject>) {
-    const result: GenericObject = {};
+export function cloneDefined<T = GenericObject>(...sources: Array<GenericObject>): T {
+    const result: T = {} as T;
     if (!(sources && sources.length)) {
         throw new SDKError('No objects to clone');
     }
@@ -57,7 +57,7 @@ export function cloneDefined(...sources: Array<GenericObject>) {
         if (isNonEmptyObj(source)) {
             Object.entries(source).forEach(([key, value]) => {
                 if (value) {
-                    result[key] = isObject(value) ? cloneDeep(value as GenericObject) : value;
+                    result[key as keyof T] = isObject(value) ? cloneDeep(value as GenericObject) : value;
                 }
             });
         }

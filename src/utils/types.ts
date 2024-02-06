@@ -5,3 +5,6 @@ export type NonFunctionMembers<T> = {
 export type Optional<T> = T | null | undefined;
 
 export type GenericObject<T = unknown> = Record<string, T>;
+
+export type EncodeChar = '!' | '\'' | '(' | ')' | '~' | '%20' | '%00';
+

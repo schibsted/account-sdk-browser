@@ -4,10 +4,10 @@
 
 'use strict';
 
-import SDKError from '../utils/SDKError.js';
-import { cloneDefined } from '../utils/object.js';
-import { urlMapper } from '../utils/url.ts';
-import { assert, isObject, isFunction, isStr, isNonEmptyString } from '../utils/validate.js';
+import SDKError from '../utils/SDKError';
+import { cloneDefined } from '../utils/object';
+import { assert, isObject, isFunction, isStr, isNonEmptyString, isUrl } from '../utils/validate';
+import { EncodeChar, GenericObject } from '../utils/types';
 
 /**
  * Converts a series of parameters of various types to a string that's suitable for logging.
@@ -15,7 +15,7 @@ import { assert, isObject, isFunction, isStr, isNonEmptyString } from '../utils/
  * @param {Array.<*>} msg - a number of parameters from any type (including objects)
  * @return {string}
  */
-const logString = (msg) => msg.map(m => isObject(m) ? JSON.stringify(m, null, 2) : m).join(' ');
+const logString = (msg: unknown[]) => msg.map(m => isObject(m) ? JSON.stringify(m, null, 2) : m).join(' ');
 
 /**
  * Calls a log function passing a string
@@ -24,7 +24,7 @@ const logString = (msg) => msg.map(m => isObject(m) ? JSON.stringify(m, null, 2)
  * @param {...*} msg - a series of message objects
  * @return {*} - The result of calling fn
  */
-const logFn = (fn, ...msg) => (typeof fn === 'function') && fn(logString(msg));
+const logFn = (fn: Function, ...msg: unknown[]) => (typeof fn === 'function') && fn(logString(msg));
 
 /**
  * Encode a string like URLSearchParams would do
@@ -32,20 +32,37 @@ const logFn = (fn, ...msg) => (typeof fn === 'function') && fn(logString(msg));
  * @param {string} str - The input
  * @returns {string} The encoded string
  */
-function encode(str) {
-    const replace = {
+function encode(str: string): string {
+    const replace: Record<EncodeChar, string> = {
         '!': '%21',
         "'": '%27',
         '(': '%28',
         ')': '%29',
         '~': '%7E',
         '%20': '+',
-        '%00': '\x00'
+        '%00': '\x00',
     };
-    return encodeURIComponent(str).replace(/[!'()~]|%20|%00/g, match => replace[match]);
+
+    return encodeURIComponent(str).replace(/[!'()~]|%20|%00/g, (match) => replace[match as EncodeChar]);
 }
 
 const globalFetch = () => window.fetch && window.fetch.bind(window);
+
+interface RESTClientOpts {
+    serverUrl: string,
+    fetch?: Function,
+    log?: Function,
+    defaultParams: GenericObject
+}
+
+interface RESTClientGoOpts {
+    method: string,
+    headers?: GenericObject<string>
+    pathname?: string
+    data?: GenericObject,
+    useDefaultParams?: boolean,
+    fetchOptions?: RequestInit,
+}
 
 /**
  * This class can be used for creating a wrapper around a server and all its endpoints.
@@ -59,7 +76,6 @@ const globalFetch = () => window.fetch && window.fetch.bind(window);
  * @private
  */
 export class RESTClient {
-
     /**
      * @param {object} options
      * @param {string} [options.serverUrl=PRE] - The URL to the server eg.
@@ -73,10 +89,11 @@ export class RESTClient {
      * @param {object} [options.defaultParams={}] - a set of parameters to add to every call custom.
      *        As long as it supports the standard fetch API we're good.
      */
-    constructor({ serverUrl = 'PRE', envDic, fetch = globalFetch(), log, defaultParams = {}}) {
-        assert(isObject(defaultParams), `defaultParams should be a non-null object`);
+    constructor({ serverUrl, fetch = globalFetch(), log, defaultParams = {} }: RESTClientOpts) {
+        assert(isObject(defaultParams), 'defaultParams should be a non-null object');
+        assert(isUrl(serverUrl), 'serverUrl should be a valid URL as a string');
 
-        this.url = new URL(urlMapper(serverUrl, envDic));
+        this.url = new URL(serverUrl);
 
         this.defaultParams = defaultParams;
 
@@ -90,6 +107,15 @@ export class RESTClient {
             this.fetch = fetch;
         }
     }
+
+    private readonly url: URL;
+
+    private readonly defaultParams: GenericObject;
+
+    private readonly fetch: Function | undefined;
+
+    private readonly log: Function | undefined;
+
 
     /**
      * Makes the actual call to the server and deals with headers, data objects and the edge cases.
@@ -116,36 +142,43 @@ export class RESTClient {
         pathname,
         data = {},
         useDefaultParams = true,
-        fetchOptions = { method, credentials: 'include' }
-    }) {
+        fetchOptions = { method: method, credentials: 'include' },
+    }: RESTClientGoOpts) {
         assert(isFunction(this.fetch),
-            `Can't make a call. The reference to fetch is missing or not a function.`);
+            'Can\'t make a call. The reference to fetch is missing or not a function.');
         assert(isNonEmptyString(method), `Method must be a non empty string but it is "${method}"`);
         assert(isNonEmptyString(pathname), `Pathname must be string but it is "${pathname}"`);
-        assert(isObject(data), `data must be a non-null object`);
+        assert(isObject(data), 'data must be a non-null object');
 
-        fetchOptions.headers = isObject(headers) ? cloneDefined(headers) : {};
+        if (headers && isObject(headers))
+            fetchOptions.headers = cloneDefined(headers);
+        else
+            fetchOptions.headers = {};
+
         const fullUrl = this.makeUrl(pathname, data, useDefaultParams);
 
-        logFn(this.log, 'Request:', fetchOptions.method.toUpperCase(), fullUrl);
-        logFn(this.log, 'Request Headers:', fetchOptions.headers);
-        logFn(this.log, 'Request Body:', fetchOptions.body);
+        logFn(this.log!, 'Request:', fetchOptions.method?.toUpperCase(), fullUrl);
+        logFn(this.log!, 'Request Headers:', fetchOptions.headers);
+        logFn(this.log!, 'Request Body:', fetchOptions.body);
         try {
-            const response = await this.fetch(fullUrl, fetchOptions);
-            logFn(this.log, 'Response Code:', response.status, response.statusText);
+            const response = await this.fetch!(fullUrl, fetchOptions);
+            logFn(this.log!, 'Response Code:', response.status, response.statusText);
             if (!response.ok) {
                 // status code not in range 200-299
-                throw new SDKError(response.statusText, { code: response.status });
+                throw new SDKError(`API call failed with: ${response.code} ${response.statusText}`);
             }
             const responseObject = await response.json();
-            logFn(this.log, 'Response Parsed:', responseObject);
+            logFn(this.log!, 'Response Parsed:', responseObject);
             return responseObject;
         } catch (err) {
-            let msg = isStr(err) ? err : 'Unknown RESTClient error';
-            if (isObject(err) && isStr(err.message)) {
+            let msg;
+            if (err instanceof Error) {
                 msg = err.message;
+                throw new SDKError(`Failed to '${method}' '${fullUrl}': '${msg}'`, err);
+            } else if (isStr(err)) {
+                msg = err;
             }
-            throw new SDKError(`Failed to '${method}' '${fullUrl}': '${msg}'`, err);
+            throw new SDKError(`Failed to '${method}' '${fullUrl}': '${msg}'`);
         }
     }
 
@@ -168,7 +201,7 @@ export class RESTClient {
      * @param {object} [data={}] - the data payload.
      * @return {Promise}
      */
-    get(pathname, data) {
+    get(pathname: string, data: GenericObject) {
         return this.go({ method: 'get', pathname, data });
     }
 
@@ -180,9 +213,12 @@ export class RESTClient {
      * @param {object} defaultParams - Default params
      * @returns {string} Query string
      */
-    static search(query, useDefaultParams, defaultParams) {
+    static search(query: GenericObject, useDefaultParams: boolean, defaultParams: GenericObject) {
         const params = useDefaultParams ? cloneDefined(defaultParams, query) : cloneDefined(query);
-        return Object.keys(params).filter(p => params[p]!=='').map(p => `${encode(p)}=${encode(params[p])}`).join('&');
+        return Object.keys(params)
+            .filter(p => params[p] !== '')
+            .map(p => `${encode(p)}=${encode(params[p] as string)}`)
+            .join('&');
     }
 }
 

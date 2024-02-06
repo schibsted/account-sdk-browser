@@ -7,7 +7,7 @@
 import { assert, isNonEmptyString, isUrl, isStr } from './utils/validate.ts';
 import { urlMapper } from './utils/url.ts';
 import { ENDPOINTS } from './config/config.js';
-import * as popup from './utils/popup.js';
+import * as popup from './utils/popup.ts';
 import RESTClient from './clients/RESTClient.js';
 
 const globalWindow = () => window;
