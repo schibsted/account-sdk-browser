@@ -139,7 +139,7 @@ export default class Cache {
      * @private
      * @returns {*} - The value if it exists, otherwise null
      */
-    get(key: string): Optional<string> {
+    get<T = string>(key: string): Optional<T> {
         /**
          * JSON.parse safe wrapper
          * @param {string} raw
