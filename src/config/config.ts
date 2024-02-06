@@ -2,7 +2,10 @@
  * See LICENSE.md in the project root.
  */
 
+
 'use strict';
+
+import type { Environment } from '../utils/types';
 
 /*
  * This file declares configs that are essentially part of how the SDK works and interacts with our
@@ -16,6 +19,18 @@
  * - options that the users of the SDK are supposed to set or provide as a parameter to functions
  *   and classes.
  */
+
+type EnvMap = Record<Environment, string>;
+
+interface Config {
+    ENDPOINTS: {
+        SPiD: EnvMap,
+        BFF: EnvMap,
+        SESSION_SERVICE: EnvMap
+    },
+    NAMESPACE: EnvMap
+
+}
 
 /**
  * Core configuration used by the SDK
@@ -47,7 +62,7 @@
  * @prop {string} ENDPOINTS.SESSION_SERVICE.PRO_FI - Production environment Finland
  * @prop {string} ENDPOINTS.SESSION_SERVICE.PRO_DK - Production environment Denmark
  */
-const config = {
+const config: Config = {
     ENDPOINTS: {
         SPiD: {
             LOCAL: 'http://id.localhost',
@@ -85,7 +100,7 @@ const config = {
         PRO_NO: 'spid.no',
         PRO_FI: 'schibsted.fi',
         PRO_DK: 'schibsted.dk',
-    }
+    },
 };
 
 export default config;

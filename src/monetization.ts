@@ -6,7 +6,7 @@
 
 import { assert, isStr, isNonEmptyString, isUrl } from './utils/validate';
 import { urlMapper } from './utils/url';
-import { ENDPOINTS, NAMESPACE } from './config/config.js';
+import { ENDPOINTS, NAMESPACE } from './config/config';
 import { TinyEmitter as EventEmitter } from 'tiny-emitter';
 import RESTClient from './clients/RESTClient';
 import Cache from './utils/cache';

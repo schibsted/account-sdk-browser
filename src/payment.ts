@@ -6,15 +6,15 @@
 
 import { assert, isNonEmptyString, isUrl, isStr } from './utils/validate';
 import { urlMapper } from './utils/url';
-import { ENDPOINTS } from './config/config.js';
+import { ENDPOINTS } from './config/config';
 import * as popupWindowRef from './utils/popup';
 import RESTClient from './clients/RESTClient.js';
-import { Optional } from './utils/types';
+import { Environment, Optional } from './utils/types';
 
 interface PaymentProps {
     clientId: string,
     redirectUri: string,
-    env?: 'PRE' | 'PRO' | 'PRO_NO',
+    env?: Environment,
     publisher?: string,
     window: Window;
 }
@@ -72,7 +72,7 @@ export class Payment {
      * @param {string} env - real URL or 'PRE' style key
      * @returns {void}
      */
-    private _setSpidServerUrl(env: string) {
+    private _setSpidServerUrl(env: Environment) {
         assert(isStr(env), `env parameter is invalid: ${env}`);
         this.spidClient = new RESTClient({
             serverUrl: urlMapper(env, ENDPOINTS.SPiD),
@@ -86,7 +86,7 @@ export class Payment {
      * @param {string} env
      * @returns {void}
      */
-    private _setBffServerUrl(env: string) {
+    private _setBffServerUrl(env: Environment) {
         assert(isStr(env), `url parameter is invalid: ${env}`);
         this.bffClient = new RESTClient({
             serverUrl: urlMapper(env, ENDPOINTS.BFF),
