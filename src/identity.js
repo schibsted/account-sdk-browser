@@ -4,16 +4,15 @@
 
 'use strict';
 
-import { assert, isStr, isNonEmptyString, isObject, isUrl, isStrIn } from './utils/validate.js';
+import { assert, isStr, isNonEmptyString, isObject, isUrl, isStrIn } from './utils/validate.ts';
 import { cloneDeep } from './utils/object.js';
 import { urlMapper } from './utils/url.ts';
 import { ENDPOINTS, NAMESPACE } from './config/config.js';
 import EventEmitter from 'tiny-emitter';
-import Cache from './utils/cache.js';
+import Cache from './utils/cache.ts';
 import * as popup from './utils/popup.js';
 import RESTClient from './clients/RESTClient.js';
-import SDKError from './utils/SDKError.js';
-import * as spidTalk from './utils/spidTalk.js';
+import SDKError from './utils/SDKError.ts';
 import version from './version.ts';
 
 /**
@@ -169,7 +168,6 @@ export class Identity extends EventEmitter {
         assert(!redirectUri || isUrl(redirectUri), 'redirectUri parameter is invalid');
         assert(sessionDomain && isUrl(sessionDomain), 'sessionDomain parameter is not a valid URL');
 
-        spidTalk.emulate(window);
         this._sessionInitiatedSent = false;
         this.window = window;
         this.clientId = clientId;

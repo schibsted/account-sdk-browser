@@ -4,12 +4,11 @@
 
 'use strict';
 
-import { assert, isNonEmptyString, isUrl, isStr } from './utils/validate.js';
+import { assert, isNonEmptyString, isUrl, isStr } from './utils/validate.ts';
 import { urlMapper } from './utils/url.ts';
 import { ENDPOINTS } from './config/config.js';
 import * as popup from './utils/popup.js';
 import RESTClient from './clients/RESTClient.js';
-import * as spidTalk from './utils/spidTalk.js';
 
 const globalWindow = () => window;
 
@@ -28,7 +27,6 @@ export class Payment {
      * @throws {SDKError} - If any of options are invalid
      */
     constructor({ clientId, redirectUri, env = 'PRE', publisher, window = globalWindow() }) {
-        spidTalk.emulate(window);
         assert(isNonEmptyString(clientId), 'clientId parameter is required');
 
         this.clientId = clientId;

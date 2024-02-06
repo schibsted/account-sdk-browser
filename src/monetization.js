@@ -4,14 +4,13 @@
 
 'use strict';
 
-import { assert, isStr, isNonEmptyString, isUrl } from './utils/validate.js';
+import { assert, isStr, isNonEmptyString, isUrl } from './utils/validate.ts';
 import { urlMapper } from './utils/url.ts';
 import { ENDPOINTS, NAMESPACE } from './config/config.js';
 import EventEmitter from 'tiny-emitter';
 import RESTClient from './clients/RESTClient.js';
-import Cache from './utils/cache.js';
-import * as spidTalk from './utils/spidTalk.js';
-import SDKError from './utils/SDKError.js';
+import Cache from './utils/cache.ts';
+import SDKError from './utils/SDKError.ts';
 import version from './version.ts';
 
 const globalWindow = () => window;
@@ -31,7 +30,6 @@ export class Monetization extends EventEmitter {
      */
     constructor({ clientId, redirectUri, env = 'PRE', sessionDomain, window = globalWindow() }) {
         super();
-        spidTalk.emulate(window);
         // validate options
         assert(isNonEmptyString(clientId), 'clientId parameter is required');
 
