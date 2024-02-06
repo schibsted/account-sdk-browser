@@ -1,8 +1,22 @@
 /* Copyright 2024 Schibsted Products & Technology AS. Licensed under the terms of the MIT license.
  * See LICENSE.md in the project root.
  */
-import { assert, isObject, isUrl, isFunction } from './validate.js';
-import { cloneDefined } from './object.js';
+import { assert, isObject, isUrl, isFunction } from './validate';
+import { GenericObject } from './types';
+
+interface WindowFeatures {
+    left?: number;
+    top?: number;
+    width?: number;
+    height?: number;
+    menubar?: boolean;
+    toolbar?: boolean;
+    location?: boolean;
+    status?: boolean;
+    resizable?: boolean;
+    scrollbars?: boolean;
+    [key: string]: unknown
+}
 
 /**
  * Serializes an object to string.
@@ -11,20 +25,20 @@ import { cloneDefined } from './object.js';
  * @param {object} obj - for example {a: 'b', c: 1}
  * @return {string} - for example 'a=b,c=1'
  */
-function serialize(obj) {
+function serialize(obj: GenericObject) {
     assert(isObject(obj), `Object must be an object but it is '${obj}'`);
     return Object.keys(obj)
         .map(key => `${key}=${obj[key]}`)
         .join(',');
 }
 
-const defaultWindowFeatures = {
-    scrollbars: 'yes',
-    location: 'yes',
-    status: 'no',
-    menubar: 'no',
-    toolbar: 'no',
-    resizable: 'yes',
+const defaultWindowFeatures: WindowFeatures = {
+    scrollbars: true,
+    location: true,
+    status: false,
+    menubar: false,
+    toolbar: false,
+    resizable: true,
 };
 
 /**
@@ -36,7 +50,7 @@ const defaultWindowFeatures = {
  * @returns {Window|null} - A reference to the popup window
  * @private
  */
-export function open(parentWindow, url, windowName = '', windowFeatures = {}) {
+export function open(parentWindow: Window, url: string, windowName = '', windowFeatures: WindowFeatures = defaultWindowFeatures) {
     assert(isObject(parentWindow), `window was supposed to be an object but it is ${parentWindow}`);
     assert(isObject(parentWindow.screen),
         'window should be a valid Window object but it lacks a \'screen\' property');
@@ -46,13 +60,12 @@ export function open(parentWindow, url, windowName = '', windowFeatures = {}) {
 
     const { height, width } = parentWindow.screen;
 
-    let mergedFeatures = cloneDefined(defaultWindowFeatures, windowFeatures);
-    if (Number.isFinite(mergedFeatures.width) && Number.isFinite(width)) {
-        mergedFeatures.left = (width - mergedFeatures.width) / 2;
+    if (Number.isFinite(windowFeatures.width) && Number.isFinite(width)) {
+        windowFeatures.left = (width - (windowFeatures.width || 0)) / 2;
     }
-    if (Number.isFinite(mergedFeatures.height) && Number.isFinite(height)) {
-        mergedFeatures.top = (height - mergedFeatures.height) / 2;
+    if (Number.isFinite(windowFeatures.height) && Number.isFinite(height)) {
+        windowFeatures.top = (height - (windowFeatures.height || 0)) / 2;
     }
-    const features = serialize(mergedFeatures);
+    const features = serialize(windowFeatures);
     return parentWindow.open(url, windowName, features);
 }
