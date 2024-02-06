@@ -201,7 +201,7 @@ export class RESTClient {
      * @param {object} [data={}] - the data payload.
      * @return {Promise}
      */
-    get(pathname: string, data: GenericObject) {
+    get<T = unknown>(pathname: string, data?: GenericObject): Promise<T> {
         return this.go({ method: 'get', pathname, data });
     }
 

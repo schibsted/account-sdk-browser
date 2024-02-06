@@ -4,16 +4,31 @@
 
 'use strict';
 
-import { assert, isStr, isNonEmptyString, isUrl } from './utils/validate.ts';
-import { urlMapper } from './utils/url.ts';
+import { assert, isStr, isNonEmptyString, isUrl } from './utils/validate';
+import { urlMapper } from './utils/url';
 import { ENDPOINTS, NAMESPACE } from './config/config.js';
-import EventEmitter from 'tiny-emitter';
-import RESTClient from './clients/RESTClient.js';
-import Cache from './utils/cache.ts';
-import SDKError from './utils/SDKError.ts';
-import version from './version.ts';
+import { TinyEmitter as EventEmitter } from 'tiny-emitter';
+import RESTClient from './clients/RESTClient';
+import Cache from './utils/cache';
+import SDKError from './utils/SDKError';
+import version from './version';
+import type { Environment } from './utils/types';
 
 const globalWindow = () => window;
+
+interface MonetizationOpts {
+    clientId: string
+    redirectUri: string
+    env: Environment,
+    sessionDomain: string,
+    window: Window
+}
+
+interface HasAccessEntry {
+    ttl: number,
+    productIds: string[],
+    entitled: boolean
+}
 
 /**
  * Provides features related to monetization
@@ -28,7 +43,7 @@ export class Monetization extends EventEmitter {
      * @param {object} [options.window]
      * @throws {SDKError} - If any of options are invalid
      */
-    constructor({ clientId, redirectUri, env = 'PRE', sessionDomain, window = globalWindow() }) {
+    constructor({ clientId, redirectUri, env = 'PRE', sessionDomain, window = globalWindow() }: MonetizationOpts) {
         super();
         // validate options
         assert(isNonEmptyString(clientId), 'clientId parameter is required');
@@ -45,16 +60,29 @@ export class Monetization extends EventEmitter {
         }
     }
 
+    private readonly cache: Cache;
+
+    private readonly clientId: string;
+
+    private readonly env: Environment;
+
+    private readonly redirectUri: string;
+
+    private spidClient: RESTClient | undefined;
+
+    private sessionServiceClient: RESTClient | undefined;
+
+
     /**
      * Set SPiD server URL
      * @private
-     * @param {string} url
+     * @param {string} env
      * @returns {void}
      */
-    _setSpidServerUrl(url) {
-        assert(isStr(url), `url parameter is invalid: ${url}`);
-        this._spid = new RESTClient({
-            serverUrl: urlMapper(url, ENDPOINTS.SPiD),
+    private _setSpidServerUrl(env: Environment): void {
+        assert(isStr(env), `env parameter is invalid: ${env}`);
+        this.spidClient = new RESTClient({
+            serverUrl: urlMapper(env, ENDPOINTS.SPiD),
             defaultParams: { client_id: this.clientId, redirect_uri: this.redirectUri },
         });
     }
@@ -65,12 +93,11 @@ export class Monetization extends EventEmitter {
      * @param {string} domain - real URL — (**not** 'PRE' style env key)
      * @returns {void}
      */
-    _setSessionServiceUrl(domain) {
+    private _setSessionServiceUrl(domain: string): void {
         assert(isStr(domain), `domain parameter is invalid: ${domain}`);
         const client_sdrn = `sdrn:${NAMESPACE[this.env]}:client:${this.clientId}`;
-        this._sessionService = new RESTClient({
+        this.sessionServiceClient = new RESTClient({
             serverUrl: domain,
-            log: this.log,
             defaultParams: { client_sdrn, redirect_uri: this.redirectUri, sdk_version: version  },
         });
     }
@@ -84,22 +111,27 @@ export class Monetization extends EventEmitter {
      * @returns {Object|null} The data object returned from Schibsted account (or `null` if the user
      * doesn't have access to any of the given products/features)
      */
-    async hasAccess(productIds, userId) {
-        if (!this._sessionService) {
-            throw new SDKError(`hasAccess can only be called if 'sessionDomain' is configured`);
+    async hasAccess(productIds: string[], userId: string) {
+        if (!this.sessionServiceClient) {
+            throw new SDKError('hasAccess can only be called if \'sessionDomain\' is configured');
         }
         if (!userId) {
-            throw new SDKError(`'userId' must be specified`);
+            throw new SDKError('\'userId\' must be specified');
         }
         if (!Array.isArray(productIds)) {
-            throw new SDKError(`'productIds' must be an array`);
+            throw new SDKError('\'productIds\' must be an array');
         }
+
+        let data: HasAccessEntry;
 
         const sortedIds = productIds.sort();
         const cacheKey = this._accessCacheKey(productIds, userId);
-        let data = this.cache.get(cacheKey);
-        if (!data) {
-            data = await this._sessionService.get(`/hasAccess/${sortedIds.join(',')}`);
+        const cacheLookup = this.cache.get<HasAccessEntry>(cacheKey);
+
+        if (cacheLookup) {
+            data = cacheLookup;
+        } else {
+            data = await this.sessionServiceClient.get(`/hasAccess/${sortedIds.join(',')}`);
             const expiresSeconds = data.ttl;
             this.cache.set(cacheKey, data, expiresSeconds * 1000);
         }
@@ -117,7 +149,7 @@ export class Monetization extends EventEmitter {
      * @param {number} userId - id of currently logged in user
      * @returns {void}
      */
-    clearCachedAccessResult(productIds, userId) {
+    clearCachedAccessResult(productIds: string[], userId: string): void {
         this.cache.delete(this._accessCacheKey(productIds, userId));
     }
 
@@ -128,7 +160,7 @@ export class Monetization extends EventEmitter {
      * @returns {string}
      * @private
      */
-    _accessCacheKey(productIds, userId) {
+    private _accessCacheKey(productIds: string[], userId: string): string {
         return `prd_${productIds.sort()}_${userId}`;
     }
 
@@ -137,9 +169,9 @@ export class Monetization extends EventEmitter {
      * @param {string} [redirectUri=this.redirectUri]
      * @return {string} - The url to the subscriptions review page
      */
-    subscriptionsUrl(redirectUri = this.redirectUri) {
-        assert(isUrl(redirectUri), `subscriptionsUrl(): redirectUri is invalid`);
-        return this._spid.makeUrl('account/subscriptions', { redirect_uri: redirectUri });
+    subscriptionsUrl(redirectUri: string = this.redirectUri): string {
+        assert(isUrl(redirectUri), 'subscriptionsUrl(): redirectUri is invalid');
+        return this.spidClient!.makeUrl('account/subscriptions', { redirect_uri: redirectUri });
     }
 
     /**
@@ -147,9 +179,9 @@ export class Monetization extends EventEmitter {
      * @param {string} [redirectUri=this.redirectUri]
      * @return {string} - The url to the products review page
      */
-    productsUrl(redirectUri = this.redirectUri) {
-        assert(isUrl(redirectUri), `productsUrl(): redirectUri is invalid`);
-        return this._spid.makeUrl('account/products', { redirect_uri: redirectUri });
+    productsUrl(redirectUri: string = this.redirectUri): string {
+        assert(isUrl(redirectUri), 'productsUrl(): redirectUri is invalid');
+        return this.spidClient!.makeUrl('account/products', { redirect_uri: redirectUri });
     }
 }
 
