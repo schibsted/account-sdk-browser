@@ -4,7 +4,14 @@
 
 'use strict';
 
-import SDKError from './SDKError.js';
+import SDKError from './SDKError';
+import { Optional } from './types';
+
+interface IStorage {
+    get: (key: string) => Optional<string>,
+    set: (key: string, value: string) => void,
+    delete: (key: string) => void,
+}
 
 /**
  * Check whether we are able to use web storage
@@ -13,13 +20,13 @@ import SDKError from './SDKError.js';
  * @private
  * @returns {boolean}
  */
-function webStorageWorks(storeProvider) {
+function webStorageWorks(storeProvider: () => Storage) {
     if (!storeProvider) {
         return false;
     }
     try {
         const store = storeProvider();
-        const randomKey = 'x-x-x-x'.replace(/x/g, () => Math.random());
+        const randomKey = 'x-x-x-x'.replace(/x/g, () => Math.random().toString());
         const testValue = 'TEST-VALUE';
         store.setItem(randomKey, testValue);
         const val = store.getItem(randomKey);
@@ -34,17 +41,40 @@ function webStorageWorks(storeProvider) {
  * Will be used if web storage is available
  * @private
  */
-class WebStorageCache {
+class WebStorageCache implements IStorage {
     /**
      * Create web storage cache object
      * @param {Storage} store - A reference to either `sessionStorage` or `localStorage` from a
      * `Window` object
      */
-    constructor(store) {
+    constructor(store: Storage) {
         this.store = store;
-        this.get = (key) => this.store.getItem(key);
-        this.set = (key, value) => this.store.setItem(key, value);
-        this.delete = (key) => this.store.removeItem(key);
+    }
+
+    private readonly store: Storage;
+
+    get(key: string): Optional<string> {
+        if (!this.store) {
+            return null;
+        }
+
+        return this.store.getItem(key);
+    }
+
+    set(key: string, value: string): void {
+        if (!this.store) {
+            return;
+        }
+
+        this.store.setItem(key, value);
+    }
+
+    delete(key: string): void {
+        if (!this.store) {
+            return;
+        }
+
+        this.store.removeItem(key);
     }
 }
 
@@ -52,15 +82,28 @@ class WebStorageCache {
  * Will be used if session storage is not available
  * @private
  */
-class LiteralCache {
+class LiteralCache implements IStorage {
     /**
      * Create JS object literal cache object
      */
     constructor() {
         this.store = {};
-        this.get = (key) => this.store[key];
-        this.set = (key, value) => this.store[key] = value;
-        this.delete = (key) => delete this.store[key];
+    }
+
+    private readonly store: Record<string, string>  = {};
+
+    get(key: string): Optional<string> {
+        return this.store[key];
+    }
+
+    set(key: string, value: string): void {
+        this.store[key] = value;
+    }
+
+    delete(key: string): void {
+        if (key in this.store) {
+            delete this.store[key];
+        }
     }
 }
 
@@ -76,7 +119,7 @@ export default class Cache {
      * `sessionStorage` or `localStorage` from a `Window` object)
      * @throws {SDKError} - If sessionStorage or localStorage are not accessible
      */
-    constructor(storeProvider) {
+    constructor(storeProvider: () => Storage) {
         if (webStorageWorks(storeProvider)) {
             this.cache = new WebStorageCache(storeProvider());
             this.type = 'WebStorage';
@@ -86,19 +129,23 @@ export default class Cache {
         }
     }
 
+    private readonly cache: IStorage;
+
+    readonly type: string;
+
     /**
      * Get a value from cache (checks that the object has not expired)
      * @param {string} key
      * @private
      * @returns {*} - The value if it exists, otherwise null
      */
-    get(key) {
+    get(key: string): Optional<string> {
         /**
          * JSON.parse safe wrapper
          * @param {string} raw
          * @returns {*} parsed value or null if failed to parse
          */
-        function getObj(raw) {
+        function getObj(raw: string) {
             try {
                 return JSON.parse(raw);
             } catch (e) {
@@ -106,16 +153,21 @@ export default class Cache {
             }
         }
 
+        const raw = this.cache.get(key);
+        if (!raw) {
+            return null;
+        }
+
         try {
-            const raw = this.cache.get(key);
-            let obj = getObj(raw);
+            const obj = getObj(raw);
             if (obj && Number.isInteger(obj.expiresOn) && obj.expiresOn > Date.now()) {
                 return obj.value;
             }
             this.delete(key);
             return null;
         } catch (e) {
-            throw new SDKError(e);
+            if (e instanceof Error) throw new SDKError(e.message, e);
+            else throw new SDKError('Failed to prase JSON while reading from cache.');
         }
     }
 
@@ -127,7 +179,7 @@ export default class Cache {
      * @private
      * @returns {void}
      */
-    set(key, value, expiresIn = 0) {
+    set(key: string, value: unknown, expiresIn = 0): void {
         if (expiresIn <= 0) {
             return;
         }
@@ -138,7 +190,8 @@ export default class Cache {
             this.cache.set(key, JSON.stringify({ expiresOn, value }));
             setTimeout(() => this.delete(key), expiresIn);
         } catch (e) {
-            throw new SDKError(e);
+            if (e instanceof Error) throw new SDKError(e.message, e);
+            else throw new SDKError('Failed to JSON stringify while writing to cache.');
         }
     }
 
@@ -148,11 +201,12 @@ export default class Cache {
      * @private
      * @returns {void}
      */
-    delete(key) {
+    delete(key: string): void {
         try {
             this.cache.delete(key);
         } catch (e) {
-            throw new SDKError(e);
+            if (e instanceof Error) throw new SDKError(e.message, e);
+            else throw new SDKError('Failed to delete cache entry.');
         }
     }
 }

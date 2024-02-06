@@ -35,7 +35,7 @@ module.exports = {
             },
         ],
         '@typescript-eslint/naming-convention': 0,
-        'no-unused-vars': 'error',
+        'no-unused-vars': 'off',
         'require-jsdoc': [
             'warn',
             {
