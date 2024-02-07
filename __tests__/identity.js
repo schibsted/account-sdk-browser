@@ -608,7 +608,7 @@ describe('Identity', () => {
                         '?client_sdrn=sdrn%3Aschibsted.com%3Aclient%3A',
                         defaultOptions.clientId,
                         '&redirect_uri=',
-                        encodeURIComponent(defaultOptions.window.location.origin),
+                        encodeURIComponent(defaultOptions.redirectUri),
                         '&sdk_version=',
                         version
                     ].join('')
