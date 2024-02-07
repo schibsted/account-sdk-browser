@@ -535,7 +535,7 @@ export class Identity extends EventEmitter {
                 if(_checkRedirectionNeed(sessionData)){
                     await this.callbackBeforeRedirect();
 
-                    this.window.location.href = this._sessionService.makeUrl(sessionData.redirectURL, {redirect_uri: this.window.location.origin});
+                    this.window.location.href = this._sessionService.makeUrl(sessionData.redirectURL);
 
                     return;
                 }
