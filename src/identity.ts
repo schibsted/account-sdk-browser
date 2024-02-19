@@ -16,7 +16,7 @@ import {
 import { cloneDeep } from './utils/object';
 import { urlMapper } from './utils/url';
 import { ENDPOINTS, NAMESPACE } from './config/config';
-// import { TinyEmitter as EventEmitter } from 'tiny-emitter';
+import { EventEmitter } from 'events';
 import Cache from './utils/cache';
 import * as popup from './utils/popup';
 import RESTClient from './clients/RESTClient';

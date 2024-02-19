@@ -7,7 +7,7 @@
 import { assert, isStr, isNonEmptyString, isUrl } from './utils/validate';
 import { urlMapper } from './utils/url';
 import { ENDPOINTS, NAMESPACE } from './config/config';
-import { TinyEmitter as EventEmitter } from 'tiny-emitter';
+import { EventEmitter } from 'events';
 import RESTClient from './clients/RESTClient';
 import Cache from './utils/cache';
 import SDKError from './utils/SDKError';

@@ -4,9 +4,9 @@
   "description": "Schibsted account SDK for browsers",
   "main": "dist/index.js",
   "files": [
-    "dist"
+    "/dist"
   ],
-  "type": "module",
+  "type": "commonjs",
   "scripts": {
     "build": "tsc --build --verbose",
     "clean": "rimraf .cache coverage dist docs",
@@ -22,8 +22,7 @@
   "author": "",
   "license": "MIT",
   "dependencies": {
-    "eventemitter3": "^5.0.1",
-    "tiny-emitter": "^2.1.0"
+    "events": "^3.3.0"
   },
   "devDependencies": {
     "@babel/core": "^7.23.2",
@@ -52,29 +51,5 @@
   "repository": {
     "type": "git",
     "url": "git://github.com/schibsted/account-sdk-browser.git"
-  },
-  "babel": {
-    "presets": [
-      [
-        "@babel/preset-env",
-        {
-          "useBuiltIns": "usage",
-          "corejs": 3,
-          "targets": {
-            "browsers": [
-              "> 1%",
-              "last 10 chrome major versions",
-              "last 10 firefox major versions",
-              "last 10 opera major versions",
-              "last 2 safari major versions",
-              "last 2 ios major versions",
-              "last 2 ie major versions",
-              "last 5 edge major versions"
-            ]
-          }
-        }
-      ]
-    ]
-  },
-  "typings": "index.d.ts"
+  }
 }
