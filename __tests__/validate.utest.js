@@ -4,7 +4,7 @@
 
 'use strict';
 
-import { isStr, isStrIn, isNonEmptyString, isObject, isNonEmptyObj } from '../src/utils/validate.js';
+import { isStr, isStrIn, isNonEmptyString, isObject, isNonEmptyObj } from '../src/utils/validate.ts';
 
 describe('validate', () => {
 

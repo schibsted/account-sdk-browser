@@ -20,7 +20,7 @@ const commonRules = {
 
 const tsConfig = {
     mode: 'production',
-    entry: './index.js',
+    entry: './index.ts',
     output: {
         filename: 'es5/[name].min.js',
         path: __dirname,
@@ -41,9 +41,9 @@ const tsConfig = {
 
 const cjsConfig = {
     entry: {
-        identity: './src/identity.js',
-        monetization: './src/monetization.js',
-        payment: './src/payment.js',
+        identity: './src/identity.ts',
+        monetization: './src/monetization.ts',
+        payment: './src/payment.ts',
     },
     output: {
         path: path.resolve(__dirname, 'es5'),
@@ -69,4 +69,4 @@ const windowConfig = {
     ...commonRules,
 }
 
-module.exports = [tsConfig, cjsConfig, windowConfig]
+module.exports = [tsConfig]

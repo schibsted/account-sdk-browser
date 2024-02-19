@@ -4,8 +4,8 @@
 
 'use strict';
 
-import { ENDPOINTS } from '../src/config/config.js';
-import { RESTClient } from '../src/clients/RESTClient.js';
+import { ENDPOINTS } from '../src/config/config.ts';
+import { RESTClient } from '../src/clients/RESTClient.ts';
 
 describe('RESTClient', () => {
     test('has the REST methods for get and go', () => {

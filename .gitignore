@@ -1,7 +1,7 @@
 .DS_Store
 .cache
 .idea
-/es5
+/dist
 coverage
 docs/
 node_modules/

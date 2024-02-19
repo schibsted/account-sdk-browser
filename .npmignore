@@ -1,9 +1,9 @@
 *
-!index.js
+!index.ts
 !*.d.ts
-!identity.js
-!monetization.js
-!payment.js
+!identity.ts
+!monetization.ts
+!payment.ts
 !es5/*.js
 !es5/*.d.ts
 !es5/*.js.map

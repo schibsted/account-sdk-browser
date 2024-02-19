@@ -4,8 +4,8 @@
 
 'use strict';
 
-import SDKError from './SDKError.js';
-import { NonFunctionMembers } from './types';
+import SDKError from './SDKError';
+import { GenericObject, NonFunctionMembers } from './types';
 
 /*
  * This module defines a set of validation functions which are used in the rest of the SDK.
@@ -35,7 +35,7 @@ export function assert(condition: boolean, message = 'Assertion failed'): void |
  * @param {*} value - The value to check
  * @return {boolean}
  */
-export function isStr(value: unknown): boolean {
+export function isStr(value: unknown): value is string {
     return typeof value === 'string';
 }
 
@@ -55,7 +55,7 @@ export function isNonEmptyString(value: unknown): boolean {
  * @param {*} value - The value to check
  * @return {boolean}
  */
-export function isObject(value: unknown): boolean {
+export function isObject(value: unknown): value is GenericObject {
     return typeof value === 'object' && value !== null;
 }
 

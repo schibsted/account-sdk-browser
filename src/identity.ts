@@ -4,51 +4,153 @@
 
 'use strict';
 
-import { assert, isStr, isNonEmptyString, isObject, isUrl, isStrIn } from './utils/validate.ts';
-import { cloneDeep } from './utils/object.js';
-import { urlMapper } from './utils/url.ts';
-import { ENDPOINTS, NAMESPACE } from './config/config.js';
-import EventEmitter from 'tiny-emitter';
-import Cache from './utils/cache.ts';
-import * as popup from './utils/popup.js';
-import RESTClient from './clients/RESTClient.js';
-import SDKError from './utils/SDKError.ts';
-import version from './version.ts';
+import {
+    assert,
+    isNonEmptyObj,
+    isNonEmptyString,
+    isObject,
+    isStr,
+    isStrIn,
+    isUrl,
+} from './utils/validate';
+import { cloneDeep } from './utils/object';
+import { urlMapper } from './utils/url';
+import { ENDPOINTS, NAMESPACE } from './config/config';
+// import { TinyEmitter as EventEmitter } from 'tiny-emitter';
+import Cache from './utils/cache';
+import * as popup from './utils/popup';
+import RESTClient from './clients/RESTClient';
+import SDKError from './utils/SDKError';
+import version from './version';
+import { Environment, GenericObject, Optional, UserSession } from './utils/types';
 
-/**
- * @typedef {object} LoginOptions
- * @property {string} state - An opaque value used by the client to maintain state between
- * the request and callback. It's also recommended to prevent CSRF {@link https://tools.ietf.org/html/rfc6749#section-10.12}
- * @property {string} [acrValues] - Authentication Context Class Reference Values. If
- * omitted, the user will be asked to authenticate using username+password.
- * For 2FA (Two-Factor Authentication) possible values are `sms`, `otp` (one time password),
- * `password` (will force password confirmation, even if user is already logged in), `eid`. Those values might
- * be mixed as space-separated string. To make sure that user has authenticated with 2FA you need
- * to verify AMR (Authentication Methods References) claim in ID token.
- * Might also be used to ensure additional acr (sms, otp) for already logged in users.
- * Supported value is also 'otp-email' means one time password using email.
- * @property {string} [scope] - The OAuth scopes for the tokens. This is a list of
- * scopes, separated by space. If the list of scopes contains `openid`, the generated tokens
- * includes the id token which can be useful for getting information about the user. Omitting
- * scope is allowed, while `invalid_scope` is returned when the client asks for a scope you
- * aren’t allowed to request. {@link https://tools.ietf.org/html/rfc6749#section-3.3}
- * @property {string} [redirectUri] - Redirect uri that will receive the
- * code. Must exactly match a redirectUri from your client in self-service
- * @property {boolean} [preferPopup] - Should we try to open a popup window?
- * @property {string} [loginHint] - user email or UUID hint
- * @property {string} [tag] - Pulse tag
- * @property {string} [teaser] - Teaser slug. Teaser with given slug will be displayed
- * in place of default teaser
- * @property {number|string} [maxAge] - Specifies the allowable elapsed time in seconds since
- * the last time the End-User was actively authenticated. If last authentication time is more
- * than maxAge seconds in the past, re-authentication will be required. See the OpenID Connect
- * spec section 3.1.2.1 for more information
- * @property {string} [locale] - Optional parameter to overwrite client locale setting.
- * New flows supports nb_NO, fi_FI, sv_SE, en_US
- * @property {boolean} [oneStepLogin] - display username and password on one screen
- * @property {string} [prompt] - String that specifies whether the Authorization Server prompts the
- * End-User for reauthentication or confirm account screen. Supported values: `select_account` or `login`
- */
+
+
+interface IdentityOpts {
+    /**
+     * @property {string} clientId
+     * @description Web applications client ID within Schibsted Account ecosystem
+     */
+    clientId: string,
+    /**
+     * @property {string} redirectUri
+     * @description
+     */
+    redirectUri: string,
+    /**
+     * @property {string} sessionDomain
+     * @description URL to brand-owned session domain pointing to global Session Service
+     */
+    sessionDomain: string,
+    /**
+     * @property {string} env
+     * @description Schibsted Account environment code
+     * @example 'PRE'
+     */
+    env: Environment,
+    /**
+     * @property {Function} log
+     * @description Optional logger function
+     */
+    log: Function,
+    /**
+     * @property {Window} window
+     * @description Reference to the window object, if not provided the SDK will use the default Window object
+     */
+    window: Window
+}
+
+interface VarnishCookieOpts {
+    expiresIn: number,
+    domain: string
+}
+
+
+interface LoginOpts {
+    /**
+     * @property {string} state
+     * @description An opaque value used by the client to maintain state between
+     * the request and callback. It's also recommended to prevent CSRF {@link https://tools.ietf.org/html/rfc6749#section-10.12}
+     */
+    state: string | Function,
+    /**
+     * @property {string} [acrValues]
+     * @description Authentication Context Class Reference Values. If
+     * omitted, the user will be asked to authenticate using username+password.
+     * For 2FA (Two-Factor Authentication) possible values are `sms`, `otp` (one time password),
+     * `password` (will force password confirmation, even if user is already logged in), `eid`. Those values might
+     * be mixed as space-separated string. To make sure that user has authenticated with 2FA you need
+     * to verify AMR (Authentication Methods References) claim in ID token.
+     * Might also be used to ensure additional acr (sms, otp) for already logged in users.
+     * Supported value is also 'otp-email' means one time password using email.
+     * @example 'otp'
+     */
+    acrValues: string,
+    /**
+     * @property {string} [scope]
+     * @description The OAuth scopes for the tokens. This is a list of
+     * scopes, separated by space. If the list of scopes contains `openid`, the generated tokens
+     * includes the id token which can be useful for getting information about the user. Omitting
+     * scope is allowed, while `invalid_scope` is returned when the client asks for a scope you
+     * aren’t allowed to request. {@link https://tools.ietf.org/html/rfc6749#section-3.3}
+     */
+    scope: string,
+    /**
+     * @property {string} [redirectUri]
+     * @description Redirect uri that will receive the
+     * code. Must exactly match a redirectUri from your client in self-service
+     */
+    redirectUri: string,
+    /**
+     * @property {boolean} [preferPopup]
+     * @description Should we try to open a popup window?
+     */
+    preferPopup: boolean,
+    /**
+     * @property {string} [loginHint]
+     * @description user email or UUID hint
+     */
+    loginHint: string,
+    /**
+     * @property {string} [tag]
+     * @description Pulse tag
+     */
+    tag: string,
+    /**
+     * @property {string} [teaser]
+     * @description Teaser slug. Teaser with given slug will be displayed
+     * in place of default teaser
+     */
+    teaser: string,
+    /**
+     * @property {number|string} [maxAge]
+     * @description Specifies the allowable elapsed time in seconds since
+     * the last time the End-User was actively authenticated. If last authentication time is more
+     * than maxAge seconds in the past, re-authentication will be required. See the OpenID Connect
+     * spec section 3.1.2.1 for more information
+     */
+    maxAge: string | number,
+    /**
+     * @property {string} [locale]
+     * @description Optional parameter to overwrite client locale setting.
+     * New flows supports nb_NO, fi_FI, sv_SE, en_US
+     * @example 'nb_NO'
+     */
+    locale: string,
+    /**
+     * @property {boolean} [oneStepLogin]
+     * @description Display username and password on one screen
+     */
+    oneStepLogin: boolean,
+    /**
+     *  @property {string} [prompt]
+     *  @description String that specifies whether the Authorization Server prompts the
+     *  End-User for re-authentication or confirm account screen. Supported values: `select_account` or `login`
+     *  @example 'login'
+     */
+    prompt: 'select_account',
+}
+
 /**
  * @typedef {object} SimplifiedLoginWidgetLoginOptions
  * @property {string|function(): (string|Promise<string>)} state - An opaque value used by the client to maintain state between
@@ -84,34 +186,17 @@ import version from './version.ts';
  * End-User for reauthentication or confirm account screen. Supported values: `select_account` or `login`
  */
 
-/**
- * @typedef {object} HasSessionSuccessResponse
- * @property {boolean} result - Is the user connected to the merchant? (it means that the merchant
- * id is in the list of merchants listed of this user in the database)? Example: false
- * @property {string} userStatus - Example: 'notConnected' or 'connected'. Deprecated, use
- * `Identity.isConnected()`
- * @property {string} baseDomain - Example: 'localhost'
- * @property {string} id - Example: '58eca10fdbb9f6df72c3368f'. Obsolete
- * @property {number} userId - Example: 37162
- * @property {string} uuid - Example: 'b3b23aa7-34f2-5d02-a10e-5a3455c6ab2c'
- * @property {string} sp_id - Example: 'eyJjbGllbnRfaWQ...'
- * @property {number} expiresIn - Example: 30 * 60 * 1000 (for 30 minutes)
- * @property {number} serverTime - Example: 1506285759
- * @property {string} sig - Example: 'NCdzXaz4ZRb7...' The sig parameter is a concatenation of an
- * HMAC SHA-256 signature string, a dot (.) and a base64url encoded JSON object (session).
- * {@link http://techdocs.spid.no/sdks/js/response-signature-and-validation/}
- * @property {string} displayName - (Only for connected users) Example: 'batman'
- * @property {string} givenName - (Only for connected users) Example: 'Bruce'
- * @property {string} familyName - (Only for connected users) Example: 'Wayne'
- * @property {string} gender - (Only for connected users) Example: 'male', 'female', 'undisclosed'
- * @property {string} photo - (Only for connected users) Example:
- * 'http://www.srv.com/some/picture.jpg'
- * @property {boolean} tracking - (Only for connected users)
- * @property {boolean} clientAgreementAccepted - (Only for connected users)
- * @property {boolean} defaultAgreementAccepted - (Only for connected users)
- * @property {string} pairId
- * @property {string} sdrn
- */
+interface SimplifiedLoginOpts {
+    encoding: string,
+    locale: string
+}
+
+interface SimplifiedLoginData {
+    provider_id: string;
+    identifier: string,
+    display_text: string,
+    client_name: string
+}
 
 /**
  * Emitted when an error happens (useful for debugging)
@@ -161,12 +246,12 @@ export class Identity extends EventEmitter {
      * @param {object} [options.window] - window object
      * @throws {SDKError} - If any of options are invalid
      */
-    constructor({ clientId, redirectUri, sessionDomain, env = 'PRE', log, window = globalWindow() }) {
+    constructor({ clientId, redirectUri, sessionDomain, env = 'PRE', log, window = globalWindow() }: IdentityOpts) {
         super();
         assert(isNonEmptyString(clientId), 'clientId parameter is required');
         assert(isObject(window), 'The reference to window is missing');
         assert(!redirectUri || isUrl(redirectUri), 'redirectUri parameter is invalid');
-        assert(sessionDomain && isUrl(sessionDomain), 'sessionDomain parameter is not a valid URL');
+        assert(!sessionDomain || isUrl(sessionDomain), 'sessionDomain parameter is not a valid URL');
 
         this._sessionInitiatedSent = false;
         this.window = window;
@@ -181,25 +266,68 @@ export class Identity extends EventEmitter {
         this._enableSessionCaching = true;
 
         // Old session
+        // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+        // @ts-expect-error
         this._session = {};
 
-        this._setSessionServiceUrl(sessionDomain);
+        this._setBrandSessionServiceUrl(sessionDomain);
         this._setSpidServerUrl(env);
         this._setBffServerUrl(env);
         this._setOauthServerUrl(env);
         this._setGlobalSessionServiceUrl(env);
     }
 
+    private _sessionInitiatedSent: boolean;
+
+    private readonly window: Window;
+
+    private readonly clientId: string;
+
+    private readonly cache: Cache;
+
+    private readonly redirectUri: string;
+
+    private readonly env: Environment;
+
+    private readonly _sessionDomain: string;
+
+    private readonly _enableSessionCaching: boolean;
+
+    private readonly log: Function;
+
+    private _session: UserSession;
+
+    private spidClient: RESTClient | undefined;
+
+    private bffClient: RESTClient | undefined;
+
+    private oauthServiceClient: RESTClient | undefined;
+
+    private brandSessionServiceClient:  RESTClient | undefined;
+
+    private globalSessionServiceClient:  RESTClient | undefined;
+
+    private popupWindowRef: Optional<Window>;
+
+    private setVarnishCookie: Optional<boolean>;
+
+    private varnishExpiresIn: Optional<number>;
+
+    private varnishCookieDomain: Optional<string>;
+
+    // private _currentSession: Optional<UserSession>;
+
+
     /**
      * Set SPiD server URL
      * @private
-     * @param {string} url - real URL or 'PRE' style key
+     * @param {string} env - 'PRE' style key
      * @returns {void}
      */
-    _setSpidServerUrl(url) {
-        assert(isStr(url), `url parameter is invalid: ${url}`);
-        this._spid = new RESTClient({
-            serverUrl: urlMapper(url, ENDPOINTS.SPiD),
+    private _setSpidServerUrl(env: Environment): void {
+        assert(isStr(env), `url parameter is invalid: ${env}`);
+        this.spidClient = new RESTClient({
+            serverUrl: urlMapper(env, ENDPOINTS.SPiD),
             log: this.log,
             defaultParams: { client_id: this.clientId, redirect_uri: this.redirectUri },
         });
@@ -208,13 +336,13 @@ export class Identity extends EventEmitter {
     /**
      * Set OAuth server URL
      * @private
-     * @param {string} url - real URL or 'PRE' style key
+     * @param {string} env - environment eg. 'PRE'
      * @returns {void}
      */
-    _setOauthServerUrl(url) {
-        assert(isStr(url), `url parameter is invalid: ${url}`);
-        this._oauthService = new RESTClient({
-            serverUrl: urlMapper(url, ENDPOINTS.SPiD),
+    private _setOauthServerUrl(env: Environment): void {
+        assert(isStr(env), `url parameter is invalid: ${env}`);
+        this.oauthServiceClient = new RESTClient({
+            serverUrl: urlMapper(env, ENDPOINTS.SPiD),
             log: this.log,
             defaultParams: { client_id: this.clientId, redirect_uri: this.redirectUri },
         });
@@ -223,13 +351,13 @@ export class Identity extends EventEmitter {
     /**
      * Set BFF server URL
      * @private
-     * @param {string} url  - real URL or 'PRE' style key
+     * @param {string} env - environment eg. 'PRE'
      * @returns {void}
      */
-    _setBffServerUrl(url) {
-        assert(isStr(url), `url parameter is invalid: ${url}`);
-        this._bffService = new RESTClient({
-            serverUrl: urlMapper(url, ENDPOINTS.BFF),
+    private _setBffServerUrl(env: Environment): void {
+        assert(isStr(env), `url parameter is invalid: ${env}`);
+        this.bffClient = new RESTClient({
+            serverUrl: urlMapper(env, ENDPOINTS.BFF),
             log: this.log,
             defaultParams: { client_id: this.clientId, redirect_uri: this.redirectUri },
         });
@@ -241,10 +369,10 @@ export class Identity extends EventEmitter {
      * @param {string} domain - real URL — (**not** 'PRE' style env key)
      * @returns {void}
      */
-    _setSessionServiceUrl(domain) {
+    private _setBrandSessionServiceUrl(domain: string): void {
         assert(isStr(domain), `domain parameter is invalid: ${domain}`);
         const client_sdrn = `sdrn:${NAMESPACE[this.env]}:client:${this.clientId}`;
-        this._sessionService = new RESTClient({
+        this.brandSessionServiceClient = new RESTClient({
             serverUrl: domain,
             log: this.log,
             defaultParams: { client_sdrn, redirect_uri: this.redirectUri, sdk_version: version },
@@ -254,14 +382,14 @@ export class Identity extends EventEmitter {
     /**
      * Set global session-service server URL
      * @private
-     * @param {string} url - real URL or 'PRE' style key
+     * @param {string} env - environment eg. 'PRE'
      * @returns {void}
      */
-    _setGlobalSessionServiceUrl(url) {
-        assert(isStr(url), `url parameter is invalid: ${url}`);
+    private _setGlobalSessionServiceUrl(env: Environment): void {
+        assert(isStr(env), `url parameter is invalid: ${env}`);
         const client_sdrn = `sdrn:${NAMESPACE[this.env]}:client:${this.clientId}`;
-        this._globalSessionService = new RESTClient({
-            serverUrl: urlMapper(url, ENDPOINTS.SESSION_SERVICE),
+        this.globalSessionServiceClient = new RESTClient({
+            serverUrl: urlMapper(env, ENDPOINTS.SESSION_SERVICE),
             log: this.log,
             defaultParams: { client_sdrn, sdk_version: version },
         });
@@ -274,7 +402,7 @@ export class Identity extends EventEmitter {
      * @param {object} current
      * @returns {void}
      */
-    _emitSessionEvent(previous, current) {
+    private _emitSessionEvent(previous: UserSession, current: UserSession): void {
         /**
          * Emitted when the user is logged in (This happens as a result of calling
          * {@link Identity#hasSession}, so it is also emitted if the user was previously logged in)
@@ -334,16 +462,16 @@ export class Identity extends EventEmitter {
     }
 
     /**
-     * Close this.popup if it exists and is open
+     * Close this.popupWindowRef if it exists and is open
      * @private
      * @returns {void}
      */
-    _closePopup() {
-        if (this.popup) {
-            if (!this.popup.closed) {
-                this.popup.close();
+    private _closePopup(): void {
+        if (this.popupWindowRef) {
+            if (!this.popupWindowRef.closed) {
+                this.popupWindowRef.close();
             }
-            this.popup = null;
+            this.popupWindowRef = null;
         }
     }
 
@@ -356,15 +484,11 @@ export class Identity extends EventEmitter {
      * @param {string} [options.domain] Override cookie domain. E.g. «vg.no» instead of «www.vg.no»
      * @returns {void}
      */
-    enableVarnishCookie(options) {
-        let expiresIn = 0;
-        let domain;
-        if (Number.isInteger(options)) {
-            expiresIn = options;
-        } else if (typeof options == 'object') {
-            expiresIn = options.expiresIn || expiresIn;
-            domain = options.domain || domain;
-        }
+    enableVarnishCookie(options: VarnishCookieOpts): void {
+        assert(isObject(options), 'Invalid argument for enableVarnishCookie. An object was expected.');
+
+        const expiresIn = options.expiresIn || 0;
+        const domain = options.domain || '';
 
         assert(Number.isInteger(expiresIn), '\'expiresIn\' must be an integer');
         assert(expiresIn >= 0, '\'expiresIn\' cannot be negative');
@@ -379,13 +503,14 @@ export class Identity extends EventEmitter {
      * @param {HasSessionSuccessResponse} sessionData
      * @returns {void}
      */
-    _maybeSetVarnishCookie(sessionData) {
+    private _maybeSetVarnishCookie(sessionData: UserSession): void {
         if (!this.setVarnishCookie) {
             return;
         }
+
         const date = new Date();
-        const validExpires = this.varnishExpiresIn
-            || typeof sessionData.expiresIn === 'number' && sessionData.expiresIn > 0;
+        const validExpires = this.varnishExpiresIn || sessionData.expiresIn > 0;
+
         if (validExpires) {
             const expires = this.varnishExpiresIn || sessionData.expiresIn;
             date.setTime(date.getTime() + (expires * 1000));
@@ -394,19 +519,14 @@ export class Identity extends EventEmitter {
         }
 
         // If the domain is missing or of the wrong type, we'll use document.domain
-        let domain = this.varnishCookieDomain ||
-            (typeof sessionData.baseDomain === 'string'
-                ? sessionData.baseDomain
-                : document.domain) ||
-            '';
+        const domain = this.varnishCookieDomain || sessionData.baseDomain || '';
 
-        const cookie = [
+        document.cookie = [
             `SP_ID=${sessionData.sp_id}`,
             `expires=${date.toUTCString()}`,
             'path=/',
             `domain=.${domain}`,
         ].join('; ');
-        document.cookie = cookie;
     }
 
     /**
@@ -414,7 +534,7 @@ export class Identity extends EventEmitter {
      * @private
      * @returns {void}
      */
-    _maybeClearVarnishCookie() {
+    private _maybeClearVarnishCookie(): void {
         if (this.setVarnishCookie) {
             this._clearVarnishCookie();
         }
@@ -425,14 +545,9 @@ export class Identity extends EventEmitter {
      * @private
      * @returns {void}
      */
-    _clearVarnishCookie() {
-        const baseDomain =  this._session && typeof this._session.baseDomain === 'string'
-            ? this._session.baseDomain
-            : document.domain;
-
-        let domain = this.varnishCookieDomain ||
-            baseDomain ||
-            '';
+    private _clearVarnishCookie(): void {
+        const baseDomain =  this._session && this._session.baseDomain || document.domain;
+        const domain = this.varnishCookieDomain || baseDomain || '';
 
         document.cookie = `SP_ID=nothing; expires=Thu, 01 Jan 1970 00:00:00 GMT; path=/; domain=.${domain}`;
     }
@@ -442,7 +557,7 @@ export class Identity extends EventEmitter {
      * @throws {SDKError} - If log method is not provided
      * @return {void}
      */
-    logSettings() {
+    logSettings(): void {
         if (!this.log && !window.console) {
             throw new SDKError('You have to provide log method in constructor');
         }
@@ -460,74 +575,127 @@ export class Identity extends EventEmitter {
         log(`Schibsted account SDK for browsers settings: \n${JSON.stringify(settings, null, 2)}`);
     }
 
-    /**
-     * @summary Queries the hassession endpoint and returns information about the status of the user
-     * @description When we send a request to this endpoint, cookies sent along with the request
-     * determines the status of the user.
-     * @throws {SDKError} - If the call to the hasSession service fails in any way (this will happen
-     * if, say, the user is not logged in)
-     * @fires Identity#login
-     * @fires Identity#logout
-     * @fires Identity#userChange
-     * @fires Identity#sessionChange
-     * @fires Identity#notLoggedin
-     * @fires Identity#sessionInit
-     * @fires Identity#statusChange
-     * @fires Identity#error
-     * @return {Promise<HasSessionSuccessResponse|HasSessionFailureResponse>}
-     */
-    hasSession() {
-        if (this._hasSessionInProgress) {
-            return this._hasSessionInProgress;
+    // /**
+    //  * @summary Queries the hassession endpoint and returns information about the status of the user
+    //  * @description When we send a request to this endpoint, cookies sent along with the request
+    //  * determines the status of the user.
+    //  * @throws {SDKError} - If the call to the hasSession service fails in any way (this will happen
+    //  * if, say, the user is not logged in)
+    //  * @fires Identity#login
+    //  * @fires Identity#logout
+    //  * @fires Identity#userChange
+    //  * @fires Identity#sessionChange
+    //  * @fires Identity#notLoggedin
+    //  * @fires Identity#sessionInit
+    //  * @fires Identity#statusChange
+    //  * @fires Identity#error
+    //  * @return {Promise<HasSessionSuccessResponse|HasSessionFailureResponse>}
+    //  */
+    // async hasSession(): Promise<Optional<UserSession>> {
+    //     if (isObject(this._currentSession)) {
+    //         return this._currentSession;
+    //     }
+    //     const _postProcess = (sessionData: UserSession) => {
+    //         if (sessionData.error) {
+    //             throw new SDKError('HasSession failed', sessionData.error);
+    //         }
+    //         this._maybeSetVarnishCookie(sessionData);
+    //         this._emitSessionEvent(this._session, sessionData);
+    //         this._session = sessionData;
+    //         return sessionData;
+    //     };
+    //     const _getSession = async () => {
+    //         if (this._enableSessionCaching) {
+    //             // Try to resolve from cache (it has a TTL)
+    //             const cachedSession = this.cache.get<UserSession>(HAS_SESSION_CACHE_KEY);
+    //             if (cachedSession) {
+    //                 return _postProcess(cachedSession);
+    //             }
+    //         }
+    //         let sessionData = null;
+    //         try {
+    //             sessionData = await this.brandSessionServiceClient!.get<UserSession>('/session');
+    //         } catch (err) {
+    //             if (err && err.code === 400 && this._enableSessionCaching) {
+    //                 const expiresIn = 1000 * (err.expiresIn || 300);
+    //                 this.cache.set(HAS_SESSION_CACHE_KEY, { error: err }, expiresIn);
+    //             }
+    //             throw err;
+    //         }
+    //
+    //         if (sessionData && this._enableSessionCaching) {
+    //             const expiresIn = 1000 * (sessionData.expiresIn || 300);
+    //             this.cache.set(HAS_SESSION_CACHE_KEY, sessionData, expiresIn);
+    //         }
+    //         return _postProcess(sessionData);
+    //     };
+    //     this._currentSession = _getSession()
+    //         .then(
+    //             sessionData => {
+    //                 this._currentSession = null;
+    //                 return sessionData;
+    //             },
+    //             err => {
+    //                 this.emit('error', err);
+    //                 this._currentSession = null;
+    //                 throw new SDKError('HasSession failed', err);
+    //             },
+    //         );
+    //
+    //     return this._currentSession;
+    // }
+
+    private _storedSession: Optional<UserSession>;
+
+    private async _fetchSession(): Promise<Optional<UserSession>> {
+        let session;
+
+        try {
+            session = await this.globalSessionServiceClient!.get<UserSession>('/session');
+        } catch (err: unknown) {
+            // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+            // @ts-expect-error
+            if (err && err.code === 400 && this._enableSessionCaching) {
+                // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+                // @ts-expect-error
+                const expiresIn = 1000 * (err.expiresIn || 300);
+                this.cache.set(HAS_SESSION_CACHE_KEY, { error: err }, expiresIn);
+            }
+            throw err;
         }
-        const _postProcess = (sessionData) => {
-            if (sessionData.error) {
-                throw new SDKError('HasSession failed', sessionData.error);
-            }
-            this._maybeSetVarnishCookie(sessionData);
-            this._emitSessionEvent(this._session, sessionData);
-            this._session = sessionData;
-            return sessionData;
-        };
-        const _getSession = async () => {
-            if (this._enableSessionCaching) {
-                // Try to resolve from cache (it has a TTL)
-                let cachedSession = this.cache.get(HAS_SESSION_CACHE_KEY);
-                if (cachedSession) {
-                    return _postProcess(cachedSession);
-                }
-            }
-            let sessionData = null;
-            try {
-                sessionData = await this._sessionService.get('/session');
-            } catch (err) {
-                if (err && err.code === 400 && this._enableSessionCaching) {
-                    const expiresIn = 1000 * (err.expiresIn || 300);
-                    this.cache.set(HAS_SESSION_CACHE_KEY, { error: err }, expiresIn);
-                }
-                throw err;
-            }
 
-            if (sessionData && this._enableSessionCaching) {
-                const expiresIn = 1000 * (sessionData.expiresIn || 300);
-                this.cache.set(HAS_SESSION_CACHE_KEY, sessionData, expiresIn);
-            }
-            return _postProcess(sessionData);
-        };
-        this._hasSessionInProgress = _getSession()
-            .then(
-                sessionData => {
-                    this._hasSessionInProgress = false;
-                    return sessionData;
-                },
-                err => {
-                    this.emit('error', err);
-                    this._hasSessionInProgress = false;
-                    throw new SDKError('HasSession failed', err);
-                },
-            );
+        return session;
+    }
 
-        return this._hasSessionInProgress;
+    async _hasSession(): Promise<Optional<UserSession>> {
+        // check if there is an existing session in memory
+        if (isObject(this._storedSession)) {
+            // if yes return it
+            return this._storedSession;
+        }
+
+        // cache lookup for any stored session data
+        const cachedSession = this.cache.get<UserSession>(HAS_SESSION_CACHE_KEY);
+        if (cachedSession && isNonEmptyObj(cachedSession)) {
+            this._storedSession = cachedSession;
+            this._maybeSetVarnishCookie(cachedSession);
+            this._emitSessionEvent(this._session, cachedSession);
+            return cachedSession;
+        }
+
+        // if cache fails, call global session service
+        const session = await this._fetchSession();
+
+        // update cache
+        if (session && isNonEmptyObj(session)) {
+            const expiresIn = 1000 * (session.expiresIn || 300);
+            this.cache.set(HAS_SESSION_CACHE_KEY, session, expiresIn);
+            this._maybeSetVarnishCookie(session);
+            this._emitSessionEvent(this._session, session);
+        }
+
+        this._storedSession = session;
+        return session;
     }
 
     /**
@@ -537,10 +705,10 @@ export class Identity extends EventEmitter {
      * effect that it might perform an auto-login on the user
      * @return {Promise<boolean>}
      */
-    async isLoggedIn() {
+    async isLoggedIn(): Promise<boolean> {
         try {
-            const data = await this.hasSession();
-            return 'result' in data;
+            const data = await this._hasSession();
+            return !!data && data.result;
         } catch (_) {
             return false;
         }
@@ -550,7 +718,7 @@ export class Identity extends EventEmitter {
      * Removes the cached user session.
      * @returns {void}
      */
-    clearCachedUserSession() {
+    clearCachedUserSession(): void {
         this.cache.delete(HAS_SESSION_CACHE_KEY);
     }
 
@@ -564,12 +732,12 @@ export class Identity extends EventEmitter {
      * @summary Check if the user is connected to the client_id
      * @return {Promise<boolean>}
      */
-    async isConnected() {
+    async isConnected(): Promise<boolean> {
         try {
-            const data = await this.hasSession();
+            const data = await this._hasSession();
             // if data is not an object, the promise will fail.
             // if the result is present, it's boolean. But if it's not, it should be assumed false.
-            return !!data.result;
+            return !!data && data.result;
         } catch (_) {
             return false;
         }
@@ -584,9 +752,9 @@ export class Identity extends EventEmitter {
      * @throws {SDKError} If we couldn't get the user
      * @return {Promise<HasSessionSuccessResponse>}
      */
-    async getUser() {
-        const user = await this.hasSession();
-        if (!user.result) {
+    async getUser(): Promise<UserSession> {
+        const user = await this._hasSession();
+        if (!user) {
             throw new SDKError('The user is not connected to this merchant');
         }
         return cloneDeep(user);
@@ -607,9 +775,9 @@ export class Identity extends EventEmitter {
      * @throws {SDKError} If the user isn't connected to the merchant
      * @return {Promise<string>} The `userId` field (not to be confused with the `uuid`)
      */
-    async getUserId() {
-        const user = await this.hasSession();
-        if (user.userId && user.result) {
+    async getUserId(): Promise<number> {
+        const user = await this._hasSession();
+        if (user && user.userId && user.result) {
             return user.userId;
         }
         throw new SDKError('The user is not connected to this merchant');
@@ -637,38 +805,38 @@ export class Identity extends EventEmitter {
      * @throws {SDKError} If the `externalParty` is not defined
      * @return {Promise<string>} The merchant- and 3rd-party-specific `externalId`
      */
-    async getExternalId(externalParty, optionalSuffix = '') {
-        const { pairId } = await this.hasSession();
+    async getExternalId(externalParty: string, optionalSuffix: string = '') :Promise<string> {
+        const session = await this._hasSession();
 
-        if (!pairId)
+        if (!session)
             throw new SDKError('pairId missing in user session!');
 
         if (!externalParty || externalParty.length === 0) {
             throw new SDKError('externalParty cannot be empty');
         }
-        const _toHexDigest = (hashBuffer) =>{
+        const _toHexDigest = (hashBuffer: ArrayBuffer) => {
             // convert buffer to byte array
             const hashArray = Array.from(new Uint8Array(hashBuffer));
             // convert bytes to hex string
             return hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
         };
 
-        const _getSha256Digest = (data) => {
+        const _getSha256Digest = (data: Uint8Array) => {
             return crypto.subtle.digest('SHA-256', data);
         };
 
-        const _hashMessage = async (message) => {
+        const _hashMessage = async (message: string) => {
             const msgUint8 = new TextEncoder().encode(message);
             return _getSha256Digest(msgUint8).then( (it) => _toHexDigest(it));
         };
 
-        const _constructMessage = (pairId, externalParty, optionalSuffix) => {
+        const _constructMessage = (pairId: string, _externalParty: string, _optionalSuffix: string): string => {
             return optionalSuffix
-                ? `${pairId}:${externalParty}:${optionalSuffix}`
-                : `${pairId}:${externalParty}`;
+                ? `${pairId}:${_externalParty}:${_optionalSuffix}`
+                : `${pairId}:${_externalParty}`;
         };
 
-        return _hashMessage(_constructMessage(pairId, externalParty, optionalSuffix));
+        return _hashMessage(_constructMessage(session.pairId, externalParty, optionalSuffix));
     }
 
     /**
@@ -680,9 +848,9 @@ export class Identity extends EventEmitter {
      * @returns {Promise<string>}
      */
     async getUserSDRN() {
-        const { sdrn } = await this.hasSession();
-        if (sdrn) {
-            return sdrn;
+        const session = await this._hasSession();
+        if (session) {
+            return session.sdrn;
         }
         throw new SDKError('Failed to get SDRN from user session');
     }
@@ -701,9 +869,9 @@ export class Identity extends EventEmitter {
      * @return {Promise<string>} The `uuid` field (not to be confused with the `userId`)
      */
     async getUserUuid() {
-        const user = await this.hasSession();
-        if (user.uuid && user.result) {
-            return user.uuid;
+        const session = await this._hasSession();
+        if (session && session.uuid && session.result) {
+            return session.uuid;
         }
         throw new SDKError('The user is not connected to this merchant');
     }
@@ -718,9 +886,9 @@ export class Identity extends EventEmitter {
      * the current browser.
      * @return {Promise<SimplifiedLoginData|null>}
      */
-    async getUserContextData() {
+    async getUserContextData(): Promise<Optional<SimplifiedLoginData>> {
         try {
-            return await this._globalSessionService.get('/user-context');
+            return await this.globalSessionServiceClient!.get('/user-context');
         } catch (_) {
             return null;
         }
@@ -761,7 +929,7 @@ export class Identity extends EventEmitter {
         locale = '',
         oneStepLogin = false,
         prompt = 'select_account',
-    }) {
+    }: LoginOpts): Optional<Window> {
         this._closePopup();
         this.cache.delete(HAS_SESSION_CACHE_KEY);
         const url = this.loginUrl({
@@ -779,10 +947,10 @@ export class Identity extends EventEmitter {
         });
 
         if (preferPopup) {
-            this.popup =
+            this.popupWindowRef =
                 popup.open(this.window, url, 'Schibsted account', { width: 360, height: 570 });
-            if (this.popup) {
-                return this.popup;
+            if (this.popupWindowRef) {
+                return this.popupWindowRef;
             }
         }
         this.window.location.href = url;
@@ -796,10 +964,10 @@ export class Identity extends EventEmitter {
      * effect that it might perform an auto-login on the user
      * @return {Promise<string|null>} - The sp_id string or null (if the server didn't return it)
      */
-    async getSpId() {
+    async getSpId(): Promise<Optional<string>> {
         try {
-            const user = await this.hasSession();
-            return user.sp_id || null;
+            const session = await this._hasSession();
+            return (session && session.sp_id) || null;
         } catch (_) {
             return null;
         }
@@ -846,19 +1014,19 @@ export class Identity extends EventEmitter {
         locale = '',
         oneStepLogin = false,
         prompt = 'select_account',
-    }) {
-        if (typeof arguments[0] !== 'object') {
-            // backward compatibility
-            state = arguments[0];
-            acrValues = arguments[1];
-            scope = arguments[2] || scope;
-            redirectUri = arguments[3] || redirectUri;
-            loginHint = arguments[4] || loginHint;
-            tag = arguments[5] || tag;
-            teaser = arguments[6] || teaser;
-            maxAge = isNaN(arguments[7]) ? maxAge : arguments[7];
-        }
-        const isValidAcrValue = (acrValue) => isStrIn(acrValue, ['password', 'otp', 'sms', 'eid-no', 'eid-se', 'eid-fi', 'eid'], true);
+    }: Omit<LoginOpts, 'preferPopup'>): string {
+        // if (typeof arguments[0] !== 'object') {
+        //     // backward compatibility
+        //     state = arguments[0];
+        //     acrValues = arguments[1];
+        //     scope = arguments[2] || scope;
+        //     redirectUri = arguments[3] || redirectUri;
+        //     loginHint = arguments[4] || loginHint;
+        //     tag = arguments[5] || tag;
+        //     teaser = arguments[6] || teaser;
+        //     maxAge = isNaN(arguments[7]) ? maxAge : arguments[7];
+        // }
+        const isValidAcrValue = (acrValue: string) => isStrIn(acrValue, ['password', 'otp', 'sms', 'eid-no', 'eid-se', 'eid-fi', 'eid'], true);
         assert(!acrValues || isStrIn(acrValues, ['', 'otp-email'], true) || acrValues.split(' ').every(isValidAcrValue),
             `The acrValues parameter is not acceptable: ${acrValues}`);
         assert(isUrl(redirectUri),
@@ -866,7 +1034,7 @@ export class Identity extends EventEmitter {
         assert(isNonEmptyString(state),
             `the state parameter should be a non empty string but it is ${state}`);
 
-        return this._oauthService.makeUrl('oauth/authorize', {
+        return this.oauthServiceClient!.makeUrl('oauth/authorize', {
             response_type: 'code',
             redirect_uri: redirectUri,
             scope,
@@ -887,10 +1055,10 @@ export class Identity extends EventEmitter {
      * @param {string} [redirectUri=this.redirectUri]
      * @return {string} url
      */
-    logoutUrl(redirectUri = this.redirectUri) {
+    logoutUrl(redirectUri = this.redirectUri): string {
         assert(isUrl(redirectUri), 'logoutUrl(): redirectUri is invalid');
         const params = { redirect_uri: redirectUri };
-        return this._sessionService.makeUrl('logout', params);
+        return this.brandSessionServiceClient!.makeUrl('logout', params);
     }
 
     /**
@@ -898,8 +1066,8 @@ export class Identity extends EventEmitter {
      * @param {string} [redirectUri=this.redirectUri]
      * @return {string}
      */
-    accountUrl(redirectUri = this.redirectUri) {
-        return this._spid.makeUrl('profile-pages', {
+    accountUrl(redirectUri = this.redirectUri): string {
+        return this.spidClient!.makeUrl('profile-pages', {
             response_type: 'code',
             redirect_uri: redirectUri,
         });
@@ -910,8 +1078,8 @@ export class Identity extends EventEmitter {
      * @param {string} [redirectUri=this.redirectUri]
      * @return {string}
      */
-    phonesUrl(redirectUri = this.redirectUri) {
-        return this._spid.makeUrl('profile-pages/about-you/phone', {
+    phonesUrl(redirectUri = this.redirectUri): string {
+        return this.spidClient!.makeUrl('profile-pages/about-you/phone', {
             response_type: 'code',
             redirect_uri: redirectUri,
         });
@@ -930,17 +1098,17 @@ export class Identity extends EventEmitter {
      * @fires Identity#simplifiedLoginCancelled
      * @return {Promise<boolean|SDKError>} - will resolve to true if widget will be display. Otherwise, will throw SDKError
      */
-    async showSimplifiedLoginWidget(loginParams, options) {
+    async showSimplifiedLoginWidget(loginParams: LoginOpts, options: SimplifiedLoginOpts): Promise<boolean> {
         // getUserContextData doesn't throw exception
         const userData = await this.getUserContextData();
 
-        const queryParams = { client_id: this.clientId };
+        const queryParams: GenericObject = { client_id: this.clientId };
         if (options && options.encoding) {
             queryParams.encoding = options.encoding;
         }
-        const widgetUrl = this._bffService.makeUrl('simplified-login-widget', queryParams, false);
+        const widgetUrl = this.bffClient!.makeUrl('simplified-login-widget', queryParams, false);
 
-        const prepareLoginParams = async (loginPrams) => {
+        const prepareLoginParams = async (loginPrams: LoginOpts): Promise<LoginOpts> => {
             if (typeof loginPrams.state === 'function') {
                 loginPrams.state = await loginPrams.state();
             }
@@ -955,13 +1123,15 @@ export class Identity extends EventEmitter {
                     return reject(new SDKError('Missing user data'));
                 }
 
-                const initialParams = {
+                const initialParams: GenericObject<string | Function> = {
                     displayText: userData.display_text,
                     env: this.env,
                     clientName: userData.client_name,
                     clientId: this.clientId,
                     providerId: userData.provider_id,
                     windowWidth: () => window.innerWidth,
+                    // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+                    // @ts-expect-error
                     windowOnResize: (f) => {
                         window.onresize = f;
                     },
@@ -1004,13 +1174,13 @@ export class Identity extends EventEmitter {
                 simplifiedLoginWidget.type = 'text/javascript';
                 simplifiedLoginWidget.src = widgetUrl;
                 simplifiedLoginWidget.onload = () => {
-                    window.openSimplifiedLoginWidget(initialParams, loginHandler, loginNotYouHandler, initHandler, cancelLoginHandler);
+                    window.openSimplifiedLoginWidget!(initialParams, loginHandler, loginNotYouHandler, initHandler, cancelLoginHandler);
                     resolve(true);
                 };
                 simplifiedLoginWidget.onerror = () => {
                     reject(new SDKError('Error when loading simplified login widget content'));
                 };
-                document.getElementsByTagName('body')[0].appendChild(simplifiedLoginWidget);
+                document.getElementsByTagName('body')[0]!.appendChild(simplifiedLoginWidget);
             });
     }
 }

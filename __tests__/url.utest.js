@@ -6,7 +6,7 @@
 
 import { URL } from 'whatwg-url';
 import { urlMapper } from '../src/utils/url.ts';
-import RESTClient from '../src/clients/RESTClient.js';
+import RESTClient from '../src/clients/RESTClient.ts';
 
 describe('url', () => {
 

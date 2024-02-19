@@ -4,7 +4,7 @@
 
 'use strict';
 
-import SDKError from '../src/utils/SDKError.js';
+import SDKError from '../src/utils/SDKError.ts';
 
 describe('SDKError', () => {
     test('Should be able to stringify an error', () => {

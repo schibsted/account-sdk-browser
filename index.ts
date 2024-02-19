@@ -4,6 +4,6 @@
 
 'use strict';
 
-export * from './identity.js';
-export * from './monetization.js';
-export * from './payment.js';
+export { Identity } from './src/identity';
+export { Monetization } from './src/monetization';
+export { Payment } from './src/payment';

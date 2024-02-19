@@ -1,6 +1,6 @@
 import { URL } from 'url';
 import { urlMapper } from '../utils/url.ts';
-import { cloneDefined } from '../utils/object.js';
+import { cloneDefined } from '../utils/object.ts';
 import { Fixtures } from '../../__tests__/utils.js';
 
 const goFn = () => jest.fn().mockImplementation(async ({ pathname }) => {

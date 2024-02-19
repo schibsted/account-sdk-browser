@@ -4,7 +4,7 @@
 
 'use strict';
 
-import { Payment } from '../payment.js';
+import { Payment } from '../payment.ts';
 import { compareUrls } from './utils.js';
 
 describe('Payment', () => {

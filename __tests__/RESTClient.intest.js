@@ -4,8 +4,8 @@
 
 'use strict';
 
-import RESTClient from '../src/clients/RESTClient.js';
-import config from '../src/config/config.js';
+import RESTClient from '../src/clients/RESTClient.ts';
+import config from '../src/config/config.ts';
 
 describe('RESTClient', () => {
 

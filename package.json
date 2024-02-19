@@ -2,10 +2,13 @@
   "name": "@schibsted/account-sdk-browser",
   "version": "4.8.7",
   "description": "Schibsted account SDK for browsers",
-  "main": "index.js",
+  "main": "dist/index.js",
+  "files": [
+    "dist"
+  ],
   "type": "module",
   "scripts": {
-    "build": "webpack --mode production",
+    "build": "tsc --build --verbose",
     "clean": "rimraf .cache coverage dist docs",
     "docs": "rimraf docs && jsdoc -c ./jsdoc.conf.json --verbose",
     "lint": "eslint .",
@@ -19,6 +22,7 @@
   "author": "",
   "license": "MIT",
   "dependencies": {
+    "eventemitter3": "^5.0.1",
     "tiny-emitter": "^2.1.0"
   },
   "devDependencies": {

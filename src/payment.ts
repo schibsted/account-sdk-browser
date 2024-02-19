@@ -8,7 +8,7 @@ import { assert, isNonEmptyString, isUrl, isStr } from './utils/validate';
 import { urlMapper } from './utils/url';
 import { ENDPOINTS } from './config/config';
 import * as popupWindowRef from './utils/popup';
-import RESTClient from './clients/RESTClient.js';
+import RESTClient from './clients/RESTClient';
 import { Environment, Optional } from './utils/types';
 
 interface PaymentProps {
@@ -69,7 +69,7 @@ export class Payment {
     /**
      * Set SPiD server URL
      * @private
-     * @param {string} env - real URL or 'PRE' style key
+     * @param {string} env - 'PRE' style key
      * @returns {void}
      */
     private _setSpidServerUrl(env: Environment) {

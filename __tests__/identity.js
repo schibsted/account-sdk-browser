@@ -4,9 +4,9 @@
 
 'use strict';
 
-import SDKError from '../src/utils/SDKError.js';
+import SDKError from '../src/utils/SDKError.ts';
 
-import Identity from '../identity.js';
+import Identity from '../identity.ts';
 import { compareUrls, Fixtures } from './utils.js';
 import { URL } from 'url';
 import { URL as u } from 'whatwg-url';
