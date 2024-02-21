@@ -28,6 +28,13 @@ describe('Identity', () => {
         clientId: 'foo',
         redirectUri: 'http://foo.com',
         sessionDomain: 'http://id.foo.com',
+        callbackBeforeRedirect: jest.fn(),
+        window:{
+            location:{
+                href:'http://test.no',
+                origin: 'http://foo.bar'
+            },
+        }
     };
 
     beforeAll(() => {
@@ -464,7 +471,7 @@ describe('Identity', () => {
 
             expect(getSessionMock).toHaveBeenCalledTimes(1)
             expect(getSessionMock).toHaveBeenCalledWith(
-                expect.stringMatching(/^http:\/\/id\.foo\.com\/session/),
+                expect.stringMatching(/^http:\/\/id\.foo\.com\/v2\/session/),
                 {"credentials": "include", "headers": {}, "method": "get"}
             )
         });
@@ -474,8 +481,11 @@ describe('Identity', () => {
 
             await expect(identity.hasSession()).rejects.toMatchObject({ message: 'HasSession failed' });
 
-            expect(identity._sessionService.fetch.mock.calls.length).toBe(1);
-            expect(identity._sessionService.fetch.mock.calls[0][0]).toMatch(/^http:\/\/id.foo.com\/session/);
+            expect(getSessionMock).toHaveBeenCalledTimes(1)
+            expect(getSessionMock).toHaveBeenCalledWith(
+                expect.stringMatching(/^http:\/\/id\.foo\.com\/v2\/session/),
+                {"credentials": "include", "headers": {}, "method": "get"}
+            )
         });
 
         test('should terminate "chain" if session-service call succeeds', async () => {
@@ -483,8 +493,11 @@ describe('Identity', () => {
 
             await expect(identity.hasSession()).resolves.toMatchObject({});
 
-            expect(identity._sessionService.fetch.mock.calls.length).toBe(1);
-            expect(identity._sessionService.fetch.mock.calls[0][0]).toMatch(/^http:\/\/id.foo.com\/session/);
+            expect(getSessionMock).toHaveBeenCalledTimes(1)
+            expect(getSessionMock).toHaveBeenCalledWith(
+                expect.stringMatching(/^http:\/\/id\.foo\.com\/v2\/session/),
+                {"credentials": "include", "headers": {}, "method": "get"}
+            )
         });
 
         test('should throw en SDK error when get /session returned an error', async () => {
@@ -522,8 +535,11 @@ describe('Identity', () => {
 
             await expect(identity.hasSession()).rejects.toMatchObject({ message: 'HasSession failed' });
 
-            expect(identity._sessionService.fetch.mock.calls.length).toBe(1);
-            expect(identity._sessionService.fetch.mock.calls[0][0]).toMatch(/^http:\/\/id.foo.com\/session/);
+            expect(getSessionMock).toHaveBeenCalledTimes(1)
+            expect(getSessionMock).toHaveBeenCalledWith(
+                expect.stringMatching(/^http:\/\/id\.foo\.com\/v2\/session/),
+                {"credentials": "include", "headers": {}, "method": "get"}
+            )
         });
 
         describe('cache', () => {
@@ -533,14 +549,14 @@ describe('Identity', () => {
                 await identity.hasSession();
                 await identity.hasSession();
 
-                expect(identity._sessionService.fetch.mock.calls.length).toBe(2);
+                expect(getSessionMock).toHaveBeenCalledTimes(2)
             });
 
             test('should use cached value on subsequent calls by default', async () => {
                 await identity.hasSession();
                 await identity.hasSession();
 
-                expect(identity._sessionService.fetch.mock.calls.length).toBe(1);
+                expect(getSessionMock).toHaveBeenCalledTimes(1)
             });
 
             test('cache shouldn\'t be updated when hasSession returns data from cache, but should be if cache expired', async () => {
@@ -573,9 +589,32 @@ describe('Identity', () => {
                 // the cached data should be removed so the second call should result in a new request
                 await identity.hasSession();
 
-                expect(identity._sessionService.fetch.mock.calls.length).toBe(2);
+                expect(getSessionMock).toHaveBeenCalledTimes(2)
             });
         });
+
+        describe('session refresh full page redirect', ()=>{
+            test('should do redirect when session endpoint respond with redirectURL only', async () => {
+                mockSessionOkResponse(Fixtures.sessionNeedsToBeRefreshedResponse)
+
+                await identity.hasSession();
+
+                expect(defaultOptions.callbackBeforeRedirect).toHaveBeenCalled();
+
+                expect(defaultOptions.window.location.href).toBe(
+                    [
+                        defaultOptions.sessionDomain,
+                        Fixtures.sessionNeedsToBeRefreshedResponse.redirectURL,
+                        '?client_sdrn=sdrn%3Aschibsted.com%3Aclient%3A',
+                        defaultOptions.clientId,
+                        '&redirect_uri=',
+                        encodeURIComponent(defaultOptions.redirectUri),
+                        '&sdk_version=',
+                        version
+                    ].join('')
+                );
+            });
+        })
     });
 
     describe('isLoggedIn', () => {

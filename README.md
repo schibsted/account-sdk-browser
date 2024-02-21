@@ -38,6 +38,10 @@ domain, your local domain should be local.sdk-example.com.
 If this is for a new site and there is no sessionDomain yet, contact
 [support](mailto:schibstedaccount@schibsted.com) to initiate the process.
 
+## Migration to 5.x.x (ITP)
+
+Follow the [migration guide](./MIGRATION.md).
+
 ## Simplified login widget
 
 1. Ensure that your site has no site specific terms and conditions in the Schibsted account login flow.

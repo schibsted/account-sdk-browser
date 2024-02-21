@@ -160,9 +160,18 @@ export class Identity extends EventEmitter {
      * @param {function} [options.log] - A function that receives debug log information. If not set,
      * no logging will be done
      * @param {object} [options.window] - window object
+     * @param {function} [options.callbackBeforeRedirect] - callback triggered before session refresh redirect happen
      * @throws {SDKError} - If any of options are invalid
      */
-    constructor({ clientId, redirectUri, sessionDomain, env = 'PRE', log, window = globalWindow() }) {
+    constructor({
+        clientId,
+        redirectUri,
+        sessionDomain,
+        env = 'PRE',
+        log,
+        window = globalWindow(),
+        callbackBeforeRedirect = ()=>{}
+    }) {
         super();
         assert(isNonEmptyString(clientId), 'clientId parameter is required');
         assert(isObject(window), 'The reference to window is missing');
@@ -177,6 +186,7 @@ export class Identity extends EventEmitter {
         this.redirectUri = redirectUri;
         this.env = env;
         this.log = log;
+        this.callbackBeforeRedirect = callbackBeforeRedirect;
         this._sessionDomain = sessionDomain;
 
         // Internal hack: set to false to always refresh from hassession
@@ -483,6 +493,7 @@ export class Identity extends EventEmitter {
         if (this._hasSessionInProgress) {
             return this._hasSessionInProgress;
         }
+
         const _postProcess = (sessionData) => {
             if (sessionData.error) {
                 throw new SDKError('HasSession failed', sessionData.error);
@@ -492,6 +503,14 @@ export class Identity extends EventEmitter {
             this._session = sessionData;
             return sessionData;
         };
+
+        const _checkRedirectionNeed = (sessionData={})=>{
+            const sessionDataKeys = Object.keys(sessionData);
+
+            return sessionDataKeys.length === 1 &&
+                sessionDataKeys[0] === 'redirectURL';
+        }
+
         const _getSession = async () => {
             if (this._enableSessionCaching) {
                 // Try to resolve from cache (it has a TTL)
@@ -502,7 +521,7 @@ export class Identity extends EventEmitter {
             }
             let sessionData = null;
             try {
-                sessionData = await this._sessionService.get('/session');
+                sessionData = await this._sessionService.get('/v2/session');
             } catch (err) {
                 if (err && err.code === 400 && this._enableSessionCaching) {
                     const expiresIn = 1000 * (err.expiresIn || 300);
@@ -511,10 +530,22 @@ export class Identity extends EventEmitter {
                 throw err;
             }
 
-            if (sessionData && this._enableSessionCaching) {
-                const expiresIn = 1000 * (sessionData.expiresIn || 300);
-                this.cache.set(HAS_SESSION_CACHE_KEY, sessionData, expiresIn);
+            if(sessionData){
+                // for expiring session and safari browser do full page redirect to gain new session
+                if(_checkRedirectionNeed(sessionData)){
+                    await this.callbackBeforeRedirect();
+
+                    this.window.location.href = this._sessionService.makeUrl(sessionData.redirectURL);
+
+                    return;
+                }
+
+                if (this._enableSessionCaching) {
+                    const expiresIn = 1000 * (sessionData.expiresIn || 300);
+                    this.cache.set(HAS_SESSION_CACHE_KEY, sessionData, expiresIn);
+                }
             }
+
             return _postProcess(sessionData);
         };
         this._hasSessionInProgress = _getSession()
@@ -632,10 +663,10 @@ export class Identity extends EventEmitter {
      * meaning the same user's ID will differ between merchants.
      * Additionally, this identifier is bound to the external party provided as argument.
      *
-     * @description This function calls {@link Identity#hasSession} internally and thus has the side
-     * effect that it might perform an auto-login on the user
      * @param {string} externalParty
      * @param {string|null} optionalSuffix
+     * @description This function calls {@link Identity#hasSession} internally and thus has the side
+     * effect that it might perform an auto-login on the user
      * @throws {SDKError} If the `pairId` is missing in user session.
      * @throws {SDKError} If the `externalParty` is not defined
      * @return {Promise<string>} The merchant- and 3rd-party-specific `externalId`
