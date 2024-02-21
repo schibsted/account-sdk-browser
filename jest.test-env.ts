@@ -1,6 +1,5 @@
 import { TextEncoder, TextDecoder } from 'util';
-import pkg from 'jest-environment-jsdom';
-const { default: JSDOMEnvironment } = pkg;
+import JSDOMEnvironment from 'jest-environment-jsdom';
 
 /**
  * Custom Jest env with missing definitions
@@ -8,7 +7,8 @@ const { default: JSDOMEnvironment } = pkg;
  */
 export default class CustomJsDomEnv extends JSDOMEnvironment {
     // eslint-disable-next-line require-jsdoc
-    constructor(...args) {
+    constructor(...args: unknown[]) {
+        //@ts-ignore
         const { global } = super(...args);
         if (!global.TextEncoder)
             global.TextEncoder = TextEncoder;
