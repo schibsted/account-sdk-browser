@@ -4,7 +4,7 @@
 
 'use strict';
 
-import Cache from '../src/utils/cache.ts';
+import Cache from '../src/utils/cache';
 
 const webStorageMock = () => {
     const mock = {
