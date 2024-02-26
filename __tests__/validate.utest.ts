@@ -2,8 +2,6 @@
  * See LICENSE.md in the project root.
  */
 
-// @ts-nocheck
-
 'use strict';
 
 import { isStr, isStrIn, isNonEmptyString, isObject, isNonEmptyObj } from '../src/utils/validate';
@@ -13,6 +11,7 @@ describe('validate', () => {
     describe('isStr()', () => {
 
         test('returns false for non strings', () => {
+            // @ts-expect-error
             expect(isStr()).toBe(false);
             expect(isStr(0)).toBe(false);
             expect(isStr(1)).toBe(false);
@@ -26,8 +25,7 @@ describe('validate', () => {
             'returns false for empty string but when min length is more than zero',
             () => {
                 expect(isNonEmptyString('')).toBe(false);
-                expect(isStr('') && ''.length >= 13).toBe(false);
-            }
+            },
         );
 
         test('returns true for non-empty strings', () => {
@@ -39,18 +37,26 @@ describe('validate', () => {
     describe('isStrIn()', () => {
 
         test('returns false for non strings as value', () => {
+            // @ts-expect-error
             expect(isStrIn()).toBe(false);
+            // @ts-expect-error
             expect(isStrIn(0)).toBe(false);
+            // @ts-expect-error
             expect(isStrIn(1)).toBe(false);
+            // @ts-expect-error
             expect(isStrIn(null)).toBe(false);
+            // @ts-expect-error
             expect(isStrIn({})).toBe(false);
+            // @ts-expect-error
             expect(isStrIn([])).toBe(false);
+            // @ts-expect-error
             expect(isStrIn(true)).toBe(false);
         });
 
         test('returns false when options are empty', () => {
             expect(isStrIn('hi', [])).toBe(false);
             expect(isStrIn('', [])).toBe(false);
+            // @ts-expect-error
             expect(isStrIn(undefined, [])).toBe(false);
         });
 
@@ -81,6 +87,7 @@ describe('validate', () => {
 
     describe('isObject()', () => {
         test('returns false for non-object values', () => {
+            // @ts-expect-error
             expect(isObject()).toBe(false);
             expect(isObject(1)).toBe(false);
             expect(isObject(false)).toBe(false);
@@ -104,6 +111,7 @@ describe('validate', () => {
     describe('isNonEmptyObj()', () => {
 
         test('returns false for non-object values', () => {
+            // @ts-expect-error
             expect(isNonEmptyObj()).toBe(false);
             expect(isNonEmptyObj(1)).toBe(false);
             expect(isNonEmptyObj(false)).toBe(false);
