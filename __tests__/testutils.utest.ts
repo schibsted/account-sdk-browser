@@ -2,8 +2,6 @@
  * See LICENSE.md in the project root.
  */
 
-// @ts-nocheck
-
 import { compareUrls } from './utils';
 
 describe('testutils', () => {
