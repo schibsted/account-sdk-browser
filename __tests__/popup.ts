@@ -1,6 +1,8 @@
 'use strict';
 
-import * as popup from '../src/utils/popup.ts';
+// @ts-nocheck
+
+import * as popup from '../src/utils/popup';
 
 describe('Popup — open', () => {
     const defaultFeatures = 'scrollbars=yes,location=yes,status=no,menubar=no,toolbar=no,resizable=yes';

@@ -2,10 +2,12 @@
  * See LICENSE.md in the project root.
  */
 
+// @ts-nocheck
+
 'use strict';
 
-import { Payment } from '../payment.ts';
-import { compareUrls } from './utils.js';
+import { Payment } from '../src/payment';
+import { compareUrls } from './utils';
 
 describe('Payment', () => {
 

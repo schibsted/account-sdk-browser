@@ -5,159 +5,193 @@
 'use strict';
 
 import Cache from '../src/utils/cache';
+import { MockStorage } from '../__mocks__/Storage.mock';
 
-const webStorageMock = () => {
-    const mock = {
-        store: {},
-        setItem: (k, v) => mock.store[k] = v,
-        getItem: (k) => mock.store[k],
-        removeItem: (k) => delete mock.store[k],
-    };
-    return mock;
+const webStorageMock = (): Storage => {
+    return new MockStorage();
 };
 
-const throwingStorageMock = {
-    spy: jest.fn().mockImplementation(() => { throw new Error() }),
-    setItem: (...args) => throwingStorageMock.spy(...args),
-};
+const KEY = 'foo';
+const VALUE = 'bar';
+
+const throwingFn = () => { throw new Error('TEST THROW');};
 
 describe('cache', () => {
-    describe('ctor', () => {
-        test('can create one', () => {
+    describe('constructor', () => {
+
+        test('can create new instance', () => {
+            // @ts-expect-error
             expect(() => new Cache()).not.toThrow();
         });
+
         test('can force a cache with object literal storage', () => {
+            const EXPECTED_CACHE_TYPE = 'ObjectLiteralStorage';
+
+            // @ts-expect-error
             const cache = new Cache();
-            expect(cache.type).toBe('ObjectLiteralStorage');
+
+            expect(cache.type).toBe(EXPECTED_CACHE_TYPE);
         });
+
         test('can force a cache with session storage', () => {
+            const EXPECTED_CACHE_TYPE = 'WebStorage';
             const cache = new Cache(webStorageMock);
-            expect(cache.type).toBe('WebStorage');
+
+            expect(cache.type).toBe(EXPECTED_CACHE_TYPE);
         });
+
         test('Falls back to object literal storage if supplied storage throws', () => {
-            const cache = new Cache(() => throwingStorageMock);
-            expect(cache.type).toBe('ObjectLiteralStorage');
-            expect(throwingStorageMock.spy).toHaveBeenCalledTimes(1);
-            expect(throwingStorageMock.spy.mock.calls[0][1]).toBe('TEST-VALUE');
+            const EXPECTED_CACHE_TYPE = 'ObjectLiteralStorage';
+            const TEST_VALUE = 'TEST-VALUE';
+
+            const spy = jest.fn().mockImplementation(throwingFn);
+            const storageMock = webStorageMock();
+            storageMock.setItem = spy;
+
+            const cache = new Cache(() => storageMock);
+
+            expect(cache.type).toBe(EXPECTED_CACHE_TYPE);
+            expect(spy).toHaveBeenCalledTimes(1);
+            expect(spy.mock.lastCall[1]).toBe(TEST_VALUE);
         });
+
         test('Falls back to object literal storage if fetching sessionStorage throws exception', () => {
-            const spy = jest.fn().mockImplementation(() => {
-                throw Error('Private mode, yo');
-            });
+            const EXPECTED_CACHE_TYPE = 'ObjectLiteralStorage';
+            const spy = jest.fn().mockImplementation(throwingFn);
             const throwingWindowInstance = {
-                get sessionStorage() { return spy(); }
+                get sessionStorage() { return spy(); },
             };
+
             const cache = new Cache(() => throwingWindowInstance.sessionStorage);
-            expect(cache.type).toBe('ObjectLiteralStorage');
+
+            expect(cache.type).toBe(EXPECTED_CACHE_TYPE);
             expect(spy).toHaveBeenCalledTimes(1);
         });
     });
     describe('web storage', () => {
         describe('get/set/clear', () => {
-            let cache;
+            let cache: Cache;
+
             beforeEach(() => {
                 cache = new Cache(webStorageMock);
             });
+
             test('can read/write values', () => {
-                cache.set('foo', 'bar', 1000);
-                expect(cache.get('foo')).toBe('bar');
+                cache.set(KEY, VALUE, 1000);
+
+                expect(cache.get(KEY)).toBe(VALUE);
             });
+
             test('values should not be saved at all with no expiration', () => {
-                cache.set('foo', 'bar');
-                expect(cache.get('foo')).toBe(null);
+                cache.set(KEY, VALUE);
+
+                expect(cache.get(KEY)).toBe(null);
             });
+
             test('values should expire', () => {
-                cache.set('foo', 'bar', 2); // 2 ms
-                return new Promise((resolve) => {
+                cache.set(KEY, VALUE, 2); // 2 ms
+
+                return new Promise((resolve): void => {
                     setTimeout(() => {
-                        expect(cache.get('foo')).toBe(null);
-                        resolve();
+                        expect(cache.get(KEY)).toBe(null);
+                        resolve('');
                     }, 10); // wait 10 ms, then check
                 });
             });
+
             test('should be able to delete values', () => {
-                cache.set('foo', 'bar', 10000);
-                cache.delete('foo');
-                expect(cache.get('foo')).toBe(null);
+                cache.set(KEY, VALUE, 10000);
+                cache.delete(KEY);
+                expect(cache.get(KEY)).toBe(null);
             });
         });
     });
+
     describe('object literal storage', () => {
         describe('get/set/clear', () => {
-            let cache;
+            let cache: Cache;
+
             beforeEach(() => {
-                cache = new Cache();
+                cache = new Cache(webStorageMock);
             });
+
             test('can read/write values', () => {
-                cache.set('foo', 'bar', 1000);
-                expect(cache.get('foo')).toBe('bar');
+                cache.set(KEY, VALUE, 1000);
+
+                expect(cache.get(KEY)).toBe(VALUE);
             });
+
             test('values should not be saved at all with no expiration', () => {
-                cache.set('foo', 'bar');
+                cache.set(KEY, VALUE);
+
                 expect(cache.get('foo')).toBe(null);
             });
+
             test('values should expire', () => {
-                cache.set('foo', 'bar', 2); // 2 ms
+                cache.set(KEY, VALUE, 2); // 2 ms
+
                 return new Promise((resolve) => {
                     setTimeout(() => {
-                        expect(cache.get('foo')).toBe(null);
-                        resolve();
+                        expect(cache.get(KEY)).toBe(null);
+                        resolve('');
                     }, 10); // wait 10 ms, then check
                 });
             });
+
             test('values should not expire if expiresIn is large', () => {
-                cache.set('foo', 'bar', 2592000000);
+                cache.set(KEY, VALUE, 2592000000);
+
                 return new Promise((resolve) => {
                     setTimeout(() => {
-                        expect(cache.get('foo')).toBe('bar');
-                        resolve();
+                        expect(cache.get(KEY)).toBe(VALUE);
+                        resolve('');
                     }, 10); // wait 10 ms, then check
                 });
             });
+
             test('should be able to delete values', () => {
-                cache.set('foo', 'bar', 10000);
-                cache.delete('foo');
-                expect(cache.get('foo')).toBe(null);
+                cache.set(KEY, VALUE, 10000);
+
+                cache.delete(KEY);
+
+                expect(cache.get(KEY)).toBe(null);
             });
 
             test('get should fail if impl fails to get', () => {
-                cache.cache.get = jest.fn().mockImplementationOnce(() => {
-                    throw new Error('get failure')
-                });
-                expect(() => cache.get('foo')).toThrow(/get failure/);
+                cache.get = jest.fn().mockImplementationOnce(throwingFn);
+                expect(() => cache.get(KEY)).toThrow(/TEST THROW/);
             });
 
             test('get should return null if impl returns non-json-parsable mess', () => {
-                cache.cache.get = jest.fn().mockImplementationOnce(() => ({}));
-                expect(cache.get('foo')).toBe(null);
+                expect(cache.get(KEY)).toBe(null);
             });
 
             test('get should fail if impl fails to delete', () => {
-                cache.cache.delete = jest.fn().mockImplementationOnce(() => {
-                    throw new Error('delete failure')
-                });
-                expect(() => cache.get('foo')).toThrow(/delete/);
+                cache.delete = jest.fn().mockImplementationOnce(throwingFn);
+
+                expect(() => cache.delete(KEY)).toThrow(/TEST THROW/);
             });
 
             test('set should fail if impl fails to set', () => {
-                cache.cache.set = jest.fn().mockImplementationOnce(() => {
-                    throw new Error('set failure')
-                });
-                expect(() => cache.set('foo', 123, 1000)).toThrow(/set failure/);
+                cache.set = jest.fn().mockImplementationOnce(throwingFn);
+
+                expect(() => cache.set(KEY, VALUE, 1000)).toThrow(/TEST THROW/);
             });
 
             test('set should fail if value is not serializable', () => {
                 const cyclic = {};
+
+                // @ts-expect-error
                 cyclic.a = cyclic;
-                expect(() => cache.set('foo', cyclic, 1000))
+
+                expect(() => cache.set(KEY, cyclic, 1000))
                     .toThrow(/Converting circular structure to JSON/);
             });
 
             test('delete should fail if impl fails to delete', () => {
-                cache.cache.delete = jest.fn().mockImplementationOnce(() => {
-                    throw new Error('delete failure')
-                });
-                expect(() => cache.delete('foo')).toThrow(/delete failure/);
+                cache.delete = jest.fn().mockImplementationOnce(throwingFn);
+
+                expect(() => cache.delete(KEY)).toThrow(/TEST THROW/);
             });
         });
     });

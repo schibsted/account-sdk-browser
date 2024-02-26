@@ -2,11 +2,13 @@
  * See LICENSE.md in the project root.
  */
 
+// @ts-nocheck
+
 'use strict';
 
 import { URL } from 'whatwg-url';
-import { urlMapper } from '../src/utils/url.ts';
-import RESTClient from '../src/clients/RESTClient.ts';
+import { urlMapper } from '../src/utils/url';
+import RESTClient from '../src/clients/RESTClient';
 
 describe('url', () => {
 

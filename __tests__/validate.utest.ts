@@ -2,9 +2,11 @@
  * See LICENSE.md in the project root.
  */
 
+// @ts-nocheck
+
 'use strict';
 
-import { isStr, isStrIn, isNonEmptyString, isObject, isNonEmptyObj } from '../src/utils/validate.ts';
+import { isStr, isStrIn, isNonEmptyString, isObject, isNonEmptyObj } from '../src/utils/validate';
 
 describe('validate', () => {
 

@@ -2,7 +2,9 @@
  * See LICENSE.md in the project root.
  */
 
-import { compareUrls } from './utils.js';
+// @ts-nocheck
+
+import { compareUrls } from './utils';
 
 describe('testutils', () => {
     describe('equal', () => {

@@ -2,10 +2,12 @@
  * See LICENSE.md in the project root.
  */
 
+// @ts-nocheck
+
 'use strict';
 
-import { ENDPOINTS } from '../src/config/config.ts';
-import { RESTClient } from '../src/clients/RESTClient.ts';
+import { ENDPOINTS } from '../src/config/config';
+import { RESTClient } from '../src/clients/RESTClient';
 
 describe('RESTClient', () => {
     test('has the REST methods for get and go', () => {

@@ -2,6 +2,8 @@
  * See LICENSE.md in the project root.
  */
 
+// @ts-nocheck
+
 function stringify(search) {
     const keys = [...new Set(search.keys())];
     keys.sort();

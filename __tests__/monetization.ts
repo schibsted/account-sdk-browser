@@ -2,11 +2,13 @@
  * See LICENSE.md in the project root.
  */
 
+// @ts-nocheck
+
 'use strict';
 
 jest.mock('../src/RESTClient.ts');
 
-import Monetization from '../monetization.ts';
+import Monetization from '../src/monetization';
 
 describe('Monetization', () => {
 

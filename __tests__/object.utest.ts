@@ -2,9 +2,11 @@
  * See LICENSE.md in the project root.
  */
 
+// @ts-nocheck
+
 'use strict';
 
-import { cloneDefined, cloneDeep } from '../src/utils/object.ts';
+import { cloneDefined, cloneDeep } from '../src/utils/object';
 
 describe('object', () => {
 

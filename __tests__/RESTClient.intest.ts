@@ -2,10 +2,12 @@
  * See LICENSE.md in the project root.
  */
 
+// @ts-nocheck
+
 'use strict';
 
-import RESTClient from '../src/clients/RESTClient.ts';
-import config from '../src/config/config.ts';
+import RESTClient from '../src/clients/RESTClient';
+import config from '../src/config/config';
 
 describe('RESTClient', () => {
 

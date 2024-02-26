@@ -1,0 +1,16 @@
+{
+    "rules": {
+        "require-jsdoc": 0,
+        "no-undefined": 0,
+        "@typescript-eslint/ban-ts-comment": 0
+    },
+    "parserOptions": {
+        "project": "../tsconfig.json"
+    },
+    "globals": {
+        "beforeAll": true,
+        "afterAll": true,
+        "expect": true,
+        "jest": true
+    }
+}

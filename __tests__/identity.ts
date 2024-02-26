@@ -2,14 +2,16 @@
  * See LICENSE.md in the project root.
  */
 
+// @ts-nocheck
+
 'use strict';
 
 import SDKError from '../src/utils/SDKError';
 import Identity from '../src/identity';
-import { compareUrls, Fixtures } from './utils.js';
+import { compareUrls, Fixtures } from './utils';
 import { URL } from 'url';
 import { URL as u } from 'whatwg-url';
-import version from '../src/version.js';
+import version from '../src/version';
 
 import { TextEncoder, TextDecoder } from 'util';
 Object.assign(global, {TextEncoder, TextDecoder});

@@ -2,9 +2,11 @@
  * See LICENSE.md in the project root.
  */
 
+// @ts-nocheck
+
 'use strict';
 
-import SDKError from '../src/utils/SDKError.ts';
+import SDKError from '../src/utils/SDKError';
 
 describe('SDKError', () => {
     test('Should be able to stringify an error', () => {
