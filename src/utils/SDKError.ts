@@ -4,14 +4,6 @@
 
 'use strict';
 
-/*
- * Note: this module can't have any internal dependencies because it's used in ./validate which
- * in turn is used as a dependency to a lot of other modules. Doing so may create a circular
- * dependency that's hard to debug in Node.
- */
-
-const STRINGIFY_TYPES = ['boolean', 'number', 'string'];
-
 /**
  * Represents a SDK error. This is returned from all rejected promises that are returned from an API
  * call. Constructs an SDK error ready to throw
@@ -45,11 +37,6 @@ export default class SDKError extends Error {
      * @return {String}
      */
     override toString(): string {
-        const ret = `${this.name}: ${this.message}`;
-        const additionalInfo = Object.keys(this)
-            .filter((key) => key !== 'name' && STRINGIFY_TYPES.includes(typeof this[key as keyof this]))
-            .map(key => `    ${key}: ${this[key as keyof this]}`)
-            .join('\n');
-        return additionalInfo ? `${ret}\n${additionalInfo}` : ret;
+        return `${this.name}: ${this.message}\n${this.stack}`;
     }
 }
