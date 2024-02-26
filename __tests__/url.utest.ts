@@ -16,19 +16,19 @@ describe('url', () => {
 
         test('can handle hostname keys', () => {
             expect(urlMapper('SHORTHAND1', {
-                'SHORTHAND1': 'http://shorthand1.local'
+                'SHORTHAND1': 'http://shorthand1.local',
             })).toBe('http://shorthand1.local');
         });
 
         test('if the first parameter is a valid URL, return that', () => {
             expect(urlMapper('http://shorthand2.local', {
-                'SHORTHAND1': 'http://shorthand1.local'
+                'SHORTHAND1': 'http://shorthand1.local',
             })).toBe('http://shorthand2.local');
         });
 
         test('if the first parameter is a bad lookup key, fail', () => {
             expect(() => urlMapper('BAD_KEY', {
-                'GOOD_KEY': 'http://shorthand1.local'
+                'GOOD_KEY': 'http://shorthand1.local',
             })).toThrow(/Bad URL given: 'BAD_KEY'/);
         });
     });
@@ -70,7 +70,7 @@ describe('url', () => {
             () => {
                 const url = new URL('server', 'http://example.com/authn');
                 expect(url.href).toBe('http://example.com/server');
-            }
+            },
         );
 
         test('cuts base path from URL if pathname is single /', () => {
