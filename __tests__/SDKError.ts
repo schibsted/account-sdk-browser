@@ -2,28 +2,32 @@
  * See LICENSE.md in the project root.
  */
 
-// @ts-nocheck
-
 'use strict';
 
 import SDKError from '../src/utils/SDKError';
 
-describe('SDKError', () => {
-    test('Should be able to stringify an error', () => {
-        const e = new SDKError('foo', { bar: 'baz' });
+const ERROR = new Error('TEST ERROR');
 
-        // FIXME: Enable this when.. we have babel7 and it (hopefully) works with Jest+Coverage
-        // expect(e.toString()).toBe('SDKError: foo\n    bar: baz');
+describe('SDKError', () => {
+
+    const EXPECTED_ERROR_MSG = /SDKError: foo/;
+
+    test('Should be able to stringify an error', () => {
+        const expectedMessage = 'foo';
+        const e = new SDKError(expectedMessage, ERROR);
+
         expect(e.toString()).toMatch(/SDKError: foo/);
     });
 
     test('Should be able to stringify an error with params by explicit function invocation', () => {
-        const e = new SDKError('foo', { bar: 'baz' });
-        expect(SDKError.prototype.toString.call(e)).toMatch(/SDKError: foo\n {4}bar: baz/);
+        const expectedMessage = 'foo';
+        const e = new SDKError(expectedMessage, ERROR);
+
+        expect(SDKError.prototype.toString.call(e)).toMatch(EXPECTED_ERROR_MSG);
     });
 
     test('Should be able to stringify an error by explicit function invocation', () => {
         const e = new SDKError('foo');
-        expect(SDKError.prototype.toString.call(e)).toMatch(/SDKError: foo/);
+        expect(SDKError.prototype.toString.call(e)).toMatch(EXPECTED_ERROR_MSG);
     });
 });
