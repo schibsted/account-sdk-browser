@@ -4,17 +4,19 @@
 import { assert, isObject, isUrl, isFunction } from './validate';
 import { GenericObject } from './types';
 
+type FeatureActivation = 'yes' | 'no';
+
 interface WindowFeatures {
     left?: number;
     top?: number;
     width?: number;
     height?: number;
-    menubar?: boolean;
-    toolbar?: boolean;
-    location?: boolean;
-    status?: boolean;
-    resizable?: boolean;
-    scrollbars?: boolean;
+    menubar?: FeatureActivation;
+    toolbar?: FeatureActivation;
+    location?: FeatureActivation;
+    status?: FeatureActivation;
+    resizable?: FeatureActivation;
+    scrollbars?: FeatureActivation;
     [key: string]: unknown
 }
 
@@ -33,12 +35,12 @@ function serialize(obj: GenericObject) {
 }
 
 const defaultWindowFeatures: WindowFeatures = {
-    scrollbars: true,
-    location: true,
-    status: false,
-    menubar: false,
-    toolbar: false,
-    resizable: true,
+    scrollbars: 'yes',
+    location: 'yes',
+    status: 'no',
+    menubar: 'no',
+    toolbar: 'no',
+    resizable: 'yes',
 };
 
 /**
@@ -66,6 +68,6 @@ export function open(parentWindow: Window, url: string, windowName = '', windowF
     if (Number.isFinite(windowFeatures.height) && Number.isFinite(height)) {
         windowFeatures.top = (height - (windowFeatures.height || 0)) / 2;
     }
-    const features = serialize(windowFeatures);
+    const features = serialize({ ...defaultWindowFeatures, ...windowFeatures });
     return parentWindow.open(url, windowName, features);
 }

@@ -160,12 +160,13 @@ export class RESTClient {
         logFn(this.log!, 'Request:', fetchOptions.method?.toUpperCase(), fullUrl);
         logFn(this.log!, 'Request Headers:', fetchOptions.headers);
         logFn(this.log!, 'Request Body:', fetchOptions.body);
+
         try {
             const response = await this.fetch!(fullUrl, fetchOptions);
             logFn(this.log!, 'Response Code:', response.status, response.statusText);
             if (!response.ok) {
                 // status code not in range 200-299
-                throw new SDKError(`API call failed with: ${response.code} ${response.statusText}`);
+                throw new SDKError(`API call failed with: ${response.code} ${response.statusText}`, { code: response.code});
             }
             const responseObject = await response.json();
             logFn(this.log!, 'Response Parsed:', responseObject);
@@ -213,8 +214,8 @@ export class RESTClient {
      * @param {object} defaultParams - Default params
      * @returns {string} Query string
      */
-    static search(query: GenericObject, useDefaultParams: boolean, defaultParams: GenericObject) {
-        const params = useDefaultParams ? cloneDefined(defaultParams, query) : cloneDefined(query);
+    static search(query: GenericObject, useDefaultParams?: boolean, defaultParams?: GenericObject) {
+        const params = useDefaultParams ? cloneDefined(defaultParams || {}, query) : cloneDefined(query);
         return Object.keys(params)
             .filter(p => params[p] !== '')
             .map(p => `${encode(p)}=${encode(params[p] as string)}`)

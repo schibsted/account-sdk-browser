@@ -2,9 +2,14 @@
  * See LICENSE.md in the project root.
  */
 
-// @ts-nocheck
+export type ForceMutable<T> = {
+    -readonly [K in keyof T]: T[K];
+};
 
-function stringify(search) {
+export const throwingFnMsg = 'TEST THROW';
+export const throwingFn = () => { throw new Error(throwingFnMsg);};
+
+function stringifySearchParams(search: URLSearchParams): string {
     const keys = [...new Set(search.keys())];
     keys.sort();
     return keys.map(k => {
@@ -20,7 +25,7 @@ function stringify(search) {
  * @param {string} second - the second url
  * @return {Array} - returns the URL objects that are made from first and second
  */
-export function compareUrls(first, second) {
+export function compareUrls(first: string, second: string): URL[] {
     const firstUrl = new URL(first);
     const secondUrl = new URL(second);
     expect(firstUrl).toBeDefined();
@@ -35,7 +40,7 @@ export function compareUrls(first, second) {
     expect(firstUrl.pathname).toBe(secondUrl.pathname);
     expect(firstUrl.port).toBe(secondUrl.port);
     expect(firstUrl.protocol).toBe(secondUrl.protocol);
-    expect(stringify(firstUrl.searchParams)).toEqual(stringify(secondUrl.searchParams));
+    expect(stringifySearchParams(firstUrl.searchParams)).toEqual(stringifySearchParams(secondUrl.searchParams));
     return [firstUrl, secondUrl];
 }
 
@@ -62,11 +67,11 @@ const sessionResponse = {
 };
 const sessionServiceAccess = {
     entitled: true,
-    allowedFeatures: ["existing"],
+    allowedFeatures: ['existing'],
     ttl: 10,
     userId: 12345,
     uuid: 'aaaaaaaa-de42-5c4b-80ee-eeeeeeeeeeee',
-    sig: 'ZUtX5e7WJcLl69m-puKJlFc413ZPi7wnMLTa_M9TFiU.eyJlbnRpdGxlZCI6dHJ1ZSwiYWxsb3dlZEZlYXR1cmVzIjpbImZlYXR1cmUtMSIsInByb2R1Y3RpZC0xIl0sInR0bCI6MTAsInVzZXJJZCI6MTIzNDUsInV1aWQiOiJ1c2VyVXVpZCIsImFsZ29yaXRobSI6IkhNQUMtU0hBMjU2In0'
+    sig: 'ZUtX5e7WJcLl69m-puKJlFc413ZPi7wnMLTa_M9TFiU.eyJlbnRpdGxlZCI6dHJ1ZSwiYWxsb3dlZEZlYXR1cmVzIjpbImZlYXR1cmUtMSIsInByb2R1Y3RpZC0xIl0sInR0bCI6MTAsInVzZXJJZCI6MTIzNDUsInV1aWQiOiJ1c2VyVXVpZCIsImFsZ29yaXRobSI6IkhNQUMtU0hBMjU2In0',
 };
 
 const sessionServiceNoAccess = {
@@ -75,7 +80,7 @@ const sessionServiceNoAccess = {
     ttl: 0,
     userId: 12345,
     uuid: 'aaaaaaaa-de42-5c4b-80ee-eeeeeeeeeeee',
-    sig: 'Rqf5fQ-gXNOdrsegajNgTOzju5z9-0v92v-PGCnL5P8.eyJlbnRpdGxlZCI6ZmFsc2UsImFsbG93ZWRGZWF0dXJlcyI6W10sInR0bCI6MCwidXNlcklkIjoxMjM0NSwidXVpZCI6InVzZXJVdWlkIiwiYWxnb3JpdGhtIjoiSE1BQy1TSEEyNTYifQ'
+    sig: 'Rqf5fQ-gXNOdrsegajNgTOzju5z9-0v92v-PGCnL5P8.eyJlbnRpdGxlZCI6ZmFsc2UsImFsbG93ZWRGZWF0dXJlcyI6W10sInR0bCI6MCwidXNlcklkIjoxMjM0NSwidXVpZCI6InVzZXJVdWlkIiwiYWxnb3JpdGhtIjoiSE1BQy1TSEEyNTYifQ',
 };
 
 export const Fixtures = {
