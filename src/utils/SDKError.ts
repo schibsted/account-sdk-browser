@@ -4,6 +4,9 @@
 
 'use strict';
 
+import { Optional } from './types';
+import { isNonEmptyObj } from './validate';
+
 /**
  * Represents a SDK error. This is returned from all rejected promises that are returned from an API
  * call. Constructs an SDK error ready to throw
@@ -12,16 +15,15 @@
  */
 export default class SDKError extends Error {
     /**
-     * @property {number} code - The HTTP error code
      * @extends {Error}
      * @param {string} message - The error message
      * @param {object} [errorObject] - The error object that was returned from the server. Any
      * property of errorObject object will be copied into this instance SDKError
      */
-    constructor(message: string, errorObject?: Error) {
+    constructor(message: string, errorObject?: Partial<SDKError>) {
         super(message);
-        this.name = 'SDKError';
-        if (typeof errorObject === 'object') {
+        this.message = message;
+        if (isNonEmptyObj(errorObject)) {
             try {
                 // At this point it doesn't matter if errorObject === null
                 Object.assign(this, errorObject);
@@ -30,6 +32,12 @@ export default class SDKError extends Error {
             }
         }
     }
+
+    override readonly name: Readonly<string> = 'SDKError';
+
+    override readonly message: Readonly<string>;
+
+    readonly code: Readonly<Optional<number>>;
 
     /**
      * Serializes the error printing any interesting additional info

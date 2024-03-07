@@ -7,7 +7,8 @@
 import SDKError from '../utils/SDKError';
 import { cloneDefined } from '../utils/object';
 import { assert, isObject, isFunction, isStr, isNonEmptyString, isUrl } from '../utils/validate';
-import { EncodeChar, GenericObject } from '../utils/types';
+import { GenericObject } from '../utils/types';
+import {encode} from "../utils/url";
 
 /**
  * Converts a series of parameters of various types to a string that's suitable for logging.
@@ -26,33 +27,13 @@ const logString = (msg: unknown[]) => msg.map(m => isObject(m) ? JSON.stringify(
  */
 const logFn = (fn: Function, ...msg: unknown[]) => (typeof fn === 'function') && fn(logString(msg));
 
-/**
- * Encode a string like URLSearchParams would do
- * @private
- * @param {string} str - The input
- * @returns {string} The encoded string
- */
-function encode(str: string): string {
-    const replace: Record<EncodeChar, string> = {
-        '!': '%21',
-        "'": '%27',
-        '(': '%28',
-        ')': '%29',
-        '~': '%7E',
-        '%20': '+',
-        '%00': '\x00',
-    };
-
-    return encodeURIComponent(str).replace(/[!'()~]|%20|%00/g, (match) => replace[match as EncodeChar]);
-}
-
 const globalFetch = () => window.fetch && window.fetch.bind(window);
 
 interface RESTClientOpts {
     serverUrl: string,
     fetch?: Function,
     log?: Function,
-    defaultParams: GenericObject
+    defaultParams?: GenericObject
 }
 
 interface RESTClientGoOpts {
@@ -166,7 +147,7 @@ export class RESTClient {
             logFn(this.log!, 'Response Code:', response.status, response.statusText);
             if (!response.ok) {
                 // status code not in range 200-299
-                throw new SDKError(`API call failed with: ${response.code} ${response.statusText}`, { code: response.code});
+                throw new SDKError(`API call failed with code ${response.status}`, { code: response.status });
             }
             const responseObject = await response.json();
             logFn(this.log!, 'Response Parsed:', responseObject);

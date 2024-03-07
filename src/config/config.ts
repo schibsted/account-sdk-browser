@@ -101,7 +101,7 @@ const config: Config = {
         PRO_FI: 'schibsted.fi',
         PRO_DK: 'schibsted.dk',
     },
-};
+} as const;
 
 export default config;
 export const ENDPOINTS = config.ENDPOINTS;

@@ -2,8 +2,6 @@
  * See LICENSE.md in the project root.
  */
 
-// @ts-nocheck
-
 'use strict';
 
 import RESTClient from '../src/clients/RESTClient';
@@ -13,9 +11,9 @@ describe('RESTClient', () => {
 
     test('can make a call to Schibsted account DEV /api/2/version', () => {
         const restClient = new RESTClient({
-            serverUrl: 'PRE',
-            envDic: config.ENDPOINTS.SPiD,
-            fetch
+            serverUrl: config.ENDPOINTS.SPiD.PRE,
+            fetch,
+            defaultParams: {},
         });
 
         return restClient.get('api/2/version').then(version => {

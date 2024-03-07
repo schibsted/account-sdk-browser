@@ -2,12 +2,10 @@
  * See LICENSE.md in the project root.
  */
 
-// @ts-nocheck
-
 'use strict';
 
 import { Payment } from '../src/payment';
-import { compareUrls } from './utils';
+import { expectUrlsToMatch } from './utils';
 
 describe('Payment', () => {
 
@@ -219,7 +217,7 @@ describe('Payment', () => {
         });
 
         test('should work with implicit redirectUri', () => {
-            compareUrls(
+            expectUrlsToMatch(
                 payment.purchasePromoCodeProductFlowUrl('12'),
                 'https://identity-pre.schibsted.com/authn/payment/purchase/code?client_id=a&redirect_uri=http%3A%2F%2Fredirect.foo&code=12&publisher=vkse'
             );
@@ -240,7 +238,7 @@ describe('Payment', () => {
         });
 
         test('should build uri with code and state', () => {
-            compareUrls(
+            expectUrlsToMatch(
                 payment.purchasePromoCodeProductFlowUrl('12', '20032'),
                 'https://identity-pre.schibsted.com/authn/payment/purchase/code?client_id=a&redirect_uri=http%3A%2F%2Fredirect.foo&code=12&publisher=vkse&state=20032'
             );

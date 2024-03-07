@@ -6,6 +6,7 @@
 
 import Cache from '../src/utils/cache';
 import { MockStorage } from '../__mocks__/Storage.mock';
+import { throwingFn, throwingFnMsg } from './utils';
 
 const webStorageMock = (): Storage => {
     return new MockStorage();
@@ -13,8 +14,6 @@ const webStorageMock = (): Storage => {
 
 const KEY = 'foo';
 const VALUE = 'bar';
-
-const throwingFn = () => { throw new Error('TEST THROW');};
 
 describe('cache', () => {
     describe('constructor', () => {
@@ -159,7 +158,8 @@ describe('cache', () => {
 
             test('get should fail if impl fails to get', () => {
                 cache.get = jest.fn().mockImplementationOnce(throwingFn);
-                expect(() => cache.get(KEY)).toThrow(/TEST THROW/);
+
+                expect(() => cache.get(KEY)).toThrow(RegExp(throwingFnMsg));
             });
 
             test('get should return null if impl returns non-json-parsable mess', () => {
@@ -169,13 +169,13 @@ describe('cache', () => {
             test('get should fail if impl fails to delete', () => {
                 cache.delete = jest.fn().mockImplementationOnce(throwingFn);
 
-                expect(() => cache.delete(KEY)).toThrow(/TEST THROW/);
+                expect(() => cache.delete(KEY)).toThrow(RegExp(throwingFnMsg));
             });
 
             test('set should fail if impl fails to set', () => {
                 cache.set = jest.fn().mockImplementationOnce(throwingFn);
 
-                expect(() => cache.set(KEY, VALUE, 1000)).toThrow(/TEST THROW/);
+                expect(() => cache.set(KEY, VALUE, 1000)).toThrow(RegExp(throwingFnMsg));
             });
 
             test('set should fail if value is not serializable', () => {
@@ -191,7 +191,7 @@ describe('cache', () => {
             test('delete should fail if impl fails to delete', () => {
                 cache.delete = jest.fn().mockImplementationOnce(throwingFn);
 
-                expect(() => cache.delete(KEY)).toThrow(/TEST THROW/);
+                expect(() => cache.delete(KEY)).toThrow(RegExp(throwingFnMsg));
             });
         });
     });

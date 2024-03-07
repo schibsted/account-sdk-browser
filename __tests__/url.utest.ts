@@ -7,7 +7,7 @@
 'use strict';
 
 import { URL } from 'whatwg-url';
-import { urlMapper } from '../src/utils/url';
+import {encode, urlMapper} from '../src/utils/url';
 import RESTClient from '../src/clients/RESTClient';
 
 describe('url', () => {
@@ -91,6 +91,17 @@ describe('url', () => {
         test('can build uris with path having multiple parts separated by slash', () => {
             const url = new URL('some/path/with/parts', 'http://example.com/authn/');
             expect(url.href).toBe('http://example.com/authn/some/path/with/parts');
+        });
+    });
+
+    describe('encode', () => {
+        test('replaces correct characters', () => {
+            const GIVEN_URL = 'http://example.com/authn/test?abc=123';
+            const EXPECTED_VALUE = 'http%3A%2F%2Fexample.com%2Fauthn%2Ftest%3Fabc%3D123';
+
+            const actualValue = encode(GIVEN_URL);
+
+            expect(actualValue).toEqual(EXPECTED_VALUE);
         });
     });
 });

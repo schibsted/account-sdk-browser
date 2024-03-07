@@ -5,6 +5,7 @@
 'use strict';
 
 import { assert, isNonEmptyString, isUrl, isNonEmptyObj } from './validate';
+import type { EncodeChar } from './types';
 
 /**
  * A simple utility function that allows looking up URLs from a dictionary
@@ -22,4 +23,24 @@ export function urlMapper(url: string, urlMap: Record<string, string>): string {
     }
     assert(isUrl(url, 'hostname'), `Bad URL given: '${url}'`);
     return url;
+}
+
+/**
+ * Encode a string like URLSearchParams would do
+ * @private
+ * @param {string} str - The input
+ * @returns {string} The encoded string
+ */
+export function encode(str: string): string {
+    const replace: Record<EncodeChar, string> = {
+        '!': '%21',
+        "'": '%27',
+        '(': '%28',
+        ')': '%29',
+        '~': '%7E',
+        '%20': '+',
+        '%00': '\x00',
+    };
+
+    return encodeURIComponent(str).replace(/[!'()~]|%20|%00/g, (match) => replace[match as EncodeChar]);
 }

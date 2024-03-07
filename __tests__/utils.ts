@@ -25,7 +25,7 @@ function stringifySearchParams(search: URLSearchParams): string {
  * @param {string} second - the second url
  * @return {Array} - returns the URL objects that are made from first and second
  */
-export function compareUrls(first: string, second: string): URL[] {
+export function expectUrlsToMatch(first: string, second: string): URL[] {
     const firstUrl = new URL(first);
     const secondUrl = new URL(second);
     expect(firstUrl).toBeDefined();

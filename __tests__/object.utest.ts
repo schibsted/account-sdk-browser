@@ -2,8 +2,6 @@
  * See LICENSE.md in the project root.
  */
 
-// @ts-nocheck
-
 'use strict';
 
 import { cloneDefined, cloneDeep } from '../src/utils/object';
@@ -14,9 +12,13 @@ describe('object', () => {
 
         test('throws for non objects', () => {
             expect(() => cloneDefined()).toThrow();
+            // @ts-expect-error
             expect(() => cloneDefined(1)).toThrow();
+            // @ts-expect-error
             expect(() => cloneDefined(null)).toThrow();
+            // @ts-expect-error
             expect(() => cloneDefined('str')).toThrow();
+            // @ts-expect-error
             expect(() => cloneDefined(true)).toThrow();
         });
 
@@ -34,6 +36,7 @@ describe('object', () => {
             expect(cloneDefined(empty) === empty).toBe(false);
             expect(cloneDefined(empty)).not.toBe(empty);
             expect(cloneDefined(nonEmpty)).not.toBe(nonEmpty);
+            // @ts-expect-error
             expect(cloneDefined(array)).not.toBe(array);
         });
 
@@ -52,6 +55,7 @@ describe('object', () => {
 
         test('ignores the values that are undefined', () => {
             const obj = { a: 19834, b: undefined, c: 'to be deleted' };
+            // @ts-expect-error
             delete obj.c;
             const clonedObj = cloneDefined(obj);
             expect(clonedObj).toEqual({ a: 19834 });
@@ -61,7 +65,7 @@ describe('object', () => {
             const clonedObj = cloneDefined({
                 b: true,
                 s: 'a string',
-                n: 1300
+                n: 1300,
             });
             expect(clonedObj.b).toBe(true);
             expect(clonedObj.s).toBe('a string');
@@ -69,27 +73,28 @@ describe('object', () => {
         });
 
         test('later objects overwrite the earlier objects', () => {
-            expect(cloneDefined({foo: 1, bar: 2}, {foo: 2})).toEqual({foo: 2, bar: 2});
+            expect(cloneDefined({ foo: 1, bar: 2 }, { foo: 2 })).toEqual({ foo: 2, bar: 2 });
         });
 
         test('deeply clones any object with values', () => {
-            const obj = {a: 'foo'};
+            const obj = { a: 'foo' };
             const result = cloneDefined({ a: 'bar' }, obj);
-            expect(result).toEqual({a: 'foo'});
+            expect(result).toEqual({ a: 'foo' });
             expect(result).not.toBe(obj);
         });
 
         test('deeply clones any object value with values', () => {
             const arr = [13];
+            // @ts-expect-error
             const result = cloneDefined({ a: 'bar' }, arr);
-            expect(result).toEqual({a: 'bar', '0': 13});
+            expect(result).toEqual({ a: 'bar', '0': 13 });
             expect(result).not.toBe(arr);
         });
 
         test('deeply clones nested object with values', () => {
-            const obj = {a: 'foo', b: {c: 1, d: 2}};
-            const result = cloneDefined({a: 'bar', b: {c: 1}}, obj);
-            expect(result).toEqual({a: 'foo', b: {c: 1, d: 2}});
+            const obj = { a: 'foo', b: { c: 1, d: 2 } };
+            const result = cloneDefined({ a: 'bar', b: { c: 1 } }, obj);
+            expect(result).toEqual({ a: 'foo', b: { c: 1, d: 2 } });
         });
     });
 
@@ -113,8 +118,8 @@ describe('object', () => {
             const a = {
                 foo: 'bar',
                 b: {
-                    baz: 'qux'
-                }
+                    baz: 'qux',
+                },
             };
             const cloneA = cloneDeep(a);
             expect(cloneA).not.toBe(a);
@@ -123,14 +128,15 @@ describe('object', () => {
             expect(cloneA).toEqual({
                 foo: 'bar',
                 b: {
-                    baz: 'qux'
-                }
+                    baz: 'qux',
+                },
             });
             expect(cloneA.b).not.toBe(a.b);
         });
 
         test('clones an array', () => {
             const a = [ 1, 2, null, 'foo', false ];
+            // @ts-expect-error
             const cloneA = cloneDeep(a);
             expect(cloneA).not.toBe(a);
             expect(cloneA).toEqual(a);
@@ -139,6 +145,7 @@ describe('object', () => {
 
         test('clones null', () => {
             const a = null;
+            // @ts-expect-error
             const cloneA = cloneDeep(a);
             expect(cloneA).toBeNull();
         });

@@ -2,19 +2,20 @@
  * See LICENSE.md in the project root.
  */
 
-// @ts-nocheck
-
 'use strict';
 
-import { ENDPOINTS } from '../src/config/config';
 import { RESTClient } from '../src/clients/RESTClient';
+import { throwingFn, throwingFnMsg } from './utils';
+import { ENDPOINTS } from '../src/config/config';
+
+const TEST_URL = ENDPOINTS.SPiD.DEV;
 
 describe('RESTClient', () => {
     test('has the REST methods for get and go', () => {
         const restClient = new RESTClient({
-            serverUrl: 'DEV',
-            envDic: ENDPOINTS.SPiD,
-            fetch: function(){},
+            defaultParams: {},
+            serverUrl: TEST_URL,
+            fetch: () => {},
         });
 
         expect(typeof restClient.get).toBe('function');
@@ -22,23 +23,21 @@ describe('RESTClient', () => {
     });
 
     test('fetch default works', () => {
-        window.fetch = function () {
-            if (this !== window) {
-                throw new Error('Illegal invocation!');
-            }
-        };
+        window.fetch = fetch;
         jest.resetModules();
         const restClient = new RESTClient({
-            serverUrl: 'DEV',
-            envDic: ENDPOINTS.SPiD,
+            defaultParams: {},
+            serverUrl: TEST_URL,
         });
+        // @ts-expect-error
         expect(restClient.fetch).not.toThrow(/Illegal invocation/);
     });
 
     test('Supplied log function is called', async () => {
         const spy = jest.fn();
         const restClient = new RESTClient({
-            envDic: ENDPOINTS.SPiD,
+            defaultParams: {},
+            serverUrl: TEST_URL,
             log: spy,
             fetch: async () => ({ ok: true, json: async () => ({}) }),
         });
@@ -55,7 +54,7 @@ describe('RESTClient', () => {
     test('Check that headers are sent', async () => {
         const spy = jest.fn();
         spy.mockImplementation(async () => ({ ok: true, json: async () => ({}) }));
-        const restClient = new RESTClient({ envDic: ENDPOINTS.SPiD, fetch: spy });
+        const restClient = new RESTClient({ defaultParams: {}, serverUrl: TEST_URL, fetch: spy });
         await restClient.go({ method: 'get', pathname: '/' });
         await restClient.go({ method: 'get', pathname: '/', headers: { foo: 'bar' } });
         expect(spy).toHaveBeenCalledTimes(2);
@@ -64,33 +63,41 @@ describe('RESTClient', () => {
     });
 
     test('Should return SDKError on failed requests', async () => {
-        const spy = jest.fn();
-        spy.mockImplementation(async () => ({ ok: false, status: 400, statusText: 'Errorz' }));
-        const restClient = new RESTClient({ envDic: ENDPOINTS.SPiD, fetch: spy });
-        await expect(restClient.go({ method: 'get', pathname: '/' })).rejects.toMatchObject({
-            name: 'SDKError',
-            message: `Failed to 'get' 'https://identity-pre.schibsted.com/': 'Errorz'`,
-            code: 400
+        const EXPECTED_STATUS = 400;
+        const EXPECTED_TEXT = `API call failed with code ${EXPECTED_STATUS}`;
+        const EXPECTED_NAME = 'SDKError';
+        const EXPECTED_MSG = `Failed to 'get' 'https://identity-pre.schibsted.com/': '${EXPECTED_TEXT}'`;
+
+        const spy = jest.fn().mockImplementation(async () => ({ ok: false, status: EXPECTED_STATUS, statusText: EXPECTED_TEXT }));
+        const restClient = new RESTClient({ defaultParams: {}, serverUrl: TEST_URL, fetch: spy });
+
+        const res = restClient.go({ method: 'get', pathname: '/' });
+
+        await expect(res).rejects.toMatchObject({
+            name: EXPECTED_NAME,
+            message: EXPECTED_MSG,
+            code: EXPECTED_STATUS,
         });
     });
 
     test('Should return SDKError when fetch throws', async () => {
         const spy = jest.fn();
-        spy.mockImplementation(async () => { throw 'Errorz'; });
-        const restClient = new RESTClient({ envDic: ENDPOINTS.SPiD, fetch: spy });
+        spy.mockImplementation(throwingFn);
+        const restClient = new RESTClient({ defaultParams: {}, serverUrl: TEST_URL, fetch: spy });
+
         await expect(restClient.go({ method: 'get', pathname: '/' })).rejects.toMatchObject({
             name: 'SDKError',
-            message: `Failed to 'get' 'https://identity-pre.schibsted.com/': 'Errorz'`,
+            message: `Failed to 'get' 'https://identity-pre.schibsted.com/': '${throwingFnMsg}'`,
         });
     });
 
     test('makeUrl should work', async () => {
         const spy = jest.fn();
-        spy.mockImplementation(async () => { throw 'Errorz'; });
-        const restClient = new RESTClient({ envDic: ENDPOINTS.SPiD, defaultParams: { foo: 'bar'} });
+        spy.mockImplementation(throwingFn);
+        const restClient = new RESTClient({ serverUrl: TEST_URL, defaultParams: { foo: 'bar' } });
         const u = restClient.makeUrl();
-        expect(u).toBe('https://identity-pre.schibsted.com/?foo=bar');
+        expect(u).toBe(TEST_URL + '/?foo=bar');
         const u2 = restClient.makeUrl('', {}, false);
-        expect(u2).toBe('https://identity-pre.schibsted.com/');
+        expect(u2).toBe(TEST_URL + '/');
     });
 });

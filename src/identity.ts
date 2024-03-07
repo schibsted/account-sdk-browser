@@ -26,7 +26,7 @@ import { Environment, GenericObject, Optional, UserSession } from './utils/types
 
 
 
-interface IdentityOpts {
+export interface IdentityOpts {
     /**
      * @property {string} clientId
      * @description Web applications client ID within Schibsted Account ecosystem
@@ -52,21 +52,21 @@ interface IdentityOpts {
      * @property {Function} log
      * @description Optional logger function
      */
-    log: Function,
+    log?: Function,
     /**
      * @property {Window} window
      * @description Reference to the window object, if not provided the SDK will use the default Window object
      */
-    window: Window
+    window?: Window
 }
 
-interface VarnishCookieOpts {
+export interface VarnishCookieOpts {
     expiresIn: number,
     domain: string
 }
 
 
-interface LoginOpts {
+export interface LoginOpts {
     /**
      * @property {string} state
      * @description An opaque value used by the client to maintain state between
@@ -136,7 +136,7 @@ interface LoginOpts {
      * New flows supports nb_NO, fi_FI, sv_SE, en_US
      * @example 'nb_NO'
      */
-    locale: string,
+    locale: 'nb_NO' | 'fi_FI' | 'sv_SE' | 'en_US' | '',
     /**
      * @property {boolean} [oneStepLogin]
      * @description Display username and password on one screen
@@ -148,8 +148,10 @@ interface LoginOpts {
      *  End-User for re-authentication or confirm account screen. Supported values: `select_account` or `login`
      *  @example 'login'
      */
-    prompt: 'select_account',
+    prompt: 'select_account' | 'login',
 }
+
+export type LoginUrlOpts = Partial<Omit<LoginOpts, 'preferPopup'> & Pick<LoginOpts, 'state'>>;
 
 /**
  * @typedef {object} SimplifiedLoginWidgetLoginOptions
@@ -293,7 +295,7 @@ export class Identity extends EventEmitter {
 
     private readonly _enableSessionCaching: boolean;
 
-    private readonly log: Function;
+    private readonly log: Function | undefined;
 
     private _session: UserSession;
 
@@ -307,7 +309,7 @@ export class Identity extends EventEmitter {
 
     private globalSessionServiceClient:  RESTClient | undefined;
 
-    private popupWindowRef: Optional<Window>;
+    popupWindowRef: Optional<Window>;
 
     private setVarnishCookie: Optional<boolean>;
 
@@ -316,7 +318,6 @@ export class Identity extends EventEmitter {
     private varnishCookieDomain: Optional<string>;
 
     // private _currentSession: Optional<UserSession>;
-
 
     /**
      * Set SPiD server URL
@@ -329,6 +330,7 @@ export class Identity extends EventEmitter {
         this.spidClient = new RESTClient({
             serverUrl: urlMapper(env, ENDPOINTS.SPiD),
             log: this.log,
+            fetch: this.window.fetch,
             defaultParams: { client_id: this.clientId, redirect_uri: this.redirectUri },
         });
     }
@@ -344,6 +346,7 @@ export class Identity extends EventEmitter {
         this.oauthServiceClient = new RESTClient({
             serverUrl: urlMapper(env, ENDPOINTS.SPiD),
             log: this.log,
+            fetch: this.window.fetch,
             defaultParams: { client_id: this.clientId, redirect_uri: this.redirectUri },
         });
     }
@@ -359,6 +362,7 @@ export class Identity extends EventEmitter {
         this.bffClient = new RESTClient({
             serverUrl: urlMapper(env, ENDPOINTS.BFF),
             log: this.log,
+            fetch: this.window.fetch,
             defaultParams: { client_id: this.clientId, redirect_uri: this.redirectUri },
         });
     }
@@ -375,6 +379,7 @@ export class Identity extends EventEmitter {
         this.brandSessionServiceClient = new RESTClient({
             serverUrl: domain,
             log: this.log,
+            fetch: this.window.fetch,
             defaultParams: { client_sdrn, redirect_uri: this.redirectUri, sdk_version: version },
         });
     }
@@ -391,6 +396,7 @@ export class Identity extends EventEmitter {
         this.globalSessionServiceClient = new RESTClient({
             serverUrl: urlMapper(env, ENDPOINTS.SESSION_SERVICE),
             log: this.log,
+            fetch: this.window.fetch,
             defaultParams: { client_sdrn, sdk_version: version },
         });
     }
@@ -521,7 +527,7 @@ export class Identity extends EventEmitter {
         // If the domain is missing or of the wrong type, we'll use document.domain
         const domain = this.varnishCookieDomain || sessionData.baseDomain || '';
 
-        document.cookie = [
+        this.window.document.cookie = [
             `SP_ID=${sessionData.sp_id}`,
             `expires=${date.toUTCString()}`,
             'path=/',
@@ -546,10 +552,10 @@ export class Identity extends EventEmitter {
      * @returns {void}
      */
     private _clearVarnishCookie(): void {
-        const baseDomain =  this._session && this._session.baseDomain || document.domain;
+        const baseDomain =  this._session && this._session.baseDomain || this.window.document.domain;
         const domain = this.varnishCookieDomain || baseDomain || '';
 
-        document.cookie = `SP_ID=nothing; expires=Thu, 01 Jan 1970 00:00:00 GMT; path=/; domain=.${domain}`;
+        this.window.document.cookie = `SP_ID=nothing; expires=Thu, 01 Jan 1970 00:00:00 GMT; path=/; domain=.${domain}`;
     }
 
     /**
@@ -1014,7 +1020,7 @@ export class Identity extends EventEmitter {
         locale = '',
         oneStepLogin = false,
         prompt = 'select_account',
-    }: Omit<LoginOpts, 'preferPopup'>): string {
+    }: LoginUrlOpts): string {
         // if (typeof arguments[0] !== 'object') {
         //     // backward compatibility
         //     state = arguments[0];
@@ -1170,7 +1176,7 @@ export class Identity extends EventEmitter {
                     return resolve(true);
                 }
 
-                const simplifiedLoginWidget = document.createElement('script');
+                const simplifiedLoginWidget = this.window.document.createElement('script');
                 simplifiedLoginWidget.type = 'text/javascript';
                 simplifiedLoginWidget.src = widgetUrl;
                 simplifiedLoginWidget.onload = () => {
@@ -1180,7 +1186,7 @@ export class Identity extends EventEmitter {
                 simplifiedLoginWidget.onerror = () => {
                     reject(new SDKError('Error when loading simplified login widget content'));
                 };
-                document.getElementsByTagName('body')[0]!.appendChild(simplifiedLoginWidget);
+                this.window.document.getElementsByTagName('body')[0]!.appendChild(simplifiedLoginWidget);
             });
     }
 }
