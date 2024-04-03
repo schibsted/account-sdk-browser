@@ -530,14 +530,12 @@ export class Identity extends EventEmitter {
                 throw err;
             }
 
-            if(sessionData){
+            if (sessionData){
                 // for expiring session and safari browser do full page redirect to gain new session
                 if(_checkRedirectionNeed(sessionData)){
                     await this.callbackBeforeRedirect();
 
-                    this.window.location.href = this._sessionService.makeUrl(sessionData.redirectURL);
-
-                    return;
+                    return this._sessionService.makeUrl(sessionData.redirectURL);
                 }
 
                 if (this._enableSessionCaching) {
@@ -552,6 +550,11 @@ export class Identity extends EventEmitter {
             .then(
                 sessionData => {
                     this._hasSessionInProgress = false;
+
+                    if (typeof sessionData === 'string' && isUrl(sessionData)) {
+                        return this.window.location.href = sessionData;
+                    }
+
                     return sessionData;
                 },
                 err => {
