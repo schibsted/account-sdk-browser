@@ -188,13 +188,10 @@ export class Identity extends EventEmitter {
         this.log = log;
         this.callbackBeforeRedirect = callbackBeforeRedirect;
         this._sessionDomain = sessionDomain;
-        if (this._enableSessionCaching) {
-            const expiresIn = 1000 * 300;
-            this.cache.set("sessionFlowOngoing", false, expiresIn);
-        }
 
         // Internal hack: set to false to always refresh from hassession
         this._enableSessionCaching = true;
+        this.cache.delete("sessionFlowOngoing");
 
         // Old session
         this._session = {};
@@ -544,7 +541,7 @@ export class Identity extends EventEmitter {
                 // for expiring session and safari browser do full page redirect to gain new session
                 if(_checkRedirectionNeed(sessionData)){
                     if (this._enableSessionCaching) {
-                        const expiresIn = 1000 * 300;
+                        const expiresIn = 1000 * (sessionData.expiresIn || 300);
                         this.cache.set("sessionFlowOngoing", true, expiresIn);
                     }
 
