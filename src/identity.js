@@ -145,6 +145,9 @@ import version from './version.js';
  */
 
 const HAS_SESSION_CACHE_KEY = 'hasSession-cache';
+const SESSION_CALL_BLOCKED_CACHE_KEY = 'sessionCallBlocked-cache';
+const SESSION_CALL_BLOCKED_TTL = 1000 * 60 * 5;
+
 const globalWindow = () => window;
 
 /**
@@ -191,7 +194,6 @@ export class Identity extends EventEmitter {
 
         // Internal hack: set to false to always refresh from hassession
         this._enableSessionCaching = true;
-        this.cache.delete("sessionFlowOngoing");
 
         // Old session
         this._session = {};
@@ -201,6 +203,50 @@ export class Identity extends EventEmitter {
         this._setBffServerUrl(env);
         this._setOauthServerUrl(env);
         this._setGlobalSessionServiceUrl(env);
+
+        this._unblockSessionCall();
+    }
+
+    /**
+     * Checks if getting session is blocked
+     * @private
+     *
+     * @returns {boolean|void}
+     */
+    _isSessionCallBlocked(){
+        if (this._enableSessionCaching) {
+            return this.cache.get(SESSION_CALL_BLOCKED_CACHE_KEY);
+        }
+    }
+
+    /**
+     * Block calls to get session
+     * @private
+     *
+     * @returns {void}
+     */
+    _blockSessionCall(){
+        if (this._enableSessionCaching) {
+            const SESSION_CALL_BLOCKED = true;
+
+            this.cache.set(
+                SESSION_CALL_BLOCKED_CACHE_KEY,
+                SESSION_CALL_BLOCKED,
+                SESSION_CALL_BLOCKED_TTL
+            );
+        }
+    }
+
+    /**
+     * Unblocks calls to get session
+     * @private
+     *
+     * @returns {void}
+     */
+    _unblockSessionCall(){
+        if (this._enableSessionCaching) {
+            this.cache.delete(SESSION_CALL_BLOCKED_CACHE_KEY);
+        }
     }
 
     /**
@@ -491,9 +537,8 @@ export class Identity extends EventEmitter {
      * @return {Promise<HasSessionSuccessResponse|HasSessionFailureResponse>}
      */
     hasSession() {
-        const checkIfSessionOngoing = this.cache.get("sessionFlowOngoing");
-        if (checkIfSessionOngoing)
-        {
+        const isSessionCallBlocked = this._isSessionCallBlocked()
+        if (isSessionCallBlocked) {
             return this._session;
         }
 
@@ -540,10 +585,7 @@ export class Identity extends EventEmitter {
             if (sessionData){
                 // for expiring session and safari browser do full page redirect to gain new session
                 if(_checkRedirectionNeed(sessionData)){
-                    if (this._enableSessionCaching) {
-                        const expiresIn = 1000 * (sessionData.expiresIn || 300);
-                        this.cache.set("sessionFlowOngoing", true, expiresIn);
-                    }
+                    this._blockSessionCall();
 
                     await this.callbackBeforeRedirect();
 
@@ -563,7 +605,7 @@ export class Identity extends EventEmitter {
                 sessionData => {
                     this._hasSessionInProgress = false;
 
-                    if (typeof sessionData === 'string' && isUrl(sessionData)) {
+                    if (isUrl(sessionData)) {
                         return this.window.location.href = sessionData;
                     }
 
