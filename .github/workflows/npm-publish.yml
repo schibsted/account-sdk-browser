@@ -38,6 +38,6 @@ jobs:
             -   name: Build application
                 run: npm run build
             -   name: Publish to npm
-                run: npm publish --access=public --tag beta #TODO: To be removed, for PoC purposes only
+                run: npm publish --access=public
                 env:
                     NODE_AUTH_TOKEN: ${{secrets.NPMJS_AUTHTOKEN}}
