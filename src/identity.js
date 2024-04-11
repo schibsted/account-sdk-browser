@@ -209,19 +209,6 @@ export class Identity extends EventEmitter {
         this._setGlobalSessionServiceUrl(env);
 
         this._unblockSessionCall();
-        this._generateTabId();
-    }
-
-    /**
-     * Generates browser tab ID if it's not present in cache
-     * @private
-     */
-    _generateTabId() {
-        if (this._enableSessionCaching) {
-            if (!this.cache.get(TAB_ID_KEY)) {
-                this.cache.set(TAB_ID_KEY, TAB_ID, TAB_ID_TTL)
-            }
-        }
     }
 
     /**
@@ -231,7 +218,13 @@ export class Identity extends EventEmitter {
      */
     _getTabId() {
         if (this._enableSessionCaching) {
-            return this.cache.get(TAB_ID_KEY)
+            const tabId = this.cache.get(TAB_ID_KEY);
+            if (!tabId) {
+                this.cache.set(TAB_ID_KEY, TAB_ID, TAB_ID_TTL);
+                return TAB_ID;
+            }
+
+            return tabId;
         }
     }
 
