@@ -212,8 +212,6 @@ export class Identity extends EventEmitter {
         this._generateTabId();
     }
 
-    // pageload -> set cache -> redirect -> pageload
-
     /**
      * Generates browser tab ID if it's not present in cache
      * @private
