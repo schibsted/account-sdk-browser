@@ -148,6 +148,10 @@ const HAS_SESSION_CACHE_KEY = 'hasSession-cache';
 const SESSION_CALL_BLOCKED_CACHE_KEY = 'sessionCallBlocked-cache';
 const SESSION_CALL_BLOCKED_TTL = 1000 * 60 * 5;
 
+const TAB_ID_KEY = 'tab-id-cache';
+const TAB_ID = Math.floor(Math.random() * 100000)
+const TAB_ID_TTL = 1000 * 60 * 60 * 24 * 30;
+
 const globalWindow = () => window;
 
 /**
@@ -205,6 +209,32 @@ export class Identity extends EventEmitter {
         this._setGlobalSessionServiceUrl(env);
 
         this._unblockSessionCall();
+        this._generateTabId();
+    }
+
+    // pageload -> set cache -> redirect -> pageload
+
+    /**
+     * Generates browser tab ID if it's not present in cache
+     * @private
+     */
+    _generateTabId() {
+        if (this._enableSessionCaching) {
+            if (!this.cache.get(TAB_ID_KEY)) {
+                this.cache.set(TAB_ID_KEY, TAB_ID, TAB_ID_TTL)
+            }
+        }
+    }
+
+    /**
+     * Read tabId from session storage
+     * @returns {number}
+     * @private
+     */
+    _getTabId() {
+        if (this._enableSessionCaching) {
+            return this.cache.get(TAB_ID_KEY)
+        }
     }
 
     /**
@@ -589,7 +619,7 @@ export class Identity extends EventEmitter {
 
                     await this.callbackBeforeRedirect();
 
-                    return this._sessionService.makeUrl(sessionData.redirectURL);
+                    return this._sessionService.makeUrl(sessionData.redirectURL, {tabId: this._getTabId()});
                 }
 
                 if (this._enableSessionCaching) {
