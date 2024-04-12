@@ -567,42 +567,59 @@ export class Identity extends EventEmitter {
                 }
             }
             let sessionData = null;
-            try {
-                sessionData = await this._sessionService.get('/v2/session');
-            } catch (err) {
-                if (err && err.code === 400 && this._enableSessionCaching) {
-                    const expiresIn = 1000 * (err.expiresIn || 300);
-                    this.sessionStorageCache.set(HAS_SESSION_CACHE_KEY, { error: err }, expiresIn);
+
+            this._callSessionService = async () => {
+                try {
+                    sessionData = await this._sessionService.get('/v2/session');
+                }  catch (err) {
+                    if (err && err.code === 400 && this._enableSessionCaching) {
+                        const expiresIn = 1000 * (err.expiresIn || 300);
+                        this.sessionStorageCache.set(HAS_SESSION_CACHE_KEY, {error: err}, expiresIn);
+                    }
+                    throw err;
                 }
-                throw err;
+
+                if (sessionData) {
+                    // for expiring session and safari browser do full page redirect to gain new session
+                    if (_checkRedirectionNeed(sessionData)) {
+                        this._blockSessionCall();
+
+                        await this.callbackBeforeRedirect();
+
+                        this.window.location.href = this._sessionService.makeUrl(sessionData.redirectURL);
+
+                        return new Promise(resolve => {
+                            window.addEventListener('load', () => resolve());
+                        })
+                    }
+
+                    if (this._enableSessionCaching) {
+                        const expiresIn = 1000 * (sessionData.expiresIn || 300);
+                        this.sessionStorageCache.set(HAS_SESSION_CACHE_KEY, sessionData, expiresIn);
+                    }
+                }
+
+                return _postProcess(sessionData);
             }
 
-            if (sessionData){
-                // for expiring session and safari browser do full page redirect to gain new session
-                if(_checkRedirectionNeed(sessionData)){
-                    this._blockSessionCall();
+            if (navigator.locks) {
+                return await navigator.locks.request('sessionCallLock', {ifAvailable: true},async lock => {
+                    if (!lock) {
+                        return this._session;
+                    }
 
-                    await this.callbackBeforeRedirect();
+                    return this._callSessionService();
 
-                    return this._sessionService.makeUrl(sessionData.redirectURL);
-                }
-
-                if (this._enableSessionCaching) {
-                    const expiresIn = 1000 * (sessionData.expiresIn || 300);
-                    this.sessionStorageCache.set(HAS_SESSION_CACHE_KEY, sessionData, expiresIn);
-                }
+                });
             }
 
-            return _postProcess(sessionData);
+            return this._callSessionService();
         };
+        
         this._hasSessionInProgress = _getSession()
             .then(
                 sessionData => {
                     this._hasSessionInProgress = false;
-
-                    if (isUrl(sessionData)) {
-                        return this.window.location.href = sessionData;
-                    }
 
                     return sessionData;
                 },
