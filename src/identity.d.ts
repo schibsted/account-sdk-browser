@@ -37,6 +37,34 @@ export class Identity extends TinyEmitter {
     _sessionDomain: string;
     _enableSessionCaching: boolean;
     _session: {};
+
+    /**
+     * Read tabId from session storage
+     * @returns {number}
+     * @private
+     */
+    private _getTabId;
+    /**
+     * Checks if getting session is blocked
+     * @private
+     *
+     * @returns {boolean|void}
+     */
+    private _isSessionCallBlocked;
+    /**
+     * Block calls to get session
+     * @private
+     *
+     * @returns {void}
+     */
+    private _blockSessionCall;
+    /**
+     * Unblocks calls to get session
+     * @private
+     *
+     * @returns {void}
+     */
+    private _unblockSessionCall;
     /**
      * Set SPiD server URL
      * @private
