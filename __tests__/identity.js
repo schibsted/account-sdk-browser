@@ -597,6 +597,10 @@ describe('Identity', () => {
             test('should do redirect when session endpoint respond with redirectURL only', async () => {
                 mockSessionOkResponse(Fixtures.sessionNeedsToBeRefreshedResponse)
 
+                const MOCK_TAB_ID = 1234;
+                const spy = jest.spyOn(Identity.prototype, '_getTabId');
+                spy.mockImplementation(() => MOCK_TAB_ID);
+
                 await identity.hasSession();
 
                 expect(defaultOptions.callbackBeforeRedirect).toHaveBeenCalled();
@@ -610,7 +614,9 @@ describe('Identity', () => {
                         '&redirect_uri=',
                         encodeURIComponent(defaultOptions.redirectUri),
                         '&sdk_version=',
-                        version
+                        version,
+                        '&tabId=',
+                        MOCK_TAB_ID
                     ].join('')
                 );
             });
