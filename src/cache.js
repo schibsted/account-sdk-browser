@@ -89,7 +89,6 @@ export default class Cache {
     /**
      * Get a value from cache (checks that the object has not expired)
      * @param {string} key
-     * @private
      * @returns {*} - The value if it exists, otherwise null
      */
     get(key) {
@@ -124,7 +123,6 @@ export default class Cache {
      * @param {string} key
      * @param {*} value
      * @param {Number} expiresIn - Value in milliseconds until the entry expires
-     * @private
      * @returns {void}
      */
     set(key, value, expiresIn = 0) {
@@ -145,7 +143,6 @@ export default class Cache {
     /**
      * Delete a cache entry
      * @param {string} key
-     * @private
      * @returns {void}
      */
     delete(key) {
