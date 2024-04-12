@@ -327,88 +327,98 @@ describe('Identity', () => {
             jest.clearAllMocks();
         })
 
-        test('should clear varnish cookie for domain', async () => {
-            identity.enableVarnishCookie(10);
+        describe('varnish cookie', () => {
+            test('should clear varnish cookie for domain', async () => {
+                identity.enableVarnishCookie(10);
 
-            mockSessionOkResponse({ result: true, sp_id: 'abc', baseDomain: 'spid.no' });
+                mockSessionOkResponse({result: true, sp_id: 'abc', baseDomain: 'spid.no'});
 
-            await identity.hasSession();
+                await identity.hasSession();
 
-            expect(document.cookie).toBe('SP_ID=abc');
+                expect(document.cookie).toBe('SP_ID=abc');
 
-            identity._clearVarnishCookie();
+                identity._clearVarnishCookie();
 
-            expect(document.cookie).toBe('');
-        });
+                expect(document.cookie).toBe('');
+            });
 
-        test('should be able to set varnish cookie', async () => {
-            await identity.hasSession();
+            test('should be able to set varnish cookie', async () => {
+                await identity.hasSession();
 
-            expect(document.cookie).toBe('');
+                expect(document.cookie).toBe('');
 
-            identity.enableVarnishCookie();
+                identity.enableVarnishCookie();
 
-            await identity.hasSession();
-            expect(document.cookie).toBe('SP_ID=some-jwt-token');
-        });
+                await identity.hasSession();
+                expect(document.cookie).toBe('SP_ID=some-jwt-token');
+            });
 
-        test('should not set varnish cookie if session has no `expiresIn`', async () => {
-            identity.enableVarnishCookie();
+            test('should not set varnish cookie if session has no `expiresIn`', async () => {
+                identity.enableVarnishCookie();
 
-            mockSessionOkResponse({ result: true, sp_id: 'abc' });
+                mockSessionOkResponse({result: true, sp_id: 'abc'});
 
-            await identity.hasSession();
+                await identity.hasSession();
 
-            expect(document.cookie).toBe('');
-        });
+                expect(document.cookie).toBe('');
+            });
 
-        test('should set varnish cookie also when reading from cache', async () => {
-            identity.enableVarnishCookie();
+            test('should set varnish cookie also when reading from cache', async () => {
+                identity.enableVarnishCookie();
 
-            mockSessionOkResponse({ result: true, sp_id: 'should_not_expire', expiresIn: 2 })
+                mockSessionOkResponse({result: true, sp_id: 'should_not_expire', expiresIn: 2})
 
-            await identity.hasSession();
+                await identity.hasSession().then(async (resolve) => {
+                    setTimeout(resolve, 1800);
+                });
 
-            expect(document.cookie).toBe('SP_ID=should_not_expire');
+                expect(document.cookie).toBe('SP_ID=should_not_expire');
 
-            // 1. Here we first wait a little bit (*less* than the 2 second cache expiry)
-            await new Promise((resolve) => setTimeout(resolve, 1800));
+                // 1. Here we first wait a little bit (*less* than the 2 second cache expiry)
 
-            // 2. Then we fetch session info — this should fetch from the cache and set the varnish
-            //    cookie again. In other words, it should exist in document.cookie for at least 2s
-            await identity.hasSession();
+                // 2. Then we fetch session info — this should fetch from the cache and set the varnish
+                //    cookie again. In other words, it should exist in document.cookie for at least 2s
+                await identity.hasSession().then(async (resolve) => {
+                    setTimeout(resolve, 1000);
+                });
 
-            // 3. Finally, we wait another second. In total, we have waited slightly more than 3
-            //    seconds required to expire the *initial* varnish cookie, but as long as the
-            //    retrieval from cache also sets the cookie, we should be good
-            await new Promise((resolve) => setTimeout(resolve, 1000));
-            expect(document.cookie).toBe('SP_ID=should_not_expire');
-        });
+                // 3. Finally, we wait another second. In total, we have waited slightly more than 3
+                //    seconds required to expire the *initial* varnish cookie, but as long as the
+                //    retrieval from cache also sets the cookie, we should be good
+                expect(document.cookie).toBe('SP_ID=should_not_expire');
+            });
 
-        test('should work to set varnish cache expiration', async () => {
-            identity.enableVarnishCookie(3);
+            test('should work to set varnish cache expiration', async () => {
+                identity.enableVarnishCookie(3);
 
-            mockSessionOkResponse({ result: true, sp_id: 'should_remain_after_one_sec', expiresIn: 1 })
+                mockSessionOkResponse({
+                    result: true,
+                    sp_id: 'should_remain_after_one_sec',
+                    expiresIn: 1
+                })
 
-            await identity.hasSession();
+                await identity.hasSession().then(async (resolve) => {
+                    setTimeout(resolve, 1010);
+                });
 
-            await new Promise((resolve) => setTimeout(resolve, 1010));
+                // await new Promise((resolve) => setTimeout(resolve, 1010));
 
-            expect(document.cookie).toBe('SP_ID=should_remain_after_one_sec');
-        });
+                expect(document.cookie).toBe('SP_ID=should_remain_after_one_sec');
+            });
 
-        test('should work to clear varnish cookie', async () => {
-            mockSessionOkResponse({ result: true, sp_id: 'should_be_cleared', expiresIn: 1 });
+            test('should work to clear varnish cookie', async () => {
+                mockSessionOkResponse({ result: true, sp_id: 'should_be_cleared', expiresIn: 1 });
 
-            identity.enableVarnishCookie(3);
+                identity.enableVarnishCookie(3);
 
-            await identity.hasSession();
+                await identity.hasSession();
 
-            expect(document.cookie).toBe('SP_ID=should_be_cleared');
+                expect(document.cookie).toBe('SP_ID=should_be_cleared');
 
-            identity._maybeClearVarnishCookie();
+                identity._maybeClearVarnishCookie();
 
-            expect(document.cookie).toBe('');
+                expect(document.cookie).toBe('');
+            });
         });
 
         describe('`baseDomain`', () => {
