@@ -218,9 +218,9 @@ export class Identity extends EventEmitter {
      */
     _getTabId() {
         if (this._enableSessionCaching) {
-            const tabId = this.sessionStorageCache.get(TAB_ID_KEY);
+            const tabId = this.cache.get(TAB_ID_KEY);
             if (!tabId) {
-                this.sessionStorageCache.set(TAB_ID_KEY, TAB_ID, TAB_ID_TTL);
+                this.cache.set(TAB_ID_KEY, TAB_ID, TAB_ID_TTL);
                 return TAB_ID;
             }
 
@@ -594,7 +594,7 @@ export class Identity extends EventEmitter {
             }
             let sessionData = null;
             try {
-                sessionData = await this._sessionService.get('/v2/session', {tabId: this._getTabId()});
+                sessionData = await this._sessionService.get('/v2/session');
             } catch (err) {
                 if (err && err.code === 400 && this._enableSessionCaching) {
                     const expiresIn = 1000 * (err.expiresIn || 300);
