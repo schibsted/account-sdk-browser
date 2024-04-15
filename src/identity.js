@@ -594,7 +594,7 @@ export class Identity extends EventEmitter {
             }
             let sessionData = null;
             try {
-                sessionData = await this._sessionService.get('/v2/session');
+                sessionData = await this._sessionService.get('/v2/session', {tabId: this._getTabId()});
             } catch (err) {
                 if (err && err.code === 400 && this._enableSessionCaching) {
                     const expiresIn = 1000 * (err.expiresIn || 300);
