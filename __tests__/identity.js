@@ -599,10 +599,7 @@ describe('Identity', () => {
                 const MOCK_TAB_ID = 1234;
                 const spy = jest.spyOn(Identity.prototype, '_getTabId');
                 spy.mockImplementation(() => MOCK_TAB_ID);
-
-                identity = new Identity(defaultOptions);
-                identity._sessionService.fetch = getSessionMock;
-                identity._clearVarnishCookie();
+                identity._tabId = MOCK_TAB_ID;
 
                 await identity.hasSession();
 

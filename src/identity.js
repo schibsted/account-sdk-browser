@@ -234,7 +234,7 @@ export class Identity extends EventEmitter {
      * Checks if getting session is blocked
      * @private
      *
-     * @returns {number}
+     * @returns {number/null}
      */
     _isSessionCallBlocked(){
         return this.localStorageCache.get(SESSION_CALL_BLOCKED_CACHE_KEY);
