@@ -196,6 +196,7 @@ export class Identity extends EventEmitter {
         this.log = log;
         this.callbackBeforeRedirect = callbackBeforeRedirect;
         this._sessionDomain = sessionDomain;
+        this._tabId = this._getTabId();
 
         // Internal hack: set to false to always refresh from hassession
         this._enableSessionCaching = true;
@@ -209,7 +210,7 @@ export class Identity extends EventEmitter {
         this._setOauthServerUrl(env);
         this._setGlobalSessionServiceUrl(env);
 
-        this._unblockSessionCall();
+        this._unblockSessionCallByTab();
     }
 
     /**
@@ -233,7 +234,7 @@ export class Identity extends EventEmitter {
      * Checks if getting session is blocked
      * @private
      *
-     * @returns {boolean|void}
+     * @returns {number}
      */
     _isSessionCallBlocked(){
         return this.localStorageCache.get(SESSION_CALL_BLOCKED_CACHE_KEY);
@@ -246,11 +247,11 @@ export class Identity extends EventEmitter {
      * @returns {void}
      */
     _blockSessionCall(){
-        const SESSION_CALL_BLOCKED = true;
+        const SESSION_CALL_BLOCKED_BY_TAB = this._tabId;
 
         this.localStorageCache.set(
             SESSION_CALL_BLOCKED_CACHE_KEY,
-            SESSION_CALL_BLOCKED,
+            SESSION_CALL_BLOCKED_BY_TAB,
             SESSION_CALL_BLOCKED_TTL
         );
     }
@@ -261,8 +262,10 @@ export class Identity extends EventEmitter {
      *
      * @returns {void}
      */
-    _unblockSessionCall(){
-        this.localStorageCache.delete(SESSION_CALL_BLOCKED_CACHE_KEY);
+    _unblockSessionCallByTab(){
+        if (this._isSessionCallBlocked() === this._tabId) {
+            this.localStorageCache.delete(SESSION_CALL_BLOCKED_CACHE_KEY);
+        }
     }
 
     /**
@@ -589,7 +592,7 @@ export class Identity extends EventEmitter {
             }
             let sessionData = null;
             try {
-                sessionData = await this._sessionService.get('/v2/session', {tabId: this._getTabId()});
+                sessionData = await this._sessionService.get('/v2/session', {tabId: this._tabId});
             } catch (err) {
                 if (err && err.code === 400 && this._enableSessionCaching) {
                     const expiresIn = 1000 * (err.expiresIn || 300);
@@ -605,7 +608,7 @@ export class Identity extends EventEmitter {
 
                     await this.callbackBeforeRedirect();
 
-                    return this._sessionService.makeUrl(sessionData.redirectURL, {tabId: this._getTabId()});
+                    return this._sessionService.makeUrl(sessionData.redirectURL, {tabId: this._tabId});
                 }
 
                 if (this._enableSessionCaching) {

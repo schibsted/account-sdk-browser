@@ -595,11 +595,14 @@ describe('Identity', () => {
 
         describe('session refresh full page redirect', ()=>{
             test('should do redirect when session endpoint respond with redirectURL only', async () => {
-                mockSessionOkResponse(Fixtures.sessionNeedsToBeRefreshedResponse)
-
+                mockSessionOkResponse(Fixtures.sessionNeedsToBeRefreshedResponse);
                 const MOCK_TAB_ID = 1234;
                 const spy = jest.spyOn(Identity.prototype, '_getTabId');
                 spy.mockImplementation(() => MOCK_TAB_ID);
+
+                identity = new Identity(defaultOptions);
+                identity._sessionService.fetch = getSessionMock;
+                identity._clearVarnishCookie();
 
                 await identity.hasSession();
 
