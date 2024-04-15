@@ -189,8 +189,7 @@ export class Identity extends EventEmitter {
         this._sessionInitiatedSent = false;
         this.window = window;
         this.clientId = clientId;
-        this.sessionStorageCache = new Cache(() => this.window && this.window.sessionStorage);
-        this.localStorageCache = new Cache(() => this.window && this.window.localStorage);
+        this.cache = new Cache(() => this.window && this.window.sessionStorage);
         this.redirectUri = redirectUri;
         this.env = env;
         this.log = log;
@@ -236,7 +235,9 @@ export class Identity extends EventEmitter {
      * @returns {boolean|void}
      */
     _isSessionCallBlocked(){
-        return this.localStorageCache.get(SESSION_CALL_BLOCKED_CACHE_KEY);
+        if (this._enableSessionCaching) {
+            return this.cache.get(SESSION_CALL_BLOCKED_CACHE_KEY);
+        }
     }
 
     /**
@@ -246,13 +247,15 @@ export class Identity extends EventEmitter {
      * @returns {void}
      */
     _blockSessionCall(){
-        const SESSION_CALL_BLOCKED = true;
+        if (this._enableSessionCaching) {
+            const SESSION_CALL_BLOCKED = true;
 
-        this.localStorageCache.set(
-            SESSION_CALL_BLOCKED_CACHE_KEY,
-            SESSION_CALL_BLOCKED,
-            SESSION_CALL_BLOCKED_TTL
-        );
+            this.cache.set(
+                SESSION_CALL_BLOCKED_CACHE_KEY,
+                SESSION_CALL_BLOCKED,
+                SESSION_CALL_BLOCKED_TTL
+            );
+        }
     }
 
     /**
@@ -262,7 +265,9 @@ export class Identity extends EventEmitter {
      * @returns {void}
      */
     _unblockSessionCall(){
-        this.localStorageCache.delete(SESSION_CALL_BLOCKED_CACHE_KEY);
+        if (this._enableSessionCaching) {
+            this.cache.delete(SESSION_CALL_BLOCKED_CACHE_KEY);
+        }
     }
 
     /**
@@ -582,7 +587,7 @@ export class Identity extends EventEmitter {
         const _getSession = async () => {
             if (this._enableSessionCaching) {
                 // Try to resolve from cache (it has a TTL)
-                let cachedSession = this.sessionStorageCache.get(HAS_SESSION_CACHE_KEY);
+                let cachedSession = this.cache.get(HAS_SESSION_CACHE_KEY);
                 if (cachedSession) {
                     return _postProcess(cachedSession);
                 }
@@ -593,7 +598,7 @@ export class Identity extends EventEmitter {
             } catch (err) {
                 if (err && err.code === 400 && this._enableSessionCaching) {
                     const expiresIn = 1000 * (err.expiresIn || 300);
-                    this.sessionStorageCache.set(HAS_SESSION_CACHE_KEY, { error: err }, expiresIn);
+                    this.cache.set(HAS_SESSION_CACHE_KEY, { error: err }, expiresIn);
                 }
                 throw err;
             }
@@ -610,7 +615,7 @@ export class Identity extends EventEmitter {
 
                 if (this._enableSessionCaching) {
                     const expiresIn = 1000 * (sessionData.expiresIn || 300);
-                    this.sessionStorageCache.set(HAS_SESSION_CACHE_KEY, sessionData, expiresIn);
+                    this.cache.set(HAS_SESSION_CACHE_KEY, sessionData, expiresIn);
                 }
             }
 
@@ -658,7 +663,7 @@ export class Identity extends EventEmitter {
      * @returns {void}
      */
     clearCachedUserSession() {
-        this.sessionStorageCache.delete(HAS_SESSION_CACHE_KEY);
+        this.cache.delete(HAS_SESSION_CACHE_KEY);
     }
 
     /**
@@ -869,7 +874,7 @@ export class Identity extends EventEmitter {
         prompt = 'select_account'
     }) {
         this._closePopup();
-        this.sessionStorageCache.delete(HAS_SESSION_CACHE_KEY);
+        this.cache.delete(HAS_SESSION_CACHE_KEY);
         const url = this.loginUrl({
             state,
             acrValues,
@@ -918,7 +923,7 @@ export class Identity extends EventEmitter {
      * @return {void}
      */
     logout(redirectUri = this.redirectUri) {
-        this.sessionStorageCache.delete(HAS_SESSION_CACHE_KEY);
+        this.cache.delete(HAS_SESSION_CACHE_KEY);
         this._maybeClearVarnishCookie();
         this.emit('logout');
         this.window.location.href = this.logoutUrl(redirectUri);
