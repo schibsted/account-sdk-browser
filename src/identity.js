@@ -219,9 +219,9 @@ export class Identity extends EventEmitter {
      */
     _getTabId() {
         if (this._enableSessionCaching) {
-            const tabId = this.cache.get(TAB_ID_KEY);
+            const tabId = this.sessionStorageCache.get(TAB_ID_KEY);
             if (!tabId) {
-                this.cache.set(TAB_ID_KEY, TAB_ID, TAB_ID_TTL);
+                this.sessionStorageCache.set(TAB_ID_KEY, TAB_ID, TAB_ID_TTL);
                 return TAB_ID;
             }
 
