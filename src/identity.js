@@ -26,7 +26,7 @@ import version from './version.js';
  * `password` (will force password confirmation, even if user is already logged in), `eid`. Those values might
  * be mixed as space-separated string. To make sure that user has authenticated with 2FA you need
  * to verify AMR (Authentication Methods References) claim in ID token.
- * Might also be used to ensure additional acr (sms, otp) for already logged in users.
+ * Might also be used to ensure additional acr (sms, otp) for already logged-in users.
  * Supported value is also 'otp-email' means one time password using email.
  * @property {string} [scope] - The OAuth scopes for the tokens. This is a list of
  * scopes, separated by space. If the list of scopes contains `openid`, the generated tokens
@@ -60,7 +60,7 @@ import version from './version.js';
  * `password` (will force password confirmation, even if user is already logged in). Those values might
  * be mixed as space-separated string. To make sure that user has authenticated with 2FA you need
  * to verify AMR (Authentication Methods References) claim in ID token.
- * Might also be used to ensure additional acr (sms, otp) for already logged in users.
+ * Might also be used to ensure additional acr (sms, otp) for already logged-in users.
  * Supported value is also 'otp-email' means one time password using email.
  * @property {string} [scope] - The OAuth scopes for the tokens. This is a list of
  * scopes, separated by space. If the list of scopes contains `openid`, the generated tokens
@@ -134,7 +134,7 @@ import version from './version.js';
 
 /**
  * @typedef {object} SimplifiedLoginData
- * @property {string} identifier - Deprecated: User UUID, to be be used as `loginHint` for {@link Identity#login}
+ * @property {string} identifier - Deprecated: User UUID, to be as `loginHint` for {@link Identity#login}
  * @property {string} display_text - Human-readable user identifier
  * @property {string} client_name - Client name
  */
@@ -155,7 +155,7 @@ const TAB_ID_TTL = 1000 * 60 * 60 * 24 * 30;
 const globalWindow = () => window;
 
 /**
- * Provides Identity functionalty to a web page
+ * Provides Identity functionality to a web page
  */
 export class Identity extends EventEmitter {
     /**
@@ -214,7 +214,7 @@ export class Identity extends EventEmitter {
     }
 
     /**
-     * Read tabId from session storage
+     * Read tabId from session storage if possible, otherwise save tabId to session storage and return it
      * @returns {number}
      * @private
      */
@@ -231,9 +231,8 @@ export class Identity extends EventEmitter {
     }
 
     /**
-     * Checks if getting session is blocked
+     * Checks if calling get session is blocked
      * @private
-     *
      * @returns {number|null}
      */
     _isSessionCallBlocked(){
@@ -241,9 +240,8 @@ export class Identity extends EventEmitter {
     }
 
     /**
-     * Block calls to get session
+     * Block calls to get session. This is done to prevent concurrent calls which can log user out if session is refreshed by one of them
      * @private
-     *
      * @returns {void}
      */
     _blockSessionCall(){
@@ -257,9 +255,8 @@ export class Identity extends EventEmitter {
     }
 
     /**
-     * Unblocks calls to get session
+     * Unblocks calls to get session if the lock was put by the same tab
      * @private
-     *
      * @returns {void}
      */
     _unblockSessionCallByTab() {
@@ -346,7 +343,7 @@ export class Identity extends EventEmitter {
     }
 
     /**
-     * Emits the relevant events based on the previous and new reply from hassession
+     * Emits the relevant events based on the previous and new reply from {@link Identity#hasSession}
      * @private
      * @param {object} previous
      * @param {object} current
@@ -426,7 +423,7 @@ export class Identity extends EventEmitter {
     }
 
     /**
-     * Set the Varnish cookie (`SP_ID`) when hasSession() is called. Note that most browsers require
+     * Set the Varnish cookie (`SP_ID`) when {@link Identity#hasSession} is called. Note that most browsers require
      * that you are on a "real domain" for this to work — so, **not** `localhost`
      * @param {object} [options]
      * @param {number} [options.expiresIn] Override this to set number of seconds before the varnish
@@ -715,7 +712,7 @@ export class Identity extends EventEmitter {
      * @description This function calls {@link Identity#hasSession} internally and thus has the side
      * effect that it might perform an auto-login on the user
      * @throws {SDKError} If the user isn't connected to the merchant
-     * @return {Promise<string>} The `userId` field (not to be confused with the `uuid`)
+     * @return {number} The `userId` field (not to be confused with the `uuid`)
      */
     async getUserId() {
         const user = await this.hasSession();

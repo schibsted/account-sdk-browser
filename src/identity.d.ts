@@ -44,23 +44,20 @@ export class Identity extends TinyEmitter {
      */
     private _getTabId;
     /**
-     * Checks if getting session is blocked
+     * Checks if calling get session is blocked
      * @private
-     *
      * @returns {boolean|void}
      */
     private _isSessionCallBlocked;
     /**
-     * Block calls to get session
+     * Block calls to get session. This is done to prevent concurrent calls which can log user out if session is refreshed by one of them
      * @private
-     *
      * @returns {void}
      */
     private _blockSessionCall;
     /**
-     * Unblocks calls to get session
+     * Unblocks calls to get session if the lock was put by the same tab
      * @private
-     *
      * @returns {void}
      */
     private _unblockSessionCall;
@@ -105,7 +102,7 @@ export class Identity extends TinyEmitter {
     private _setGlobalSessionServiceUrl;
     _globalSessionService: RESTClient;
     /**
-     * Emits the relevant events based on the previous and new reply from hassession
+     * Emits the relevant events based on the previous and new reply from {@link Identity#hasSession}
      * @private
      * @param {object} previous
      * @param {object} current
@@ -120,7 +117,7 @@ export class Identity extends TinyEmitter {
     private _closePopup;
     popup: Window;
     /**
-     * Set the Varnish cookie (`SP_ID`) when hasSession() is called. Note that most browsers require
+     * Set the Varnish cookie (`SP_ID`) when {@link Identity#hasSession} is called. Note that most browsers require
      * that you are on a "real domain" for this to work — so, **not** `localhost`
      * @param {object} [options]
      * @param {number} [options.expiresIn] Override this to set number of seconds before the varnish
@@ -223,7 +220,7 @@ export class Identity extends TinyEmitter {
      * @description This function calls {@link Identity#hasSession} internally and thus has the side
      * effect that it might perform an auto-login on the user
      * @throws {SDKError} If the user isn't connected to the merchant
-     * @return {Promise<string>} The `userId` field (not to be confused with the `uuid`)
+     * @return {number} The `userId` field (not to be confused with the `uuid`)
      */
     getUserId(): Promise<string>;
     /**
@@ -383,7 +380,7 @@ export type LoginOptions = {
      * `password` (will force password confirmation, even if user is already logged in), `eid`. Those values might
      * be mixed as space-separated string. To make sure that user has authenticated with 2FA you need
      * to verify AMR (Authentication Methods References) claim in ID token.
-     * Might also be used to ensure additional acr (sms, otp, eid) for already logged in users.
+     * Might also be used to ensure additional acr (sms, otp, eid) for already logged-in users.
      * Supported value is also 'otp-email' means one time password using email.
      */
     acrValues?: string;
@@ -452,7 +449,7 @@ export type SimplifiedLoginWidgetLoginOptions = {
      * `password` (will force password confirmation, even if user is already logged in). Those values might
      * be mixed as space-separated string. To make sure that user has authenticated with 2FA you need
      * to verify AMR (Authentication Methods References) claim in ID token.
-     * Might also be used to ensure additional acr (sms, otp) for already logged in users.
+     * Might also be used to ensure additional acr (sms, otp) for already logged-in users.
      * Supported value is also 'otp-email' means one time password using email.
      */
     acrValues?: string;
@@ -620,7 +617,7 @@ export type HasSessionFailureResponse = {
 };
 export type SimplifiedLoginData = {
     /**
-     * - Deprecated: User UUID, to be be used as `loginHint` for {@link Identity#login}
+     * - Deprecated: User UUID, to be used as `loginHint` for {@link Identity#login}
      */
     identifier: string;
     /**
