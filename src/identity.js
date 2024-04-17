@@ -146,7 +146,7 @@ import version from './version.js';
 
 const HAS_SESSION_CACHE_KEY = 'hasSession-cache';
 const SESSION_CALL_BLOCKED_CACHE_KEY = 'sessionCallBlocked-cache';
-const SESSION_CALL_BLOCKED_TTL = 1000 * 60 * 5;
+const SESSION_CALL_BLOCKED_TTL = 1000 * 60;
 
 const TAB_ID_KEY = 'tab-id-cache';
 const TAB_ID = Math.floor(Math.random() * 100000)
@@ -189,8 +189,8 @@ export class Identity extends EventEmitter {
         this._sessionInitiatedSent = false;
         this.window = window;
         this.clientId = clientId;
-        this.sessionStorageCache = new Cache(() => this.window && this.window.sessionStorage);
-        this.localStorageCache = new Cache(() => this.window && this.window.localStorage);
+        this.sessionStorageCache = new Cache(this.window && this.window.sessionStorage);
+        this.localStorageCache = new Cache(this.window && this.window.localStorage);
         this.redirectUri = redirectUri;
         this.env = env;
         this.log = log;
@@ -605,7 +605,8 @@ export class Identity extends EventEmitter {
 
                     await this.callbackBeforeRedirect();
 
-                    return this._sessionService.makeUrl(sessionData.redirectURL, {tabId: this._tabId});
+                    this.window.addEventListener('load', () => this._unblockSessionCallByTab());
+                    this.window.location.href = this._sessionService.makeUrl(sessionData.redirectURL, {tabId: this._tabId});
                 }
 
                 if (this._enableSessionCaching) {
@@ -620,10 +621,6 @@ export class Identity extends EventEmitter {
             .then(
                 sessionData => {
                     this._hasSessionInProgress = false;
-
-                    if (isUrl(sessionData)) {
-                        return this.window.location.href = sessionData;
-                    }
 
                     return sessionData;
                 },
