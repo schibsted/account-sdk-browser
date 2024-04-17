@@ -39,7 +39,7 @@ Additionally, we’ll deprecate the currently used API in the future.
 ### Necessary changes
 
 <p align="justify">
-Firstly, change the session-service API you’re using to query for sessions from `/session` to `/v2/session`.
+Firstly, change the session-service API you’re using to query for sessions from  `/session` to `/v2/session`.
 
 This new API will detect sessions that are about to expire and in cases where the browser sending the request is Safari-based, will return a new payload:
 
@@ -49,13 +49,13 @@ This new API will detect sessions that are about to expire and in cases where th
 }
 ```
 
-For Safari-based browsers, our service will return the aforementioned payload when there's a need to refresh the session. Check the response, and if it contains a `redirectURL` manually redirect the client to the resource returned in a response.
+For Safari-based browsers, our service will return the aforementioned payload when there's a need to refresh the session. Check the response, and if it contains a `redirectURL` manually redirect the client to the session-service page URL returned in the response.
 
 This action has to be made client-side, the full redirect URL can be constructed following this example:
 
 ```https://global-session-service-url/redirect-url?redirect_uri=url_to_your_app```
 
-At last, trigger a full-page reload by redirecting to this URL. The simplest way to achieve that is to overwrite `window.location.href`
+At last, trigger page navigation by loading this URL. The simplest way to achieve that is to overwrite `window.location.href`
 
 ```window.location.href = redirectURL```
 
