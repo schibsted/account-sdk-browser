@@ -28,8 +28,7 @@ export class Identity extends TinyEmitter {
     _sessionInitiatedSent: boolean;
     window: any;
     clientId: string;
-    sessionStorageCache: any;
-    localStorageCache: any;
+    cache: any;
     redirectUri: string;
     env: string;
     log: Function;
