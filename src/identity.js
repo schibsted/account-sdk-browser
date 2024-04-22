@@ -247,7 +247,7 @@ export class Identity extends EventEmitter {
     _blockSessionCall(){
         const SESSION_CALL_BLOCKED_BY_TAB = this._tabId;
 
-        this.cache.set(
+        this.localStorageCache.set(
             SESSION_CALL_BLOCKED_CACHE_KEY,
             SESSION_CALL_BLOCKED_BY_TAB,
             SESSION_CALL_BLOCKED_TTL
@@ -261,7 +261,7 @@ export class Identity extends EventEmitter {
      */
     _unblockSessionCallByTab() {
         if (this._isSessionCallBlocked() === this._tabId) {
-            this.cache.delete(SESSION_CALL_BLOCKED_CACHE_KEY);
+            this.localStorageCache.delete(SESSION_CALL_BLOCKED_CACHE_KEY);
         }
     }
 

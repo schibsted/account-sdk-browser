@@ -563,7 +563,7 @@ describe('Identity', () => {
                 jest.spyOn(Date, 'now')
                     .mockReturnValue(new Date("2019-11-09T10:00:00").getTime());
 
-                const getExpiresOn = () => JSON.parse(identity.cache.cache.get('hasSession-cache')).expiresOn;
+                const getExpiresOn = () => JSON.parse(identity.sessionStorageCache.cache.get('hasSession-cache')).expiresOn;
 
                 await identity.hasSession();
 
