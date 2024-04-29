@@ -146,7 +146,7 @@ import version from './version.js';
 
 const HAS_SESSION_CACHE_KEY = 'hasSession-cache';
 const SESSION_CALL_BLOCKED_CACHE_KEY = 'sessionCallBlocked-cache';
-const SESSION_CALL_BLOCKED_TTL = 1000 * 60;
+const SESSION_CALL_BLOCKED_TTL = 1000 * 30;
 
 const TAB_ID_KEY = 'tab-id-cache';
 const TAB_ID = Math.floor(Math.random() * 100000)
@@ -186,21 +186,21 @@ export class Identity extends EventEmitter {
         assert(sessionDomain && isUrl(sessionDomain), 'sessionDomain parameter is not a valid URL');
 
         spidTalk.emulate(window);
+
+        // Internal hack: set as false to always refresh from hasSession
+        this._enableSessionCaching = true;
+
         this._sessionInitiatedSent = false;
         this.window = window;
         this.clientId = clientId;
         this.sessionStorageCache = new Cache(this.window && this.window.sessionStorage);
         this.localStorageCache = new Cache(this.window && this.window.localStorage);
-
         this.redirectUri = redirectUri;
         this.env = env;
         this.log = log;
         this.callbackBeforeRedirect = callbackBeforeRedirect;
         this._sessionDomain = sessionDomain;
         this._tabId = this._getTabId();
-
-        // Internal hack: set as false to always refresh from hasSession
-        this._enableSessionCaching = true;
 
         // Old session
         this._session = {};
@@ -210,7 +210,6 @@ export class Identity extends EventEmitter {
         this._setBffServerUrl(env);
         this._setOauthServerUrl(env);
         this._setGlobalSessionServiceUrl(env);
-
         this._unblockSessionCallByTab();
     }
 
@@ -224,15 +223,18 @@ export class Identity extends EventEmitter {
             const tabId = this.sessionStorageCache.get(TAB_ID_KEY);
             if (!tabId) {
                 this.sessionStorageCache.set(TAB_ID_KEY, TAB_ID, TAB_ID_TTL);
+
                 return TAB_ID;
             }
 
             return tabId;
         }
+
+        return TAB_ID;
     }
 
     /**
-     * Checks if calling get session is blocked
+     * Checks if calling GET session is blocked
      * @private
      * @returns {number|null}
      */
@@ -246,11 +248,9 @@ export class Identity extends EventEmitter {
      * @returns {void}
      */
     _blockSessionCall(){
-        const SESSION_CALL_BLOCKED_BY_TAB = this._tabId;
-
         this.localStorageCache.set(
             SESSION_CALL_BLOCKED_CACHE_KEY,
-            SESSION_CALL_BLOCKED_BY_TAB,
+            this._tabId,
             SESSION_CALL_BLOCKED_TTL
         );
     }
@@ -588,6 +588,7 @@ export class Identity extends EventEmitter {
                     return _postProcess(cachedSession);
                 }
             }
+
             let sessionData = null;
             try {
                 sessionData = await this._sessionService.get('/v2/session', {tabId: this._tabId});
@@ -606,8 +607,7 @@ export class Identity extends EventEmitter {
 
                     await this.callbackBeforeRedirect();
 
-                    this.window.addEventListener('load', () => this._unblockSessionCallByTab());
-                    this.window.location.href = this._sessionService.makeUrl(sessionData.redirectURL, {tabId: this._tabId});
+                    return this._sessionService.makeUrl(sessionData.redirectURL, {tabId: this._getTabId()});
                 }
 
                 if (this._enableSessionCaching) {
@@ -622,6 +622,10 @@ export class Identity extends EventEmitter {
             .then(
                 sessionData => {
                     this._hasSessionInProgress = false;
+
+                    if (isUrl(sessionData)) {
+                        return this.window.location.href = sessionData;
+                    }
 
                     return sessionData;
                 },
