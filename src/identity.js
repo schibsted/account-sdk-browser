@@ -146,7 +146,7 @@ import version from './version.js';
 
 const HAS_SESSION_CACHE_KEY = 'hasSession-cache';
 const SESSION_CALL_BLOCKED_CACHE_KEY = 'sessionCallBlocked-cache';
-const SESSION_CALL_BLOCKED_TTL = 1000 * 30;
+const SESSION_CALL_BLOCKED_TTL = 1000 * 30; //set to 30s, the default period for a request timeout
 
 const TAB_ID_KEY = 'tab-id-cache';
 const TAB_ID = Math.floor(Math.random() * 100000)
@@ -193,8 +193,8 @@ export class Identity extends EventEmitter {
         this._sessionInitiatedSent = false;
         this.window = window;
         this.clientId = clientId;
-        this.sessionStorageCache = new Cache(this.window && this.window.sessionStorage);
-        this.localStorageCache = new Cache(this.window && this.window.localStorage);
+        this.sessionStorageCache = new Cache(() => this.window && this.window.sessionStorage);
+        this.localStorageCache = new Cache(() =>this.window && this.window.localStorage);
         this.redirectUri = redirectUri;
         this.env = env;
         this.log = log;
@@ -554,11 +554,6 @@ export class Identity extends EventEmitter {
      * @return {Promise<HasSessionSuccessResponse|HasSessionFailureResponse>}
      */
     hasSession() {
-        const isSessionCallBlocked = this._isSessionCallBlocked()
-        if (isSessionCallBlocked) {
-            return this._session;
-        }
-
         if (this._hasSessionInProgress) {
             return this._hasSessionInProgress;
         }
@@ -589,8 +584,16 @@ export class Identity extends EventEmitter {
                 }
             }
 
+            // Prevent concurrent calls to session-service
+            if (this._isSessionCallBlocked()) {
+                // Returning data directly, without _postProcess since the data returned is the local copy
+                return this._session;
+            }
+
             let sessionData = null;
             try {
+                this._blockSessionCall();
+
                 sessionData = await this._sessionService.get('/v2/session', {tabId: this._tabId});
             } catch (err) {
                 if (err && err.code === 400 && this._enableSessionCaching) {
@@ -601,13 +604,10 @@ export class Identity extends EventEmitter {
             }
 
             if (sessionData){
-                // for expiring session and safari browser do full page redirect to gain new session
+                // For expiring session and Safari browser do full page redirect to get new session
                 if(_checkRedirectionNeed(sessionData)){
-                    this._blockSessionCall();
-
                     await this.callbackBeforeRedirect();
-
-                    return this._sessionService.makeUrl(sessionData.redirectURL, {tabId: this._getTabId()});
+                    this.window.location.href = this._sessionService.makeUrl(sessionData.redirectURL, {tabId: this._getTabId()});
                 }
 
                 if (this._enableSessionCaching) {
@@ -623,10 +623,6 @@ export class Identity extends EventEmitter {
                 sessionData => {
                     this._hasSessionInProgress = false;
 
-                    if (isUrl(sessionData)) {
-                        return this.window.location.href = sessionData;
-                    }
-
                     return sessionData;
                 },
                 err => {
@@ -636,6 +632,7 @@ export class Identity extends EventEmitter {
                 }
             );
 
+        this._unblockSessionCallByTab();
         return this._hasSessionInProgress;
     }
 
