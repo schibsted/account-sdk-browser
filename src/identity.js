@@ -193,8 +193,8 @@ export class Identity extends EventEmitter {
         this._sessionInitiatedSent = false;
         this.window = window;
         this.clientId = clientId;
-        this.sessionStorageCache = new Cache(this.window && this.window.sessionStorage);
-        this.localStorageCache = new Cache(this.window && this.window.localStorage);
+        this.sessionStorageCache = new Cache(() => this.window && this.window.sessionStorage);
+        this.localStorageCache = new Cache(() =>this.window && this.window.localStorage);
         this.redirectUri = redirectUri;
         this.env = env;
         this.log = log;
