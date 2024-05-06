@@ -586,8 +586,7 @@ export class Identity extends EventEmitter {
 
             // Prevent concurrent calls to session-service
             if (this._isSessionCallBlocked()) {
-                // Returning data directly, without _postProcess since the data returned is the local copy
-                return this._session;
+                return _postProcess(this._session);
             }
 
             let sessionData = null;
@@ -607,7 +606,7 @@ export class Identity extends EventEmitter {
                 // For expiring session and Safari browser do full page redirect to get new session
                 if(_checkRedirectionNeed(sessionData)){
                     await this.callbackBeforeRedirect();
-                    this.window.location.href = this._sessionService.makeUrl(sessionData.redirectURL, {tabId: this._getTabId()});
+                    return this.window.location.href = this._sessionService.makeUrl(sessionData.redirectURL, {tabId: this._getTabId()});
                 }
 
                 if (this._enableSessionCaching) {
