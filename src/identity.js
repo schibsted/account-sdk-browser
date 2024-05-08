@@ -151,6 +151,9 @@ const SESSION_CALL_BLOCKED_TTL = 1000 * 30; //set to 30s, the default period for
 const TAB_ID_KEY = 'tab-id-cache';
 const TAB_ID = Math.floor(Math.random() * 100000)
 const TAB_ID_TTL = 1000 * 60 * 60 * 24 * 30;
+const MAX_SESSION_CALL_RETRIES = 10;
+const MIN_SESSION_CALL_WAIT_TIME = 100;
+
 
 const globalWindow = () => window;
 
@@ -568,70 +571,121 @@ export class Identity extends EventEmitter {
             return sessionData;
         };
 
-        const _checkRedirectionNeed = (sessionData={})=>{
+        const _checkRedirectionNeed = (sessionData= {}) => {
             const sessionDataKeys = Object.keys(sessionData);
 
             return sessionDataKeys.length === 1 &&
                 sessionDataKeys[0] === 'redirectURL';
-        }
+        };
 
         const _getSession = async () => {
-            if (this._enableSessionCaching) {
-                // Try to resolve from cache (it has a TTL)
-                let cachedSession = this.sessionStorageCache.get(HAS_SESSION_CACHE_KEY);
-                if (cachedSession) {
-                    return _postProcess(cachedSession);
+            const callSessionEndpoint = async () => {
+                try {
+                    // Blocking future calls to session-service. This lock is removed after the response is processed
+                    // to account for redirection that can happen towards session-service too
+                    this._blockSessionCall();
+
+                    return await this._sessionService.get('/v2/session', {tabId: this._tabId});
+                } catch (err) {
+                    if (err && err.code === 400 && this._enableSessionCaching) {
+                        const expiresIn = 1000 * (err.expiresIn || 300);
+                        this.sessionStorageCache.set(HAS_SESSION_CACHE_KEY, {error: err}, expiresIn);
+                    }
+
+                    throw err;
                 }
-            }
+            };
 
-            // Prevent concurrent calls to session-service
-            if (this._isSessionCallBlocked()) {
-                return _postProcess(this._session);
-            }
+            const useSessionResponseIfValid = async (sessionData) => {
+                if (sessionData) {
+                    // For expiring session and WebKit browsers do a full page redirect to get a new session
+                    if (_checkRedirectionNeed(sessionData)) {
+                        await this.callbackBeforeRedirect();
 
-            let sessionData = null;
-            try {
-                this._blockSessionCall();
+                        // Doing a return here, to avoid caching the redirect response
+                        return this.window.location.href = this._sessionService.makeUrl(sessionData.redirectURL, {tabId: this._getTabId()});
+                    }
 
-                sessionData = await this._sessionService.get('/v2/session', {tabId: this._tabId});
-            } catch (err) {
-                if (err && err.code === 400 && this._enableSessionCaching) {
-                    const expiresIn = 1000 * (err.expiresIn || 300);
-                    this.sessionStorageCache.set(HAS_SESSION_CACHE_KEY, { error: err }, expiresIn);
+                    if (this._enableSessionCaching) {
+                        const expiresIn = 1000 * (sessionData.expiresIn || 300);
+                        this.sessionStorageCache.set(HAS_SESSION_CACHE_KEY, sessionData, expiresIn);
+                    }
+
+                    return _postProcess(sessionData)
                 }
-                throw err;
-            }
+            };
 
-            if (sessionData){
-                // For expiring session and Safari browser do full page redirect to get new session
-                if(_checkRedirectionNeed(sessionData)){
-                    await this.callbackBeforeRedirect();
-                    return this.window.location.href = this._sessionService.makeUrl(sessionData.redirectURL, {tabId: this._getTabId()});
-                }
-
+            const checkIfSessionCallIsNeededAndSafe = async (blockedAction) => {
                 if (this._enableSessionCaching) {
-                    const expiresIn = 1000 * (sessionData.expiresIn || 300);
-                    this.sessionStorageCache.set(HAS_SESSION_CACHE_KEY, sessionData, expiresIn);
+                    // Try to resolve from cache (it has a TTL)
+                    let cachedSession = this.sessionStorageCache.get(HAS_SESSION_CACHE_KEY);
+                    if (cachedSession) {
+                        return _postProcess(cachedSession);
+                    }
                 }
-            }
 
-            return _postProcess(sessionData);
+                if (this._isSessionCallBlocked()) {
+                    if (this._session && this._session.userId) {
+                        return _postProcess(this._session);
+                    }
+
+                    if (blockedAction) {
+                        const blockedResult = await blockedAction();
+
+                        return _postProcess(blockedResult);
+                    }
+
+                    return null;
+                }
+                const sessionData = await callSessionEndpoint();
+
+                return await useSessionResponseIfValid(sessionData);
+            };
+
+            return await checkIfSessionCallIsNeededAndSafe(async ()=> {
+                let retryCount = 0;
+
+                // Try to call session-service MAX_SESSION_CALL_RETRIES times, waiting up to 1 second each time
+                while (retryCount < MAX_SESSION_CALL_RETRIES) {
+                    retryCount++;
+                    const randomWaitingStep = Math.floor(Math.random() * 9); // ignoring waiting times that are too small to matter
+                    const randomWaitTime = MIN_SESSION_CALL_WAIT_TIME + (randomWaitingStep * 100);
+                    await new Promise( resolve => { setTimeout(() =>{
+                        return resolve();
+                    }, randomWaitTime)});
+
+                    const result = await checkIfSessionCallIsNeededAndSafe(null);
+                    if (result) {
+                        return result;
+                    }
+                }
+
+                // exceeded number of attempts, returning old session info
+                if (this._session && this._session.userId) {
+                    return this._session;
+                }
+
+                throw new SDKError('HasSession exceeded maximum number of attempts');
+            });
         };
+
         this._hasSessionInProgress = _getSession()
             .then(
                 sessionData => {
                     this._hasSessionInProgress = false;
+                    this._unblockSessionCallByTab();
 
                     return sessionData;
                 },
                 err => {
                     this.emit('error', err);
                     this._hasSessionInProgress = false;
+                    this._unblockSessionCallByTab();
+
                     throw new SDKError('HasSession failed', err);
                 }
             );
 
-        this._unblockSessionCallByTab();
         return this._hasSessionInProgress;
     }
 
