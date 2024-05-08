@@ -180,7 +180,7 @@ export class Identity extends EventEmitter {
         env = 'PRE',
         log,
         window = globalWindow(),
-        callbackBeforeRedirect = ()=>{}
+        callbackBeforeRedirect = () => {}
     }) {
         super();
         assert(isNonEmptyString(clientId), 'clientId parameter is required');
@@ -197,7 +197,7 @@ export class Identity extends EventEmitter {
         this.window = window;
         this.clientId = clientId;
         this.sessionStorageCache = new Cache(() => this.window && this.window.sessionStorage);
-        this.localStorageCache = new Cache(() =>this.window && this.window.localStorage);
+        this.localStorageCache = new Cache(() => this.window && this.window.localStorage);
         this.redirectUri = redirectUri;
         this.env = env;
         this.log = log;
@@ -241,7 +241,7 @@ export class Identity extends EventEmitter {
      * @private
      * @returns {string|null}
      */
-    _isSessionCallBlocked(){
+    _isSessionCallBlocked() {
         return this.localStorageCache.get(SESSION_CALL_BLOCKED_CACHE_KEY);
     }
 
@@ -250,7 +250,7 @@ export class Identity extends EventEmitter {
      * @private
      * @returns {void}
      */
-    _blockSessionCall(){
+    _blockSessionCall() {
         this.localStorageCache.set(
             SESSION_CALL_BLOCKED_CACHE_KEY,
             this._tabId,
@@ -342,7 +342,7 @@ export class Identity extends EventEmitter {
         this._globalSessionService = new RESTClient({
             serverUrl: urlMapper(url, ENDPOINTS.SESSION_SERVICE),
             log: this.log,
-            defaultParams: { client_sdrn, sdk_version: version },
+            defaultParams: {client_sdrn, sdk_version: version},
         });
     }
 
@@ -506,7 +506,7 @@ export class Identity extends EventEmitter {
      * @returns {void}
      */
     _clearVarnishCookie() {
-        const baseDomain =  this._session && typeof this._session.baseDomain === 'string'
+        const baseDomain = this._session && typeof this._session.baseDomain === 'string'
             ? this._session.baseDomain
             : document.domain;
 
@@ -571,7 +571,7 @@ export class Identity extends EventEmitter {
             return sessionData;
         };
 
-        const _checkRedirectionNeed = (sessionData= {}) => {
+        const _checkRedirectionNeed = (sessionData = {}) => {
             const sessionDataKeys = Object.keys(sessionData);
 
             return sessionDataKeys.length === 1 &&
@@ -645,7 +645,7 @@ export class Identity extends EventEmitter {
                 return await useSessionResponseIfValid(sessionData);
             };
 
-            return await checkIfSessionCallIsNeededAndSafe(async ()=> {
+            return await checkIfSessionCallIsNeededAndSafe(async () => {
                 let retryCount = 0;
 
                 // Try to call session-service MAX_SESSION_CALL_RETRIES times, waiting up to 1 second each time
@@ -653,7 +653,7 @@ export class Identity extends EventEmitter {
                     retryCount++;
                     const randomWaitingStep = Math.floor(Math.random() * 9); // ignoring waiting times that are too small to matter
                     const randomWaitTime = MIN_SESSION_CALL_WAIT_TIME + (randomWaitingStep * 100);
-                    await new Promise( resolve => setTimeout(resolve, randomWaitTime));
+                    await new Promise(resolve => setTimeout(resolve, randomWaitTime));
 
                     // attempt to call session service, but don't take any action if call is blocked and don't use the result
                     const result = await checkIfSessionCallIsNeededAndSafe(null);
@@ -804,10 +804,10 @@ export class Identity extends EventEmitter {
         if (!pairId)
             throw new SDKError('pairId missing in user session!');
 
-        if(!externalParty || externalParty.length === 0) {
+        if (!externalParty || externalParty.length === 0) {
             throw new SDKError('externalParty cannot be empty');
         }
-        const _toHexDigest = (hashBuffer) =>{
+        const _toHexDigest = (hashBuffer) => {
             // Convert buffer to byte array
             const hashArray = Array.from(new Uint8Array(hashBuffer));
             // Convert bytes to hex string
@@ -886,6 +886,7 @@ export class Identity extends EventEmitter {
             return null;
         }
     }
+
     /**
      * If a popup is desired, this function needs to be called in response to a user event (like
      * click or tap) in order to work correctly. Otherwise the popup will be blocked by the
@@ -1136,7 +1137,10 @@ export class Identity extends EventEmitter {
                 };
 
                 const loginNotYouHandler = async () => {
-                    this.login(Object.assign(await prepareLoginParams(loginParams), {loginHint: userData.identifier, prompt: 'login'}));
+                    this.login(Object.assign(await prepareLoginParams(loginParams), {
+                        loginHint: userData.identifier,
+                        prompt: 'login'
+                    }));
                 };
 
                 const initHandler = () => {
