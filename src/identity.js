@@ -239,7 +239,7 @@ export class Identity extends EventEmitter {
     /**
      * Checks if calling GET session is blocked
      * @private
-     * @returns {number|null}
+     * @returns {string|null}
      */
     _isSessionCallBlocked(){
         return this.localStorageCache.get(SESSION_CALL_BLOCKED_CACHE_KEY);
@@ -581,8 +581,8 @@ export class Identity extends EventEmitter {
         const _getSession = async () => {
             const callSessionEndpoint = async () => {
                 try {
-                    // Blocking future calls to session-service. This lock is removed after the response is processed
-                    // to account for redirection that can happen towards session-service too
+                    /* Blocking future calls to session-service. This lock is removed after the response is processed
+                     to account for redirection that can happen towards session-service too */
                     this._blockSessionCall();
 
                     return await this._sessionService.get('/v2/session', {tabId: this._tabId});
@@ -629,6 +629,7 @@ export class Identity extends EventEmitter {
                         return _postProcess(this._session);
                     }
 
+                    // If blockedAction is defined, do that and return the result, otherwise return null
                     if (blockedAction) {
                         const blockedResult = await blockedAction();
 
@@ -637,6 +638,8 @@ export class Identity extends EventEmitter {
 
                     return null;
                 }
+
+                // If session service calls are not blocked, call it
                 const sessionData = await callSessionEndpoint();
 
                 return await useSessionResponseIfValid(sessionData);
@@ -650,17 +653,16 @@ export class Identity extends EventEmitter {
                     retryCount++;
                     const randomWaitingStep = Math.floor(Math.random() * 9); // ignoring waiting times that are too small to matter
                     const randomWaitTime = MIN_SESSION_CALL_WAIT_TIME + (randomWaitingStep * 100);
-                    await new Promise( resolve => { setTimeout(() =>{
-                        return resolve();
-                    }, randomWaitTime)});
+                    await new Promise( resolve => setTimeout(resolve, randomWaitTime));
 
+                    // attempt to call session service, but don't take any action if call is blocked and don't use the result
                     const result = await checkIfSessionCallIsNeededAndSafe(null);
                     if (result) {
                         return result;
                     }
                 }
 
-                // exceeded number of attempts, returning old session info
+                // Exceeded number of attempts, returning old session info
                 if (this._session && this._session.userId) {
                     return this._session;
                 }
@@ -726,8 +728,8 @@ export class Identity extends EventEmitter {
     async isConnected() {
         try {
             const data = await this.hasSession();
-            // if data is not an object, the promise will fail.
-            // if the result is present, it's boolean. But if it's not, it should be assumed false.
+            /* If data is not an object, the promise will fail.
+            If the result is present, it's boolean. But if it's not, it should be assumed false. */
             return !!data.result;
         } catch (_) {
             return false;
@@ -806,9 +808,9 @@ export class Identity extends EventEmitter {
             throw new SDKError('externalParty cannot be empty');
         }
         const _toHexDigest = (hashBuffer) =>{
-            // convert buffer to byte array
+            // Convert buffer to byte array
             const hashArray = Array.from(new Uint8Array(hashBuffer));
-            // convert bytes to hex string
+            // Convert bytes to hex string
             return hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
         }
 
@@ -1006,7 +1008,7 @@ export class Identity extends EventEmitter {
         prompt = 'select_account',
     }) {
         if (typeof arguments[0] !== 'object') {
-            // backward compatibility
+            // Backward compatibility
             state = arguments[0];
             acrValues = arguments[1];
             scope = arguments[2] || scope;

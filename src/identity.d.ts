@@ -47,7 +47,7 @@ export class Identity extends TinyEmitter {
     /**
      * Checks if calling get session is blocked
      * @private
-     * @returns {boolean|void}
+     * @returns {string|null}
      */
     private _isSessionCallBlocked;
     /**
