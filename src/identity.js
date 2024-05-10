@@ -603,7 +603,7 @@ export class Identity extends EventEmitter {
                         await this.callbackBeforeRedirect();
 
                         // Doing a return here, to avoid caching the redirect response
-                        return this.window.location.href = this._sessionService.makeUrl(sessionData.redirectURL, {tabId: this._getTabId()});
+                        return this._sessionService.makeUrl(sessionData.redirectURL, {tabId: this._getTabId()});
                     }
 
                     if (this._enableSessionCaching) {
@@ -676,6 +676,10 @@ export class Identity extends EventEmitter {
                 sessionData => {
                     this._hasSessionInProgress = false;
                     this._unblockSessionCallByTab();
+
+                    if (isUrl(sessionData)) {
+                        return this.window.location.href = sessionData;
+                    }
 
                     return sessionData;
                 },
