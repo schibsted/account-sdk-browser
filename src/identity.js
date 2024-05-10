@@ -146,7 +146,7 @@ import version from './version.js';
 
 const HAS_SESSION_CACHE_KEY = 'hasSession-cache';
 const SESSION_CALL_BLOCKED_CACHE_KEY = 'sessionCallBlocked-cache';
-const SESSION_CALL_BLOCKED_TTL = 1000 * 30; //set to 30s, the default period for a request timeout
+const SESSION_CALL_BLOCKED_TTL = 1000 * 15; //set to 15s, to not block calls much longer than the time attempting retries
 
 const TAB_ID_KEY = 'tab-id-cache';
 const TAB_ID = Math.floor(Math.random() * 100000)
@@ -213,7 +213,6 @@ export class Identity extends EventEmitter {
         this._setBffServerUrl(env);
         this._setOauthServerUrl(env);
         this._setGlobalSessionServiceUrl(env);
-        this._unblockSessionCallByTab();
     }
 
     /**
@@ -237,13 +236,12 @@ export class Identity extends EventEmitter {
     }
 
     /**
-     * Checks if calling GET session is blocked by a cache storage
+     * Checks if calling GET session is blocked
      * @private
-     * @param {Cache} cache - cache to check
      * @returns {string|null}
      */
-    _isSessionCallBlocked(cache) {
-        return cache.get(SESSION_CALL_BLOCKED_CACHE_KEY);
+    _isSessionCallBlocked() {
+        return this.localStorageCache.get(SESSION_CALL_BLOCKED_CACHE_KEY);
     }
 
     /**
@@ -252,14 +250,6 @@ export class Identity extends EventEmitter {
      * @returns {void}
      */
     _blockSessionCall() {
-        // session storage block protects against single tab, multiple identity instance concurrency
-        this.sessionStorageCache.set(
-            SESSION_CALL_BLOCKED_CACHE_KEY,
-            this._tabId,
-            SESSION_CALL_BLOCKED_TTL
-        );
-
-        // local storage block protects against cross-tab concurrency
         this.localStorageCache.set(
             SESSION_CALL_BLOCKED_CACHE_KEY,
             this._tabId,
@@ -273,11 +263,9 @@ export class Identity extends EventEmitter {
      * @returns {void}
      */
     _unblockSessionCallByTab() {
-        if (this._isSessionCallBlocked(this.localStorageCache) === this._tabId) {
+        if (this._isSessionCallBlocked() === this._tabId) {
             this.localStorageCache.delete(SESSION_CALL_BLOCKED_CACHE_KEY);
         }
-
-        this.sessionStorageCache.delete(SESSION_CALL_BLOCKED_CACHE_KEY);
     }
 
     /**
@@ -636,7 +624,7 @@ export class Identity extends EventEmitter {
                     }
                 }
 
-                if (this._isSessionCallBlocked(this.sessionStorageCache) || this._isSessionCallBlocked(this.localStorageCache)) {
+                if (this._isSessionCallBlocked()) {
                     if (this._session && this._session.userId) {
                         return _postProcess(this._session);
                     }
@@ -663,7 +651,6 @@ export class Identity extends EventEmitter {
                 // Try to call session-service MAX_SESSION_CALL_RETRIES times, waiting up to 1 second each time
                 while (retryCount < MAX_SESSION_CALL_RETRIES) {
                     retryCount++;
-
                     const randomWaitingStep = Math.floor(Math.random() * 9); // ignoring waiting times that are too small to matter
                     const randomWaitTime = MIN_SESSION_CALL_WAIT_TIME + (randomWaitingStep * 100);
                     await new Promise(resolve => setTimeout(resolve, randomWaitTime));

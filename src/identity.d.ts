@@ -45,9 +45,8 @@ export class Identity extends TinyEmitter {
      */
     private _getTabId;
     /**
-     * Checks if calling GET session is blocked by a cache storage
+     * Checks if calling get session is blocked
      * @private
-     * @param {Cache} cache - cache to check
      * @returns {string|null}
      */
     private _isSessionCallBlocked;
@@ -62,7 +61,7 @@ export class Identity extends TinyEmitter {
      * @private
      * @returns {void}
      */
-    private _unblockSessionCallByTab;
+    private _unblockSessionCall;
     /**
      * Set SPiD server URL
      * @private
