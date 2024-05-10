@@ -146,7 +146,7 @@ import version from './version.js';
 
 const HAS_SESSION_CACHE_KEY = 'hasSession-cache';
 const SESSION_CALL_BLOCKED_CACHE_KEY = 'sessionCallBlocked-cache';
-const SESSION_CALL_BLOCKED_TTL = 1000 * 30; //set to 30s, the default period for a request timeout
+const SESSION_CALL_BLOCKED_TTL = 1000 * 15; //set to 15s, to not block calls much longer than the time attempting retries
 
 const TAB_ID_KEY = 'tab-id-cache';
 const TAB_ID = Math.floor(Math.random() * 100000)
@@ -213,7 +213,6 @@ export class Identity extends EventEmitter {
         this._setBffServerUrl(env);
         this._setOauthServerUrl(env);
         this._setGlobalSessionServiceUrl(env);
-        this._unblockSessionCallByTab();
     }
 
     /**
@@ -568,6 +567,7 @@ export class Identity extends EventEmitter {
             this._maybeSetVarnishCookie(sessionData);
             this._emitSessionEvent(this._session, sessionData);
             this._session = sessionData;
+
             return sessionData;
         };
 
@@ -611,7 +611,7 @@ export class Identity extends EventEmitter {
                         this.sessionStorageCache.set(HAS_SESSION_CACHE_KEY, sessionData, expiresIn);
                     }
 
-                    return _postProcess(sessionData)
+                    return _postProcess(sessionData);
                 }
             };
 
