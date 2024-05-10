@@ -237,12 +237,13 @@ export class Identity extends EventEmitter {
     }
 
     /**
-     * Checks if calling GET session is blocked
+     * Checks if calling GET session is blocked by a cache storage
      * @private
+     * @param {Cache} cache - cache to check
      * @returns {string|null}
      */
-    _isSessionCallBlocked() {
-        return this.localStorageCache.get(SESSION_CALL_BLOCKED_CACHE_KEY);
+    _isSessionCallBlocked(cache) {
+        return cache.get(SESSION_CALL_BLOCKED_CACHE_KEY);
     }
 
     /**
@@ -251,6 +252,14 @@ export class Identity extends EventEmitter {
      * @returns {void}
      */
     _blockSessionCall() {
+        // session storage block protects against single tab, multiple identity instance concurrency
+        this.sessionStorageCache.set(
+            SESSION_CALL_BLOCKED_CACHE_KEY,
+            this._tabId,
+            SESSION_CALL_BLOCKED_TTL
+        );
+
+        // local storage block protects against cross-tab concurrency
         this.localStorageCache.set(
             SESSION_CALL_BLOCKED_CACHE_KEY,
             this._tabId,
@@ -264,9 +273,11 @@ export class Identity extends EventEmitter {
      * @returns {void}
      */
     _unblockSessionCallByTab() {
-        if (this._isSessionCallBlocked() === this._tabId) {
+        if (this._isSessionCallBlocked(this.localStorageCache) === this._tabId) {
             this.localStorageCache.delete(SESSION_CALL_BLOCKED_CACHE_KEY);
         }
+
+        this.sessionStorageCache.delete(SESSION_CALL_BLOCKED_CACHE_KEY);
     }
 
     /**
@@ -568,6 +579,7 @@ export class Identity extends EventEmitter {
             this._maybeSetVarnishCookie(sessionData);
             this._emitSessionEvent(this._session, sessionData);
             this._session = sessionData;
+
             return sessionData;
         };
 
@@ -611,7 +623,7 @@ export class Identity extends EventEmitter {
                         this.sessionStorageCache.set(HAS_SESSION_CACHE_KEY, sessionData, expiresIn);
                     }
 
-                    return _postProcess(sessionData)
+                    return _postProcess(sessionData);
                 }
             };
 
@@ -624,7 +636,7 @@ export class Identity extends EventEmitter {
                     }
                 }
 
-                if (this._isSessionCallBlocked()) {
+                if (this._isSessionCallBlocked(this.sessionStorageCache) || this._isSessionCallBlocked(this.localStorageCache)) {
                     if (this._session && this._session.userId) {
                         return _postProcess(this._session);
                     }
@@ -651,6 +663,7 @@ export class Identity extends EventEmitter {
                 // Try to call session-service MAX_SESSION_CALL_RETRIES times, waiting up to 1 second each time
                 while (retryCount < MAX_SESSION_CALL_RETRIES) {
                     retryCount++;
+
                     const randomWaitingStep = Math.floor(Math.random() * 9); // ignoring waiting times that are too small to matter
                     const randomWaitTime = MIN_SESSION_CALL_WAIT_TIME + (randomWaitingStep * 100);
                     await new Promise(resolve => setTimeout(resolve, randomWaitTime));
