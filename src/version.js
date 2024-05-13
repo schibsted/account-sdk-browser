@@ -1,5 +1,5 @@
 // Automatically generated in 'npm version' by scripts/genversion.js
 
 'use strict'
-const version = '5.0.1-beta.7';
+const version = '5.0.1-beta.8';
 export default version;
