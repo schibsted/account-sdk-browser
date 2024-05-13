@@ -674,12 +674,11 @@ export class Identity extends EventEmitter {
         this._hasSessionInProgress = _getSession()
             .then(
                 sessionData => {
-                    this._hasSessionInProgress = false;
-                    this._unblockSessionCallByTab();
-
                     if (isUrl(sessionData)) {
                         return this.window.location.href = sessionData;
                     }
+                    this._hasSessionInProgress = false;
+                    this._unblockSessionCallByTab();
 
                     return sessionData;
                 },
