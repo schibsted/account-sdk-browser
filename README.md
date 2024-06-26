@@ -263,13 +263,7 @@ where it's difficult to do their own transpilation, we do provide some opt-in es
 But then regardless of whether you use the es5 versions or not, you might need to polyfill certain
 things that might be missing in the browsers you wish to support. A quick test using IE11 showed
 that we needed polyfills for `Promise`, `URL`, `Object.entries`, `fetch`, `Number.isFinite` and
-`Number.isInteger`. If you want any sort of debugging to work (say, if you're passing a function
-using `console.log` as a parameter to any SDK function that supports logging), you might also need
-to polyfill `console` and `console.log` (yeah, it's baffling, but a [known
-issue](https://stackoverflow.com/questions/22315167/in-ie11-how-to-use-console-log) in IE). We added
-them from polyfill.io like this:
-
-    <script src="https://cdn.polyfill.io/v2/polyfill.js?features=Promise,URL,Object.entries,fetch,Number.isFinite,Number.isInteger,console,console.log"></script>
+`Number.isInteger`.
 
 #### Cookies
 
