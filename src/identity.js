@@ -26,7 +26,7 @@ import version from './version.js';
  * `password` (will force password confirmation, even if user is already logged in), `eid`. Those values might
  * be mixed as space-separated string. To make sure that user has authenticated with 2FA you need
  * to verify AMR (Authentication Methods References) claim in ID token.
- * Might also be used to ensure additional acr (sms, otp) for already logged in users.
+ * Might also be used to ensure additional acr (sms, otp) for already logged-in users.
  * Supported value is also 'otp-email' means one time password using email.
  * @property {string} [scope] - The OAuth scopes for the tokens. This is a list of
  * scopes, separated by space. If the list of scopes contains `openid`, the generated tokens
@@ -60,7 +60,7 @@ import version from './version.js';
  * `password` (will force password confirmation, even if user is already logged in). Those values might
  * be mixed as space-separated string. To make sure that user has authenticated with 2FA you need
  * to verify AMR (Authentication Methods References) claim in ID token.
- * Might also be used to ensure additional acr (sms, otp) for already logged in users.
+ * Might also be used to ensure additional acr (sms, otp) for already logged-in users.
  * Supported value is also 'otp-email' means one time password using email.
  * @property {string} [scope] - The OAuth scopes for the tokens. This is a list of
  * scopes, separated by space. If the list of scopes contains `openid`, the generated tokens
@@ -134,7 +134,7 @@ import version from './version.js';
 
 /**
  * @typedef {object} SimplifiedLoginData
- * @property {string} identifier - Deprecated: User UUID, to be be used as `loginHint` for {@link Identity#login}
+ * @property {string} identifier - Deprecated: User UUID, to be as `loginHint` for {@link Identity#login}
  * @property {string} display_text - Human-readable user identifier
  * @property {string} client_name - Client name
  */
@@ -146,16 +146,19 @@ import version from './version.js';
 
 const HAS_SESSION_CACHE_KEY = 'hasSession-cache';
 const SESSION_CALL_BLOCKED_CACHE_KEY = 'sessionCallBlocked-cache';
-const SESSION_CALL_BLOCKED_TTL = 1000 * 60 * 5;
+const SESSION_CALL_BLOCKED_TTL = 1000 * 15; //set to 15s, to not block calls much longer than the time attempting retries
 
 const TAB_ID_KEY = 'tab-id-cache';
 const TAB_ID = Math.floor(Math.random() * 100000)
 const TAB_ID_TTL = 1000 * 60 * 60 * 24 * 30;
+const MAX_SESSION_CALL_RETRIES = 10;
+const MIN_SESSION_CALL_WAIT_TIME = 100;
+
 
 const globalWindow = () => window;
 
 /**
- * Provides Identity functionalty to a web page
+ * Provides Identity functionality to a web page
  */
 export class Identity extends EventEmitter {
     /**
@@ -177,7 +180,7 @@ export class Identity extends EventEmitter {
         env = 'PRE',
         log,
         window = globalWindow(),
-        callbackBeforeRedirect = ()=>{}
+        callbackBeforeRedirect = () => {}
     }) {
         super();
         assert(isNonEmptyString(clientId), 'clientId parameter is required');
@@ -186,6 +189,10 @@ export class Identity extends EventEmitter {
         assert(sessionDomain && isUrl(sessionDomain), 'sessionDomain parameter is not a valid URL');
 
         spidTalk.emulate(window);
+
+        // Internal hack: set as false to always refresh from hasSession
+        this._enableSessionCaching = true;
+
         this._sessionInitiatedSent = false;
         this.window = window;
         this.clientId = clientId;
@@ -196,9 +203,7 @@ export class Identity extends EventEmitter {
         this.log = log;
         this.callbackBeforeRedirect = callbackBeforeRedirect;
         this._sessionDomain = sessionDomain;
-
-        // Internal hack: set to false to always refresh from hassession
-        this._enableSessionCaching = true;
+        this._tabId = this._getTabId();
 
         // Old session
         this._session = {};
@@ -208,12 +213,10 @@ export class Identity extends EventEmitter {
         this._setBffServerUrl(env);
         this._setOauthServerUrl(env);
         this._setGlobalSessionServiceUrl(env);
-
-        this._unblockSessionCall();
     }
 
     /**
-     * Read tabId from session storage
+     * Read tabId from session storage if possible, otherwise save tabId to session storage and return it
      * @returns {number}
      * @private
      */
@@ -222,47 +225,47 @@ export class Identity extends EventEmitter {
             const tabId = this.sessionStorageCache.get(TAB_ID_KEY);
             if (!tabId) {
                 this.sessionStorageCache.set(TAB_ID_KEY, TAB_ID, TAB_ID_TTL);
+
                 return TAB_ID;
             }
 
             return tabId;
         }
+
+        return TAB_ID;
     }
 
     /**
-     * Checks if getting session is blocked
+     * Checks if calling GET session is blocked
      * @private
-     *
-     * @returns {boolean|void}
+     * @returns {string|null}
      */
-    _isSessionCallBlocked(){
+    _isSessionCallBlocked() {
         return this.localStorageCache.get(SESSION_CALL_BLOCKED_CACHE_KEY);
     }
 
     /**
-     * Block calls to get session
+     * Block calls to get session. This is done to prevent concurrent calls which can log user out if session is refreshed by one of them
      * @private
-     *
      * @returns {void}
      */
-    _blockSessionCall(){
-        const SESSION_CALL_BLOCKED = true;
-
+    _blockSessionCall() {
         this.localStorageCache.set(
             SESSION_CALL_BLOCKED_CACHE_KEY,
-            SESSION_CALL_BLOCKED,
+            this._tabId,
             SESSION_CALL_BLOCKED_TTL
         );
     }
 
     /**
-     * Unblocks calls to get session
+     * Unblocks calls to get session if the lock was put by the same tab
      * @private
-     *
      * @returns {void}
      */
-    _unblockSessionCall(){
-        this.localStorageCache.delete(SESSION_CALL_BLOCKED_CACHE_KEY);
+    _unblockSessionCallByTab() {
+        if (this._isSessionCallBlocked() === this._tabId) {
+            this.localStorageCache.delete(SESSION_CALL_BLOCKED_CACHE_KEY);
+        }
     }
 
     /**
@@ -338,12 +341,12 @@ export class Identity extends EventEmitter {
         this._globalSessionService = new RESTClient({
             serverUrl: urlMapper(url, ENDPOINTS.SESSION_SERVICE),
             log: this.log,
-            defaultParams: { client_sdrn, sdk_version: version },
+            defaultParams: {client_sdrn, sdk_version: version},
         });
     }
 
     /**
-     * Emits the relevant events based on the previous and new reply from hassession
+     * Emits the relevant events based on the previous and new reply from {@link Identity#hasSession}
      * @private
      * @param {object} previous
      * @param {object} current
@@ -423,7 +426,7 @@ export class Identity extends EventEmitter {
     }
 
     /**
-     * Set the Varnish cookie (`SP_ID`) when hasSession() is called. Note that most browsers require
+     * Set the Varnish cookie (`SP_ID`) when {@link Identity#hasSession} is called. Note that most browsers require
      * that you are on a "real domain" for this to work — so, **not** `localhost`
      * @param {object} [options]
      * @param {number} [options.expiresIn] Override this to set number of seconds before the varnish
@@ -502,7 +505,7 @@ export class Identity extends EventEmitter {
      * @returns {void}
      */
     _clearVarnishCookie() {
-        const baseDomain =  this._session && typeof this._session.baseDomain === 'string'
+        const baseDomain = this._session && typeof this._session.baseDomain === 'string'
             ? this._session.baseDomain
             : document.domain;
 
@@ -553,11 +556,6 @@ export class Identity extends EventEmitter {
      * @return {Promise<HasSessionSuccessResponse|HasSessionFailureResponse>}
      */
     hasSession() {
-        const isSessionCallBlocked = this._isSessionCallBlocked()
-        if (isSessionCallBlocked) {
-            return this._session;
-        }
-
         if (this._hasSessionInProgress) {
             return this._hasSessionInProgress;
         }
@@ -569,67 +567,126 @@ export class Identity extends EventEmitter {
             this._maybeSetVarnishCookie(sessionData);
             this._emitSessionEvent(this._session, sessionData);
             this._session = sessionData;
+
             return sessionData;
         };
 
-        const _checkRedirectionNeed = (sessionData={})=>{
+        const _checkRedirectionNeed = (sessionData = {}) => {
             const sessionDataKeys = Object.keys(sessionData);
 
             return sessionDataKeys.length === 1 &&
                 sessionDataKeys[0] === 'redirectURL';
-        }
+        };
 
         const _getSession = async () => {
-            if (this._enableSessionCaching) {
-                // Try to resolve from cache (it has a TTL)
-                let cachedSession = this.sessionStorageCache.get(HAS_SESSION_CACHE_KEY);
-                if (cachedSession) {
-                    return _postProcess(cachedSession);
-                }
-            }
-            let sessionData = null;
-            try {
-                sessionData = await this._sessionService.get('/v2/session', {tabId: this._getTabId()});
-            } catch (err) {
-                if (err && err.code === 400 && this._enableSessionCaching) {
-                    const expiresIn = 1000 * (err.expiresIn || 300);
-                    this.sessionStorageCache.set(HAS_SESSION_CACHE_KEY, { error: err }, expiresIn);
-                }
-                throw err;
-            }
-
-            if (sessionData){
-                // for expiring session and safari browser do full page redirect to gain new session
-                if(_checkRedirectionNeed(sessionData)){
+            const callSessionEndpoint = async () => {
+                try {
+                    /* Blocking future calls to session-service. This lock is removed after the response is processed
+                     to account for redirection that can happen towards session-service too */
                     this._blockSessionCall();
 
-                    await this.callbackBeforeRedirect();
+                    return await this._sessionService.get('/v2/session', {tabId: this._tabId});
+                } catch (err) {
+                    if (err && err.code === 400 && this._enableSessionCaching) {
+                        const expiresIn = 1000 * (err.expiresIn || 300);
+                        this.sessionStorageCache.set(HAS_SESSION_CACHE_KEY, {error: err}, expiresIn);
+                    }
 
-                    return this._sessionService.makeUrl(sessionData.redirectURL, {tabId: this._getTabId()});
+                    throw err;
                 }
+            };
 
+            const useSessionResponseIfValid = async (sessionData) => {
+                if (sessionData) {
+                    // For expiring session and WebKit browsers do a full page redirect to get a new session
+                    if (_checkRedirectionNeed(sessionData)) {
+                        await this.callbackBeforeRedirect();
+
+                        // Doing a return here, to avoid caching the redirect response
+                        return this._sessionService.makeUrl(sessionData.redirectURL, {tabId: this._getTabId()});
+                    }
+
+                    if (this._enableSessionCaching) {
+                        const expiresIn = 1000 * (sessionData.expiresIn || 300);
+                        this.sessionStorageCache.set(HAS_SESSION_CACHE_KEY, sessionData, expiresIn);
+                    }
+
+                    return _postProcess(sessionData);
+                }
+            };
+
+            const checkIfSessionCallIsNeededAndSafe = async (blockedAction) => {
                 if (this._enableSessionCaching) {
-                    const expiresIn = 1000 * (sessionData.expiresIn || 300);
-                    this.sessionStorageCache.set(HAS_SESSION_CACHE_KEY, sessionData, expiresIn);
+                    // Try to resolve from cache (it has a TTL)
+                    let cachedSession = this.sessionStorageCache.get(HAS_SESSION_CACHE_KEY);
+                    if (cachedSession) {
+                        return _postProcess(cachedSession);
+                    }
                 }
-            }
 
-            return _postProcess(sessionData);
+                if (this._isSessionCallBlocked()) {
+                    if (this._session && this._session.userId) {
+                        return _postProcess(this._session);
+                    }
+
+                    // If blockedAction is defined, do that and return the result, otherwise return null
+                    if (blockedAction) {
+                        const blockedResult = await blockedAction();
+
+                        return _postProcess(blockedResult);
+                    }
+
+                    return null;
+                }
+
+                // If session service calls are not blocked, call it
+                const sessionData = await callSessionEndpoint();
+
+                return await useSessionResponseIfValid(sessionData);
+            };
+
+            return await checkIfSessionCallIsNeededAndSafe(async () => {
+                let retryCount = 0;
+
+                // Try to call session-service MAX_SESSION_CALL_RETRIES times, waiting up to 1 second each time
+                while (retryCount < MAX_SESSION_CALL_RETRIES) {
+                    retryCount++;
+                    const randomWaitingStep = Math.floor(Math.random() * 9); // ignoring waiting times that are too small to matter
+                    const randomWaitTime = MIN_SESSION_CALL_WAIT_TIME + (randomWaitingStep * 100);
+                    await new Promise(resolve => setTimeout(resolve, randomWaitTime));
+
+                    // attempt to call session service, but don't take any action if call is blocked and don't use the result
+                    const result = await checkIfSessionCallIsNeededAndSafe(null);
+                    if (result) {
+                        return result;
+                    }
+                }
+
+                // Exceeded number of attempts, returning old session info
+                if (this._session && this._session.userId) {
+                    return this._session;
+                }
+
+                throw new SDKError('HasSession exceeded maximum number of attempts');
+            });
         };
+
         this._hasSessionInProgress = _getSession()
             .then(
                 sessionData => {
-                    this._hasSessionInProgress = false;
-
                     if (isUrl(sessionData)) {
                         return this.window.location.href = sessionData;
                     }
+                    this._hasSessionInProgress = false;
+                    this._unblockSessionCallByTab();
 
                     return sessionData;
                 },
                 err => {
                     this.emit('error', err);
                     this._hasSessionInProgress = false;
+                    this._unblockSessionCallByTab();
+
                     throw new SDKError('HasSession failed', err);
                 }
             );
@@ -674,8 +731,8 @@ export class Identity extends EventEmitter {
     async isConnected() {
         try {
             const data = await this.hasSession();
-            // if data is not an object, the promise will fail.
-            // if the result is present, it's boolean. But if it's not, it should be assumed false.
+            /* If data is not an object, the promise will fail.
+            If the result is present, it's boolean. But if it's not, it should be assumed false. */
             return !!data.result;
         } catch (_) {
             return false;
@@ -712,7 +769,7 @@ export class Identity extends EventEmitter {
      * @description This function calls {@link Identity#hasSession} internally and thus has the side
      * effect that it might perform an auto-login on the user
      * @throws {SDKError} If the user isn't connected to the merchant
-     * @return {Promise<string>} The `userId` field (not to be confused with the `uuid`)
+     * @return {number} The `userId` field (not to be confused with the `uuid`)
      */
     async getUserId() {
         const user = await this.hasSession();
@@ -750,13 +807,13 @@ export class Identity extends EventEmitter {
         if (!pairId)
             throw new SDKError('pairId missing in user session!');
 
-        if(!externalParty || externalParty.length === 0) {
+        if (!externalParty || externalParty.length === 0) {
             throw new SDKError('externalParty cannot be empty');
         }
-        const _toHexDigest = (hashBuffer) =>{
-            // convert buffer to byte array
+        const _toHexDigest = (hashBuffer) => {
+            // Convert buffer to byte array
             const hashArray = Array.from(new Uint8Array(hashBuffer));
-            // convert bytes to hex string
+            // Convert bytes to hex string
             return hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
         }
 
@@ -832,6 +889,7 @@ export class Identity extends EventEmitter {
             return null;
         }
     }
+
     /**
      * If a popup is desired, this function needs to be called in response to a user event (like
      * click or tap) in order to work correctly. Otherwise the popup will be blocked by the
@@ -954,7 +1012,7 @@ export class Identity extends EventEmitter {
         prompt = 'select_account',
     }) {
         if (typeof arguments[0] !== 'object') {
-            // backward compatibility
+            // Backward compatibility
             state = arguments[0];
             acrValues = arguments[1];
             scope = arguments[2] || scope;
@@ -1082,7 +1140,10 @@ export class Identity extends EventEmitter {
                 };
 
                 const loginNotYouHandler = async () => {
-                    this.login(Object.assign(await prepareLoginParams(loginParams), {loginHint: userData.identifier, prompt: 'login'}));
+                    this.login(Object.assign(await prepareLoginParams(loginParams), {
+                        loginHint: userData.identifier,
+                        prompt: 'login'
+                    }));
                 };
 
                 const initHandler = () => {
