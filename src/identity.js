@@ -852,6 +852,7 @@ export class Identity extends EventEmitter {
      * @param {string} [options.locale]
      * @param {boolean} [options.oneStepLogin=false]
      * @param {string} [options.prompt=select_account]
+     * @param {string} [options.frontendVersion]
      * @return {Window|null} - Reference to popup window if created (or `null` otherwise)
      */
     login({
@@ -866,7 +867,8 @@ export class Identity extends EventEmitter {
         maxAge = '',
         locale = '',
         oneStepLogin = false,
-        prompt = 'select_account'
+        prompt = 'select_account',
+        frontendVersion
     }) {
         this._closePopup();
         this.sessionStorageCache.delete(HAS_SESSION_CACHE_KEY);
@@ -881,7 +883,8 @@ export class Identity extends EventEmitter {
             maxAge,
             locale,
             oneStepLogin,
-            prompt
+            prompt,
+            frontendVersion
         });
 
         if (preferPopup) {
@@ -952,6 +955,7 @@ export class Identity extends EventEmitter {
         locale = '',
         oneStepLogin = false,
         prompt = 'select_account',
+        frontendVersion,
     }) {
         if (typeof arguments[0] !== 'object') {
             // backward compatibility
@@ -972,7 +976,7 @@ export class Identity extends EventEmitter {
         assert(isNonEmptyString(state),
             `the state parameter should be a non empty string but it is ${state}`);
 
-        return this._oauthService.makeUrl('oauth/authorize', {
+        const queryParams = {
             response_type: 'code',
             redirect_uri: redirectUri,
             scope,
@@ -984,8 +988,15 @@ export class Identity extends EventEmitter {
             max_age: maxAge,
             locale,
             one_step_login: oneStepLogin || '',
-            prompt: acrValues ? '' : prompt
-        });
+            prompt: acrValues ? '' : prompt,
+        }
+
+        if(frontendVersion){
+            assert(isStrIn(frontendVersion, ['v2']), 'the frontendVersion parameter must be a valid version');
+            queryParams.frontendVersion = frontendVersion
+        }
+
+        return this._oauthService.makeUrl('oauth/authorize', queryParams);
     }
 
     /**
