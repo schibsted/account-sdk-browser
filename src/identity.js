@@ -964,7 +964,7 @@ export class Identity extends EventEmitter {
             teaser = arguments[6] || teaser;
             maxAge = isNaN(arguments[7]) ? maxAge : arguments[7];
         }
-        const isValidAcrValue = (acrValue) => isStrIn(acrValue, ['password', 'otp', 'sms', 'eid-no', 'eid-se', 'eid-fi', 'eid'], true);
+        const isValidAcrValue = (acrValue) => isStrIn(acrValue, ['password', 'otp', 'sms', 'eid-dk', 'eid-no', 'eid-se', 'eid-fi', 'eid'], true);
         assert(!acrValues || isStrIn(acrValues, ['', 'otp-email'], true) || acrValues.split(' ').every(isValidAcrValue),
             `The acrValues parameter is not acceptable: ${acrValues}`);
         assert(isUrl(redirectUri),
