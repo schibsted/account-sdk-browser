@@ -61,14 +61,13 @@ You can use that code as inspiration or just fork and play with it. The account-
 module is used for authenticating the user with Schibsted account. Take a look at how the SDK is
 initialized.
 
-When a user wants to log in to your site, you direct them to a UI flow that is hosted by Schibsted
-Account. We authenticate the user and redirect them back to your site. This final redirect back to
-your site is done in accordance with the OAuth2 spec. That means that we pass a `code` in the query
-string in that redirect uri. You can use that `code` on your site backend along with your client
-credentials (client id & secret) to get an *Access Token* (AT) and *Refresh Token* (RT). You don't
-send the AT (and never ever the RT!) to the browser but rather keep it on the server side and
-associate it with that particular user session in order to be able to call Schibsted account APIs on
-behalf of that user.
+When a user wants to log in to your site, you direct them to a UI flow hosted by **Schibsted Account**. 
+We authenticate the user and redirect them back to your site. This final redirect back to your site is performed in accordance with the OAuth2 specification. 
+This means we pass a `code` in the query string of that redirect URI.
+You can use that `code` on your site's backend, along with your client credentials (client ID and secret), to obtain an *Access Token* (AT) and a *Refresh Token* (RT). 
+You should not send the AT (and **never** the RT!) to the browser. Instead, keep them on the server side and associate them with the specific user session. 
+This allows you to call Schibsted Account APIs on behalf of that user.
+
 
 ## Events
 
