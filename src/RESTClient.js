@@ -157,7 +157,8 @@ export class RESTClient {
      * @return {string} - the resulting url string ready to pass to fetch
      */
     makeUrl(pathname = '', query = {}, useDefaultParams = true) {
-        const url = new URL(pathname, this.url);
+        const usablePathName = this.url.pathname ? '.' + pathname : pathname;
+        const url = new URL(usablePathName, this.url);
         url.search = RESTClient.search(query, useDefaultParams, this.defaultParams);
         return url.href;
     }
