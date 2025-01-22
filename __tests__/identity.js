@@ -145,6 +145,16 @@ describe('Identity', () => {
                 'https://identity-pre.schibsted.com/oauth/authorize?client_id=foo&redirect_uri=http%3A%2F%2Ffoo.com&response_type=code&scope=openid&state=foo&prompt=login'
             );
         });
+
+        test('Should return url with xDomainId', () => {
+            const window = { location: {} };
+            const identity = new Identity(Object.assign({}, defaultOptions, { window }));
+            identity.login({ state: 'foo', xDomainId: 'aaa1111BBBB' });
+            compareUrls(
+                window.location.href,
+                'https://identity-pre.schibsted.com/oauth/authorize?client_id=foo&redirect_uri=http%3A%2F%2Ffoo.com&response_type=code&scope=openid&state=foo&prompt=select_account&x_domain_id=aaa1111BBBB'
+            );
+        });
     });
 
     describe('logout()', () => {
@@ -285,6 +295,14 @@ describe('Identity', () => {
                 state: 'dummy-state',
                 acrValues: 'sms otp password',
             }), 'https://login.schibsted.com/oauth/authorize?redirect_uri=http%3A%2F%2Ffoo.com&client_id=foo&state=dummy-state&response_type=code&scope=openid&acr_values=sms+otp+password');
+        });
+
+        test('returns the expected endpoint with default params and xDomainId', () => {
+            const identity = new Identity(Object.assign({}, defaultOptions, { env: 'PRO' }));
+            compareUrls(identity.loginUrl({
+                state: 'dummy-state',
+                xDomainId: 'aaa1111BBBB'
+            }), 'https://login.schibsted.com/oauth/authorize?redirect_uri=http%3A%2F%2Ffoo.com&client_id=foo&state=dummy-state&response_type=code&scope=openid&prompt=select_account&x_domain_id=aaa1111BBBB');
         });
     });
 
