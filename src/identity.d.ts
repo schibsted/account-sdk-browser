@@ -8,6 +8,7 @@ export class Identity extends TinyEmitter {
      * @param {object} options
      * @param {string} options.clientId - Example: "1234567890abcdef12345678"
      * @param {string} options.sessionDomain - Example: "https://id.site.com"
+     * @param {string} [options.sessionDomainPath] - Example: "id"
      * @param {string} options.redirectUri - Example: "https://site.com"
      * @param {string} [options.env=PRE] - Schibsted account environment: `PRE`, `PRO`, `PRO_NO`, `PRO_FI` or `PRO_DK`
      * @param {function} [options.log] - A function that receives debug log information. If not set,
@@ -16,9 +17,10 @@ export class Identity extends TinyEmitter {
      * @param {function} [options.callbackBeforeRedirect] - callback triggered before session refresh redirect happen
      * @throws {SDKError} - If any of options are invalid
      */
-    constructor({ clientId, redirectUri, sessionDomain, env, log, window, callbackBeforeRedirect }: {
+    constructor({ clientId, redirectUri, sessionDomain, sessionDomainPath, env, log, window, callbackBeforeRedirect }: {
         clientId: string;
         sessionDomain: string;
+        sessionDomainPath?: string;
         redirectUri: string;
         env?: string;
         log?: Function;
@@ -35,6 +37,7 @@ export class Identity extends TinyEmitter {
     log: Function;
     callbackBeforeRedirect: Function;
     _sessionDomain: string;
+    _sessionDomainPath?: string;
     _enableSessionCaching: boolean;
     _session: {};
 
@@ -93,6 +96,7 @@ export class Identity extends TinyEmitter {
      * Set site-specific session-service domain
      * @private
      * @param {string} domain - real URL — (**not** 'PRE' style env key)
+     * @param {string} [path]
      * @returns {void}
      */
     private _setSessionServiceUrl;

@@ -6,7 +6,8 @@
 
 import SDKError from '../src/SDKError.js';
 
-import Identity from '../identity.js';
+import { Identity } from '../identity.js';
+import { createSessionServiceUrl } from '../src/identity.js';
 import { compareUrls, Fixtures } from './utils.js';
 import { URL } from 'url';
 import { URL as u } from 'whatwg-url';
@@ -1204,6 +1205,7 @@ describe('Identity', () => {
                 redirectUri: defaultOptions.redirectUri,
                 env: 'PRE',
                 sessionDomain: defaultOptions.sessionDomain,
+                sessionDomainPath: '',
                 sdkVersion: version
             }
 
@@ -1222,6 +1224,7 @@ describe('Identity', () => {
                 redirectUri: defaultOptions.redirectUri,
                 env: 'PRE',
                 sessionDomain: defaultOptions.sessionDomain,
+                sessionDomainPath: '',
                 sdkVersion: version
             }
 
@@ -1245,3 +1248,14 @@ describe('Identity', () => {
         })
     })
 });
+
+describe('Utils', () => {
+    describe('createSessionServiceUrl()', () => {
+        test('should create URL without path', () => {
+            expect(createSessionServiceUrl('http://test.example.com')).toEqual('http://test.example.com');
+        });
+        test('should create URL with path', () => {
+            expect(createSessionServiceUrl('http://example.com', 'test')).toEqual('http://example.com/test');
+        });
+    });
+})
