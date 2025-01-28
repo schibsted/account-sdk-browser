@@ -589,7 +589,7 @@ export class Identity extends EventEmitter {
             }
             let sessionData = null;
             try {
-                sessionData = await this._sessionService.get('/v2/session', {tabId: this._getTabId()});
+                sessionData = await this._sessionService.get('v2/session', {tabId: this._getTabId()});
             } catch (err) {
                 if (err && err.code === 400 && this._enableSessionCaching) {
                     const expiresIn = 1000 * (err.expiresIn || 300);
@@ -827,7 +827,7 @@ export class Identity extends EventEmitter {
      */
     async getUserContextData() {
         try {
-            return await this._globalSessionService.get('/user-context');
+            return await this._globalSessionService.get('user-context');
         } catch (_) {
             return null;
         }
