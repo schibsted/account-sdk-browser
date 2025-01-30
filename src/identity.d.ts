@@ -304,9 +304,10 @@ export class Identity extends TinyEmitter {
      * @param {string} [options.locale]
      * @param {boolean} [options.oneStepLogin=false]
      * @param {string} [options.prompt=select_account]
+     * @param {string} [options.xDomainId]
      * @return {Window|null} - Reference to popup window if created (or `null` otherwise)
      */
-    login({ state, acrValues, scope, redirectUri, preferPopup, loginHint, tag, teaser, maxAge, locale, oneStepLogin, prompt }: LoginOptions): Window | null;
+    login({ state, acrValues, scope, redirectUri, preferPopup, loginHint, tag, teaser, maxAge, locale, oneStepLogin, prompt, xDomainId }: LoginOptions): Window | null;
     /**
      * @async
      * @summary Retrieve the sp_id (Varnish ID)
@@ -439,6 +440,11 @@ export type LoginOptions = {
      * End-User for reauthentication or confirm account screen. Supported values: `select_account` or `login`
      */
     prompt?: string;
+    /**
+     * - Identifier for cross-domain tracking in Pulse
+     */
+    xDomainId?: string;
+
 };
 export type SimplifiedLoginWidgetLoginOptions = {
     /**
@@ -508,6 +514,10 @@ export type SimplifiedLoginWidgetLoginOptions = {
      * End-User for reauthentication or confirm account screen. Supported values: `select_account` or `login`
      */
     prompt?: string;
+    /**
+     * - Identifier for cross-domain tracking in Pulse
+     */
+    xDomainId?: string;
 };
 export type HasSessionSuccessResponse = {
     /**
