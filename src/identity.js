@@ -155,13 +155,26 @@ const TAB_ID_TTL = 1000 * 60 * 60 * 24 * 30;
 const globalWindow = () => window;
 
 /**
- * Provides Identity functionalty to a web page
+ * Utils for Identity
+ */
+
+/**
+ * Creates a Session Service URL
+ * @param {string} domain
+ * @param {string} [path]
+ * @returns {string}
+ */
+export const createSessionServiceUrl = (domain, path) => `${domain}${path ? `/${path}` : ''}`.trim();
+
+/**
+ * Provides Identity functionality to a web page
  */
 export class Identity extends EventEmitter {
     /**
      * @param {object} options
      * @param {string} options.clientId - Example: "1234567890abcdef12345678"
      * @param {string} options.sessionDomain - Example: "https://id.site.com"
+     * @param {string} [options.sessionDomainPath=""] - Example: "id"
      * @param {string} options.redirectUri - Example: "https://site.com"
      * @param {string} [options.env=PRE] - Schibsted account environment: `PRE`, `PRO`, `PRO_NO`, `PRO_FI` or `PRO_DK`
      * @param {function} [options.log] - A function that receives debug log information. If not set,
@@ -174,6 +187,7 @@ export class Identity extends EventEmitter {
         clientId,
         redirectUri,
         sessionDomain,
+        sessionDomainPath = '',
         env = 'PRE',
         log,
         window = globalWindow(),
@@ -196,6 +210,7 @@ export class Identity extends EventEmitter {
         this.log = log;
         this.callbackBeforeRedirect = callbackBeforeRedirect;
         this._sessionDomain = sessionDomain;
+        this._sessionDomainPath = sessionDomainPath;
 
         // Internal hack: set to false to always refresh from hassession
         this._enableSessionCaching = true;
@@ -203,7 +218,7 @@ export class Identity extends EventEmitter {
         // Old session
         this._session = {};
 
-        this._setSessionServiceUrl(sessionDomain);
+        this._setSessionServiceUrl(sessionDomain, sessionDomainPath);
         this._setSpidServerUrl(env);
         this._setBffServerUrl(env);
         this._setOauthServerUrl(env);
@@ -314,13 +329,14 @@ export class Identity extends EventEmitter {
      * Set site-specific session-service domain
      * @private
      * @param {string} domain - real URL — (**not** 'PRE' style env key)
+     * @param {string} [path]
      * @returns {void}
      */
-    _setSessionServiceUrl(domain) {
+    _setSessionServiceUrl(domain, path) {
         assert(isStr(domain), `domain parameter is invalid: ${domain}`);
         const client_sdrn = `sdrn:${NAMESPACE[this.env]}:client:${this.clientId}`;
         this._sessionService = new RESTClient({
-            serverUrl: domain,
+            serverUrl: createSessionServiceUrl(domain,path),
             log: this.log,
             defaultParams: { client_sdrn, redirect_uri: this.redirectUri, sdk_version: version },
         });
@@ -530,6 +546,7 @@ export class Identity extends EventEmitter {
             redirectUri: this.redirectUri,
             env: this.env,
             sessionDomain: this._sessionDomain,
+            sessionDomainPath: this._sessionDomainPath,
             sdkVersion: version
         }
 
