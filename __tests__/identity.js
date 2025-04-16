@@ -27,7 +27,7 @@ describe('Identity', () => {
     const defaultOptions = {
         clientId: 'foo',
         redirectUri: 'http://foo.com',
-        sessionDomain: 'http://id.foo.com',
+        sessionDomain: 'http://id.foo.com/test/',
         callbackBeforeRedirect: jest.fn(),
         window:{
             location:{
@@ -164,14 +164,14 @@ describe('Identity', () => {
             identity.logout();
 
             const clientSdrn = `sdrn%3Aschibsted.com%3Aclient%3A${defaultOptions.clientId}`;
-            expect(window.location.href).toBe(`${defaultOptions.sessionDomain}/logout?client_sdrn=${clientSdrn}&redirect_uri=http%3A%2F%2Ffoo.com&sdk_version=${version}`);
+            expect(window.location.href).toBe(`${new URL(defaultOptions.sessionDomain).toString()}logout?client_sdrn=${clientSdrn}&redirect_uri=http%3A%2F%2Ffoo.com&sdk_version=${version}`);
         });
         test('Should redirect to session-service for site-specific logout if configured', async () => {
             const window = { location: {} };
             const identity = new Identity(Object.assign({}, defaultOptions, { window }));
             identity.logout();
 
-            expect(window.location.href).toBe(`http://id.foo.com/logout?client_sdrn=sdrn%3Aschibsted.com%3Aclient%3Afoo&redirect_uri=http%3A%2F%2Ffoo.com&sdk_version=${version}`);
+            expect(window.location.href).toBe(`${new URL(defaultOptions.sessionDomain).toString()}logout?client_sdrn=sdrn%3Aschibsted.com%3Aclient%3Afoo&redirect_uri=http%3A%2F%2Ffoo.com&sdk_version=${version}`);
         });
         test('Should clear cache when logging out', async () => {
             const webStorageMock = () => {
@@ -494,7 +494,7 @@ describe('Identity', () => {
 
             expect(getSessionMock).toHaveBeenCalledTimes(1)
             expect(getSessionMock).toHaveBeenCalledWith(
-                expect.stringMatching(/^http:\/\/id\.foo\.com\/v2\/session/),
+                expect.stringContaining(new URL(defaultOptions.sessionDomain).toString() + "v2/session"),
                 {"credentials": "include", "headers": {}, "method": "get"}
             )
         });
@@ -506,7 +506,7 @@ describe('Identity', () => {
 
             expect(getSessionMock).toHaveBeenCalledTimes(1)
             expect(getSessionMock).toHaveBeenCalledWith(
-                expect.stringMatching(/^http:\/\/id\.foo\.com\/v2\/session/),
+                expect.stringContaining(new URL(defaultOptions.sessionDomain).toString() + "v2/session"),
                 {"credentials": "include", "headers": {}, "method": "get"}
             )
         });
@@ -518,7 +518,7 @@ describe('Identity', () => {
 
             expect(getSessionMock).toHaveBeenCalledTimes(1)
             expect(getSessionMock).toHaveBeenCalledWith(
-                expect.stringMatching(/^http:\/\/id\.foo\.com\/v2\/session/),
+                expect.stringContaining(new URL(defaultOptions.sessionDomain).toString() + "v2/session"),
                 {"credentials": "include", "headers": {}, "method": "get"}
             )
         });
@@ -560,7 +560,7 @@ describe('Identity', () => {
 
             expect(getSessionMock).toHaveBeenCalledTimes(1)
             expect(getSessionMock).toHaveBeenCalledWith(
-                expect.stringMatching(/^http:\/\/id\.foo\.com\/v2\/session/),
+                expect.stringContaining(new URL(defaultOptions.sessionDomain).toString() + "v2/session"),
                 {"credentials": "include", "headers": {}, "method": "get"}
             )
         });
@@ -630,7 +630,7 @@ describe('Identity', () => {
 
                 expect(defaultOptions.window.location.href).toBe(
                     [
-                        defaultOptions.sessionDomain,
+                        new URL(defaultOptions.sessionDomain).toString(),
                         Fixtures.sessionNeedsToBeRefreshedResponse.redirectURL,
                         '?client_sdrn=sdrn%3Aschibsted.com%3Aclient%3A',
                         defaultOptions.clientId,
@@ -967,8 +967,8 @@ describe('Identity', () => {
         describe.each(redirects)(`logoutUrl: redirect='%s'`, (redirect) => {
             const identity = new Identity(defaultOptions);
             const url = new URL(identity.logoutUrl(redirect));
-            expect(url.origin).toBe(defaultOptions.sessionDomain);
-            expect(url.pathname).toBe('/logout');
+            expect(url.origin).toBe(new URL(defaultOptions.sessionDomain).origin);
+            expect(url.pathname).toBe(new URL(defaultOptions.sessionDomain).pathname + 'logout');
             expect(url.searchParams.get('client_sdrn')).toBe('sdrn:schibsted.com:client:foo');
             expect(url.searchParams.get('redirect_uri')).toBe(redirect || identity.redirectUri);
         });
