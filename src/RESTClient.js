@@ -76,7 +76,8 @@ export class RESTClient {
     constructor({ serverUrl = 'PRE', envDic, fetch = globalFetch(), log, defaultParams = {}}) {
         assert(isObject(defaultParams), `defaultParams should be a non-null object`);
 
-        this.url = new URL(urlMapper(serverUrl, envDic));
+        const handledServerUrl = serverUrl.endsWith('/') ? serverUrl : `${serverUrl}/`;
+        this.url = new URL(urlMapper(handledServerUrl, envDic));
 
         this.defaultParams = defaultParams;
 
@@ -124,6 +125,8 @@ export class RESTClient {
         assert(isNonEmptyString(pathname), `Pathname must be string but it is "${pathname}"`);
         assert(isObject(data), `data must be a non-null object`);
 
+
+
         fetchOptions.headers = isObject(headers) ? cloneDefined(headers) : {};
         const fullUrl = this.makeUrl(pathname, data, useDefaultParams);
 
@@ -157,7 +160,9 @@ export class RESTClient {
      * @return {string} - the resulting url string ready to pass to fetch
      */
     makeUrl(pathname = '', query = {}, useDefaultParams = true) {
-        const url = new URL(pathname, this.url);
+        const handledPathname = pathname.startsWith('/') ? pathname.slice(1) : pathname;
+
+        const url = new URL(handledPathname, this.url);
         url.search = RESTClient.search(query, useDefaultParams, this.defaultParams);
         return url.href;
     }
