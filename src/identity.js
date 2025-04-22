@@ -204,6 +204,8 @@ export class Identity extends EventEmitter {
         this._session = {};
 
         this._setSessionServiceUrl(sessionDomain);
+        this._usedSessionServiceGetSessionEndpoint = this._sessionService.url.pathname && this._sessionService.url.pathname.length <= 1 ? 'session' : 'v2/session';
+
         this._setSpidServerUrl(env);
         this._setBffServerUrl(env);
         this._setOauthServerUrl(env);
@@ -589,7 +591,7 @@ export class Identity extends EventEmitter {
             }
             let sessionData = null;
             try {
-                sessionData = await this._sessionService.get('v2/session', {tabId: this._getTabId()});
+                sessionData = await this._sessionService.get(this._usedSessionServiceGetSessionEndpoint, {tabId: this._getTabId()});
             } catch (err) {
                 if (err && err.code === 400 && this._enableSessionCaching) {
                     const expiresIn = 1000 * (err.expiresIn || 300);

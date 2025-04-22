@@ -76,7 +76,9 @@ export class RESTClient {
     constructor({ serverUrl = 'PRE', envDic, fetch = globalFetch(), log, defaultParams = {}}) {
         assert(isObject(defaultParams), `defaultParams should be a non-null object`);
 
-        this.url = new URL(urlMapper(serverUrl, envDic));
+        const mappedUrl = urlMapper(serverUrl, envDic);
+        const handledServerUrl = mappedUrl.endsWith('/') ? mappedUrl : `${mappedUrl}/`;
+        this.url = new URL(handledServerUrl);
 
         this.defaultParams = defaultParams;
 
@@ -157,7 +159,9 @@ export class RESTClient {
      * @return {string} - the resulting url string ready to pass to fetch
      */
     makeUrl(pathname = '', query = {}, useDefaultParams = true) {
-        const url = new URL(pathname, this.url);
+        const handledPathname = pathname.startsWith('/') ? pathname.slice(1) : pathname;
+
+        const url = new URL(handledPathname, this.url);
         url.search = RESTClient.search(query, useDefaultParams, this.defaultParams);
         return url.href;
     }

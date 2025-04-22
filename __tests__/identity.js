@@ -27,7 +27,20 @@ describe('Identity', () => {
     const defaultOptions = {
         clientId: 'foo',
         redirectUri: 'http://foo.com',
-        sessionDomain: 'http://id.foo.com/test/',
+        sessionDomain: 'http://id.foo.com/',
+        callbackBeforeRedirect: jest.fn(),
+        window:{
+            location:{
+                href:'http://test.no',
+                origin: 'http://foo.bar'
+            },
+        }
+    };
+
+    const sessionServicePathedOptions = {
+        clientId: 'foo',
+        redirectUri: 'http://foo.com',
+        sessionDomain: 'http://id.foo.com/test',
         callbackBeforeRedirect: jest.fn(),
         window:{
             location:{
@@ -164,14 +177,14 @@ describe('Identity', () => {
             identity.logout();
 
             const clientSdrn = `sdrn%3Aschibsted.com%3Aclient%3A${defaultOptions.clientId}`;
-            expect(window.location.href).toBe(`${new URL(defaultOptions.sessionDomain).toString()}logout?client_sdrn=${clientSdrn}&redirect_uri=http%3A%2F%2Ffoo.com&sdk_version=${version}`);
+            expect(window.location.href).toBe(`${identity._sessionService.url}logout?client_sdrn=${clientSdrn}&redirect_uri=http%3A%2F%2Ffoo.com&sdk_version=${version}`);
         });
         test('Should redirect to session-service for site-specific logout if configured', async () => {
             const window = { location: {} };
             const identity = new Identity(Object.assign({}, defaultOptions, { window }));
             identity.logout();
 
-            expect(window.location.href).toBe(`${new URL(defaultOptions.sessionDomain).toString()}logout?client_sdrn=sdrn%3Aschibsted.com%3Aclient%3Afoo&redirect_uri=http%3A%2F%2Ffoo.com&sdk_version=${version}`);
+            expect(window.location.href).toBe(`${identity._sessionService.url}logout?client_sdrn=sdrn%3Aschibsted.com%3Aclient%3Afoo&redirect_uri=http%3A%2F%2Ffoo.com&sdk_version=${version}`);
         });
         test('Should clear cache when logging out', async () => {
             const webStorageMock = () => {
@@ -494,7 +507,7 @@ describe('Identity', () => {
 
             expect(getSessionMock).toHaveBeenCalledTimes(1)
             expect(getSessionMock).toHaveBeenCalledWith(
-                expect.stringContaining(new URL(defaultOptions.sessionDomain).toString() + "v2/session"),
+                expect.stringContaining(identity._sessionService.url + "session"),
                 {"credentials": "include", "headers": {}, "method": "get"}
             )
         });
@@ -506,7 +519,7 @@ describe('Identity', () => {
 
             expect(getSessionMock).toHaveBeenCalledTimes(1)
             expect(getSessionMock).toHaveBeenCalledWith(
-                expect.stringContaining(new URL(defaultOptions.sessionDomain).toString() + "v2/session"),
+                expect.stringContaining(identity._sessionService.url + "session"),
                 {"credentials": "include", "headers": {}, "method": "get"}
             )
         });
@@ -518,7 +531,7 @@ describe('Identity', () => {
 
             expect(getSessionMock).toHaveBeenCalledTimes(1)
             expect(getSessionMock).toHaveBeenCalledWith(
-                expect.stringContaining(new URL(defaultOptions.sessionDomain).toString() + "v2/session"),
+                expect.stringContaining(identity._sessionService.url + "session"),
                 {"credentials": "include", "headers": {}, "method": "get"}
             )
         });
@@ -560,7 +573,7 @@ describe('Identity', () => {
 
             expect(getSessionMock).toHaveBeenCalledTimes(1)
             expect(getSessionMock).toHaveBeenCalledWith(
-                expect.stringContaining(new URL(defaultOptions.sessionDomain).toString() + "v2/session"),
+                expect.stringContaining(identity._sessionService.url + "session"),
                 {"credentials": "include", "headers": {}, "method": "get"}
             )
         });
@@ -630,12 +643,326 @@ describe('Identity', () => {
 
                 expect(defaultOptions.window.location.href).toBe(
                     [
-                        new URL(defaultOptions.sessionDomain).toString(),
+                        identity._sessionService.url,
                         Fixtures.sessionNeedsToBeRefreshedResponse.redirectURL,
                         '?client_sdrn=sdrn%3Aschibsted.com%3Aclient%3A',
                         defaultOptions.clientId,
                         '&redirect_uri=',
                         encodeURIComponent(defaultOptions.redirectUri),
+                        '&sdk_version=',
+                        version,
+                        '&tabId=',
+                        MOCK_TAB_ID
+                    ].join('')
+                );
+            });
+        })
+    });
+
+    describe('hasSession pathed session-service', () => {
+        let identity;
+
+        const getSessionMock = jest.fn(() => ({ ok: true, json: () => Fixtures.sessionResponse }));
+        const mockSessionOkResponse = (response)=>{
+            getSessionMock.mockImplementationOnce(() => ({ ok: true, json: () => response }));
+        }
+
+        beforeEach(() => {
+            identity = new Identity(sessionServicePathedOptions);
+            identity._sessionService.fetch = getSessionMock;
+            identity._clearVarnishCookie();
+        });
+
+        afterEach(()=>{
+            jest.clearAllMocks();
+        })
+
+        test('should clear varnish cookie for domain', async () => {
+            identity.enableVarnishCookie(10);
+
+            mockSessionOkResponse({ result: true, sp_id: 'abc', baseDomain: 'spid.no' });
+
+            await identity.hasSession();
+
+            expect(document.cookie).toBe('SP_ID=abc');
+
+            identity._clearVarnishCookie();
+
+            expect(document.cookie).toBe('');
+        });
+
+        test('should be able to set varnish cookie', async () => {
+            await identity.hasSession();
+
+            expect(document.cookie).toBe('');
+
+            identity.enableVarnishCookie();
+
+            await identity.hasSession();
+            expect(document.cookie).toBe('SP_ID=some-jwt-token');
+        });
+
+        test('should not set varnish cookie if session has no `expiresIn`', async () => {
+            identity.enableVarnishCookie();
+
+            mockSessionOkResponse({ result: true, sp_id: 'abc' });
+
+            await identity.hasSession();
+
+            expect(document.cookie).toBe('');
+        });
+
+        test('should set varnish cookie also when reading from cache', async () => {
+            identity.enableVarnishCookie();
+
+            mockSessionOkResponse({ result: true, sp_id: 'should_not_expire', expiresIn: 2 })
+
+            await identity.hasSession();
+
+            expect(document.cookie).toBe('SP_ID=should_not_expire');
+
+            // 1. Here we first wait a little bit (*less* than the 2 second cache expiry)
+            await new Promise((resolve) => setTimeout(resolve, 1800));
+
+            // 2. Then we fetch session info — this should fetch from the cache and set the varnish
+            //    cookie again. In other words, it should exist in document.cookie for at least 2s
+            await identity.hasSession();
+
+            // 3. Finally, we wait another second. In total, we have waited slightly more than 3
+            //    seconds required to expire the *initial* varnish cookie, but as long as the
+            //    retrieval from cache also sets the cookie, we should be good
+            await new Promise((resolve) => setTimeout(resolve, 1000));
+            expect(document.cookie).toBe('SP_ID=should_not_expire');
+        });
+
+        test('should work to set varnish cache expiration', async () => {
+            identity.enableVarnishCookie(3);
+
+            mockSessionOkResponse({ result: true, sp_id: 'should_remain_after_one_sec', expiresIn: 1 })
+
+            await identity.hasSession();
+
+            await new Promise((resolve) => setTimeout(resolve, 1010));
+
+            expect(document.cookie).toBe('SP_ID=should_remain_after_one_sec');
+        });
+
+        test('should work to clear varnish cookie', async () => {
+            mockSessionOkResponse({ result: true, sp_id: 'should_be_cleared', expiresIn: 1 });
+
+            identity.enableVarnishCookie(3);
+
+            await identity.hasSession();
+
+            expect(document.cookie).toBe('SP_ID=should_be_cleared');
+
+            identity._maybeClearVarnishCookie();
+
+            expect(document.cookie).toBe('');
+        });
+
+        describe('`baseDomain`', () => {
+            test('should respect `baseDomain` from session', async () => {
+                identity.enableVarnishCookie();
+
+                mockSessionOkResponse({ result: true, sp_id: 'abc', expiresIn: 3600, baseDomain: 'foo.com' });
+
+                await identity.hasSession();
+
+                expect(document.cookie).toBe('');
+            });
+
+            test('should respect `baseDomain` from session', async () => {
+                mockSessionOkResponse({ result: true, sp_id: 'abc', expiresIn: 3600 });
+
+                identity.enableVarnishCookie();
+
+                await identity.hasSession();
+
+                expect(document.cookie).toBe('SP_ID=abc');
+            });
+        });
+
+        describe(`enableVarnishCookie domain`, () => {
+            const domain =  'spid.no';
+            const expiresIn=  10;
+
+            beforeEach(()=>{
+                //session base domain is `tv.spid.no` which is different from jest testURL, so cookie is not set
+                mockSessionOkResponse({ result: true, sp_id: 'abc', expiresIn: 3600, baseDomain: 'tv.spid.no' });
+            })
+
+            const cases = [
+                [undefined, undefined, 0, ''],
+                [{expiresIn}, undefined, expiresIn, ''],
+                [{domain}, domain, 0, 'SP_ID=abc'],
+                [{domain, expiresIn}, domain, expiresIn, 'SP_ID=abc'],
+            ]
+
+            test.each(cases)(
+                "with %p as cookieSetup, %p as varnishCookieDomain, %p as varnishExpiresIn set cookies %p",
+                async (cookieConfig, varnishCookieDomain, varnishExpiresIn, exepectedCookie) => {
+                    identity.enableVarnishCookie(cookieConfig);
+
+                    expect(identity.varnishCookieDomain).toBe(varnishCookieDomain);
+                    expect(identity.varnishExpiresIn).toBe(varnishExpiresIn);
+
+                    await identity.hasSession();
+
+                    expect(document.cookie).toBe(exepectedCookie);
+                }
+            );
+        });
+
+        test('should only go to session-service for site specific logout', async () => {
+            getSessionMock.mockImplementationOnce(() => ({ ok: false, status: 400, statusText: 'No cookie present' }));
+
+            await expect(identity.hasSession()).rejects.toMatchObject({ message: 'HasSession failed' });
+
+            expect(getSessionMock).toHaveBeenCalledTimes(1)
+            expect(getSessionMock).toHaveBeenCalledWith(
+                expect.stringContaining(identity._sessionService.url + "v2/session"),
+                {"credentials": "include", "headers": {}, "method": "get"}
+            )
+        });
+
+        test('should fail `hasSession` if session cookie is present but no session is found and site does not have specific logout', async () => {
+            getSessionMock.mockImplementationOnce(() => ({ ok: false, status: 404, statusText: 'No session found' }));
+
+            await expect(identity.hasSession()).rejects.toMatchObject({ message: 'HasSession failed' });
+
+            expect(getSessionMock).toHaveBeenCalledTimes(1)
+            expect(getSessionMock).toHaveBeenCalledWith(
+                expect.stringContaining(identity._sessionService.url + "v2/session"),
+                {"credentials": "include", "headers": {}, "method": "get"}
+            )
+        });
+
+        test('should terminate "chain" if session-service call succeeds', async () => {
+            mockSessionOkResponse({});
+
+            await expect(identity.hasSession()).resolves.toMatchObject({});
+
+            expect(getSessionMock).toHaveBeenCalledTimes(1)
+            expect(getSessionMock).toHaveBeenCalledWith(
+                expect.stringContaining(identity._sessionService.url + "v2/session"),
+                {"credentials": "include", "headers": {}, "method": "get"}
+            )
+        });
+
+        test('should throw en SDK error when get /session returned an error', async () => {
+            mockSessionOkResponse({error: 'some error'});
+
+            await expect(identity.hasSession()).rejects.toThrowError('HasSession failed');
+        });
+
+        test('should emit event both when "real" and "cached" values are used', async () => {
+            const spy = jest.fn();
+
+            identity.on('login', spy);
+
+            await identity.hasSession();
+            await identity.hasSession();
+
+            expect(spy).toHaveBeenCalledTimes(2);
+        });
+
+        test('should return the same promise if invoked multiple times', async () => {
+            mockSessionOkResponse({ sp_id: 'yo' });
+
+            const promise1 = identity.hasSession();
+            const promise2 = identity.hasSession(); // NOTE: no 'await' — we want the promise
+
+            expect(promise2).toBe(promise1);
+
+            const dummy = await promise1;
+
+            expect(dummy).toMatchObject({ sp_id: 'yo' });
+        });
+
+        test('should throw error if session-service returns error without 404', async () => {
+            getSessionMock.mockImplementationOnce(() => ({ ok: false, status: 401, statusText: 'Unauthorized' }));
+
+            await expect(identity.hasSession()).rejects.toMatchObject({ message: 'HasSession failed' });
+
+            expect(getSessionMock).toHaveBeenCalledTimes(1)
+            expect(getSessionMock).toHaveBeenCalledWith(
+                expect.stringContaining(identity._sessionService.url + "v2/session"),
+                {"credentials": "include", "headers": {}, "method": "get"}
+            )
+        });
+
+        describe('cache', () => {
+            test('should never cache if caching is off', async () => {
+                identity._enableSessionCaching = false;
+
+                await identity.hasSession();
+                await identity.hasSession();
+
+                expect(getSessionMock).toHaveBeenCalledTimes(2)
+            });
+
+            test('should use cached value on subsequent calls by default', async () => {
+                await identity.hasSession();
+                await identity.hasSession();
+
+                expect(getSessionMock).toHaveBeenCalledTimes(1)
+            });
+
+            test('cache shouldn\'t be updated when hasSession returns data from cache, but should be if cache expired', async () => {
+                jest.spyOn(Date, 'now')
+                    .mockReturnValue(new Date("2019-11-09T10:00:00").getTime());
+
+                const getExpiresOn = () => JSON.parse(identity.sessionStorageCache.cache.get('hasSession-cache')).expiresOn;
+
+                await identity.hasSession();
+
+                const cacheExpires = getExpiresOn();
+                jest.spyOn(Date, 'now')
+                    .mockReturnValue(new Date("2019-11-09T10:02:00").getTime());
+
+                await identity.hasSession();
+
+                expect(getExpiresOn()).toBe(cacheExpires); // expiresOn shouldn't change on call less than 5m
+                jest.spyOn(Date, 'now')
+                    .mockReturnValue(new Date("2019-11-09T11:05:00").getTime());
+
+                await identity.hasSession();
+
+                // expiresOn should change after 1h
+                expect(getExpiresOn()).not.toBe(cacheExpires);
+            });
+
+            test('should clear cache when explicitly called', async () => {
+                await identity.hasSession();
+                await identity.clearCachedUserSession();
+                // the cached data should be removed so the second call should result in a new request
+                await identity.hasSession();
+
+                expect(getSessionMock).toHaveBeenCalledTimes(2)
+            });
+        });
+
+        describe('session refresh full page redirect', ()=>{
+            test('should do redirect when session endpoint respond with redirectURL only', async () => {
+                mockSessionOkResponse(Fixtures.sessionNeedsToBeRefreshedResponse)
+
+                const MOCK_TAB_ID = 1234;
+                const spy = jest.spyOn(Identity.prototype, '_getTabId');
+                spy.mockImplementation(() => MOCK_TAB_ID);
+
+                await identity.hasSession();
+
+                expect(sessionServicePathedOptions.callbackBeforeRedirect).toHaveBeenCalled();
+
+                expect(sessionServicePathedOptions.window.location.href).toBe(
+                    [
+                        identity._sessionService.url,
+                        Fixtures.sessionNeedsToBeRefreshedResponse.redirectURL,
+                        '?client_sdrn=sdrn%3Aschibsted.com%3Aclient%3A',
+                        sessionServicePathedOptions.clientId,
+                        '&redirect_uri=',
+                        encodeURIComponent(sessionServicePathedOptions.redirectUri),
                         '&sdk_version=',
                         version,
                         '&tabId=',
@@ -968,7 +1295,7 @@ describe('Identity', () => {
             const identity = new Identity(defaultOptions);
             const url = new URL(identity.logoutUrl(redirect));
             expect(url.origin).toBe(new URL(defaultOptions.sessionDomain).origin);
-            expect(url.pathname).toBe(new URL(defaultOptions.sessionDomain).pathname + 'logout');
+            expect(url.pathname).toBe(identity._sessionService.url.pathname + 'logout');
             expect(url.searchParams.get('client_sdrn')).toBe('sdrn:schibsted.com:client:foo');
             expect(url.searchParams.get('redirect_uri')).toBe(redirect || identity.redirectUri);
         });
