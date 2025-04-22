@@ -1,5 +1,8 @@
 # Changelog
 
+## 5.2.1 (2025-04-22)
+* Add conditional session-service session call for pathed services by @bogdan-niculescu-sch in https://github.com/schibsted/account-sdk-browser/pull/296
+
 ## 4.7.7 (2023-11-29)
 * docs: dts update by @michal-oleniacz-stp in https://github.com/schibsted/account-sdk-browser/pull/263
 

@@ -10,7 +10,7 @@ browsers. To achieve this, breaking changes were introduced to some functionalit
 ### Force-redirect when refreshing user sessions
 
 <p align="justify">
-To ensure sessions stored in Safari-based browsers work properly we now force a redirect to session-service causing a full-page load in order to refresh sessions in the `hasSession` method. Once cookies are refreshed, session-service will redirect users back to the client app.
+To ensure sessions stored in Safari-based browsers work properly we now force a redirect to session-service causing a full-page load in order to refresh sessions in the `hasSession` method only if session-service is defined at base level. If session-service domain used to connect to is pathed, then `hasSession` will use the old endpoint which does not support redirects. Once cookies are refreshed, session-service will redirect users back to the client app.
 
 This directly affects the following methods depending on `hasSession`:
 
