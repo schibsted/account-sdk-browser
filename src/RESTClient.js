@@ -126,8 +126,6 @@ export class RESTClient {
         assert(isNonEmptyString(pathname), `Pathname must be string but it is "${pathname}"`);
         assert(isObject(data), `data must be a non-null object`);
 
-
-
         fetchOptions.headers = isObject(headers) ? cloneDefined(headers) : {};
         const fullUrl = this.makeUrl(pathname, data, useDefaultParams);
 
