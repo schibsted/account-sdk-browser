@@ -507,7 +507,7 @@ describe('Identity', () => {
 
             expect(getSessionMock).toHaveBeenCalledTimes(1)
             expect(getSessionMock).toHaveBeenCalledWith(
-                expect.stringContaining(identity._sessionService.url + "v2/session"),
+                expect.stringContaining(identity._sessionService.url + "session"),
                 {"credentials": "include", "headers": {}, "method": "get"}
             )
         });
@@ -519,7 +519,7 @@ describe('Identity', () => {
 
             expect(getSessionMock).toHaveBeenCalledTimes(1)
             expect(getSessionMock).toHaveBeenCalledWith(
-                expect.stringContaining(identity._sessionService.url + "v2/session"),
+                expect.stringContaining(identity._sessionService.url + "session"),
                 {"credentials": "include", "headers": {}, "method": "get"}
             )
         });
@@ -531,7 +531,7 @@ describe('Identity', () => {
 
             expect(getSessionMock).toHaveBeenCalledTimes(1)
             expect(getSessionMock).toHaveBeenCalledWith(
-                expect.stringContaining(identity._sessionService.url + "v2/session"),
+                expect.stringContaining(identity._sessionService.url + "session"),
                 {"credentials": "include", "headers": {}, "method": "get"}
             )
         });
@@ -573,7 +573,7 @@ describe('Identity', () => {
 
             expect(getSessionMock).toHaveBeenCalledTimes(1)
             expect(getSessionMock).toHaveBeenCalledWith(
-                expect.stringContaining(identity._sessionService.url + "v2/session"),
+                expect.stringContaining(identity._sessionService.url + "session"),
                 {"credentials": "include", "headers": {}, "method": "get"}
             )
         });

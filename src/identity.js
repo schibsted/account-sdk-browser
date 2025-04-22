@@ -589,7 +589,15 @@ export class Identity extends EventEmitter {
             }
             let sessionData = null;
             try {
-                sessionData = await this._sessionService.get('v2/session', {tabId: this._getTabId()});
+                console.log(this._sessionService.url.pathname);
+                console.log(this._sessionService.url.pathname.length <= 1);
+                console.log(this._sessionService.url.pathname && this._sessionService.url.pathname.length <= 1);
+                if (this._sessionService.url.pathname && this._sessionService.url.pathname.length <= 1) {
+                    sessionData = await this._sessionService.get('session', {tabId: this._getTabId()});
+                }
+                else {
+                    sessionData = await this._sessionService.get('v2/session', {tabId: this._getTabId()});
+                }
             } catch (err) {
                 if (err && err.code === 400 && this._enableSessionCaching) {
                     const expiresIn = 1000 * (err.expiresIn || 300);
