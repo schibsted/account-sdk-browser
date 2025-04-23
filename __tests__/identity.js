@@ -159,13 +159,13 @@ describe('Identity', () => {
             );
         });
 
-        test('Should return url with xDomainId', () => {
+        test('Should return url with xDomainId, xEnvironmentId and originCampaing', () => {
             const window = { location: {} };
             const identity = new Identity(Object.assign({}, defaultOptions, { window }));
-            identity.login({ state: 'foo', xDomainId: 'aaa1111BBBB' });
+            identity.login({ state: 'foo', xDomainId: 'aaa1111BBBB', xEnvironmentId: 'hello', originCampaign: 'world' });
             compareUrls(
                 window.location.href,
-                'https://identity-pre.schibsted.com/oauth/authorize?client_id=foo&redirect_uri=http%3A%2F%2Ffoo.com&response_type=code&scope=openid&state=foo&prompt=select_account&x_domain_id=aaa1111BBBB'
+                'https://identity-pre.schibsted.com/oauth/authorize?client_id=foo&redirect_uri=http%3A%2F%2Ffoo.com&response_type=code&scope=openid&state=foo&prompt=select_account&x_domain_id=aaa1111BBBB&x_env_id=hello&utm_campaign=world'
             );
         });
     });
