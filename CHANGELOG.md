@@ -1,5 +1,8 @@
 # Changelog
 
+## 5.2.2 (2025-04-23)
+* Fix conditional for session endpoint for session-service @bogdan-niculescu-sch in https://github.com/schibsted/account-sdk-browser/pull/298
+
 ## 5.2.1 (2025-04-22)
 * Add conditional session-service session call if the service is path-ed by @bogdan-niculescu-sch in https://github.com/schibsted/account-sdk-browser/pull/296
 * Add domain and endpoint string format enforcing in RestClient @bogdan-niculescu-sch in https://github.com/schibsted/account-sdk-browser/pull/296
