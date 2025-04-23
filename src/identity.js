@@ -204,7 +204,7 @@ export class Identity extends EventEmitter {
         this._session = {};
 
         this._setSessionServiceUrl(sessionDomain);
-        this._usedSessionServiceGetSessionEndpoint = this._sessionService.url.pathname && this._sessionService.url.pathname.length <= 1 ? 'session' : 'v2/session';
+        this._usedSessionServiceGetSessionEndpoint = this._sessionService.url.pathname && this._sessionService.url.pathname.length <= 1 ? 'v2/session' : 'session';
 
         this._setSpidServerUrl(env);
         this._setBffServerUrl(env);
