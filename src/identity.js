@@ -591,10 +591,6 @@ export class Identity extends EventEmitter {
             }
             let sessionData = null;
             try {
-                console.log(this._sessionService.url.pathname);
-                console.log(this._sessionService.url.pathname.length <= 1);
-                console.log(this._sessionService.url.pathname && this._sessionService.url.pathname.length <= 1);
-                console.log(this._usedSessionServiceGetSessionEndpoint);
                 sessionData = await this._sessionService.get(this._usedSessionServiceGetSessionEndpoint, {tabId: this._getTabId()});
             } catch (err) {
                 if (err && err.code === 400 && this._enableSessionCaching) {
