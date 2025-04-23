@@ -305,9 +305,11 @@ export class Identity extends TinyEmitter {
      * @param {boolean} [options.oneStepLogin=false]
      * @param {string} [options.prompt=select_account]
      * @param {string} [options.xDomainId]
+     * @param {string} [options.xEnvironmentId]
+     * @param {string} [options.originCampaign]
      * @return {Window|null} - Reference to popup window if created (or `null` otherwise)
      */
-    login({ state, acrValues, scope, redirectUri, preferPopup, loginHint, tag, teaser, maxAge, locale, oneStepLogin, prompt, xDomainId }: LoginOptions): Window | null;
+    login({ state, acrValues, scope, redirectUri, preferPopup, loginHint, tag, teaser, maxAge, locale, oneStepLogin, prompt, xDomainId, xEnvironmentId, originCampaign }: LoginOptions): Window | null;
     /**
      * @async
      * @summary Retrieve the sp_id (Varnish ID)
@@ -337,9 +339,12 @@ export class Identity extends TinyEmitter {
      * @param {string} [options.locale]
      * @param {boolean} [options.oneStepLogin=false]
      * @param {string} [options.prompt=select_account]
+     * @param {string} [options.xDomainId]
+     * @param {string} [options.xEnvironmentId]
+     * @param {string} [options.originCampaign]
      * @return {string} - The url
      */
-    loginUrl({ state, acrValues, scope, redirectUri, loginHint, tag, teaser, maxAge, locale, oneStepLogin, prompt, }: LoginOptions, ...args: any[]): string;
+    loginUrl({ state, acrValues, scope, redirectUri, loginHint, tag, teaser, maxAge, locale, oneStepLogin, prompt, xDomainId, xEnvironmentId, originCampaign }: LoginOptions, ...args: any[]): string;
     /**
      * The url for logging the user out
      * @param {string} [redirectUri=this.redirectUri]
@@ -444,7 +449,14 @@ export type LoginOptions = {
      * - Identifier for cross-domain tracking in Pulse
      */
     xDomainId?: string;
-
+    /**
+     * - Environment for cross-domain tracking in Pulse
+     */
+    xEnvironmentId?: string;
+    /**
+     * - Campaign identifier for tracking in Pulse
+     */
+    originCampaign?: string;
 };
 export type SimplifiedLoginWidgetLoginOptions = {
     /**
@@ -518,6 +530,15 @@ export type SimplifiedLoginWidgetLoginOptions = {
      * - Identifier for cross-domain tracking in Pulse
      */
     xDomainId?: string;
+    /**
+     * - Environment for cross-domain tracking in Pulse
+     */
+    xEnvironmentId?: string;
+    /**
+     * - Campaign identifier for tracking in Pulse
+     */
+    originCampaign?: string;
+
 };
 export type HasSessionSuccessResponse = {
     /**
