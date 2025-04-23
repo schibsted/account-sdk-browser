@@ -159,7 +159,7 @@ describe('Identity', () => {
             );
         });
 
-        test('Should return url with xDomainId, xEnvironmentId and originCampaing', () => {
+        test('Should return url with xDomainId, xEnvironmentId and originCampaign', () => {
             const window = { location: {} };
             const identity = new Identity(Object.assign({}, defaultOptions, { window }));
             identity.login({ state: 'foo', xDomainId: 'aaa1111BBBB', xEnvironmentId: 'hello', originCampaign: 'world' });
