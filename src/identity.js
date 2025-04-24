@@ -26,7 +26,7 @@ import version from './version.js';
  * `password` (will force password confirmation, even if user is already logged in), `eid`. Those values might
  * be mixed as space-separated string. To make sure that user has authenticated with 2FA you need
  * to verify AMR (Authentication Methods References) claim in ID token.
- * Might also be used to ensure additional acr (sms, otp) for already logged in users.
+ * Might also be used to ensure additional acr (sms, otp) for already logged-in users.
  * Supported value is also 'otp-email' means one time password using email.
  * @property {string} [scope] - The OAuth scopes for the tokens. This is a list of
  * scopes, separated by space. If the list of scopes contains `openid`, the generated tokens
@@ -36,7 +36,7 @@ import version from './version.js';
  * @property {string} [redirectUri] - Redirect uri that will receive the
  * code. Must exactly match a redirectUri from your client in self-service
  * @property {boolean} [preferPopup] - Should we try to open a popup window?
- * @property {string} [loginHint] - user email or UUID hint
+ * @property {string} [loginHint] - User email or UUID hint
  * @property {string} [tag] - Pulse tag
  * @property {string} [teaser] - Teaser slug. Teaser with given slug will be displayed
  * in place of default teaser
@@ -46,9 +46,12 @@ import version from './version.js';
  * spec section 3.1.2.1 for more information
  * @property {string} [locale] - Optional parameter to overwrite client locale setting.
  * New flows supports nb_NO, fi_FI, sv_SE, en_US
- * @property {boolean} [oneStepLogin] - display username and password on one screen
+ * @property {boolean} [oneStepLogin] - Display username and password on one screen
  * @property {string} [prompt] - String that specifies whether the Authorization Server prompts the
- * End-User for reauthentication or confirm account screen. Supported values: `select_account` or `login`
+ * End-User for re-authentication or confirm account screen. Supported values: `select_account` or `login`
+ * @property {string} [xDomainId] - Identifier for cross-domain tracking in Pulse
+ * @property {string} [xEnvironmentId] - Environment for cross-domain tracking in Pulse
+ * @property {string} [originCampaign] - Campaign identifier for tracking in Pulse
  */
 /**
  * @typedef {object} SimplifiedLoginWidgetLoginOptions
@@ -60,7 +63,7 @@ import version from './version.js';
  * `password` (will force password confirmation, even if user is already logged in). Those values might
  * be mixed as space-separated string. To make sure that user has authenticated with 2FA you need
  * to verify AMR (Authentication Methods References) claim in ID token.
- * Might also be used to ensure additional acr (sms, otp) for already logged in users.
+ * Might also be used to ensure additional acr (sms, otp) for already logged-in users.
  * Supported value is also 'otp-email' means one time password using email.
  * @property {string} [scope] - The OAuth scopes for the tokens. This is a list of
  * scopes, separated by space. If the list of scopes contains `openid`, the generated tokens
@@ -70,7 +73,7 @@ import version from './version.js';
  * @property {string} [redirectUri] - Redirect uri that will receive the
  * code. Must exactly match a redirectUri from your client in self-service
  * @property {boolean} [preferPopup] - Should we try to open a popup window?
- * @property {string} [loginHint] - user email or UUID hint
+ * @property {string} [loginHint] - User email or UUID hint
  * @property {string} [tag] - Pulse tag
  * @property {string} [teaser] - Teaser slug. Teaser with given slug will be displayed
  * in place of default teaser
@@ -80,9 +83,12 @@ import version from './version.js';
  * spec section 3.1.2.1 for more information
  * @property {string} [locale] - Optional parameter to overwrite client locale setting.
  * New flows supports nb_NO, fi_FI, sv_SE, en_US
- * @property {boolean} [oneStepLogin] - display username and password on one screen
+ * @property {boolean} [oneStepLogin] - Display username and password on one screen
  * @property {string} [prompt] - String that specifies whether the Authorization Server prompts the
  * End-User for reauthentication or confirm account screen. Supported values: `select_account` or `login`
+ * @property {string} [xDomainId] - Identifier for cross-domain tracking in Pulse
+ * @property {string} [xEnvironmentId] - Environment for cross-domain tracking in Pulse
+ * @property {string} [originCampaign] - Campaign identifier for tracking in Pulse
  */
 
 /**
@@ -834,6 +840,7 @@ export class Identity extends EventEmitter {
             return null;
         }
     }
+
     /**
      * If a popup is desired, this function needs to be called in response to a user event (like
      * click or tap) in order to work correctly. Otherwise the popup will be blocked by the
@@ -855,6 +862,8 @@ export class Identity extends EventEmitter {
      * @param {boolean} [options.oneStepLogin=false]
      * @param {string} [options.prompt=select_account]
      * @param {string} [options.xDomainId]
+     * @param {string} [options.xEnvironmentId]
+     * @param {string} [options.originCampaign]
      * @return {Window|null} - Reference to popup window if created (or `null` otherwise)
      */
     login({
@@ -870,7 +879,9 @@ export class Identity extends EventEmitter {
         locale = '',
         oneStepLogin = false,
         prompt = 'select_account',
-        xDomainId = ''
+        xDomainId = '',
+        xEnvironmentId = '',
+        originCampaign = ''
     }) {
         this._closePopup();
         this.sessionStorageCache.delete(HAS_SESSION_CACHE_KEY);
@@ -886,7 +897,9 @@ export class Identity extends EventEmitter {
             locale,
             oneStepLogin,
             prompt,
-            xDomainId
+            xDomainId,
+            xEnvironmentId,
+            originCampaign
         });
 
         if (preferPopup) {
@@ -943,6 +956,9 @@ export class Identity extends EventEmitter {
      * @param {string} [options.locale]
      * @param {boolean} [options.oneStepLogin=false]
      * @param {string} [options.prompt=select_account]
+     * @param {string} [options.xDomainId]
+     * @param {string} [options.xEnvironmentId]
+     * @param {string} [options.originCampaign]
      * @return {string} - The url
      */
     loginUrl({
@@ -957,7 +973,9 @@ export class Identity extends EventEmitter {
         locale = '',
         oneStepLogin = false,
         prompt = 'select_account',
-        xDomainId = ''
+        xDomainId = '',
+        xEnvironmentId = '',
+        originCampaign = ''
     }) {
         if (typeof arguments[0] !== 'object') {
             // backward compatibility
@@ -991,7 +1009,9 @@ export class Identity extends EventEmitter {
             locale,
             one_step_login: oneStepLogin || '',
             prompt: acrValues ? '' : prompt,
-            x_domain_id: xDomainId
+            x_domain_id: xDomainId,
+            x_env_id: xEnvironmentId,
+            utm_campaign: originCampaign
         });
     }
 
@@ -1060,7 +1080,6 @@ export class Identity extends EventEmitter {
 
             return loginPrams;
         }
-
 
         return new Promise(
             (resolve, reject) => {
