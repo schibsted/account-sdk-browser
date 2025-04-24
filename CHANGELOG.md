@@ -1,5 +1,8 @@
 # Changelog
 
+## 5.2.3 (2025-04-24)
+* Add xEnvironmentId and originCampaign optional parameters to login triggers @bogdan-niculescu-sch in https://github.com/schibsted/account-sdk-browser/pull/300
+
 ## 5.2.2 (2025-04-23)
 * Fix conditional for session endpoint for session-service @bogdan-niculescu-sch in https://github.com/schibsted/account-sdk-browser/pull/298
 
