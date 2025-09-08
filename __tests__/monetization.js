@@ -144,4 +144,23 @@ describe('Monetization', () => {
             expect(url).toBe('https://identity-pre.schibsted.com/account/products?client_id=a&redirect_uri=http%3A%2F%2Ffoo.bar');
         });
     });
+
+    describe('global registration', () => {
+        test('registers itself as window.sch_monetization', () => {
+
+            const window = {};
+            const instance = new Monetization({ clientId: 'a', window });
+            expect(window.sch_monetization).toBe(instance);
+        })
+        test('emits document event', async () => {
+
+            const event = new Promise(resolve => {
+                document.addEventListener('sch_monetization:init', e => {
+                    resolve(e);
+                });
+            });
+            const instance = new Monetization({ clientId: 'a'});
+            expect(event).resolves.toMatchObject({ detail: { instance } });
+        })
+    });
 });

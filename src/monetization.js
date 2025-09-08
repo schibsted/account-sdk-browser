@@ -13,6 +13,7 @@ import Cache from './cache.js';
 import * as spidTalk from './spidTalk.js';
 import SDKError from './SDKError.js';
 import version from './version.js';
+import { registerGlobal } from './global-registry.js';
 
 const globalWindow = () => window;
 
@@ -45,6 +46,7 @@ export class Monetization extends EventEmitter {
             assert(isUrl(sessionDomain), 'sessionDomain parameter is not a valid URL');
             this._setSessionServiceUrl(sessionDomain);
         }
+        registerGlobal(window, 'monetization', this);
     }
 
     /**

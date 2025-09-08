@@ -1589,4 +1589,24 @@ describe('Identity', () => {
             window.console = console;
         })
     })
+
+    describe('global registration', () => {
+        test('should register as window.sch_identity', () => {
+            const window = { location: {}};
+            const instance = new Identity(Object.assign({}, defaultOptions, { window }));
+
+            expect(window.sch_identity).toBe(instance);
+        })
+        test('should emit document event', async () => {
+            const window = { location: {}};
+            const event = new Promise(resolve => {
+                document.addEventListener('sch_identity:init', e => {
+                    resolve(e);
+                });
+            });
+            const instance = new Identity(Object.assign({}, defaultOptions, { window }));
+
+            expect(event).resolves.toMatchObject({ detail: { instance } });
+        })
+    });
 });

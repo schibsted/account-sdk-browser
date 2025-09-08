@@ -15,6 +15,7 @@ import RESTClient from './RESTClient.js';
 import SDKError from './SDKError.js';
 import * as spidTalk from './spidTalk.js';
 import version from './version.js';
+import { registerGlobal } from './global-registry.js';
 
 /**
  * @typedef {object} LoginOptions
@@ -218,6 +219,9 @@ export class Identity extends EventEmitter {
         this._setGlobalSessionServiceUrl(env);
 
         this._unblockSessionCall();
+
+        registerGlobal(window, 'identity', this);
+
     }
 
     /**

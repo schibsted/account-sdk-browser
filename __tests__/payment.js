@@ -244,4 +244,23 @@ describe('Payment', () => {
             );
         });
     });
+
+    describe('global registration', () => {
+        test('registers itself as window.sch_payment', () => {
+            const window = { location: {}};
+            const instance = new Payment({ clientId: 'a',  window });
+            expect(window.sch_payment).toBe(instance);
+        })
+
+        test('emits document event', async () => {
+            const window = { location: {}};
+            const event = new Promise(resolve => {
+                document.addEventListener('sch_payment:init', e => {
+                    resolve(e);
+                });
+            });
+            const instance = new Payment({ clientId: 'a', window });
+            expect(event).resolves.toMatchObject({ detail: { instance } });
+        })
+    });
 });
