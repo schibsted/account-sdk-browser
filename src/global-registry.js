@@ -1,10 +1,10 @@
 
 /**
- * Registers a component globally if not already registered, and dispatches an event to notify listeners.
+ * Registers a component as a property on the provided global object, if not already registered, and dispatches an event to notify listeners.
  * The event is dispatched on `document` and will have the name `$sch_${componentName}:init` and a `detail` property with the instance.
  *
  * @param {any} global typically `window`
- * @param {string} componentName the name of the component to register
+ * @param {string} componentName the name of the component to register, 'identity', 'monetization' or 'payment'
  * @param {any} instance the instance of the component to register
  * @returns {void}
  */
