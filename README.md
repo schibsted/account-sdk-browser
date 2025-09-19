@@ -28,7 +28,7 @@ domain, your local domain should be local.sdk-example.com.
 1. Do `npm install --save @schibsted/account-sdk-browser`
 1. Use this library as you would any other npm module: `import { Identity, Monetization, Payment } from '@schibsted/account-sdk-browser'`
    With CommonJS it is possible to `require` the modules Identity, Monetization and Payment
-   by appending `/identity`, `/monetization'` or `/payment'`.
+   by appending `/identity`, `/monetization` or `/payment`.
 1. Build your site as you prefer. This library uses modern JavaScript syntax (including async/await
    and other ES2017 and WHATWG features) by default. We recommend that you do any transpilation
    yourself for the browser versions you need to cater to. See [this paragraph](#polyfills) for
@@ -212,7 +212,7 @@ const monetization = new Monetization({
 });
 
 try {
-    // Check if the user has access to a a particular product
+    // Check if the user has access to a particular product
     const userId = await identity.getUserId();
     const data = await monetization.hasAccess([productId], userId);
     alert(`User has access to ${productId}? ${data.entitled}`)
