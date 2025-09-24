@@ -255,7 +255,7 @@ describe('Payment', () => {
         test('emits document event', async () => {
             const window = { location: {}};
             const event = new Promise(resolve => {
-                document.addEventListener('schPayment:init', e => {
+                window.addEventListener('schPayment:init', e => {
                     resolve(e);
                 });
             });

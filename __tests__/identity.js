@@ -1600,7 +1600,7 @@ describe('Identity', () => {
         test('should emit document event', async () => {
             const window = { location: {}};
             const event = new Promise(resolve => {
-                document.addEventListener('schIdentity:init', e => {
+                window.addEventListener('schIdentity:init', e => {
                     resolve(e);
                 });
             });

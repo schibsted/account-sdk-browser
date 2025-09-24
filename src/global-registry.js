@@ -13,6 +13,6 @@ export const registerGlobal = (global, componentClassName, instance) => {
     if (!(global)[prefixedName]) {
         (global)[prefixedName] = instance;
     }
-    document.dispatchEvent(new CustomEvent(`${prefixedName}:ready`, { detail: { instance } }));
+    window.dispatchEvent(new CustomEvent(`${prefixedName}:ready`, { detail: { instance } }));
 }
 

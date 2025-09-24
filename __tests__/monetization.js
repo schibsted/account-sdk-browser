@@ -155,7 +155,7 @@ describe('Monetization', () => {
         test('emits document event', async () => {
 
             const event = new Promise(resolve => {
-                document.addEventListener('schMonetization:init', e => {
+                window.addEventListener('schMonetization:init', e => {
                     resolve(e);
                 });
             });
