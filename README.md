@@ -158,7 +158,7 @@ attacks. For example this can be accomplished by:
 Although Schibsted account abstracts away the details of how the users sign up or log in, it's worth
 mentioning that your end users have a few ways to log in:
 
- Username & password: pretty self-explanatory; users register using an email address and a
+* Username & password: pretty self-explanatory; users register using an email address and a
     self-chosen password
 *  Passwordless - email: here, the users enter their email address and receive a one-time code that
     they can use to log in
@@ -292,24 +292,24 @@ browser side. Nevertheless, here is a short description of them.
    production environments is `vgs_email`, because reasons (on PRE, it is called `spid-pre-data`).
    It's a JSON string that's encoded using the standard `encodeURIComponent()` function and is an
    object that contains two pieces of information that's important:
-    - `remember`: if set to `true`, the user chose to be remembered and this means we usually support
+    * `remember`: if set to `true`, the user chose to be remembered and this means we usually support
       auto-login (that is, if you call the Schibsted account hassession service, and no session can
       be found in the session database, it will automatically create a new one for the user so that
       they don't have to authenticate again. If it is `false`, it should be interpreted as the user
       does not want to be automatically logged in to any site when their session expires
-    - `v`: the version number
+    * `v`: the version number
 1. The **session** cookies: Cookie names in production environments are `identity`, and `SPID_SE` or
    `SPID_NO`. It contains:
-    - `user`: an object (if it's missing, a call to hassession will return a `401` with a
+    * `user`: an object (if it's missing, a call to hassession will return a `401` with a
       `UserException` that says `No session found`)
-        - `userId` identifies the user. We use this property to compare "old" user with "new" user and
+        * `userId` identifies the user. We use this property to compare "old" user with "new" user and
           fire events that indicate that the user has changed
-        - `is_logged_in` indicates if the user is logged in
-    - `user_tags`: a map that contains some flags about the user; namely:
-        - `is_logged_in` indicates if the user is logged in (this seems to be a duplicate of a
+        * `is_logged_in` indicates if the user is logged in
+    * `user_tags`: a map that contains some flags about the user; namely:
+        * `is_logged_in` indicates if the user is logged in (this seems to be a duplicate of a
           property with a similar name in the parent `user` object)
-        - `terms`: a map of term ids that indicate if they've been accepted by the user.
-    - `referer` (yep, missing the double "rr"..): If this is missing, a call to hassession will
+        * `terms`: a map of term ids that indicate if they've been accepted by the user.
+    * `referer` (yep, missing the double "rr"..): If this is missing, a call to hassession will
       return a `401` with a `UserException` that says `No session found`.
 
 ## Releasing
