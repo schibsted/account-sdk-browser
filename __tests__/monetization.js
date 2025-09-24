@@ -146,16 +146,16 @@ describe('Monetization', () => {
     });
 
     describe('global registration', () => {
-        test('registers itself as window.sch_monetization', () => {
+        test('registers itself as window.schMonetization', () => {
 
             const window = {};
             const instance = new Monetization({ clientId: 'a', window });
-            expect(window.sch_monetization).toBe(instance);
+            expect(window.schMonetization).toBe(instance);
         })
         test('emits document event', async () => {
 
             const event = new Promise(resolve => {
-                document.addEventListener('sch_monetization:init', e => {
+                document.addEventListener('schMonetization:init', e => {
                     resolve(e);
                 });
             });

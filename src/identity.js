@@ -220,7 +220,7 @@ export class Identity extends EventEmitter {
 
         this._unblockSessionCall();
 
-        registerGlobal(window, 'identity', this);
+        registerGlobal(window, 'Identity', this);
 
     }
 

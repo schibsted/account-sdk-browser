@@ -38,7 +38,7 @@ export class Payment {
         this.publisher = publisher;
         this._setSpidServerUrl(env);
         this._setBffServerUrl(env);
-        registerGlobal(window, 'payment', this);
+        registerGlobal(window, 'Payment', this);
     }
 
     /**

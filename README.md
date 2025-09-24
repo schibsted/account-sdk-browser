@@ -83,13 +83,13 @@ Events are emitted for:
 
 | Class | event name |
 |--- | --- |
-| Identity | `sch_identity:init` |
-| Monetization | `sch_monetization:init` |
-| Payment | `sch_payment:init` |
+| Identity | `schIdentity:ready` |
+| Monetization | `schMonetization:ready` |
+| Payment | `schPayment:ready` |
 
 ```js
-document.addEventListener('sch_identity:init', e => {
-    // The event contains the initialized instancese.detail.instance);
+document.addEventListener('schIdentity:ready', e => {
+    // The event contains the initialized instance (e.detail.instance);
 }
 
 ```

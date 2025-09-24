@@ -246,16 +246,16 @@ describe('Payment', () => {
     });
 
     describe('global registration', () => {
-        test('registers itself as window.sch_payment', () => {
+        test('registers itself as window.schPayment', () => {
             const window = { location: {}};
             const instance = new Payment({ clientId: 'a',  window });
-            expect(window.sch_payment).toBe(instance);
+            expect(window.schPayment).toBe(instance);
         })
 
         test('emits document event', async () => {
             const window = { location: {}};
             const event = new Promise(resolve => {
-                document.addEventListener('sch_payment:init', e => {
+                document.addEventListener('schPayment:init', e => {
                     resolve(e);
                 });
             });
