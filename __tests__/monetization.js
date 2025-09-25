@@ -152,15 +152,15 @@ describe('Monetization', () => {
             const instance = new Monetization({ clientId: 'a', window });
             expect(window.schMonetization).toBe(instance);
         })
-        test('emits document event', async () => {
+        test('emits window event', async () => {
 
-            const event = new Promise(resolve => {
-                window.addEventListener('schMonetization:init', e => {
-                    resolve(e);
-                });
-            });
-            const instance = new Monetization({ clientId: 'a'});
-            expect(event).resolves.toMatchObject({ detail: { instance } });
+            const window = { location: {}, dispatchEvent: jest.fn() };
+            const instance = new Monetization({ clientId: 'a', window });
+            expect(window.dispatchEvent).toHaveBeenCalledTimes(1);
+            expect(window.dispatchEvent).toHaveBeenCalledWith(expect.objectContaining({
+                type: 'schMonetization:ready',
+                detail: { instance }
+            }));
         })
     });
 });

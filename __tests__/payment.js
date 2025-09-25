@@ -247,20 +247,20 @@ describe('Payment', () => {
 
     describe('global registration', () => {
         test('registers itself as window.schPayment', () => {
-            const window = { location: {}};
-            const instance = new Payment({ clientId: 'a',  window });
+
+            const window = { location: {}, dispatchEvent: jest.fn() };
+            const instance = new Payment({ clientId: 'a', window });
             expect(window.schPayment).toBe(instance);
         })
 
-        test('emits document event', async () => {
-            const window = { location: {}};
-            const event = new Promise(resolve => {
-                window.addEventListener('schPayment:init', e => {
-                    resolve(e);
-                });
-            });
+        test('emits window event', async () => {
+            const window = { location: {}, dispatchEvent: jest.fn() };
+
             const instance = new Payment({ clientId: 'a', window });
-            expect(event).resolves.toMatchObject({ detail: { instance } });
+            expect(window.dispatchEvent).toHaveBeenCalledWith(expect.objectContaining({
+                type: 'schPayment:ready',
+                detail: { instance }
+            }));
         })
     });
 });

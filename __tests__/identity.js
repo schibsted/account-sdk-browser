@@ -1592,21 +1592,20 @@ describe('Identity', () => {
 
     describe('global registration', () => {
         test('should register as window.schIdentity', () => {
-            const window = { location: {}};
+            const window = { location: {} };
             const instance = new Identity(Object.assign({}, defaultOptions, { window }));
 
             expect(window.schIdentity).toBe(instance);
         })
-        test('should emit document event', async () => {
-            const window = { location: {}};
-            const event = new Promise(resolve => {
-                window.addEventListener('schIdentity:init', e => {
-                    resolve(e);
-                });
-            });
+        test('should emit window event', async () => {
+            const window = { location: {}, dispatchEvent: jest.fn() };
+
             const instance = new Identity(Object.assign({}, defaultOptions, { window }));
 
-            expect(event).resolves.toMatchObject({ detail: { instance } });
+            expect(window.dispatchEvent).toHaveBeenCalledWith(expect.objectContaining({
+                type: 'schIdentity:ready',
+                detail: { instance }
+            }));
         })
     });
 });
