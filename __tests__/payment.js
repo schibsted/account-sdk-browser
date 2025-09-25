@@ -244,4 +244,23 @@ describe('Payment', () => {
             );
         });
     });
+
+    describe('global registration', () => {
+        test('registers itself as window.schPayment', () => {
+
+            const window = { location: {}, dispatchEvent: jest.fn() };
+            const instance = new Payment({ clientId: 'a', window });
+            expect(window.schPayment).toBe(instance);
+        })
+
+        test('emits window event', async () => {
+            const window = { location: {}, dispatchEvent: jest.fn() };
+
+            const instance = new Payment({ clientId: 'a', window });
+            expect(window.dispatchEvent).toHaveBeenCalledWith(expect.objectContaining({
+                type: 'schPayment:ready',
+                detail: { instance }
+            }));
+        })
+    });
 });

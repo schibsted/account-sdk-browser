@@ -10,6 +10,7 @@ import { ENDPOINTS } from './config.js';
 import * as popup from './popup.js';
 import RESTClient from './RESTClient.js';
 import * as spidTalk from './spidTalk.js';
+import { registerGlobal } from './global-registry.js';
 
 const globalWindow = () => window;
 
@@ -37,6 +38,7 @@ export class Payment {
         this.publisher = publisher;
         this._setSpidServerUrl(env);
         this._setBffServerUrl(env);
+        registerGlobal(window, 'Payment', this);
     }
 
     /**

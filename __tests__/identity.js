@@ -1589,4 +1589,23 @@ describe('Identity', () => {
             window.console = console;
         })
     })
+
+    describe('global registration', () => {
+        test('should register as window.schIdentity', () => {
+            const window = { location: {} };
+            const instance = new Identity(Object.assign({}, defaultOptions, { window }));
+
+            expect(window.schIdentity).toBe(instance);
+        })
+        test('should emit window event', async () => {
+            const window = { location: {}, dispatchEvent: jest.fn() };
+
+            const instance = new Identity(Object.assign({}, defaultOptions, { window }));
+
+            expect(window.dispatchEvent).toHaveBeenCalledWith(expect.objectContaining({
+                type: 'schIdentity:ready',
+                detail: { instance }
+            }));
+        })
+    });
 });
