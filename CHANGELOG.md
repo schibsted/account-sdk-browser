@@ -1,5 +1,8 @@
 # Changelog
 
+## 5.2.5 (2025-09-29)
+* Set instances as global properties and add specific events @erikfried in https://github.com/schibsted/account-sdk-browser/pull/302
+* 
 ## 5.2.4 (2025-09-29)
 * Set instances as global properties and add specific events @erikfried in https://github.com/schibsted/account-sdk-browser/pull/302
 
