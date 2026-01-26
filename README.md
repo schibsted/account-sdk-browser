@@ -325,7 +325,7 @@ and push.
 
 ## LICENSE
 
-Copyright (c) 2024 Schibsted Products & Technology AS
+Copyright (c) 2026 Schibsted Products & Technology AS
 
 Licensed under the [MIT
 License](https://github.com/schibsted/account-sdk-browser/blob/master/LICENSE.md)
