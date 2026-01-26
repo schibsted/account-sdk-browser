@@ -1,5 +1,8 @@
 # Changelog
 
+## 5.2.6 (2026-01-26)
+* Request coalescing for concurrent Monetization.hasAccess calls @erikfried in https://github.com/schibsted/account-sdk-browser/pull/307
+*
 ## 5.2.5 (2025-09-29)
 * Set instances as global properties and add specific events @erikfried in https://github.com/schibsted/account-sdk-browser/pull/302
 * 
