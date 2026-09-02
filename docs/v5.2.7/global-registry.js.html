@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <title>global-registry.js - Documentation</title>
+
+    <script src="scripts/prettify/prettify.js"></script>
+    <script src="scripts/prettify/lang-css.js"></script>
+    <!--[if lt IE 9]>
+      <script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+    <link type="text/css" rel="stylesheet" href="styles/prettify.css">
+    <link type="text/css" rel="stylesheet" href="styles/jsdoc.css">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+        <!-- account-sdk-docs-version-switcher -->
+        <link rel="stylesheet" href="../version-switcher.css">
+        <script src="../version-switcher.js" data-docs-version="v5.2.7" defer></script>
+    </head>
+<body>
+
+<input type="checkbox" id="nav-trigger" class="nav-trigger" />
+<label for="nav-trigger" class="navicon-button x">
+  <div class="navicon"></div>
+</label>
+
+<label for="nav-trigger" class="overlay"></label>
+
+<nav>
+    <h2><a href="index.html">Home</a></h2><h3>Classes</h3><ul><li><a href="Identity.html">Identity</a><ul class='methods'><li data-type='method'><a href="Identity.html#enableVarnishCookie">enableVarnishCookie</a></li><li data-type='method'><a href="Identity.html#logSettings">logSettings</a></li><li data-type='method'><a href="Identity.html#hasSession">hasSession</a></li><li data-type='method'><a href="Identity.html#isLoggedIn">isLoggedIn</a></li><li data-type='method'><a href="Identity.html#clearCachedUserSession">clearCachedUserSession</a></li><li data-type='method'><a href="Identity.html#isConnected">isConnected</a></li><li data-type='method'><a href="Identity.html#getUser">getUser</a></li><li data-type='method'><a href="Identity.html#getUserId">getUserId</a></li><li data-type='method'><a href="Identity.html#getExternalId">getExternalId</a></li><li data-type='method'><a href="Identity.html#getUserSDRN">getUserSDRN</a></li><li data-type='method'><a href="Identity.html#getUserUuid">getUserUuid</a></li><li data-type='method'><a href="Identity.html#getUserContextData">getUserContextData</a></li><li data-type='method'><a href="Identity.html#login">login</a></li><li data-type='method'><a href="Identity.html#getSpId">getSpId</a></li><li data-type='method'><a href="Identity.html#logout">logout</a></li><li data-type='method'><a href="Identity.html#loginUrl">loginUrl</a></li><li data-type='method'><a href="Identity.html#logoutUrl">logoutUrl</a></li><li data-type='method'><a href="Identity.html#accountUrl">accountUrl</a></li><li data-type='method'><a href="Identity.html#phonesUrl">phonesUrl</a></li><li data-type='method'><a href="Identity.html#showSimplifiedLoginWidget">showSimplifiedLoginWidget</a></li></ul></li><li><a href="Monetization.html">Monetization</a><ul class='methods'><li data-type='method'><a href="Monetization.html#hasAccess">hasAccess</a></li><li data-type='method'><a href="Monetization.html#clearCachedAccessResult">clearCachedAccessResult</a></li><li data-type='method'><a href="Monetization.html#subscriptionsUrl">subscriptionsUrl</a></li><li data-type='method'><a href="Monetization.html#productsUrl">productsUrl</a></li></ul></li><li><a href="Payment.html">Payment</a><ul class='methods'><li data-type='method'><a href="Payment.html#payWithPaylink">payWithPaylink</a></li><li data-type='method'><a href="Payment.html#purchaseHistoryUrl">purchaseHistoryUrl</a></li><li data-type='method'><a href="Payment.html#redeemUrl">redeemUrl</a></li><li data-type='method'><a href="Payment.html#purchasePaylinkUrl">purchasePaylinkUrl</a></li><li data-type='method'><a href="Payment.html#purchaseProductFlowUrl">purchaseProductFlowUrl</a></li><li data-type='method'><a href="Payment.html#purchaseCampaignFlowUrl">purchaseCampaignFlowUrl</a></li><li data-type='method'><a href="Payment.html#purchasePromoCodeProductFlowUrl">purchasePromoCodeProductFlowUrl</a></li></ul></li></ul><h3>Events</h3><ul><li><a href="Identity.html#event:error">error</a></li><li><a href="Identity.html#event:login">login</a></li><li><a href="Identity.html#event:logout">logout</a></li><li><a href="Identity.html#event:userChange">userChange</a></li><li><a href="Identity.html#event:sessionChange">sessionChange</a></li><li><a href="Identity.html#event:notLoggedin">notLoggedin</a></li><li><a href="Identity.html#event:sessionInit">sessionInit</a></li><li><a href="Identity.html#event:statusChange">statusChange</a></li><li><a href="Identity.html#event:simplifiedLoginOpened">simplifiedLoginOpened</a></li><li><a href="Identity.html#event:simplifiedLoginCancelled">simplifiedLoginCancelled</a></li></ul><h3>Global</h3><ul><li><a href="global.html#registerGlobal">registerGlobal</a></li></ul>
+</nav>
+
+<div id="main">
+    
+    <h1 class="page-title">global-registry.js</h1>
+    
+
+    
+
+
+
+    
+    <section>
+        <article>
+            <pre class="prettyprint source linenums"><code>
+/**
+ * Registers a component as a property on the provided global object, if not already registered, and dispatches an event to notify listeners.
+ * The event is dispatched on `document` and will have the name `$sch${componentClassName}:ready` and a `detail` property with the instance.
+ *
+ * @param {any} global typically `window`
+ * @param {string} componentClassName the name of the component to register, 'identity', 'monetization' or 'payment'
+ * @param {any} instance the instance of the component to register
+ * @returns {void}
+ */
+export const registerGlobal = (global, componentClassName, instance) => {
+    const prefixedName = `sch${componentClassName}`;
+    if (!(global)[prefixedName]) {
+        (global)[prefixedName] = instance;
+    }
+    if (typeof global.dispatchEvent === 'function') {
+        global.dispatchEvent(new CustomEvent(`${prefixedName}:ready`, { detail: { instance } }));
+    }
+}
+
+</code></pre>
+        </article>
+    </section>
+
+
+
+
+</div>
+
+<br class="clear">
+
+<footer>
+    Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.6.11</a> on Wed Aug 26 2026 18:03:02 GMT+0200 (Central European Summer Time) using the <a href="https://github.com/clenemt/docdash">docdash</a> theme.
+</footer>
+
+<script>prettyPrint();</script>
+<script src="scripts/linenumber.js"></script>
+</body>
+</html>

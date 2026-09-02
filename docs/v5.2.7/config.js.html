@@ -1,0 +1,156 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <title>config.js - Documentation</title>
+
+    <script src="scripts/prettify/prettify.js"></script>
+    <script src="scripts/prettify/lang-css.js"></script>
+    <!--[if lt IE 9]>
+      <script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+    <link type="text/css" rel="stylesheet" href="styles/prettify.css">
+    <link type="text/css" rel="stylesheet" href="styles/jsdoc.css">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+        <!-- account-sdk-docs-version-switcher -->
+        <link rel="stylesheet" href="../version-switcher.css">
+        <script src="../version-switcher.js" data-docs-version="v5.2.7" defer></script>
+    </head>
+<body>
+
+<input type="checkbox" id="nav-trigger" class="nav-trigger" />
+<label for="nav-trigger" class="navicon-button x">
+  <div class="navicon"></div>
+</label>
+
+<label for="nav-trigger" class="overlay"></label>
+
+<nav>
+    <h2><a href="index.html">Home</a></h2><h3>Classes</h3><ul><li><a href="Identity.html">Identity</a><ul class='methods'><li data-type='method'><a href="Identity.html#enableVarnishCookie">enableVarnishCookie</a></li><li data-type='method'><a href="Identity.html#logSettings">logSettings</a></li><li data-type='method'><a href="Identity.html#hasSession">hasSession</a></li><li data-type='method'><a href="Identity.html#isLoggedIn">isLoggedIn</a></li><li data-type='method'><a href="Identity.html#clearCachedUserSession">clearCachedUserSession</a></li><li data-type='method'><a href="Identity.html#isConnected">isConnected</a></li><li data-type='method'><a href="Identity.html#getUser">getUser</a></li><li data-type='method'><a href="Identity.html#getUserId">getUserId</a></li><li data-type='method'><a href="Identity.html#getExternalId">getExternalId</a></li><li data-type='method'><a href="Identity.html#getUserSDRN">getUserSDRN</a></li><li data-type='method'><a href="Identity.html#getUserUuid">getUserUuid</a></li><li data-type='method'><a href="Identity.html#getUserContextData">getUserContextData</a></li><li data-type='method'><a href="Identity.html#login">login</a></li><li data-type='method'><a href="Identity.html#getSpId">getSpId</a></li><li data-type='method'><a href="Identity.html#logout">logout</a></li><li data-type='method'><a href="Identity.html#loginUrl">loginUrl</a></li><li data-type='method'><a href="Identity.html#logoutUrl">logoutUrl</a></li><li data-type='method'><a href="Identity.html#accountUrl">accountUrl</a></li><li data-type='method'><a href="Identity.html#phonesUrl">phonesUrl</a></li><li data-type='method'><a href="Identity.html#showSimplifiedLoginWidget">showSimplifiedLoginWidget</a></li></ul></li><li><a href="Monetization.html">Monetization</a><ul class='methods'><li data-type='method'><a href="Monetization.html#hasAccess">hasAccess</a></li><li data-type='method'><a href="Monetization.html#clearCachedAccessResult">clearCachedAccessResult</a></li><li data-type='method'><a href="Monetization.html#subscriptionsUrl">subscriptionsUrl</a></li><li data-type='method'><a href="Monetization.html#productsUrl">productsUrl</a></li></ul></li><li><a href="Payment.html">Payment</a><ul class='methods'><li data-type='method'><a href="Payment.html#payWithPaylink">payWithPaylink</a></li><li data-type='method'><a href="Payment.html#purchaseHistoryUrl">purchaseHistoryUrl</a></li><li data-type='method'><a href="Payment.html#redeemUrl">redeemUrl</a></li><li data-type='method'><a href="Payment.html#purchasePaylinkUrl">purchasePaylinkUrl</a></li><li data-type='method'><a href="Payment.html#purchaseProductFlowUrl">purchaseProductFlowUrl</a></li><li data-type='method'><a href="Payment.html#purchaseCampaignFlowUrl">purchaseCampaignFlowUrl</a></li><li data-type='method'><a href="Payment.html#purchasePromoCodeProductFlowUrl">purchasePromoCodeProductFlowUrl</a></li></ul></li></ul><h3>Events</h3><ul><li><a href="Identity.html#event:error">error</a></li><li><a href="Identity.html#event:login">login</a></li><li><a href="Identity.html#event:logout">logout</a></li><li><a href="Identity.html#event:userChange">userChange</a></li><li><a href="Identity.html#event:sessionChange">sessionChange</a></li><li><a href="Identity.html#event:notLoggedin">notLoggedin</a></li><li><a href="Identity.html#event:sessionInit">sessionInit</a></li><li><a href="Identity.html#event:statusChange">statusChange</a></li><li><a href="Identity.html#event:simplifiedLoginOpened">simplifiedLoginOpened</a></li><li><a href="Identity.html#event:simplifiedLoginCancelled">simplifiedLoginCancelled</a></li></ul><h3>Global</h3><ul><li><a href="global.html#registerGlobal">registerGlobal</a></li></ul>
+</nav>
+
+<div id="main">
+    
+    <h1 class="page-title">config.js</h1>
+    
+
+    
+
+
+
+    
+    <section>
+        <article>
+            <pre class="prettyprint source linenums"><code>/* Copyright 2024 Schibsted Products &amp; Technology AS. Licensed under the terms of the MIT license.
+ * See LICENSE.md in the project root.
+ */
+
+'use strict';
+
+/*
+ * This file declares configs that are essentially part of how the SDK works and interacts with our
+ * backend servers.
+ *
+ * What goes here?
+ * - The configurations that are likely to change over time
+ * - Constants that are otherwise obscure (for example 7000 for a TIMEOUT)
+ *
+ * What doesn't go here?
+ * - options that the users of the SDK are supposed to set or provide as a parameter to functions
+ *   and classes.
+ */
+
+/**
+ * Core configuration used by the SDK
+ * @type {Object}
+ * @memberof core
+ * @prop {object} ENDPOINTS - URL to some of the services that users of this SDK may interact with
+ * @prop {object} ENDPOINTS.SPiD - SPiD endpoints
+ * @prop {string} ENDPOINTS.SPiD.LOCAL - Local endpoint (for Identity team)
+ * @prop {string} ENDPOINTS.SPiD.DEV - Dev environment (for Identity team)
+ * @prop {string} ENDPOINTS.SPiD.PRE - Staging environment
+ * @prop {string} ENDPOINTS.SPiD.PRO - Production environment Sweden
+ * @prop {string} ENDPOINTS.SPiD.PRO_NO - Production environment Norway
+ * @prop {string} ENDPOINTS.SPiD.PRO_FI - Production environment Finland
+ * @prop {string} ENDPOINTS.SPiD.PRO_DK - Production environment Denmark
+ * @prop {object} ENDPOINTS.BFF - Endpoints used with new GDPR-compliant web flows
+ * @prop {string} ENDPOINTS.BFF.LOCAL - Local endpoint (for Identity team)
+ * @prop {string} ENDPOINTS.BFF.DEV - Dev environment (for Identity team)
+ * @prop {string} ENDPOINTS.BFF.PRE - Staging environment
+ * @prop {string} ENDPOINTS.BFF.PRO - Production environment Sweden
+ * @prop {string} ENDPOINTS.BFF.PRO_NO - Production environment Norway
+ * @prop {string} ENDPOINTS.BFF.PRO_FI - Production environment Finland
+ * @prop {string} ENDPOINTS.BFF.PRO_DK - Production environment Denmark
+ * @prop {object} ENDPOINTS.SESSION_SERVICE - Endpoints to check global user session data
+ * @prop {string} ENDPOINTS.SESSION_SERVICE.LOCAL - Local endpoint (for Identity team)
+ * @prop {string} ENDPOINTS.SESSION_SERVICE.DEV - Dev environment (for Identity team)
+ * @prop {string} ENDPOINTS.SESSION_SERVICE.PRE - Staging environment
+ * @prop {string} ENDPOINTS.SESSION_SERVICE.PRO - Production environment Sweden
+ * @prop {string} ENDPOINTS.SESSION_SERVICE.PRO_NO - Production environment Norway
+ * @prop {string} ENDPOINTS.SESSION_SERVICE.PRO_FI - Production environment Finland
+ * @prop {string} ENDPOINTS.SESSION_SERVICE.PRO_DK - Production environment Denmark
+ */
+const config = {
+    ENDPOINTS: {
+        SPiD: {
+            LOCAL: 'http://id.localhost',
+            DEV: 'https://identity-dev.schibsted.com',
+            PRE: 'https://identity-pre.schibsted.com',
+            PRO: 'https://login.schibsted.com',
+            PRO_NO: 'https://payment.schibsted.no',
+            PRO_FI: 'https://login.schibsted.fi',
+            PRO_DK: 'https://login.schibsted.dk',
+        },
+        BFF: {
+            LOCAL: 'http://id.localhost/authn/',
+            DEV: 'https://identity-dev.schibsted.com/authn/',
+            PRE: 'https://identity-pre.schibsted.com/authn/',
+            PRO: 'https://login.schibsted.com/authn/',
+            PRO_NO: 'https://payment.schibsted.no/authn/',
+            PRO_FI: 'https://login.schibsted.fi/authn/',
+            PRO_DK: 'https://login.schibsted.dk/authn/',
+        },
+        SESSION_SERVICE: {
+            LOCAL: 'http://session-service.id.localhost',
+            DEV: 'https://session-service.identity-dev.schibsted.com',
+            PRE: 'https://session-service.identity-pre.schibsted.com',
+            PRO: 'https://session-service.login.schibsted.com',
+            PRO_NO: 'https://session-service.payment.schibsted.no',
+            PRO_FI: 'https://session-service.login.schibsted.fi',
+            PRO_DK: 'https://session-service.login.schibsted.dk',
+        },
+    },
+    NAMESPACE: {
+        LOCAL: 'id.localhost',
+        DEV: 'schibsted.com',
+        PRE: 'schibsted.com',
+        PRO: 'schibsted.com',
+        PRO_NO: 'spid.no',
+        PRO_FI: 'schibsted.fi',
+        PRO_DK: 'schibsted.dk',
+    }
+};
+
+export default config;
+export const ENDPOINTS = config.ENDPOINTS;
+export const NAMESPACE = config.NAMESPACE;
+</code></pre>
+        </article>
+    </section>
+
+
+
+
+</div>
+
+<br class="clear">
+
+<footer>
+    Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.6.11</a> on Wed Aug 26 2026 18:03:02 GMT+0200 (Central European Summer Time) using the <a href="https://github.com/clenemt/docdash">docdash</a> theme.
+</footer>
+
+<script>prettyPrint();</script>
+<script src="scripts/linenumber.js"></script>
+</body>
+</html>

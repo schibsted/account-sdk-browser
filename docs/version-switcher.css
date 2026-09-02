@@ -1,0 +1,41 @@
+.account-sdk-version-switcher {
+    box-sizing: border-box;
+    margin: 0 0 1rem;
+    padding: 0.75rem;
+    border: 1px solid rgb(128 128 128 / 35%);
+    border-radius: 0.4rem;
+    background: Canvas;
+    color: CanvasText;
+    font:
+        600 0.75rem / 1.2 system-ui,
+        sans-serif;
+}
+
+.account-sdk-version-switcher label,
+.account-sdk-version-switcher label > span {
+    display: block;
+}
+
+.account-sdk-version-switcher label > span {
+    margin-bottom: 0.4rem;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+}
+
+.account-sdk-version-switcher select {
+    box-sizing: border-box;
+    width: 100%;
+    min-width: 11rem;
+    padding: 0.35rem;
+    font:
+        500 0.875rem / 1.2 system-ui,
+        sans-serif;
+}
+
+.account-sdk-version-switcher--floating {
+    position: fixed;
+    z-index: 1000;
+    top: 0.75rem;
+    right: 0.75rem;
+    box-shadow: 0 0.15rem 0.5rem rgb(0 0 0 / 15%);
+}
