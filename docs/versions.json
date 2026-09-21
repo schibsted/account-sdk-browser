@@ -3,6 +3,12 @@
   "latestVersion": "v5.2.7",
   "versions": [
     {
+      "label": "v6.0.0-alpha.10",
+      "path": "v6.0.0-alpha.10",
+      "prerelease": true,
+      "version": "v6.0.0-alpha.10"
+    },
+    {
       "label": "v5.2.7",
       "path": "v5.2.7",
       "prerelease": false,

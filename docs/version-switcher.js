@@ -14,6 +14,10 @@
         return group;
     }
 
+    function releaseVersion(version) {
+        return version.split(/[+-]/, 1)[0];
+    }
+
     fetch(manifestUrl, { cache: 'no-store' })
         .then((response) => {
             if (!response.ok) {
@@ -37,7 +41,17 @@
             label.append(labelText, select);
             container.append(label);
 
-            for (const version of manifest.versions) {
+            const stableReleases = new Set(
+                manifest.versions
+                    .filter((version) => !version.prerelease)
+                    .map((version) => releaseVersion(version.version)),
+            );
+            const visibleVersions = manifest.versions.filter(
+                (version) =>
+                    !version.prerelease || !stableReleases.has(releaseVersion(version.version)),
+            );
+
+            for (const version of visibleVersions) {
                 const option = document.createElement('option');
                 const isLatest = version.version === manifest.latestVersion;
 
