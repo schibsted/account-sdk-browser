@@ -1,0 +1,75 @@
+<!doctype html>
+<html lang="en">
+    <head>
+        <meta charset="utf-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <meta name="description" content="Versioned documentation for Schibsted Account SDK for browsers">
+        <meta name="robots" content="noindex">
+        <title>Page not found &mdash; Schibsted Account SDK documentation</title>
+        <style>
+            :root { color-scheme: light dark; font-family: system-ui, sans-serif; }
+            body { max-width: 52rem; margin: 0 auto; padding: 4rem 1.5rem; line-height: 1.5; }
+            h1 { line-height: 1.15; }
+            ul { padding-left: 1.25rem; }
+            li { margin: .65rem 0; }
+            a { color: #1570ef; }
+            .recommended { display: inline-block; margin: 1rem 0; padding: .65rem 1rem; border-radius: .4rem; background: #1570ef; color: white; text-decoration: none; }
+        </style>
+        <script>
+            /*
+             * Before the documentation was versioned, every page lived at the site root
+             * (e.g. /account-sdk-browser/Identity.html). Those URLs are still linked from
+             * elsewhere, so redirect them to the equivalent page of the last unversioned
+             * release, keeping the query string and hash intact.
+             */
+            (function redirectLegacyDocumentationUrl() {
+                var LEGACY_VERSION_PATH = 'v5.2.7';
+                var LEGACY_PAGES = [
+                    'Identity.html',
+                    'Monetization.html',
+                    'Payment.html',
+                    'MIGRATION.html',
+                    'global.html',
+                    'index.html',
+                    'config.js.html',
+                    'global-registry.js.html',
+                    'identity.js.html',
+                    'monetization.js.html',
+                    'object.js.html',
+                    'payment.js.html',
+                    'RESTClient.js.html',
+                    'spidTalk.js.html',
+                    'url.js.html',
+                    'validate.js.html'
+                ];
+                var VERSION_SEGMENT_PATTERN = /^v\d/;
+
+                var segments = window.location.pathname.split('/');
+                var requestedPage = segments.pop();
+
+                // Already inside a versioned directory: the page simply does not exist there,
+                // and redirecting would only build an endlessly nested path.
+                var isVersionedPath = segments.some(function (segment) {
+                    return VERSION_SEGMENT_PATTERN.test(segment);
+                });
+                if (isVersionedPath) return;
+
+                if (LEGACY_PAGES.indexOf(requestedPage) === -1) return;
+
+                var target = segments.concat(LEGACY_VERSION_PATH, requestedPage).join('/')
+                    + window.location.search
+                    + window.location.hash;
+
+                window.location.replace(target);
+            })();
+        </script>
+    </head>
+    <body>
+        <main>
+            <h1>Page not found</h1>
+            <p>This page does not exist in the Schibsted Account SDK documentation.</p>
+            <p><a href="/account-sdk-browser/versions.html">Browse the available documentation versions</a>.</p>
+            <a class="recommended" href="/account-sdk-browser/">Documentation home</a>
+        </main>
+    </body>
+</html>
