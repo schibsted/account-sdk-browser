@@ -15,9 +15,9 @@ fact — especially the removed-legacy-methods list and anything you're about to
 "gone" — check it against the actual package installed in this repo (its published `.d.ts` files
 under `node_modules/@schibsted/account-sdk-browser/dist/`, or `npm view`/`npm pack` the exact
 declared version if it's not installed yet). If the real package disagrees with the guide, trust the
-real package for what you propose, and flag the discrepancy so the developer can raise it on
-`#connect-all` per the guardrails below — don't silently pick one source and don't let the mismatch
-block the migration.
+real package for what you propose, and flag the discrepancy so the developer can raise it in the
+`#tmp-account-sdk-browser-v6-feedback` Slack channel, per the guardrails below. Don't silently pick
+one source, and don't let the mismatch block the migration.
 
 ## Why this isn't a find-and-replace job
 
@@ -45,8 +45,8 @@ no "typical" repo here.
   methods without a 1:1 replacement, removed events, anything where you can't find every consumer
   in this repository. Ask and wait.
 - If something looks like a real bug or ambiguity in the SDK or the migration guide itself (not the
-  client's code), suggest the developer post it in the `#connect-all` Slack channel. Never report
-  anything anywhere yourself.
+  client's code), suggest the developer post it in the `#tmp-account-sdk-browser-v6-feedback` Slack
+  channel. Never report anything anywhere yourself.
 - You do bump the SDK version in `package.json` and create a dedicated branch for this migration as
   part of your own work — this is in scope, shown as a normal diff like everything else, not a
   precondition the developer has to satisfy first.
@@ -415,8 +415,9 @@ already writing. If there's nothing further to add, say the thing once, where yo
 gesture at a followup that never arrives.
 
 Things you noticed but can't act on now (a sibling package below v5, a dependency you can't verify,
-something worth raising on `#connect-all`) belong folded into the relevant decision item above as
-context, or mentioned in passing in the summary — don't give them their own separate section; a
+something worth raising in `#tmp-account-sdk-browser-v6-feedback`) belong folded into the relevant
+decision item above as context, or mentioned in passing in the summary — don't give them their own
+separate section; a
 "things I'm not doing" list adds length without helping the developer decide anything.
 
 Ask the developer to respond to part 3; nothing proceeds until they do.
