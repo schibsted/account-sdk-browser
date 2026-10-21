@@ -14,3 +14,14 @@ the contents of the `docs/` folder.
 
 The SDK source code is maintained internally in a private Schibsted repository. This repository is
 no longer used for source development.
+
+## Skills
+
+Use the [Account SDK v6 migration skill](skills/migration-to-account-sdk-browser-v6/SKILL.md) to
+help an AI coding agent assess and migrate a v5 integration to v6 under developer supervision.
+
+## Migration guides
+
+Read the
+[Account SDK v6 migration guide](skills/migration-to-account-sdk-browser-v6/migration-guide.md) for
+an overview of the breaking changes and the steps required to upgrade from v5 to v6.
