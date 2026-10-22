@@ -1,0 +1,365 @@
+<!DOCTYPE html><html class="default" lang="en" data-base="../"><head><meta charset="utf-8"/><meta http-equiv="x-ua-compatible" content="IE=edge"/><title>Migration to v6 | @schibsted/account-sdk-browser</title><meta name="description" content="Documentation for @schibsted/account-sdk-browser"/><meta name="viewport" content="width=device-width, initial-scale=1"/><link rel="stylesheet" href="../assets/style.css"/><link rel="stylesheet" href="../assets/highlight.css"/><script defer src="../assets/main.js"></script><script async src="../assets/icons.js" id="tsd-icons-script"></script><script async src="../assets/search.js" id="tsd-search-script"></script><script async src="../assets/navigation.js" id="tsd-nav-script"></script>
+        <!-- account-sdk-docs-version-switcher -->
+        <link rel="stylesheet" href="../../version-switcher.css">
+        <script src="../../version-switcher.js" data-docs-version="v6.0.0" defer></script>
+    </head><body><script>document.documentElement.dataset.theme = localStorage.getItem("tsd-theme") || "os";document.body.style.display="none";setTimeout(() => window.app?app.showPage():document.body.style.removeProperty("display"),500)</script><header class="tsd-page-toolbar"><div class="tsd-toolbar-contents container"><a href="../index.html" class="title">@schibsted/account-sdk-browser</a><div id="tsd-toolbar-links"></div><button id="tsd-search-trigger" class="tsd-widget" aria-label="Search"><svg width="16" height="16" viewBox="0 0 16 16" fill="none" aria-hidden="true"><use href="../assets/icons.svg#icon-search"></use></svg></button><dialog id="tsd-search" aria-label="Search"><input role="combobox" id="tsd-search-input" aria-controls="tsd-search-results" aria-autocomplete="list" aria-expanded="true" autocapitalize="off" autocomplete="off" placeholder="Search the docs" maxLength="100"/><ul role="listbox" id="tsd-search-results"></ul><div id="tsd-search-status" aria-live="polite" aria-atomic="true"><div>Preparing search index...</div></div></dialog><a href="#" class="tsd-widget menu" id="tsd-toolbar-menu-trigger" data-toggle="menu" aria-label="Menu"><svg width="16" height="16" viewBox="0 0 16 16" fill="none" aria-hidden="true"><use href="../assets/icons.svg#icon-menu"></use></svg></a></div></header><div class="container container-main"><div class="col-content"><div class="tsd-page-title"><ul class="tsd-breadcrumb" aria-label="Breadcrumb"><li><a href="" aria-current="page">Migration to v6</a></li></ul></div><div class="tsd-panel tsd-typography"><h1 id="schibsted-account-sdk-v600-migration-guide" class="tsd-anchor-link">Schibsted Account SDK v6.0.0 Migration Guide<a href="#schibsted-account-sdk-v600-migration-guide" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="../assets/icons.svg#icon-anchor"></use></svg></a></h1>
+<h2 id="overview" class="tsd-anchor-link">Overview<a href="#overview" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="../assets/icons.svg#icon-anchor"></use></svg></a></h2>
+<p>Version 6 replaces the separate <code>Identity</code> and <code>Monetization</code> APIs with one <code>Account</code> API. Most
+commonly used methods keep their names, but initialization, globals, imports, and events have
+changed. The Payment API and other unsupported legacy APIs have been removed.</p>
+<p>Version 6 supports ES modules only. The ES5 build and SDK-provided polyfills are no longer
+included.</p>
+<p>The goal is to give browser applications one clear integration point and reduce the public API to
+the parts actively supported by the SDK.</p>
+<p>The background and the decisions behind these changes are described in
+<a href="https://docs.google.com/document/d/1WR4xgRpWMgd3JXClTYKmrwsa3ZrUVABO7-4NYVxaLs0"><strong>SCH-ADR-012 Standardised Building Block interfaces for Web</strong></a>
+(available only for Schibsted employees).</p>
+<h2 id="what-you-need-to-do" class="tsd-anchor-link">What you need to do<a href="#what-you-need-to-do" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="../assets/icons.svg#icon-anchor"></use></svg></a></h2>
+<h3 id="site-developers" class="tsd-anchor-link">Site developers<a href="#site-developers" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="../assets/icons.svg#icon-anchor"></use></svg></a></h3>
+<ul>
+<li>Assess the needed changes and plan your upgrade.</li>
+<li>Note that v5 is effectively deprecated. Libraries your site depends on (e.g. Advertory,
+Sourcepoint, video players) should be upgraded to support v6. If a dependency is not ready yet,
+use the temporary compatibility layer described below while migrating your own code to Account.</li>
+<li>Use the <a href="#ai-migration-skill">AI migration skill</a> in Claude Code to help migrate your site from v5 to v6.</li>
+</ul>
+<h3 id="library-developers" class="tsd-anchor-link">Library developers<a href="#library-developers" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="../assets/icons.svg#icon-anchor"></use></svg></a></h3>
+<p>If your library depends on <code>@schibsted/account-sdk-browser</code>, update it so sites do not need to rely
+on the temporary compatibility layer. Choose one of the following:</p>
+<ul>
+<li>Upgrade your library to support both v5 (<code>Identity</code>) and v6 (<code>Account</code>) APIs in parallel. The two
+are runtime-compatible, so this can ship as a non-breaking release.</li>
+<li>Or make a breaking-change release of your library that supports only v6.</li>
+</ul>
+<blockquote>
+<p>Integrating by reading an expected <code>window.Identity</code>, <code>window.SPiD_Identity</code>, or similar global is
+no longer recommended. See <a href="../#using-the-sdk-instance">TYPEDOC Docs</a> for the supported
+alternatives.</p>
+</blockquote>
+<h2 id="temporary-backward-compatibility" class="tsd-anchor-link">Temporary backward compatibility<a href="#temporary-backward-compatibility" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="../assets/icons.svg#icon-anchor"></use></svg></a></h2>
+<p>Account SDK v6 provides an optional compatibility layer for dependencies that still expect the v5
+Identity and Monetization globals. Application code should still be migrated to the <code>Account</code> API;
+the shims are only a temporary bridge for libraries that have not been updated yet.</p>
+<p>Enable compatibility before creating Account:</p>
+<pre><code class="ts"><span class="hl-0">import</span><span class="hl-1"> { </span><span class="hl-2">createAccountSdk</span><span class="hl-1"> } </span><span class="hl-0">from</span><span class="hl-1"> </span><span class="hl-3">&#39;@schibsted/account-sdk-browser&#39;</span><span class="hl-1">;</span><br/><span class="hl-0">import</span><span class="hl-1"> { </span><span class="hl-2">enableLegacyCompatibility</span><span class="hl-1"> } </span><span class="hl-0">from</span><span class="hl-1"> </span><span class="hl-3">&#39;@schibsted/account-sdk-browser/compatibility&#39;</span><span class="hl-1">;</span><br/><br/><span class="hl-6">enableLegacyCompatibility</span><span class="hl-1">();</span><br/><span class="hl-4">const</span><span class="hl-1"> </span><span class="hl-5">account</span><span class="hl-1"> = </span><span class="hl-6">createAccountSdk</span><span class="hl-1">(</span><span class="hl-2">config</span><span class="hl-1">);</span>
+</code><button type="button">Copy</button></pre>
+
+<p>The legacy Identity <code>clientId</code>, <code>env</code>, and <code>redirectUri</code> properties are read from the Account
+configuration; migrate them to <code>account.clientId</code>, <code>account.env</code>, and
+<code>account.redirectUri</code>. If Account has already been created, calling <code>enableLegacyCompatibility()</code> installs
+the shims immediately. Pass <code>{ window }</code> when Account was created on a provided browser window.</p>
+<p>Enable compatibility where Account is initialized, using the same SDK module instance. Remove the
+old Identity/Monetization initialization first.</p>
+<p>If a wrapper creates Account for your application, migrate the wrapper to v6 and enable
+compatibility inside it, using its SDK imports—not a separate SDK copy in the application.</p>
+<p>If Sourcepoint uses a custom Identity reference, point it to the shim.</p>
+<p>The compatibility layer provides:</p>
+<ul>
+<li><code>window.schIdentity</code> and <code>window.Identity</code> with supported Identity methods delegated to Account;</li>
+<li><code>window.schMonetization</code> with <code>hasAccess()</code> and <code>clearCachedAccessResult()</code> delegated to Account;</li>
+<li>the <code>schIdentity:ready</code> and <code>schMonetization:ready</code> window events, with the corresponding shim in
+<code>event.detail.instance</code>;</li>
+<li>the legacy Identity <code>clientId</code>, <code>env</code>, <code>redirectUri</code>, and <code>_session</code> properties;</li>
+<li>the legacy Identity <code>logout</code> subscription used by Sourcepoint. It fires when a logout flow starts
+and when a session update detects that the previous user has logged out. Other Identity instance
+events remain removed.</li>
+</ul>
+<p>The <code>logout</code> subscription accepts the v5 <code>on('logout', listener, context)</code> signature. During a
+session update, listeners can still read the previous <code>_session</code>. Synchronous exceptions from each
+listener are reported to <code>console.error</code> and do not prevent other listeners or the Account session
+update from completing.</p>
+<p>The Identity shim also accepts the legacy positional
+<code>loginUrl(state, acrValues, scope, redirectUri, loginHint, tag, teaser, maxAge)</code> signature, preserving
+the v5 defaults. Migrate this usage to <code>account.loginUrl({ ... })</code> in application code and let
+the configured <a href="#10-generate-login-state-in-the-account-configuration"><code>generateState</code></a> provide
+<code>state</code>.</p>
+<p>The legacy <code>userId</code> argument passed to <code>schMonetization.hasAccess()</code> is ignored. Account resolves
+the currently logged-in user before performing the access check. This can perform a session lookup
+even when Sourcepoint supplied a user id; if the current user cannot be resolved, the check fails.</p>
+<p>The compatibility layer does not restore:</p>
+<ul>
+<li>Identity and Monetization constructors or their old package imports;</li>
+<li>Identity instance events other than <code>logout</code>, and all Monetization instance events;</li>
+<li><code>enableVarnishCookie()</code>;</li>
+<li><code>logSettings()</code>, <code>phonesUrl()</code>, <code>subscriptionsUrl()</code>, or <code>productsUrl()</code>;</li>
+<li>the Payment API.</li>
+</ul>
+<p>Each legacy global or property access and method call emits a deprecation warning with its Account
+replacement. Only the compatibility installation warning is shown once per page load. Do not use
+the shims in new code, and remove <code>enableLegacyCompatibility()</code> after all dependencies support the
+Account API. The entire compatibility entrypoint will be removed in v7.</p>
+<h2 id="migration-at-a-glance" class="tsd-anchor-link">Migration at a glance<a href="#migration-at-a-glance" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="../assets/icons.svg#icon-anchor"></use></svg></a></h2>
+<ol>
+<li>Upgrade <code>@schibsted/account-sdk-browser</code> to v6.</li>
+<li>Replace <code>Identity</code> and <code>Monetization</code> instances with one <code>Account</code> created by
+<code>createAccountSdk()</code>.</li>
+<li>Initialize the SDK once per browser window. Use the returned <code>Account</code> instance or
+<code>getAccountSdk()</code> in other modules.</li>
+<li>Replace ES5 and deep imports with ESM imports from <code>@schibsted/account-sdk-browser</code>.</li>
+<li>Update TypeScript imports and session response types.</li>
+<li>Remove Payment usage and any calls to removed legacy methods.</li>
+<li>Update SDK event listeners.</li>
+<li>Check <a href="#9-configure-consent-forwarding">consent forwarding</a>, especially when upgrading from a version older than v5.3.0.</li>
+<li>Configure <a href="#10-generate-login-state-in-the-account-configuration"><code>generateState</code></a> and drop
+<code>state</code> from <code>login()</code>, <code>loginUrl()</code>, and <code>showSimplifiedLoginWidget()</code> calls.</li>
+</ol>
+<h2 id="1-use-one-account-instance" class="tsd-anchor-link">1. Use one Account instance<a href="#1-use-one-account-instance" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="../assets/icons.svg#icon-anchor"></use></svg></a></h2>
+<h3 id="v5" class="tsd-anchor-link">v5<a href="#v5" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="../assets/icons.svg#icon-anchor"></use></svg></a></h3>
+<pre><code class="ts"><span class="hl-0">import</span><span class="hl-1"> { </span><span class="hl-2">Identity</span><span class="hl-1">, </span><span class="hl-2">Monetization</span><span class="hl-1"> } </span><span class="hl-0">from</span><span class="hl-1"> </span><span class="hl-3">&#39;@schibsted/account-sdk-browser&#39;</span><span class="hl-1">;</span><br/><br/><span class="hl-4">const</span><span class="hl-1"> </span><span class="hl-5">identity</span><span class="hl-1"> = </span><span class="hl-4">new</span><span class="hl-1"> </span><span class="hl-6">Identity</span><span class="hl-1">(</span><span class="hl-2">config</span><span class="hl-1">);</span><br/><span class="hl-4">const</span><span class="hl-1"> </span><span class="hl-5">monetization</span><span class="hl-1"> = </span><span class="hl-4">new</span><span class="hl-1"> </span><span class="hl-6">Monetization</span><span class="hl-1">(</span><span class="hl-2">config</span><span class="hl-1">);</span>
+</code><button type="button">Copy</button></pre>
+
+<h3 id="v6" class="tsd-anchor-link">v6<a href="#v6" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="../assets/icons.svg#icon-anchor"></use></svg></a></h3>
+<pre><code class="ts"><span class="hl-0">import</span><span class="hl-1"> { </span><span class="hl-2">createAccountSdk</span><span class="hl-1"> } </span><span class="hl-0">from</span><span class="hl-1"> </span><span class="hl-3">&#39;@schibsted/account-sdk-browser&#39;</span><span class="hl-1">;</span><br/><br/><span class="hl-4">const</span><span class="hl-1"> </span><span class="hl-5">account</span><span class="hl-1"> = </span><span class="hl-6">createAccountSdk</span><span class="hl-1">(</span><span class="hl-2">config</span><span class="hl-1">);</span>
+</code><button type="button">Copy</button></pre>
+
+<p>Most Identity and Monetization methods keep their names and move to <code>Account</code>. For example, replace
+<code>identity.hasSession()</code> with <code>account.hasSession()</code>.</p>
+<h2 id="2-initialize-the-sdk-once" class="tsd-anchor-link">2. Initialize the SDK once<a href="#2-initialize-the-sdk-once" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="../assets/icons.svg#icon-anchor"></use></svg></a></h2>
+<p><code>createAccountSdk()</code> registers the instance as <code>window.schAccount</code>. Calling it again in the same
+window throws an <code>SDKError</code>.</p>
+<p>Only the application entry point should initialize the SDK. Other modules should use:</p>
+<pre><code class="ts"><span class="hl-0">import</span><span class="hl-1"> { </span><span class="hl-2">getAccountSdk</span><span class="hl-1"> } </span><span class="hl-0">from</span><span class="hl-1"> </span><span class="hl-3">&#39;@schibsted/account-sdk-browser&#39;</span><span class="hl-1">;</span><br/><br/><span class="hl-4">const</span><span class="hl-1"> </span><span class="hl-5">account</span><span class="hl-1"> = </span><span class="hl-0">await</span><span class="hl-1"> </span><span class="hl-6">getAccountSdk</span><span class="hl-1">();</span>
+</code><button type="button">Copy</button></pre>
+
+<p>See <a href="../#using-the-sdk-instance">TYPEDOC Docs</a> for more information.</p>
+<p><code>getAccountSdk()</code> returns the existing instance or waits for initialization. It rejects if the SDK
+is not initialized within four seconds.</p>
+<p>You should avoid directly using browser globals or ready events in your integration, but if you must, you also have to replace references as follows:</p>
+<table>
+<thead>
+<tr>
+<th>v5</th>
+<th>v6</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>window.schIdentity</code></td>
+<td><code>window.schAccount</code></td>
+</tr>
+<tr>
+<td><code>window.schMonetization</code></td>
+<td><code>window.schAccount</code></td>
+</tr>
+<tr>
+<td><code>schIdentity:ready</code> / <code>schMonetization:ready</code></td>
+<td><code>schAccount:ready</code></td>
+</tr>
+</tbody>
+</table>
+<p><code>window.schAccount</code> property and the <code>schAccount:ready</code> event are both set by the SDK itself, at the moment <code>createAccountSdk()</code> creates the instance. Your code does not need to set either of them; it only
+needs to read the global or listen for the event.</p>
+<h2 id="3-update-access-checks" class="tsd-anchor-link">3. Update access checks<a href="#3-update-access-checks" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="../assets/icons.svg#icon-anchor"></use></svg></a></h2>
+<h3 id="v5-1" class="tsd-anchor-link">v5<a href="#v5-1" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="../assets/icons.svg#icon-anchor"></use></svg></a></h3>
+<pre><code class="ts"><span class="hl-4">const</span><span class="hl-1"> </span><span class="hl-5">userId</span><span class="hl-1"> = </span><span class="hl-0">await</span><span class="hl-1"> </span><span class="hl-2">identity</span><span class="hl-1">.</span><span class="hl-6">getUserId</span><span class="hl-1">();</span><br/><span class="hl-4">const</span><span class="hl-1"> </span><span class="hl-5">access</span><span class="hl-1"> = </span><span class="hl-0">await</span><span class="hl-1"> </span><span class="hl-2">monetization</span><span class="hl-1">.</span><span class="hl-6">hasAccess</span><span class="hl-1">([</span><span class="hl-3">&#39;premium&#39;</span><span class="hl-1">], </span><span class="hl-2">userId</span><span class="hl-1">);</span>
+</code><button type="button">Copy</button></pre>
+
+<h3 id="v6-1" class="tsd-anchor-link">v6<a href="#v6-1" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="../assets/icons.svg#icon-anchor"></use></svg></a></h3>
+<pre><code class="ts"><span class="hl-4">const</span><span class="hl-1"> </span><span class="hl-5">account</span><span class="hl-1"> = </span><span class="hl-6">createAccountSdk</span><span class="hl-1">({</span><br/><span class="hl-1">    ...</span><span class="hl-2">config</span><span class="hl-1">,</span><br/><span class="hl-1">    </span><span class="hl-2">defaultProductIds:</span><span class="hl-1"> [</span><span class="hl-3">&#39;premium&#39;</span><span class="hl-1">],</span><br/><span class="hl-1">});</span><br/><br/><span class="hl-4">const</span><span class="hl-1"> </span><span class="hl-5">access</span><span class="hl-1"> = </span><span class="hl-0">await</span><span class="hl-1"> </span><span class="hl-2">account</span><span class="hl-1">.</span><span class="hl-6">hasAccess</span><span class="hl-1">();</span>
+</code><button type="button">Copy</button></pre>
+
+<p><code>Account</code> resolves the current user from the session, so do not pass a user id to <code>hasAccess()</code>.
+Configure <code>defaultProductIds</code> when the same products or features are checked by default. For a
+different check, pass the ids directly; they override the configured defaults:</p>
+<pre><code class="ts"><span class="hl-4">const</span><span class="hl-1"> </span><span class="hl-5">access</span><span class="hl-1"> = </span><span class="hl-0">await</span><span class="hl-1"> </span><span class="hl-2">account</span><span class="hl-1">.</span><span class="hl-6">hasAccess</span><span class="hl-1">([</span><span class="hl-3">&#39;another-product&#39;</span><span class="hl-1">]);</span>
+</code><button type="button">Copy</button></pre>
+
+<p>Calling <code>hasAccess()</code> without an argument requires <code>defaultProductIds</code> in <code>AccountConfig</code>. If
+neither is provided, the method throws an <code>SDKError</code>.</p>
+<p>This signature change applies only to <code>hasAccess()</code>. Cache invalidation still requires both values:</p>
+<pre><code class="ts"><span class="hl-2">account</span><span class="hl-1">.</span><span class="hl-6">clearCachedAccessResult</span><span class="hl-1">(</span><span class="hl-2">productIds</span><span class="hl-1">, </span><span class="hl-2">userId</span><span class="hl-1">);</span>
+</code><button type="button">Copy</button></pre>
+
+<h2 id="4-use-root-esm-imports" class="tsd-anchor-link">4. Use root ESM imports<a href="#4-use-root-esm-imports" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="../assets/icons.svg#icon-anchor"></use></svg></a></h2>
+<p>v6 no longer publishes the CommonJS/ES5 bundles. Replace imports from the ES5 build with an ESM
+import from the package root:</p>
+<pre><code class="diff"><span class="hl-3">- const { Identity } = require(&#39;@schibsted/account-sdk-browser/es5&#39;);</span><br/><span class="hl-10">+ import { createAccountSdk } from &#39;@schibsted/account-sdk-browser&#39;;</span>
+</code><button type="button">Copy</button></pre>
+
+<p>Imports from <code>/identity</code>, <code>/monetization</code>, <code>/payment</code>, <code>/src/*</code>, and <code>/es5</code> must be removed.
+Applications that loaded <code>/es5/global</code> using a regular <code>&lt;script&gt;</code> must switch to an ESM-aware build
+or loader.</p>
+<p>v6 does not include SDK-provided polyfills. Make sure your browser support and build pipeline handle
+modern JavaScript, <code>async</code>/<code>await</code>, and standard browser APIs.</p>
+<h2 id="5-update-typescript-types" class="tsd-anchor-link">5. Update TypeScript types<a href="#5-update-typescript-types" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="../assets/icons.svg#icon-anchor"></use></svg></a></h2>
+<p>v6 exports its public types from the package root. Update renamed session types:</p>
+<table>
+<thead>
+<tr>
+<th>v5</th>
+<th>v6</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>HasSessionSuccessResponse</code></td>
+<td><code>SessionSuccessResponse</code></td>
+</tr>
+<tr>
+<td><code>HasSessionFailureResponse</code></td>
+<td><code>SessionFailureResponse</code></td>
+</tr>
+</tbody>
+</table>
+<p>Use <code>Account</code> as the SDK instance type, <code>AccountConfig</code> for its configuration, and
+<code>HasAccessResult</code> for access-check results.</p>
+<p><code>SessionResponse</code> represents all possible results of <code>hasSession()</code>: <code>SessionSuccessResponse</code>,
+<code>SessionFailureResponse</code>, an unrecognized object response, or <code>RedirectSessionResponse</code> (a
+session-refresh URL string). If you need to narrow it, v6 exports type guards for this purpose:
+<code>isSessionSuccessResponse</code>, <code>isConnectedSessionResponse</code>, <code>isConnectedSessionWithUserIdResponse</code>,
+and <code>isSessionFailureResponse</code>.</p>
+<h2 id="6-move-varnish-configuration" class="tsd-anchor-link">6. Move Varnish configuration<a href="#6-move-varnish-configuration" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="../assets/icons.svg#icon-anchor"></use></svg></a></h2>
+<p>Configure the Varnish cookie when creating the Account:</p>
+<pre><code class="diff"><span class="hl-3">- const identity = new Identity(config);</span><br/><span class="hl-3">- identity.enableVarnishCookie({ domain: &#39;example.com&#39;, expiresIn: 3600 });</span><br/><span class="hl-10">+ const account = createAccountSdk({</span><br/><span class="hl-10">+     ...config,</span><br/><span class="hl-10">+     varnish: { domain: &#39;example.com&#39;, expiresIn: 3600 },</span><br/><span class="hl-10">+ });</span>
+</code><button type="button">Copy</button></pre>
+
+<p>If you previously called <code>identity.enableVarnishCookie()</code> without options, use <code>varnish: {}</code>. The
+SDK will enable the <code>SP_ID</code> cookie and use the domain and expiration returned with the session when
+available.</p>
+<h2 id="7-remove-apis-without-a-v6-replacement" class="tsd-anchor-link">7. Remove APIs without a v6 replacement<a href="#7-remove-apis-without-a-v6-replacement" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="../assets/icons.svg#icon-anchor"></use></svg></a></h2>
+<p>The complete Payment API has been removed. Applications using it must migrate their payment flow
+before upgrading to v6.</p>
+<p>The following legacy methods have also been removed:</p>
+<ul>
+<li><code>Identity.logSettings()</code></li>
+<li><code>Identity.phonesUrl()</code></li>
+<li><code>Monetization.subscriptionsUrl()</code></li>
+<li><code>Monetization.productsUrl()</code></li>
+</ul>
+<p><code>account.getExternalId()</code> is available on <code>Account</code>, but deprecated; it is retained only for
+compatibility with existing integrations and should not be used in new code.</p>
+<h2 id="8-update-event-listeners" class="tsd-anchor-link">8. Update event listeners<a href="#8-update-event-listeners" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="../assets/icons.svg#icon-anchor"></use></svg></a></h2>
+<p><code>Account</code> supports these events:</p>
+<table>
+<thead>
+<tr>
+<th>Event</th>
+<th>When it is emitted</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>loginRequested</code></td>
+<td><code>login()</code> starts a login flow (<code>event.detail.method</code> is <code>popup</code> or <code>default</code>)</td>
+</tr>
+<tr>
+<td><code>logoutRequested</code></td>
+<td><code>logout()</code> starts the logout redirect</td>
+</tr>
+<tr>
+<td><code>sessionUpdated</code></td>
+<td><code>hasSession()</code> detects a change in the stored session state</td>
+</tr>
+<tr>
+<td><code>simplifiedLoginOpened</code></td>
+<td>the simplified login widget opens</td>
+</tr>
+<tr>
+<td><code>simplifiedLoginCancelled</code></td>
+<td>the simplified login widget closes</td>
+</tr>
+</tbody>
+</table>
+<p>The <code>loginRequested</code>, <code>logoutRequested</code>, and <code>sessionUpdated</code> events provide their data in
+<code>event.detail</code>:</p>
+<pre><code class="ts"><span class="hl-2">account</span><span class="hl-1">.</span><span class="hl-6">on</span><span class="hl-1">(</span><span class="hl-3">&#39;loginRequested&#39;</span><span class="hl-1">, (</span><span class="hl-2">event</span><span class="hl-1">) </span><span class="hl-4">=&gt;</span><span class="hl-1"> {</span><br/><span class="hl-1">    </span><span class="hl-2">console</span><span class="hl-1">.</span><span class="hl-6">log</span><span class="hl-1">(</span><span class="hl-2">event</span><span class="hl-1">.</span><span class="hl-2">detail</span><span class="hl-1">.</span><span class="hl-2">url</span><span class="hl-1">, </span><span class="hl-2">event</span><span class="hl-1">.</span><span class="hl-2">detail</span><span class="hl-1">.</span><span class="hl-2">method</span><span class="hl-1">);</span><br/><span class="hl-1">});</span>
+</code><button type="button">Copy</button></pre>
+
+<p>Subscriptions now use native event listeners instead of <code>tiny-emitter</code>:</p>
+<ul>
+<li><code>off(event, listener)</code> requires the same function reference passed to <code>on()</code>. The v5
+<code>off(event)</code> form that removed all listeners is no longer supported.</li>
+<li><code>on(event, listener, context)</code> no longer accepts a context argument. Use an arrow function or
+<code>bind(context)</code> and keep the resulting function reference for <code>off()</code>.</li>
+<li><code>once()</code> is no longer available. For a one-time subscription, call <code>off(event, listener)</code> at the
+start of the listener.</li>
+</ul>
+<p>The v5 <code>login</code> and <code>logout</code> events were tied to session data updates made by <code>hasSession()</code>. They
+have no same-named replacement in v6. The v6 <code>loginRequested</code> and <code>logoutRequested</code> events mean
+only that <code>account.login()</code> or <code>account.logout()</code> started the corresponding flow. They do not
+confirm that the user has logged in or out. Check the session after navigation to determine the
+current state.</p>
+<p>Replace v5 <code>sessionChange</code> listeners with <code>sessionUpdated</code>. The v5 event was emitted for fresh or
+cached data, even if unchanged, but only when the previous or current response contained a
+<code>userId</code>; its listener received the response directly. The v6 event is emitted when <code>hasSession()</code>
+detects a change in <code>userId</code> or <code>result</code>; changes to other fields alone do not emit it.
+Receiving the same fresh or cached session does not emit it. The response is available in
+<code>event.detail</code>. It does not confirm that the user is logged in.</p>
+<p>The v5 Identity events <code>userChange</code>, <code>notLoggedin</code>, <code>sessionInit</code>, <code>statusChange</code>, and <code>error</code>, as
+well as the Monetization <code>hasAccess</code> event, are no longer emitted.</p>
+<h2 id="9-configure-consent-forwarding" class="tsd-anchor-link">9. Configure consent forwarding<a href="#9-configure-consent-forwarding" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="../assets/icons.svg#icon-anchor"></use></svg></a></h2>
+<p>Consent forwarding was introduced in v5.3.0 and is also available in v6. If you are upgrading
+from a version older than v5.3.0, include it in your migration checks.</p>
+<p>In v6, the SDK reads consents from the Schibsted Sourcepoint integration by default, so sites
+using that integration do not need to configure <code>getConsents</code>. Sites using another CMP must
+provide their own synchronous <code>getConsents</code> reader when calling <code>createAccountSdk()</code>.</p>
+<p>If you already configured a custom reader or <code>refreshLoginLinks</code> in v5, carry those settings
+over to your Account configuration. Use <code>getConsents: () =&gt; null</code> to forward no consents.</p>
+<p>See <a href="../#forward-consents-to-account">Forward consents to Account</a> for setup examples
+and login link refresh behavior.</p>
+<h2 id="10-generate-login-state-in-the-account-configuration" class="tsd-anchor-link">10. Generate login state in the Account configuration<a href="#10-generate-login-state-in-the-account-configuration" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="../assets/icons.svg#icon-anchor"></use></svg></a></h2>
+<p><code>createAccountSdk()</code> requires a <code>generateState</code> function. The SDK calls it with the configured
+window whenever <code>login()</code>, <code>loginUrl()</code>, or the simplified login widget start a login without an
+explicit <code>state</code>. It must synchronously return a non-empty string.</p>
+<pre><code class="diff"><span class="hl-3">- const identity = new Identity(config);</span><br/><span class="hl-3">- identity.login({ state: createLoginState(), preferPopup: true });</span><br/><span class="hl-10">+ const account = createAccountSdk({</span><br/><span class="hl-10">+     ...config,</span><br/><span class="hl-10">+     generateState: (window) =&gt; createLoginState(window),</span><br/><span class="hl-10">+ });</span><br/><span class="hl-10">+ account.login({ preferPopup: true });</span>
+</code><button type="button">Copy</button></pre>
+
+<p>Passing <code>state</code> explicitly is still supported and overrides <code>generateState</code> for that call.</p>
+<p>See <a href="../#handling-state">Handling <code>state</code></a> for the recommended CSRF token pattern.</p>
+<h2 id="ai-migration-skill" class="tsd-anchor-link">AI migration skill<a href="#ai-migration-skill" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="../assets/icons.svg#icon-anchor"></use></svg></a></h2>
+<p>The <a href="https://github.com/schibsted/account-sdk-browser/tree/master/skills/migration-to-account-sdk-browser-v6">migrate-account-sdk-v6 skill</a>
+helps migrate repositories from Account SDK v5 to v6.</p>
+<p><strong>For Schibsted employees:</strong></p>
+<p>The skill is included in the <code>schibsted-dev-toolkit</code> plugin for Claude Code.</p>
+<p>Install or update the toolkit:</p>
+<pre><code class="bash"><span class="hl-6">claude-litellm</span><span class="hl-1"> </span><span class="hl-4">--install-dev-toolkit</span>
+</code><button type="button">Copy</button></pre>
+
+<p>Start a new Claude Code session in the repository you want to migrate, then run:</p>
+<pre><code class="text">/schibsted-dev-toolkit:migrate-account-sdk-v6
+</code><button type="button">Copy</button></pre>
+
+<p>The skill reviews your integration, suggests a migration plan, and helps you apply the changes.</p>
+<p><strong>Installing from the source code on GitHub:</strong></p>
+<p>The skill is a plain <a href="https://agentskills.io">Agent Skill</a> directory (a <code>SKILL.md</code> file with
+optional supporting files), so you can install it without the plugin. Clone the repository:</p>
+<pre><code class="bash"><span class="hl-6">git</span><span class="hl-1"> </span><span class="hl-3">clone</span><span class="hl-1"> </span><span class="hl-4">--depth</span><span class="hl-1"> </span><span class="hl-10">1</span><span class="hl-1"> </span><span class="hl-3">https://github.com/schibsted/account-sdk-browser.git</span><span class="hl-1"> </span><span class="hl-3">/tmp/account-sdk-browser</span>
+</code><button type="button">Copy</button></pre>
+
+<p>Then copy <code>skills/migration-to-account-sdk-browser-v6</code> to the skills directory of your coding
+agent. Name the destination folder <code>migrate-account-sdk-v6</code>, matching the <code>name</code> in <code>SKILL.md</code>.
+Always copy the whole directory: <code>SKILL.md</code> relies on <code>migration-guide.md</code> next to it, and the
+skill won't work correctly without it:</p>
+<table>
+<thead>
+<tr>
+<th>Agent</th>
+<th>Project-level (shared with the repository)</th>
+<th>User-level (all repositories)</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Claude Code</td>
+<td><code>.claude/skills/</code></td>
+<td><code>~/.claude/skills/</code></td>
+</tr>
+<tr>
+<td>Codex and other agents that read <code>.agents/skills</code></td>
+<td><code>.agents/skills/</code></td>
+<td><code>~/.agents/skills/</code></td>
+</tr>
+</tbody>
+</table>
+<p>For example, to install it for Claude Code in the repository you want to migrate:</p>
+<pre><code class="bash"><span class="hl-6">mkdir</span><span class="hl-1"> </span><span class="hl-4">-p</span><span class="hl-1"> </span><span class="hl-3">.claude/skills</span><br/><span class="hl-6">cp</span><span class="hl-1"> </span><span class="hl-4">-R</span><span class="hl-1"> </span><span class="hl-3">/tmp/account-sdk-browser/skills/migration-to-account-sdk-browser-v6</span><span class="hl-1"> </span><span class="hl-3">.claude/skills/migrate-account-sdk-v6</span>
+</code><button type="button">Copy</button></pre>
+
+<p>Start a new Claude Code session and run:</p>
+<pre><code class="text">/migrate-account-sdk-v6
+</code><button type="button">Copy</button></pre>
+
+<p>For agents without skill support, give the agent the contents of <code>SKILL.md</code> together with
+<code>migration-guide.md</code> as instructions, for example by copying them into your <code>AGENTS.md</code>, or ask
+it to follow the <code>SKILL.md</code> file directly. To update the skill, repeat the steps above.</p>
+</div></div><div class="col-sidebar"><div class="page-menu"><div class="tsd-navigation settings"><details class="tsd-accordion"><summary class="tsd-accordion-summary"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" aria-hidden="true"><use href="../assets/icons.svg#icon-chevronDown"></use></svg><h3>Settings</h3></summary><div class="tsd-accordion-details"><div class="tsd-filter-visibility"><span class="settings-label">Member Visibility</span><ul id="tsd-filter-options"><li class="tsd-filter-item"><label class="tsd-filter-input"><input type="checkbox" id="tsd-filter-inherited" name="inherited" checked/><svg width="32" height="32" viewBox="0 0 32 32" aria-hidden="true"><rect class="tsd-checkbox-background" width="30" height="30" x="1" y="1" rx="6" fill="none"></rect><path class="tsd-checkbox-checkmark" d="M8.35422 16.8214L13.2143 21.75L24.6458 10.25" stroke="none" stroke-width="3.5" stroke-linejoin="round" fill="none"></path></svg><span>Inherited</span></label></li><li class="tsd-filter-item"><label class="tsd-filter-input"><input type="checkbox" id="tsd-filter-external" name="external"/><svg width="32" height="32" viewBox="0 0 32 32" aria-hidden="true"><rect class="tsd-checkbox-background" width="30" height="30" x="1" y="1" rx="6" fill="none"></rect><path class="tsd-checkbox-checkmark" d="M8.35422 16.8214L13.2143 21.75L24.6458 10.25" stroke="none" stroke-width="3.5" stroke-linejoin="round" fill="none"></path></svg><span>External</span></label></li></ul></div><div class="tsd-theme-toggle"><label class="settings-label" for="tsd-theme">Theme</label><select id="tsd-theme"><option value="os">OS</option><option value="light">Light</option><option value="dark">Dark</option></select></div></div></details></div><details open class="tsd-accordion tsd-page-navigation"><summary class="tsd-accordion-summary"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" aria-hidden="true"><use href="../assets/icons.svg#icon-chevronDown"></use></svg><h3>On This Page</h3></summary><div class="tsd-accordion-details"><a href="#schibsted-account-sdk-v600-migration-guide"><span>Schibsted <wbr/>Account <wbr/>SDK v6.0.0 <wbr/>Migration <wbr/>Guide</span></a><ul><li><a href="#overview"><span>Overview</span></a></li><li><a href="#what-you-need-to-do"><span>What you need to do</span></a></li><li><ul><li><a href="#site-developers"><span>Site developers</span></a></li><li><a href="#library-developers"><span>Library developers</span></a></li></ul></li><li><a href="#temporary-backward-compatibility"><span>Temporary backward compatibility</span></a></li><li><a href="#migration-at-a-glance"><span>Migration at a glance</span></a></li><li><a href="#1-use-one-account-instance"><span>1. <wbr/>Use one <wbr/>Account instance</span></a></li><li><ul><li><a href="#v5"><span>v5</span></a></li><li><a href="#v6"><span>v6</span></a></li></ul></li><li><a href="#2-initialize-the-sdk-once"><span>2. <wbr/>Initialize the <wbr/>SDK once</span></a></li><li><a href="#3-update-access-checks"><span>3. <wbr/>Update access checks</span></a></li><li><ul><li><a href="#v5-1"><span>v5</span></a></li><li><a href="#v6-1"><span>v6</span></a></li></ul></li><li><a href="#4-use-root-esm-imports"><span>4. <wbr/>Use root <wbr/>ESM imports</span></a></li><li><a href="#5-update-typescript-types"><span>5. <wbr/>Update <wbr/>Type<wbr/>Script types</span></a></li><li><a href="#6-move-varnish-configuration"><span>6. <wbr/>Move <wbr/>Varnish configuration</span></a></li><li><a href="#7-remove-apis-without-a-v6-replacement"><span>7. <wbr/>Remove <wbr/>AP<wbr/>Is without a v6 replacement</span></a></li><li><a href="#8-update-event-listeners"><span>8. <wbr/>Update event listeners</span></a></li><li><a href="#9-configure-consent-forwarding"><span>9. <wbr/>Configure consent forwarding</span></a></li><li><a href="#10-generate-login-state-in-the-account-configuration"><span>10. <wbr/>Generate login state in the <wbr/>Account configuration</span></a></li><li><a href="#ai-migration-skill"><span>AI migration skill</span></a></li></ul></div></details></div><div class="site-menu"><nav class="tsd-navigation"><a href="../modules.html">@schibsted/account-sdk-browser</a><ul class="tsd-small-nested-navigation" id="tsd-nav-container"><li>Loading...</li></ul></nav></div></div></div><footer><p class="tsd-generator">Generated using <a href="https://typedoc.org/" target="_blank">TypeDoc</a></p></footer><div class="overlay"></div></body></html>
